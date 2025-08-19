@@ -2,10 +2,9 @@ package com.twitter.controller;
 
 import com.twitter.dto.UserRequestDto;
 import com.twitter.dto.UserResponseDto;
-import com.twitter.entity.User;
 import com.twitter.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +18,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public UserResponseDto createUser(@RequestBody UserRequestDto userRequest) {
+    public UserResponseDto createUser(@RequestBody @Valid UserRequestDto userRequest) {
         return userService.createUser(userRequest);
     }
 
@@ -31,7 +30,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserResponseDto> updateUser(@PathVariable UUID id, @RequestBody UserRequestDto userDetails) {
+    public ResponseEntity<UserResponseDto> updateUser(@PathVariable UUID id, @RequestBody @Valid UserRequestDto userDetails) {
         return userService.updateUser(id, userDetails)
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
