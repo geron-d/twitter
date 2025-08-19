@@ -1,0 +1,4 @@
+- @Mapper(componentModel = "spring") to build.gradle
+- Нормальные post put patch из примера c dto
+- вместо delete статус
+- нормальное хэширование пароля
