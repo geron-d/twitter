@@ -5,8 +5,10 @@ import com.twitter.dto.UserResponseDto;
 import com.twitter.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 
@@ -26,7 +28,8 @@ public class UserController {
     public ResponseEntity<UserResponseDto> getUserById(@PathVariable UUID id) {
         return userService.getUserById(id)
             .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
+//            .orElse(ResponseEntity.notFound().build());
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Entity not found"));
     }
 
     @PutMapping("/{id}")
