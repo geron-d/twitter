@@ -2,30 +2,109 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.2.4'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id 'org.sonarqube' version '4.4.1.3373'
+	id 'jacoco' version '0.8.11'
 }
 
 group = 'com.twitter'
 version = '0.0.1-SNAPSHOT'
-description = 'Twitter'
+description = 'Twitter Microservices Monorepo'
 
-java {
-	sourceCompatibility = '21'
-	targetCompatibility = '21'
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
+allprojects {
+	apply plugin: 'java'
+	apply plugin: 'org.springframework.boot'
+	apply plugin: 'io.spring.dependency-management'
+	apply plugin: 'jacoco'
+	
+	group = rootProject.group
+	version = rootProject.version
+	
+	java {
+		sourceCompatibility = '21'
+		targetCompatibility = '21'
+		toolchain {
+			languageVersion = JavaLanguageVersion.of(21)
+		}
+	}
+	
+	repositories {
+		mavenCentral()
+		maven { url 'https://repo.spring.io/milestone' }
+		maven { url 'https://repo.spring.io/snapshot' }
+	}
+	
+	dependencies {
+		implementation 'org.springframework.boot:spring-boot-starter'
+		implementation 'org.springframework.boot:spring-boot-starter-web'
+		implementation 'org.springframework.boot:spring-boot-starter-validation'
+		implementation 'org.springframework.boot:spring-boot-starter-actuator'
+		
+		// Логирование
+		implementation 'org.springframework.boot:spring-boot-starter-logging'
+		
+		// Тестирование
+		testImplementation 'org.springframework.boot:spring-boot-starter-test'
+		testImplementation 'org.testcontainers:junit-jupiter'
+		testImplementation 'org.testcontainers:postgresql'
+		testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	}
+	
+	tasks.named('test') {
+		useJUnitPlatform()
+		finalizedBy jacocoTestReport
+	}
+	
+	jacocoTestReport {
+		reports {
+			xml.required = true
+			html.required = true
+		}
 	}
 }
 
-repositories {
-	mavenCentral()
+// Настройки для корневого проекта
+springBoot {
+	enabled = false
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	// Корневой проект не имеет собственных зависимостей
 }
 
-tasks.named('test') {
-	useJUnitPlatform()
+task buildAll {
+	dependsOn subprojects.build
+	group = 'build'
+	description = 'Сборка всех модулей'
+}
+
+task testAll {
+	dependsOn subprojects.test
+	group = 'verification'
+	description = 'Запуск тестов во всех модулях'
+}
+
+task cleanAll {
+	dependsOn subprojects.clean
+	group = 'build'
+	description = 'Очистка всех модулей'
+}
+
+task jacocoAll {
+	dependsOn subprojects.jacocoTestReport
+	group = 'verification'
+	description = 'Генерация отчетов покрытия для всех модулей'
+}
+
+// Настройки SonarQube
+sonarqube {
+	properties {
+		property 'sonar.projectKey', 'twitter-monorepo'
+		property 'sonar.projectName', 'Twitter Microservices Monorepo'
+		property 'sonar.projectVersion', version
+		property 'sonar.sources', 'src/main/java'
+		property 'sonar.tests', 'src/test/java'
+		property 'sonar.java.binaries', 'build/classes'
+		property 'sonar.java.test.binaries', 'build/test-results'
+		property 'sonar.coverage.jacoco.xmlReportPaths', '**/build/reports/jacoco/test/jacocoTestReport.xml'
+	}
 }
