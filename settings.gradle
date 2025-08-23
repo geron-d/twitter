@@ -5,5 +5,5 @@ pluginManagement {
 	}
 }
 rootProject.name = 'twitter'
-include 'users-service'
+include 'services:users-service'
 
