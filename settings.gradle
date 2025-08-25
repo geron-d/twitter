@@ -9,6 +9,6 @@ rootProject.name = 'twitter'
 include 'shared:common-lib'
 include 'shared:database'
 
-include 'services:users-service'
+include 'services:users-api'
 
 
