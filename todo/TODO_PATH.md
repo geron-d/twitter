@@ -4,15 +4,8 @@
 
 ## 0
 - отредактировать user-service по видео
-- сделать монорепзиторий структуру (shared, scripts, docs)
-- сделать shared common-lib GlobalExceptionHandler
 - как лучше его сделать на последнем spring boot с лучшими практиками
-- сделать общий shared database пообщать нужен ли он
 - переименовать user-service в user-api
-- вынести user-api в services
-- dockerfile для users
-- скрипт для билд алл в scripts/
-- скрипт для запуска всех сервисов
 
 
 ## 1.1 Создание user-service
