@@ -38,5 +38,5 @@ compileJava {
 }
 
 springBoot {
-    mainClass = 'com.twitter.UsersApiApplication'
+    mainClass = 'com.twitter.Application'
 }

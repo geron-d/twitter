@@ -24,7 +24,7 @@ RUN chmod +x gradlew
 RUN ./gradlew :services:users-api:build -x test
 
 # Stage 2: Runtime stage
-FROM openjdk:21-jre-slim
+FROM eclipse-temurin:21-jre
 
 # Create app user for security
 RUN groupadd -r appuser && useradd -r -g appuser appuser
