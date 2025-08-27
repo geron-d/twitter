@@ -11,7 +11,10 @@ COPY gradlew gradlew.bat ./
 COPY build.gradle settings.gradle ./
 COPY gradle.properties ./
 
-# Copy shared modules first
+# Download dependencies first (this layer will be cached)
+RUN ./gradlew dependencies --no-daemon
+
+# Copy shared modules
 COPY shared/ shared/
 
 # Copy users-api source code
@@ -20,8 +23,8 @@ COPY services/users-api/ services/users-api/
 # Make gradlew executable
 RUN chmod +x gradlew
 
-# Build the application
-RUN ./gradlew :services:users-api:build -x test
+# Build the application with optimized flags
+RUN ./gradlew :services:users-api:build -x test --no-daemon --parallel --build-cache
 
 # Stage 2: Runtime stage
 FROM eclipse-temurin:21-jre
@@ -53,5 +56,3 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
 
 # Run the application
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
-
-

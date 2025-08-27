@@ -5,10 +5,11 @@ services:
   postgres:
     image: postgres:15-alpine
     container_name: twitter-postgres
+    restart: unless-stopped
     environment:
-      POSTGRES_DB: twitter_users
-      POSTGRES_USER: twitter_user
-      POSTGRES_PASSWORD: twitter_password
+      POSTGRES_DB: twitter
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
       POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
     ports:
       - "5432:5432"
@@ -18,11 +19,25 @@ services:
     networks:
       - twitter-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U twitter_user -d twitter_users"]
+      test: [ "CMD-SHELL", "pg_isready -U user -d twitter" ]
       interval: 10s
       timeout: 5s
       retries: 5
+
+  # Optional: pgAdmin for database management
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: twitter-pgadmin
     restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@twitter.com
+      PGADMIN_DEFAULT_PASSWORD: password
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - twitter-network
 
   # Users API Service
   users-api:
@@ -34,9 +49,9 @@ services:
       - "8080:8080"
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/twitter_users
-      SPRING_DATASOURCE_USERNAME: twitter_user
-      SPRING_DATASOURCE_PASSWORD: twitter_password
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/twitter
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: password
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
       SPRING_JPA_HIBERNATE_DDL_AUTO: validate
       SPRING_JPA_SHOW_SQL: false
@@ -56,22 +71,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
-
-  # Optional: pgAdmin for database management
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: twitter-pgadmin
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@twitter.com
-      PGADMIN_DEFAULT_PASSWORD: admin123
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
-    ports:
-      - "5050:80"
-    depends_on:
-      - postgres
-    networks:
-      - twitter-network
-    restart: unless-stopped
 
 volumes:
   postgres_data:
