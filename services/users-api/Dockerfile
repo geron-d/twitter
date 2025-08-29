@@ -1,6 +1,6 @@
 # Multi-stage build for Twitter Users API
 # Stage 1: Build stage with Gradle
-FROM gradle:8.5-jdk21 AS build
+FROM gradle:jdk24 AS build
 
 # Set working directory
 WORKDIR /app
@@ -11,23 +11,20 @@ COPY gradlew gradlew.bat ./
 COPY build.gradle settings.gradle ./
 COPY gradle.properties ./
 
-# Download dependencies first (this layer will be cached)
-RUN ./gradlew dependencies --no-daemon
-
-# Copy shared modules
-COPY shared/ shared/
-
-# Copy users-api source code
-COPY services/users-api/ services/users-api/
+# Copy the entire project structure
+COPY . .
 
 # Make gradlew executable
 RUN chmod +x gradlew
+
+# Download dependencies first (this layer will be cached)
+RUN ./gradlew dependencies --no-daemon
 
 # Build the application with optimized flags
 RUN ./gradlew :services:users-api:build -x test --no-daemon --parallel --build-cache
 
 # Stage 2: Runtime stage
-FROM eclipse-temurin:21-jre
+FROM eclipse-temurin:24-jre
 
 # Create app user for security
 RUN groupadd -r appuser && useradd -r -g appuser appuser
