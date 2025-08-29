@@ -1,2 +1,3 @@
 - Нормальные post put patch из примера c dto
+- пекреименовать у user secondName в lastName
 - вместо delete статус

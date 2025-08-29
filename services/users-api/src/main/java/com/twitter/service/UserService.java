@@ -2,60 +2,40 @@ package com.twitter.service;
 
 import com.twitter.dto.UserRequestDto;
 import com.twitter.dto.UserResponseDto;
-import com.twitter.entity.User;
-import com.twitter.mapper.UserMapper;
-import com.twitter.repository.UserRepository;
-import com.twitter.util.PasswordUtil;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-import java.util.Base64;
 import java.util.Optional;
 import java.util.UUID;
 
-@Service
-@RequiredArgsConstructor
-public class UserService {
+public interface UserService {
 
-    private final UserMapper userMapper;
-    private final UserRepository userRepository;
+    /**
+     * Создает нового пользователя
+     * @param userRequest данные для создания пользователя
+     * @return созданный пользователь
+     */
+    UserResponseDto createUser(UserRequestDto userRequest);
 
-    public UserResponseDto createUser(UserRequestDto userRequest) {
-        User user = userMapper.toUser(userRequest);
+    /**
+     * Обновляет существующего пользователя
+     * @param id идентификатор пользователя
+     * @param userDetails новые данные пользователя
+     * @return обновленный пользователь или пустой Optional если пользователь не найден
+     */
+    Optional<UserResponseDto> updateUser(UUID id, UserRequestDto userDetails);
 
-        setPassword(user, userRequest.password());
+    /**
+     * Получает пользователя по идентификатору
+     * @param id идентификатор пользователя
+     * @return пользователь или пустой Optional если не найден
+     */
+    Optional<UserResponseDto> getUserById(UUID id);
 
-        User savedUser = userRepository.save(user);
-        return userMapper.toUserResponseDto(savedUser);
-    }
-
-    public Optional<UserResponseDto> updateUser(UUID id, UserRequestDto userDetails) {
-        return userRepository.findById(id).map(user -> {
-            userMapper.updateUserFromDto(userDetails, user);
-
-            if (userDetails.password() != null && !userDetails.password().isEmpty()) {
-                setPassword(user, userDetails.password());
-            }
-
-            User updatedUser = userRepository.save(user);
-            return userMapper.toUserResponseDto(updatedUser);
-        });
-    }
-
-    public Optional<UserResponseDto> getUserById(UUID id) {
-        return userRepository.findById(id).map(userMapper::toUserResponseDto);
-    }
-
-    private void setPassword(User user, String password) {
-        try {
-            byte[] salt = PasswordUtil.getSalt();
-            String hashedPassword = PasswordUtil.hashPassword(password, salt);
-            user.setPasswordHash(hashedPassword);
-            user.setPasswordSalt(Base64.getEncoder().encodeToString(salt));
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            throw new RuntimeException("Error hashing password", e);
-        }
-    }
+    /**
+     * Получает всех пользователей с пагинацией
+     * @param pageable параметры пагинации
+     * @return страница пользователей
+     */
+    Page<UserResponseDto> findAll(Pageable pageable);
 }

@@ -5,10 +5,11 @@ import com.twitter.dto.UserResponseDto;
 import com.twitter.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 
@@ -19,17 +20,22 @@ public class UserController {
 
     private final UserService userService;
 
-    @PostMapping
-    public UserResponseDto createUser(@RequestBody @Valid UserRequestDto userRequest) {
-        return userService.createUser(userRequest);
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDto> getUserById(@PathVariable UUID id) {
         return userService.getUserById(id)
             .map(ResponseEntity::ok)
-//            .orElse(ResponseEntity.notFound().build());
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Entity not found"));
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping
+    public PagedModel<UserResponseDto> findAll(Pageable pageable) {
+        Page<UserResponseDto> users = userService.findAll(pageable);
+        return new PagedModel<>(users);
+    }
+
+    @PostMapping
+    public UserResponseDto createUser(@RequestBody @Valid UserRequestDto userRequest) {
+        return userService.createUser(userRequest);
     }
 
     @PutMapping("/{id}")
