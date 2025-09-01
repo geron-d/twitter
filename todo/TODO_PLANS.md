@@ -1,3 +1,6 @@
 - Нормальные post put patch из примера c dto
+- протестить findAll с фильтрами
+- добавить фильты по email, username
+- сделать для фильтрации с email и username, метод пост с requestbody (подумать оставлять ли старый вариант и в каком виде)
 - пекреименовать у user secondName в lastName
 - вместо delete статус

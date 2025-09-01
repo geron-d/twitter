@@ -1,5 +1,6 @@
 package com.twitter.service;
 
+import com.twitter.UserFilter;
 import com.twitter.dto.UserRequestDto;
 import com.twitter.dto.UserResponseDto;
 import com.twitter.entity.User;
@@ -54,8 +55,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<UserResponseDto> findAll(Pageable pageable) {
-        return userRepository.findAll(pageable)
+    public Page<UserResponseDto> findAll(UserFilter userFilter, Pageable pageable) {
+        return userRepository.findAll(userFilter.toSpecification(), pageable)
             .map(userMapper::toUserResponseDto);
     }
 

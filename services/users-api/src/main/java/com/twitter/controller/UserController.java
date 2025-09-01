@@ -1,5 +1,6 @@
 package com.twitter.controller;
 
+import com.twitter.UserFilter;
 import com.twitter.dto.UserRequestDto;
 import com.twitter.dto.UserResponseDto;
 import com.twitter.service.UserService;
@@ -28,8 +29,8 @@ public class UserController {
     }
 
     @GetMapping
-    public PagedModel<UserResponseDto> findAll(Pageable pageable) {
-        Page<UserResponseDto> users = userService.findAll(pageable);
+    public PagedModel<UserResponseDto> findAll(@ModelAttribute UserFilter userFilter, Pageable pageable) {
+        Page<UserResponseDto> users = userService.findAll(userFilter, pageable);
         return new PagedModel<>(users);
     }
 

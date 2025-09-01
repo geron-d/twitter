@@ -1,5 +1,6 @@
 package com.twitter.service;
 
+import com.twitter.UserFilter;
 import com.twitter.dto.UserRequestDto;
 import com.twitter.dto.UserResponseDto;
 import org.springframework.data.domain.Page;
@@ -37,5 +38,5 @@ public interface UserService {
      * @param pageable параметры пагинации
      * @return страница пользователей
      */
-    Page<UserResponseDto> findAll(Pageable pageable);
+    Page<UserResponseDto> findAll(UserFilter userFilter, Pageable pageable);
 }
