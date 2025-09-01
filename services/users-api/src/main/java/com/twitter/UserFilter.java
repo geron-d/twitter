@@ -6,7 +6,7 @@ import org.springframework.util.StringUtils;
 
 public record UserFilter(String firstNameContains, String secondNameContains) {
     public Specification<User> toSpecification() {
-        return Specification.where(firstNameContainsSpec())
+        return firstNameContainsSpec()
             .and(secondNameContainsSpec());
     }
 

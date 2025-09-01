@@ -10,7 +10,6 @@ description = 'Twitter Microservices Monorepo'
 
 allprojects {
     apply plugin: 'java'
-    apply plugin: 'io.spring.dependency-management'
 
     group = rootProject.group
     version = rootProject.version
@@ -27,16 +26,6 @@ allprojects {
         mavenCentral()
         maven { url 'https://repo.spring.io/milestone' }
         maven { url 'https://repo.spring.io/snapshot' }
-    }
-
-    dependencies {
-        implementation 'org.springframework.boot:spring-boot-starter'
-        implementation 'org.springframework.boot:spring-boot-starter-web'
-        implementation 'org.springframework.boot:spring-boot-starter-validation'
-
-        // Тестирование
-        testImplementation 'org.springframework.boot:spring-boot-starter-test'
-        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     }
 
     tasks.named('test') {
