@@ -1,7 +1,7 @@
 package com.twitter.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.twitter.UserFilter;
+import com.twitter.dto.filter.UserFilter;
 import com.twitter.dto.UserRequestDto;
 import com.twitter.dto.UserResponseDto;
 import com.twitter.service.UserService;
