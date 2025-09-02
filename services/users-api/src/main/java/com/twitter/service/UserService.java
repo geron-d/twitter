@@ -1,5 +1,6 @@
 package com.twitter.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.twitter.UserFilter;
 import com.twitter.dto.UserRequestDto;
 import com.twitter.dto.UserResponseDto;
@@ -10,6 +11,20 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface UserService {
+
+    /**
+     * Получает пользователя по идентификатору
+     * @param id идентификатор пользователя
+     * @return пользователь или пустой Optional если не найден
+     */
+    Optional<UserResponseDto> getUserById(UUID id);
+
+    /**
+     * Получает всех пользователей с пагинацией
+     * @param pageable параметры пагинации
+     * @return страница пользователей
+     */
+    Page<UserResponseDto> findAll(UserFilter userFilter, Pageable pageable);
 
     /**
      * Создает нового пользователя
@@ -26,17 +41,5 @@ public interface UserService {
      */
     Optional<UserResponseDto> updateUser(UUID id, UserRequestDto userDetails);
 
-    /**
-     * Получает пользователя по идентификатору
-     * @param id идентификатор пользователя
-     * @return пользователь или пустой Optional если не найден
-     */
-    Optional<UserResponseDto> getUserById(UUID id);
-
-    /**
-     * Получает всех пользователей с пагинацией
-     * @param pageable параметры пагинации
-     * @return страница пользователей
-     */
-    Page<UserResponseDto> findAll(UserFilter userFilter, Pageable pageable);
+    Optional<UserResponseDto> patchUser(UUID id, JsonNode patchNode);
 }

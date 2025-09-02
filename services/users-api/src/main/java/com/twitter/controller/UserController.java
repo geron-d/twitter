@@ -1,5 +1,6 @@
 package com.twitter.controller;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.twitter.UserFilter;
 import com.twitter.dto.UserRequestDto;
 import com.twitter.dto.UserResponseDto;
@@ -42,6 +43,13 @@ public class UserController {
     @PutMapping("/{id}")
     public ResponseEntity<UserResponseDto> updateUser(@PathVariable UUID id, @RequestBody @Valid UserRequestDto userDetails) {
         return userService.updateUser(id, userDetails)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<UserResponseDto> patchUser(@PathVariable UUID id, @RequestBody JsonNode patchNode) {
+        return userService.patchUser(id, patchNode)
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
     }
