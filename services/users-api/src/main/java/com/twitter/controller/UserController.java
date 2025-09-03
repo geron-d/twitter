@@ -23,7 +23,7 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponseDto> getUserById(@PathVariable UUID id) {
+    public ResponseEntity<UserResponseDto> getUserById(@PathVariable("id") UUID id) {
         return userService.getUserById(id)
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
@@ -41,14 +41,14 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserResponseDto> updateUser(@PathVariable UUID id, @RequestBody @Valid UserRequestDto userDetails) {
+    public ResponseEntity<UserResponseDto> updateUser(@PathVariable("id") UUID id, @RequestBody @Valid UserRequestDto userDetails) {
         return userService.updateUser(id, userDetails)
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<UserResponseDto> patchUser(@PathVariable UUID id, @RequestBody JsonNode patchNode) {
+    public ResponseEntity<UserResponseDto> patchUser(@PathVariable("id") UUID id, @RequestBody JsonNode patchNode) {
         return userService.patchUser(id, patchNode)
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());

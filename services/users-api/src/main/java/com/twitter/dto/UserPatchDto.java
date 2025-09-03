@@ -1,21 +1,21 @@
 package com.twitter.dto;
 
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
-public record UserPatchDto(
+@Data
+@RequiredArgsConstructor
+public class UserPatchDto {
 
-    @NotBlank(message = "Username cannot be blank")
     @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
-    String username,
+    private String username;
 
-    String firstName,
+    private String firstName;
 
-    String secondName,
+    private String secondName;
 
-    @NotBlank(message = "Email cannot be blank")
     @Email(message = "Invalid email format")
-    String email
-) {
+    private String email;
 }
