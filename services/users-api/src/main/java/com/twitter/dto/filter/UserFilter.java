@@ -4,10 +4,10 @@ import com.twitter.entity.User;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
 
-public record UserFilter(String firstNameContains, String secondNameContains, String email, String username) {
+public record UserFilter(String firstNameContains, String lastNameContains, String email, String username) {
     public Specification<User> toSpecification() {
         return firstNameContainsSpec()
-            .and(secondNameContainsSpec())
+            .and(lastNameContainsSpec())
             .and(emailSpec())
             .and(usernameSpec());
     }
@@ -18,9 +18,9 @@ public record UserFilter(String firstNameContains, String secondNameContains, St
             : null);
     }
 
-    private Specification<User> secondNameContainsSpec() {
-        return ((root, query, cb) -> StringUtils.hasText(secondNameContains)
-            ? cb.like(root.get("secondName"), "%" + secondNameContains + "%")
+    private Specification<User> lastNameContainsSpec() {
+        return ((root, query, cb) -> StringUtils.hasText(lastNameContains)
+            ? cb.like(root.get("lastName"), "%" + lastNameContains + "%")
             : null);
     }
 

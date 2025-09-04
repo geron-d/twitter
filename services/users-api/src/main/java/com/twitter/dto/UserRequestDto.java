@@ -12,7 +12,7 @@ public record UserRequestDto(
 
     String firstName,
 
-    String secondName,
+    String lastName,
 
     @NotBlank(message = "Email cannot be blank")
     @Email(message = "Invalid email format")

@@ -6,6 +6,6 @@ public record UserResponseDto(
     UUID id,
     String username,
     String firstName,
-    String secondName,
+    String lastName,
     String email
 ) {}

@@ -14,7 +14,7 @@ public class UserPatchDto {
 
     private String firstName;
 
-    private String secondName;
+    private String lastName;
 
     @Email(message = "Invalid email format")
     private String email;
