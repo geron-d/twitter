@@ -9,8 +9,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserPatchDto {
 
-    @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
-    private String username;
+    @Size(min = 3, max = 50, message = "Login must be between 3 and 50 characters")
+    private String login;
 
     private String firstName;
 

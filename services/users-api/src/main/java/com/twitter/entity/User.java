@@ -21,8 +21,8 @@ public class User {
     @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
-    @Column(name = "username", unique = true, nullable = false)
-    private String username;
+    @Column(name = "login", unique = true, nullable = false)
+    private String login;
 
     @Column(name = "first_name")
     private String firstName;

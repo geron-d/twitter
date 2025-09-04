@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY,
-    username VARCHAR(50) UNIQUE NOT NULL,
+    login VARCHAR(50) UNIQUE NOT NULL,
     first_name VARCHAR(50),
     last_name VARCHAR(50),
     email VARCHAR(255) UNIQUE NOT NULL,
