@@ -1,5 +1,6 @@
 package com.twitter.dto;
 
+import com.twitter.enums.UserStatus;
 import java.util.UUID;
 
 public record UserResponseDto(
@@ -7,5 +8,6 @@ public record UserResponseDto(
     String login,
     String firstName,
     String lastName,
-    String email
+    String email,
+    UserStatus status
 ) {}

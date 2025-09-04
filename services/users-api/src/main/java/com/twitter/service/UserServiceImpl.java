@@ -7,6 +7,7 @@ import com.twitter.dto.UserPatchDto;
 import com.twitter.dto.UserRequestDto;
 import com.twitter.dto.UserResponseDto;
 import com.twitter.entity.User;
+import com.twitter.enums.UserStatus;
 import com.twitter.mapper.UserMapper;
 import com.twitter.repository.UserRepository;
 import com.twitter.util.PasswordUtil;
@@ -44,6 +45,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDto createUser(UserRequestDto userRequest) {
         User user = userMapper.toUser(userRequest);
+        user.setStatus(UserStatus.ACTIVE);
 
         setPassword(user, userRequest.password());
 
