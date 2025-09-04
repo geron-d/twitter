@@ -14,7 +14,9 @@ import com.twitter.util.PasswordUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -75,7 +77,7 @@ public class UserServiceImpl implements UserService {
             try {
                 objectMapper.readerForUpdating(userPatchDto).readValue(patchNode);
             } catch (IOException e) {
-                throw new RuntimeException("Error patching user", e);
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error patching user: " + e.getMessage(), e);
             }
             userMapper.updateUserFromPatchDto(userPatchDto, user);
 
@@ -106,7 +108,7 @@ public class UserServiceImpl implements UserService {
             user.setPasswordHash(hashedPassword);
             user.setPasswordSalt(Base64.getEncoder().encodeToString(salt));
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            throw new RuntimeException("Error hashing password", e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error hashing password: " + e.getMessage(), e);
         }
     }
 }
