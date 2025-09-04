@@ -1,9 +1,9 @@
 package com.twitter.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.twitter.dto.filter.UserFilter;
 import com.twitter.dto.UserRequestDto;
 import com.twitter.dto.UserResponseDto;
+import com.twitter.dto.filter.UserFilter;
 import com.twitter.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -50,6 +50,13 @@ public class UserController {
     @PatchMapping("/{id}")
     public ResponseEntity<UserResponseDto> patchUser(@PathVariable("id") UUID id, @RequestBody JsonNode patchNode) {
         return userService.patchUser(id, patchNode)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PatchMapping("/{id}/inactivate")
+    public ResponseEntity<UserResponseDto> inactivateUser(@PathVariable("id") UUID id) {
+        return userService.inactivateUser(id)
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
     }

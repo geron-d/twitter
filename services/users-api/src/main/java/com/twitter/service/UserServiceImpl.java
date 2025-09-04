@@ -2,10 +2,10 @@ package com.twitter.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.twitter.dto.filter.UserFilter;
 import com.twitter.dto.UserPatchDto;
 import com.twitter.dto.UserRequestDto;
 import com.twitter.dto.UserResponseDto;
+import com.twitter.dto.filter.UserFilter;
 import com.twitter.entity.User;
 import com.twitter.enums.UserStatus;
 import com.twitter.mapper.UserMapper;
@@ -84,9 +84,19 @@ public class UserServiceImpl implements UserService {
         });
     }
 
+    @Override
+    public Optional<UserResponseDto> inactivateUser(UUID id) {
+        return userRepository.findById(id).map(user -> {
+            user.setStatus(UserStatus.INACTIVE);
+            User updatedUser = userRepository.save(user);
+            return userMapper.toUserResponseDto(updatedUser);
+        });
+    }
+
     /**
      * Устанавливает хешированный пароль для пользователя
-     * @param user пользователь
+     *
+     * @param user     пользователь
      * @param password пароль в открытом виде
      */
     private void setPassword(User user, String password) {
