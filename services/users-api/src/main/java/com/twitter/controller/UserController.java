@@ -1,6 +1,7 @@
 package com.twitter.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.twitter.common.aspect.LoggableRequest;
 import com.twitter.dto.UserRequestDto;
 import com.twitter.dto.UserResponseDto;
 import com.twitter.dto.filter.UserFilter;
@@ -22,6 +23,7 @@ public class UserController {
 
     private final UserService userService;
 
+    @LoggableRequest
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDto> getUserById(@PathVariable("id") UUID id) {
         return userService.getUserById(id)
@@ -29,17 +31,20 @@ public class UserController {
             .orElse(ResponseEntity.notFound().build());
     }
 
+    @LoggableRequest
     @GetMapping
     public PagedModel<UserResponseDto> findAll(@ModelAttribute UserFilter userFilter, Pageable pageable) {
         Page<UserResponseDto> users = userService.findAll(userFilter, pageable);
         return new PagedModel<>(users);
     }
 
+    @LoggableRequest
     @PostMapping
     public UserResponseDto createUser(@RequestBody @Valid UserRequestDto userRequest) {
         return userService.createUser(userRequest);
     }
 
+    @LoggableRequest
     @PutMapping("/{id}")
     public ResponseEntity<UserResponseDto> updateUser(@PathVariable("id") UUID id, @RequestBody @Valid UserRequestDto userDetails) {
         return userService.updateUser(id, userDetails)
@@ -47,6 +52,7 @@ public class UserController {
             .orElse(ResponseEntity.notFound().build());
     }
 
+    @LoggableRequest
     @PatchMapping("/{id}")
     public ResponseEntity<UserResponseDto> patchUser(@PathVariable("id") UUID id, @RequestBody JsonNode patchNode) {
         return userService.patchUser(id, patchNode)
@@ -54,6 +60,7 @@ public class UserController {
             .orElse(ResponseEntity.notFound().build());
     }
 
+    @LoggableRequest
     @PatchMapping("/{id}/inactivate")
     public ResponseEntity<UserResponseDto> inactivateUser(@PathVariable("id") UUID id) {
         return userService.inactivateUser(id)
