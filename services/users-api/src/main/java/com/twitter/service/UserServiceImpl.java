@@ -12,6 +12,7 @@ import com.twitter.mapper.UserMapper;
 import com.twitter.repository.UserRepository;
 import com.twitter.util.PasswordUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,7 @@ import java.util.Base64;
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -32,20 +34,68 @@ public class UserServiceImpl implements UserService {
     private final ObjectMapper objectMapper;
     private final UserMapper userMapper;
     private final UserRepository userRepository;
+//    private final TracingUtil tracingUtil;
 
     @Override
     public Optional<UserResponseDto> getUserById(UUID id) {
+//        log.debug("Looking up user by ID: {}", id);
+//        return tracingUtil.executeInSpan("get-user-by-id", Map.of(
+//            "user.id", id.toString(),
+//            "operation", "GET_USER_BY_ID"
+//        ), () -> {
+//            tracingUtil.addEvent("database-query-started");
+//            Optional<User> user = userRepository.findById(id);
+//            tracingUtil.addEvent("database-query-completed");
+//            tracingUtil.addTag("user.found", String.valueOf(user.isPresent()));
+//
+//            return user.map(userMapper::toUserResponseDto);
+//        });
         return userRepository.findById(id).map(userMapper::toUserResponseDto);
     }
 
     @Override
     public Page<UserResponseDto> findAll(UserFilter userFilter, Pageable pageable) {
+//        log.debug("Finding users with filter: {}", userFilter);
+//        return tracingUtil.executeInSpan("find-all-users", Map.of(
+//            "page.size", String.valueOf(pageable.getPageSize()),
+//            "page.number", String.valueOf(pageable.getPageNumber()),
+//            "operation", "FIND_ALL_USERS"
+//        ), () -> {
+//            tracingUtil.addEvent("database-query-started");
+//            Page<User> users = userRepository.findAll(userFilter.toSpecification(), pageable);
+//            tracingUtil.addEvent("database-query-completed");
+//            tracingUtil.addTag("result.count", String.valueOf(users.getTotalElements()));
+//
+//            return users.map(userMapper::toUserResponseDto);
+//        });
         return userRepository.findAll(userFilter.toSpecification(), pageable)
             .map(userMapper::toUserResponseDto);
     }
 
     @Override
     public UserResponseDto createUser(UserRequestDto userRequest) {
+//        log.info("Creating new user with email: {}", userRequest.email());
+//        return tracingUtil.executeInSpan("create-user", Map.of(
+//            "user.email", userRequest.email(),
+//            "user.login", userRequest.login(),
+//            "operation", "CREATE_USER"
+//        ), () -> {
+//            tracingUtil.addEvent("user-creation-started");
+//
+//            User user = userMapper.toUser(userRequest);
+//            user.setStatus(UserStatus.ACTIVE);
+//
+//            tracingUtil.addEvent("password-hashing-started");
+//            setPassword(user, userRequest.password());
+//            tracingUtil.addEvent("password-hashing-completed");
+//
+//            tracingUtil.addEvent("database-save-started");
+//            User savedUser = userRepository.save(user);
+//            tracingUtil.addEvent("database-save-completed");
+//            tracingUtil.addTag("user.id", savedUser.getId().toString());
+//
+//            return userMapper.toUserResponseDto(savedUser);
+//        });
         User user = userMapper.toUser(userRequest);
         user.setStatus(UserStatus.ACTIVE);
 
