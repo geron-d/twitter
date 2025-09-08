@@ -35,7 +35,7 @@ public class Follow {
 
 
 ## Future
-- узнать что такое openTelemetry и подключить его
+- узнать что такое openTelemetry и подключить его (собирать все логи в 1 точку opentelemetry, zipkin, elk)
 - твиты в монго
 - твиты в касандра
 - Neo4j для подписки в follow-service
