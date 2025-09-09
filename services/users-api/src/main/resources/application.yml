@@ -33,5 +33,5 @@ logging:
     org.springframework.boot.context.embedded: WARN
     org.springframework.boot.actuate: WARN
   pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{traceId:-},%X{spanId:-}] %logger{36} - %msg%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{traceId:-},%X{spanId:-}] %logger{36} - %msg%n"
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${spring.application.name:} [%thread] %-5level [%X{traceId:-},%X{spanId:-}] %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${spring.application.name:} [%thread] %-5level [%X{traceId:-},%X{spanId:-}] %logger{36} - %msg%n"
