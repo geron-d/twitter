@@ -21,6 +21,7 @@ public interface UserMapper {
     @Mapping(target = "passwordHash", ignore = true)
     @Mapping(target = "passwordSalt", ignore = true)
     @Mapping(target = "status", ignore = true)
+    @Mapping(target = "role", ignore = true)
     void updateUserFromDto(UserRequestDto userRequestDto, @MappingTarget User user);
 
     UserPatchDto toUserPatchDto(User user);

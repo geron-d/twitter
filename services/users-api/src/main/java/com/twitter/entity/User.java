@@ -1,5 +1,6 @@
 package com.twitter.entity;
 
+import com.twitter.enums.UserRole;
 import com.twitter.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -43,4 +44,8 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private UserStatus status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    private UserRole role;
 }

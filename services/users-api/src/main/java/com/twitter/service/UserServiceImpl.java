@@ -7,6 +7,7 @@ import com.twitter.dto.UserRequestDto;
 import com.twitter.dto.UserResponseDto;
 import com.twitter.dto.filter.UserFilter;
 import com.twitter.entity.User;
+import com.twitter.enums.UserRole;
 import com.twitter.enums.UserStatus;
 import com.twitter.mapper.UserMapper;
 import com.twitter.repository.UserRepository;
@@ -50,6 +51,7 @@ public class UserServiceImpl implements UserService {
     public UserResponseDto createUser(UserRequestDto userRequest) {
         User user = userMapper.toUser(userRequest);
         user.setStatus(UserStatus.ACTIVE);
+        user.setRole(UserRole.USER);
 
         setPassword(user, userRequest.password());
 
