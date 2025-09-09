@@ -1,5 +1,8 @@
 package com.twitter.common.aspect;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -22,6 +25,8 @@ import java.util.stream.Collectors;
 @Component
 public class LoggableRequestAspect {
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     @Around("@annotation(com.twitter.common.aspect.LoggableRequest))")
     public Object log(final ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder
@@ -35,9 +40,10 @@ public class LoggableRequestAspect {
 
     private void logRequestDetails(HttpServletRequest request, ProceedingJoinPoint proceedingJoinPoint) {
         MethodSignature methodSignature = (MethodSignature) proceedingJoinPoint.getSignature();
-        boolean printDetails = methodSignature.getMethod()
-            .getAnnotation(LoggableRequest.class)
-            .printRequestBody();
+        LoggableRequest annotation = methodSignature.getMethod()
+            .getAnnotation(LoggableRequest.class);
+        boolean printDetails = annotation.printRequestBody();
+        String[] hideFields = annotation.hideFields();
 
         String method = request.getMethod();
         String uri = request.getRequestURI();
@@ -51,6 +57,11 @@ public class LoggableRequestAspect {
             Object requestBody = proceedingJoinPoint.getArgs().length > 0
                 ? proceedingJoinPoint.getArgs()[0]
                 : "{}";
+
+            if (hideFields.length > 0) {
+                requestBody = hideSensitiveFields(requestBody, hideFields);
+            }
+            
             if (!headers.isEmpty()) {
                 log.info("### REQUEST {} {} ,Headers: {} , Body: {}", method, uri, headers, requestBody);
             } else {
@@ -82,6 +93,42 @@ public class LoggableRequestAspect {
             } else {
                 log.info("### RESPONSE {} {} , status: {}", request.getMethod(), request.getRequestURI(),
                     responseEntity.getStatusCode().value());
+            }
+        }
+    }
+
+    private Object hideSensitiveFields(Object requestBody, String[] hideFields) {
+        try {
+            String jsonString = objectMapper.writeValueAsString(requestBody);
+            JsonNode jsonNode = objectMapper.readTree(jsonString);
+
+            hideFieldsInJsonNode(jsonNode, hideFields);
+            
+            return jsonNode;
+        } catch (Exception e) {
+            log.warn("Failed to hide sensitive fields, returning original object: {}", e.getMessage());
+            return requestBody;
+        }
+    }
+
+    private void hideFieldsInJsonNode(JsonNode node, String[] hideFields) {
+        if (node.isObject()) {
+            ObjectNode objectNode = (ObjectNode) node;
+            for (String fieldName : hideFields) {
+                if (objectNode.has(fieldName)) {
+                    objectNode.put(fieldName, "***");
+                }
+            }
+
+            objectNode.fieldNames().forEachRemaining(fieldName -> {
+                JsonNode fieldValue = objectNode.get(fieldName);
+                if (fieldValue.isObject() || fieldValue.isArray()) {
+                    hideFieldsInJsonNode(fieldValue, hideFields);
+                }
+            });
+        } else if (node.isArray()) {
+            for (JsonNode arrayElement : node) {
+                hideFieldsInJsonNode(arrayElement, hideFields);
             }
         }
     }

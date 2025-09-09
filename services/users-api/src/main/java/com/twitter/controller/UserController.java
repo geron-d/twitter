@@ -40,13 +40,13 @@ public class UserController {
         return new PagedModel<>(users);
     }
 
-    @LoggableRequest
+    @LoggableRequest(hideFields = {"password"})
     @PostMapping
     public UserResponseDto createUser(@RequestBody @Valid UserRequestDto userRequest) {
         return userService.createUser(userRequest);
     }
 
-    @LoggableRequest
+    @LoggableRequest(hideFields = {"password"})
     @PutMapping("/{id}")
     public ResponseEntity<UserResponseDto> updateUser(@PathVariable("id") UUID id, @RequestBody @Valid UserRequestDto userDetails) {
         return userService.updateUser(id, userDetails)

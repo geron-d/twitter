@@ -10,5 +10,7 @@ import java.lang.annotation.Target;
 public @interface LoggableRequest {
 
     boolean printRequestBody() default true;
+    
+    String[] hideFields() default {};
 
 }
