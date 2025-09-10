@@ -2,6 +2,7 @@ package com.twitter.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.twitter.common.exception.LastAdminDeactivationException;
 import com.twitter.dto.UserPatchDto;
 import com.twitter.dto.UserRequestDto;
 import com.twitter.dto.UserResponseDto;
@@ -93,8 +94,17 @@ public class UserServiceImpl implements UserService {
     @Override
     public Optional<UserResponseDto> inactivateUser(UUID id) {
         return userRepository.findById(id).map(user -> {
+            if (user.getRole() == UserRole.ADMIN) {
+                long activeAdminCount = userRepository.countByRoleAndStatus(UserRole.ADMIN, UserStatus.ACTIVE);
+                if (activeAdminCount <= 1) {
+                    log.warn("Attempt to deactivate the last active administrator with ID: {}", id);
+                    throw new LastAdminDeactivationException("Cannot deactivate the last active administrator");
+                }
+            }
+            
             user.setStatus(UserStatus.INACTIVE);
             User updatedUser = userRepository.save(user);
+            log.info("User with ID {} has been successfully deactivated", id);
             return userMapper.toUserResponseDto(updatedUser);
         });
     }

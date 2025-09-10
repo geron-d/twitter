@@ -55,4 +55,19 @@ public class GlobalExceptionHandler {
         problemDetail.setProperty("timestamp", Instant.now());
         return problemDetail;
     }
+
+    /**
+     * Обработка попытки деактивации последнего администратора
+     */
+    @ExceptionHandler(LastAdminDeactivationException.class)
+    public ProblemDetail handleLastAdminDeactivationException(LastAdminDeactivationException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+            HttpStatus.CONFLICT,
+            ex.getReason() != null ? ex.getReason() : "Cannot deactivate the last active administrator"
+        );
+        problemDetail.setTitle("Last Admin Deactivation Error");
+        problemDetail.setType(URI.create("https://example.com/errors/last-admin-deactivation"));
+        problemDetail.setProperty("timestamp", Instant.now());
+        return problemDetail;
+    }
 }
