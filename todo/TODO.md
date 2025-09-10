@@ -1,66 +1,78 @@
-# TODO: Запрет деактивации последнего администратора
+# TODO: Создание UserUpdateDto для обновления пользователей
 
-## Задача
-В users-api в методе `inactivateUser` в `UserController.java` необходимо запретить деактивировать последнего администратора.
+## Цель
+Создать кастомное DTO для обновления пользователя в users-api и обновить все связанные компоненты.
 
-## Анализ текущей архитектуры
-- **UserRole**: USER, ADMIN, MODERATOR
-- **UserStatus**: ACTIVE, INACTIVE
-- **User**: entity с полями role и status
-- **UserRepository**: базовый JpaRepository без кастомных методов
-- **UserServiceImpl.inactivateUser()**: просто меняет статус на INACTIVE без проверок
-- **GlobalExceptionHandler**: обрабатывает ResponseStatusException
+## Анализ текущего состояния
+- `UserController.updateUser()` использует `UserRequestDto` для обновления пользователя
+- `UserRequestDto` содержит все поля включая обязательные (`login`, `email`, `password`)
+- `UserPatchDto` уже существует для частичного обновления (PATCH операций)
+- `UserMapper` имеет методы для работы с `UserRequestDto` и `UserPatchDto`
+
+## Проблема
+- `UserRequestDto` предназначен для создания пользователей и содержит обязательные поля
+- Для обновления пользователя нужен отдельный DTO, который не требует обязательных полей
+- Текущий `updateUser` метод использует `UserRequestDto`, что неоптимально
 
 ## План выполнения
 
-### Шаг 1: Добавить метод в UserRepository
-- [ ] Создать метод `countByRoleAndStatus(UserRole role, UserStatus status)` в `UserRepository.java`
-- [ ] Этот метод будет использоваться для подсчета активных администраторов
+### Шаг 1: Создание UserUpdateDto
+- Создать новый DTO `UserUpdateDto` для операций обновления
+- Поля должны быть опциональными (все nullable)
+- Добавить валидацию только для заполненных полей
+- Исключить поля, которые не должны обновляться (id, status, role)
 
-### Шаг 2: Создать кастомное исключение
-- [ ] Создать `LastAdminDeactivationException` в `shared/common-lib/src/main/java/com/twitter/common/exception/`
-- [ ] Наследовать от `ResponseStatusException` с HTTP 409 Conflict
-- [ ] Добавить понятное сообщение об ошибке
-
-### Шаг 3: Обновить GlobalExceptionHandler
-- [ ] Добавить обработку `LastAdminDeactivationException` в `GlobalExceptionHandler.java`
-- [ ] Обеспечить корректный HTTP ответ с описанием ошибки
-
-### Шаг 4: Модифицировать UserServiceImpl
-- [ ] Обновить метод `inactivateUser(UUID id)` в `UserServiceImpl.java`
-- [ ] Добавить проверку: если пользователь ADMIN и это последний активный админ - выбросить исключение
-- [ ] Проверку делать перед изменением статуса на INACTIVE
-- [ ] Добавить логирование попытки деактивации последнего админа
-
-### Шаг 5: Тестирование
-- [ ] Протестировать деактивацию обычных пользователей (должно работать)
-- [ ] Протестировать деактивацию админов, когда есть другие активные админы (должно работать)
-- [ ] Протестировать попытку деактивации последнего админа (должна выбрасываться ошибка 409)
-
-## Технические детали
-
-### HTTP статус код
-- **409 Conflict** - подходящий статус для бизнес-ограничений
-
-### Логика проверки
+**Структура UserUpdateDto:**
 ```java
-// Псевдокод
-if (user.getRole() == UserRole.ADMIN) {
-    long activeAdminCount = userRepository.countByRoleAndStatus(UserRole.ADMIN, UserStatus.ACTIVE);
-    if (activeAdminCount <= 1) {
-        throw new LastAdminDeactivationException("Cannot deactivate the last active administrator");
-    }
-}
+public record UserUpdateDto(
+    @Size(min = 3, max = 50, message = "Login must be between 3 and 50 characters")
+    String login,
+    
+    String firstName,
+    
+    String lastName,
+    
+    @Email(message = "Invalid email format")
+    String email,
+    
+    @Size(min = 8, message = "Password must be at least 8 characters long")
+    String password
+) {}
 ```
 
-### Файлы для изменения
-1. `services/users-api/src/main/java/com/twitter/repository/UserRepository.java`
-2. `shared/common-lib/src/main/java/com/twitter/common/exception/LastAdminDeactivationException.java` (новый)
-3. `shared/common-lib/src/main/java/com/twitter/common/exception/GlobalExceptionHandler.java`
-4. `services/users-api/src/main/java/com/twitter/service/UserServiceImpl.java`
+### Шаг 2: Обновление UserMapper
+- Добавить методы для работы с `UserUpdateDto`
+- `toUserUpdateDto(User user)` - для преобразования User в UserUpdateDto
+- `updateUserFromUpdateDto(UserUpdateDto dto, @MappingTarget User user)` - для обновления User из UserUpdateDto
 
-## Ожидаемый результат
-- Последний активный администратор не может быть деактивирован
-- При попытке деактивации возвращается HTTP 409 с понятным сообщением
-- Обычные пользователи и админы (когда есть другие активные админы) деактивируются как обычно
-- Логируется попытка деактивации последнего админа
+### Шаг 3: Обновление UserService
+- Изменить сигнатуру метода `updateUser` для использования `UserUpdateDto`
+- Обновить реализацию в `UserServiceImpl`
+
+### Шаг 4: Обновление UserController
+- Изменить метод `updateUser` для использования `UserUpdateDto`
+- Обновить импорты
+
+### Шаг 5: Проверка совместимости
+- Убедиться, что все изменения корректно интегрированы
+- Проверить, что валидация работает правильно
+
+## Файлы для изменения
+1. `services/users-api/src/main/java/com/twitter/dto/UserUpdateDto.java` (новый)
+2. `services/users-api/src/main/java/com/twitter/mapper/UserMapper.java`
+3. `services/users-api/src/main/java/com/twitter/service/UserService.java`
+4. `services/users-api/src/main/java/com/twitter/service/UserServiceImpl.java`
+5. `services/users-api/src/main/java/com/twitter/controller/UserController.java`
+
+## Ключевые особенности UserUpdateDto
+- Все поля nullable (опциональные)
+- Валидация применяется только к заполненным полям
+- Исключены системные поля (id, status, role, passwordHash, passwordSalt)
+- Совместимость с существующей логикой обновления пароля
+
+## Статус
+- [ ] Шаг 1: Создание UserUpdateDto
+- [ ] Шаг 2: Обновление UserMapper
+- [ ] Шаг 3: Обновление UserService
+- [ ] Шаг 4: Обновление UserController
+- [ ] Шаг 5: Проверка совместимости
