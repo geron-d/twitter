@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.twitter.common.aspect.LoggableRequest;
 import com.twitter.dto.UserRequestDto;
 import com.twitter.dto.UserResponseDto;
+import com.twitter.dto.UserUpdateDto;
 import com.twitter.dto.filter.UserFilter;
 import com.twitter.service.UserService;
 import jakarta.validation.Valid;
@@ -48,7 +49,7 @@ public class UserController {
 
     @LoggableRequest(hideFields = {"password"})
     @PutMapping("/{id}")
-    public ResponseEntity<UserResponseDto> updateUser(@PathVariable("id") UUID id, @RequestBody @Valid UserRequestDto userDetails) {
+    public ResponseEntity<UserResponseDto> updateUser(@PathVariable("id") UUID id, @RequestBody @Valid UserUpdateDto userDetails) {
         return userService.updateUser(id, userDetails)
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());

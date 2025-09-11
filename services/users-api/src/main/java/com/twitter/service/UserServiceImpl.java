@@ -6,6 +6,7 @@ import com.twitter.common.exception.LastAdminDeactivationException;
 import com.twitter.dto.UserPatchDto;
 import com.twitter.dto.UserRequestDto;
 import com.twitter.dto.UserResponseDto;
+import com.twitter.dto.UserUpdateDto;
 import com.twitter.dto.filter.UserFilter;
 import com.twitter.entity.User;
 import com.twitter.enums.UserRole;
@@ -61,9 +62,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<UserResponseDto> updateUser(UUID id, UserRequestDto userDetails) {
+    public Optional<UserResponseDto> updateUser(UUID id, UserUpdateDto userDetails) {
         return userRepository.findById(id).map(user -> {
-            userMapper.updateUserFromDto(userDetails, user);
+            userMapper.updateUserFromUpdateDto(userDetails, user);
 
             if (userDetails.password() != null && !userDetails.password().isEmpty()) {
                 setPassword(user, userDetails.password());

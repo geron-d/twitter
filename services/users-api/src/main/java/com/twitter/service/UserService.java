@@ -3,6 +3,7 @@ package com.twitter.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.twitter.dto.UserRequestDto;
 import com.twitter.dto.UserResponseDto;
+import com.twitter.dto.UserUpdateDto;
 import com.twitter.dto.filter.UserFilter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -43,7 +44,7 @@ public interface UserService {
      * @param userDetails новые данные пользователя
      * @return обновленный пользователь или пустой Optional если пользователь не найден
      */
-    Optional<UserResponseDto> updateUser(UUID id, UserRequestDto userDetails);
+    Optional<UserResponseDto> updateUser(UUID id, UserUpdateDto userDetails);
 
     Optional<UserResponseDto> patchUser(UUID id, JsonNode patchNode);
 
