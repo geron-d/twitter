@@ -6,6 +6,7 @@ import com.twitter.common.exception.LastAdminDeactivationException;
 import com.twitter.dto.UserPatchDto;
 import com.twitter.dto.UserRequestDto;
 import com.twitter.dto.UserResponseDto;
+import com.twitter.dto.UserRoleUpdateDto;
 import com.twitter.dto.UserUpdateDto;
 import com.twitter.dto.filter.UserFilter;
 import com.twitter.entity.User;
@@ -106,6 +107,30 @@ public class UserServiceImpl implements UserService {
             user.setStatus(UserStatus.INACTIVE);
             User updatedUser = userRepository.save(user);
             log.info("User with ID {} has been successfully deactivated", id);
+            return userMapper.toUserResponseDto(updatedUser);
+        });
+    }
+
+    @Override
+    public Optional<UserResponseDto> updateUserRole(UUID id, UserRoleUpdateDto roleUpdate) {
+        return userRepository.findById(id).map(user -> {
+            UserRole oldRole = user.getRole();
+            UserRole newRole = roleUpdate.role();
+            
+            // Проверяем, что нельзя удалить последнего активного админа
+            if (oldRole == UserRole.ADMIN && newRole != UserRole.ADMIN) {
+                long activeAdminCount = userRepository.countByRoleAndStatus(UserRole.ADMIN, UserStatus.ACTIVE);
+                if (activeAdminCount <= 1) {
+                    log.warn("Attempt to change role of the last active administrator with ID: {} from {} to {}", 
+                            id, oldRole, newRole);
+                    throw new LastAdminDeactivationException("Cannot change role of the last active administrator");
+                }
+            }
+            
+            user.setRole(newRole);
+            User updatedUser = userRepository.save(user);
+            
+            log.info("User role updated for ID {}: {} -> {}", id, oldRole, newRole);
             return userMapper.toUserResponseDto(updatedUser);
         });
     }

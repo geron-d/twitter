@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.twitter.common.aspect.LoggableRequest;
 import com.twitter.dto.UserRequestDto;
 import com.twitter.dto.UserResponseDto;
+import com.twitter.dto.UserRoleUpdateDto;
 import com.twitter.dto.UserUpdateDto;
 import com.twitter.dto.filter.UserFilter;
 import com.twitter.service.UserService;
@@ -67,6 +68,15 @@ public class UserController {
     @PatchMapping("/{id}/inactivate")
     public ResponseEntity<UserResponseDto> inactivateUser(@PathVariable("id") UUID id) {
         return userService.inactivateUser(id)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @LoggableRequest
+    @PatchMapping("/{id}/role")
+    public ResponseEntity<UserResponseDto> updateUserRole(@PathVariable("id") UUID id, 
+                                                         @RequestBody @Valid UserRoleUpdateDto roleUpdate) {
+        return userService.updateUserRole(id, roleUpdate)
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
     }

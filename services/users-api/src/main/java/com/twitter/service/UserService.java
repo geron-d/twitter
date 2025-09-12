@@ -3,6 +3,7 @@ package com.twitter.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.twitter.dto.UserRequestDto;
 import com.twitter.dto.UserResponseDto;
+import com.twitter.dto.UserRoleUpdateDto;
 import com.twitter.dto.UserUpdateDto;
 import com.twitter.dto.filter.UserFilter;
 import org.springframework.data.domain.Page;
@@ -55,4 +56,13 @@ public interface UserService {
      * @return обновленный пользователь или пустой Optional если пользователь не найден
      */
     Optional<UserResponseDto> inactivateUser(UUID id);
+
+    /**
+     * Обновляет роль пользователя
+     *
+     * @param id идентификатор пользователя
+     * @param roleUpdate данные для обновления роли
+     * @return обновленный пользователь или пустой Optional если пользователь не найден
+     */
+    Optional<UserResponseDto> updateUserRole(UUID id, UserRoleUpdateDto roleUpdate);
 }
