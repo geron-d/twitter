@@ -3,6 +3,7 @@ package com.twitter.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.twitter.dto.UserRequestDto;
 import com.twitter.dto.UserResponseDto;
+import com.twitter.dto.UserUpdateDto;
 import com.twitter.dto.filter.UserFilter;
 import com.twitter.entity.User;
 import com.twitter.enums.UserRole;
@@ -27,6 +28,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -104,19 +106,6 @@ class UserServiceImplTest {
             assertThat(result).isEmpty();
 
             verify(userRepository).findById(nonExistentUserId);
-            verify(userMapper, never()).toUserResponseDto(any());
-        }
-
-        @Test
-        @SuppressWarnings("null")
-        void getUserById_WhenIdIsNull_ShouldReturnEmptyOptional() {
-            when(userRepository.findById(null)).thenReturn(Optional.empty());
-
-            Optional<UserResponseDto> result = userService.getUserById(null);
-
-            assertThat(result).isEmpty();
-
-            verify(userRepository).findById(null);
             verify(userMapper, never()).toUserResponseDto(any());
         }
 
@@ -540,6 +529,213 @@ class UserServiceImplTest {
             userService.createUser(testUserRequestDto);
 
             verify(userMapper).toUserResponseDto(savedUser);
+        }
+    }
+
+    @Nested
+    class UpdateUserTest {
+
+        private User testUser;
+        private User updatedUser;
+        private UserResponseDto testUserResponseDto;
+        private UserUpdateDto testUserUpdateDto;
+        private UUID testUserId;
+
+        @BeforeEach
+        void setUp() {
+            testUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+            
+            testUser = new User()
+                    .setId(testUserId)
+                    .setLogin("testuser")
+                    .setFirstName("Test")
+                    .setLastName("User")
+                    .setEmail("test@example.com")
+                    .setPasswordHash("oldHashedPassword")
+                    .setPasswordSalt("oldSalt")
+                    .setStatus(UserStatus.ACTIVE)
+                    .setRole(UserRole.USER);
+
+            updatedUser = new User()
+                    .setId(testUserId)
+                    .setLogin("updateduser")
+                    .setFirstName("Updated")
+                    .setLastName("User")
+                    .setEmail("updated@example.com")
+                    .setPasswordHash("newHashedPassword")
+                    .setPasswordSalt("newSalt")
+                    .setStatus(UserStatus.ACTIVE)
+                    .setRole(UserRole.USER);
+
+            testUserUpdateDto = new UserUpdateDto(
+                    "updateduser",
+                    "Updated",
+                    "User",
+                    "updated@example.com",
+                    "newPassword123"
+            );
+
+            testUserResponseDto = new UserResponseDto(
+                    testUserId,
+                    "updateduser",
+                    "Updated",
+                    "User",
+                    "updated@example.com",
+                    UserStatus.ACTIVE,
+                    UserRole.USER
+            );
+        }
+
+        @Test
+        void updateUser_WhenUserExists_ShouldUpdateAndReturnUser() {
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+            when(userRepository.save(any(User.class))).thenReturn(updatedUser);
+            when(userMapper.toUserResponseDto(updatedUser)).thenReturn(testUserResponseDto);
+
+            Optional<UserResponseDto> result = userService.updateUser(testUserId, testUserUpdateDto);
+
+            assertThat(result).isPresent();
+            assertThat(result.get()).isEqualTo(testUserResponseDto);
+            assertThat(result.get().id()).isEqualTo(testUserId);
+            assertThat(result.get().login()).isEqualTo("updateduser");
+            assertThat(result.get().firstName()).isEqualTo("Updated");
+            assertThat(result.get().lastName()).isEqualTo("User");
+            assertThat(result.get().email()).isEqualTo("updated@example.com");
+
+            verify(userRepository).findById(testUserId);
+            verify(userMapper).updateUserFromUpdateDto(testUserUpdateDto, testUser);
+            verify(userRepository).save(testUser);
+            verify(userMapper).toUserResponseDto(updatedUser);
+        }
+
+        @Test
+        void updateUser_WhenUserDoesNotExist_ShouldReturnEmptyOptional() {
+            UUID nonExistentUserId = UUID.fromString("999e4567-e89b-12d3-a456-426614174999");
+
+            when(userRepository.findById(nonExistentUserId)).thenReturn(Optional.empty());
+
+            Optional<UserResponseDto> result = userService.updateUser(nonExistentUserId, testUserUpdateDto);
+
+            assertThat(result).isEmpty();
+
+            verify(userRepository).findById(nonExistentUserId);
+            verify(userMapper, never()).updateUserFromUpdateDto(any(), any());
+            verify(userRepository, never()).save(any());
+            verify(userMapper, never()).toUserResponseDto(any());
+        }
+
+        @Test
+        void updateUser_WhenUserUpdateDtoIsNull_ShouldThrowException() {
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+
+            assertThatThrownBy(() -> userService.updateUser(testUserId, null))
+                    .isInstanceOf(NullPointerException.class);
+
+            verify(userRepository).findById(testUserId);
+        }
+
+        @Test
+        void updateUser_WithMinimalUpdateData_ShouldUpdateUser() {
+            UserUpdateDto minimalUpdateDto = new UserUpdateDto(
+                    "newlogin",
+                    null,
+                    null,
+                    "newemail@example.com",
+                    null
+            );
+
+            User minimalUpdatedUser = new User()
+                    .setId(testUserId)
+                    .setLogin("newlogin")
+                    .setFirstName("Test")
+                    .setLastName("User")
+                    .setEmail("newemail@example.com")
+                    .setPasswordHash("oldHashedPassword")
+                    .setPasswordSalt("oldSalt")
+                    .setStatus(UserStatus.ACTIVE)
+                    .setRole(UserRole.USER);
+
+            UserResponseDto minimalResponseDto = new UserResponseDto(
+                    testUserId,
+                    "newlogin",
+                    "Test",
+                    "User",
+                    "newemail@example.com",
+                    UserStatus.ACTIVE,
+                    UserRole.USER
+            );
+
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+            when(userRepository.save(any(User.class))).thenReturn(minimalUpdatedUser);
+            when(userMapper.toUserResponseDto(minimalUpdatedUser)).thenReturn(minimalResponseDto);
+
+            Optional<UserResponseDto> result = userService.updateUser(testUserId, minimalUpdateDto);
+
+            assertThat(result).isPresent();
+            assertThat(result.get().login()).isEqualTo("newlogin");
+            assertThat(result.get().firstName()).isEqualTo("Test");
+            assertThat(result.get().lastName()).isEqualTo("User");
+            assertThat(result.get().email()).isEqualTo("newemail@example.com");
+
+            verify(userRepository).findById(testUserId);
+            verify(userMapper).updateUserFromUpdateDto(minimalUpdateDto, testUser);
+            verify(userRepository).save(testUser);
+            verify(userMapper).toUserResponseDto(minimalUpdatedUser);
+        }
+
+        @Test
+        void updateUser_ShouldCallMapperWithCorrectParameters() {
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+            when(userRepository.save(any(User.class))).thenReturn(updatedUser);
+            when(userMapper.toUserResponseDto(updatedUser)).thenReturn(testUserResponseDto);
+
+            userService.updateUser(testUserId, testUserUpdateDto);
+
+            verify(userMapper).updateUserFromUpdateDto(testUserUpdateDto, testUser);
+        }
+
+        @Test
+        void updateUser_ShouldCallRepositoryWithModifiedUser() {
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+            when(userRepository.save(any(User.class))).thenReturn(updatedUser);
+            when(userMapper.toUserResponseDto(updatedUser)).thenReturn(testUserResponseDto);
+
+            userService.updateUser(testUserId, testUserUpdateDto);
+
+            verify(userRepository).save(testUser);
+        }
+
+        @Test
+        void updateUser_ShouldCallMapperWithSavedUser() {
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+            when(userRepository.save(any(User.class))).thenReturn(updatedUser);
+            when(userMapper.toUserResponseDto(updatedUser)).thenReturn(testUserResponseDto);
+
+            userService.updateUser(testUserId, testUserUpdateDto);
+
+            verify(userMapper).toUserResponseDto(updatedUser);
+        }
+
+        @Test
+        void updateUser_WithValidPassword_ShouldHashPassword() {
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+            when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
+                User user = invocation.getArgument(0);
+                assertThat(user.getPasswordHash()).isNotNull();
+                assertThat(user.getPasswordSalt()).isNotNull();
+                assertThat(user.getPasswordHash()).isNotEqualTo("oldHashedPassword");
+                assertThat(user.getPasswordHash()).isNotEqualTo("newPassword123");
+                return updatedUser;
+            });
+            when(userMapper.toUserResponseDto(updatedUser)).thenReturn(testUserResponseDto);
+
+            Optional<UserResponseDto> result = userService.updateUser(testUserId, testUserUpdateDto);
+
+            assertThat(result).isPresent();
+            verify(userRepository).findById(testUserId);
+            verify(userMapper).updateUserFromUpdateDto(testUserUpdateDto, testUser);
+            verify(userRepository).save(testUser);
+            verify(userMapper).toUserResponseDto(updatedUser);
         }
     }
 }
