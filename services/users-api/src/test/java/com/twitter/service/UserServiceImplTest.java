@@ -1,6 +1,7 @@
 package com.twitter.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.twitter.dto.UserRequestDto;
 import com.twitter.dto.UserResponseDto;
 import com.twitter.dto.filter.UserFilter;
 import com.twitter.entity.User;
@@ -9,7 +10,6 @@ import com.twitter.enums.UserStatus;
 import com.twitter.mapper.UserMapper;
 import com.twitter.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -338,6 +338,208 @@ class UserServiceImplTest {
 
             verify(userMapper).toUserResponseDto(testUser1);
             verify(userMapper).toUserResponseDto(testUser2);
+        }
+    }
+
+    @Nested
+    class CreateUserTest {
+
+        private UserRequestDto testUserRequestDto;
+        private User testUser;
+        private User savedUser;
+        private UserResponseDto testUserResponseDto;
+
+        @BeforeEach
+        void setUp() {
+            testUserRequestDto = new UserRequestDto(
+                    "testuser",
+                    "Test",
+                    "User",
+                    "test@example.com",
+                    "password123"
+            );
+
+            testUser = new User()
+                    .setLogin("testuser")
+                    .setFirstName("Test")
+                    .setLastName("User")
+                    .setEmail("test@example.com");
+
+            savedUser = new User()
+                    .setId(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"))
+                    .setLogin("testuser")
+                    .setFirstName("Test")
+                    .setLastName("User")
+                    .setEmail("test@example.com")
+                    .setPasswordHash("hashedPassword")
+                    .setPasswordSalt("salt")
+                    .setStatus(UserStatus.ACTIVE)
+                    .setRole(UserRole.USER);
+
+            testUserResponseDto = new UserResponseDto(
+                    savedUser.getId(),
+                    "testuser",
+                    "Test",
+                    "User",
+                    "test@example.com",
+                    UserStatus.ACTIVE,
+                    UserRole.USER
+            );
+        }
+
+        @Test
+        void createUser_WithValidData_ShouldCreateAndReturnUser() {
+            when(userMapper.toUser(testUserRequestDto)).thenReturn(testUser);
+            when(userRepository.save(any(User.class))).thenReturn(savedUser);
+            when(userMapper.toUserResponseDto(savedUser)).thenReturn(testUserResponseDto);
+
+            UserResponseDto result = userService.createUser(testUserRequestDto);
+
+            assertThat(result).isNotNull();
+            assertThat(result).isEqualTo(testUserResponseDto);
+            assertThat(result.id()).isEqualTo(savedUser.getId());
+            assertThat(result.login()).isEqualTo("testuser");
+            assertThat(result.firstName()).isEqualTo("Test");
+            assertThat(result.lastName()).isEqualTo("User");
+            assertThat(result.email()).isEqualTo("test@example.com");
+            assertThat(result.status()).isEqualTo(UserStatus.ACTIVE);
+            assertThat(result.role()).isEqualTo(UserRole.USER);
+
+            verify(userMapper).toUser(testUserRequestDto);
+            verify(userRepository).save(any(User.class));
+            verify(userMapper).toUserResponseDto(savedUser);
+        }
+
+        @Test
+        void createUser_ShouldSetStatusToActive() {
+            when(userMapper.toUser(testUserRequestDto)).thenReturn(testUser);
+            when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
+                User user = invocation.getArgument(0);
+                assertThat(user.getStatus()).isEqualTo(UserStatus.ACTIVE);
+                return savedUser;
+            });
+            when(userMapper.toUserResponseDto(savedUser)).thenReturn(testUserResponseDto);
+
+            userService.createUser(testUserRequestDto);
+
+            verify(userRepository).save(any(User.class));
+        }
+
+        @Test
+        void createUser_ShouldSetRoleToUser() {
+            when(userMapper.toUser(testUserRequestDto)).thenReturn(testUser);
+            when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
+                User user = invocation.getArgument(0);
+                assertThat(user.getRole()).isEqualTo(UserRole.USER);
+                return savedUser;
+            });
+            when(userMapper.toUserResponseDto(savedUser)).thenReturn(testUserResponseDto);
+
+            userService.createUser(testUserRequestDto);
+
+            verify(userRepository).save(any(User.class));
+        }
+
+        @Test
+        void createUser_ShouldHashPassword() {
+            when(userMapper.toUser(testUserRequestDto)).thenReturn(testUser);
+            when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
+                User user = invocation.getArgument(0);
+                assertThat(user.getPasswordHash()).isNotNull();
+                assertThat(user.getPasswordSalt()).isNotNull();
+                assertThat(user.getPasswordHash()).isNotEqualTo("password123");
+                return savedUser;
+            });
+            when(userMapper.toUserResponseDto(savedUser)).thenReturn(testUserResponseDto);
+
+            userService.createUser(testUserRequestDto);
+
+            verify(userRepository).save(any(User.class));
+        }
+
+        @Test
+        void createUser_WithMinimalData_ShouldCreateUser() {
+            UserRequestDto minimalRequest = new UserRequestDto(
+                    "minuser",
+                    null,
+                    null,
+                    "min@example.com",
+                    "password123"
+            );
+
+            User minimalUser = new User()
+                    .setLogin("minuser")
+                    .setEmail("min@example.com");
+
+            User savedMinimalUser = new User()
+                    .setId(UUID.fromString("223e4567-e89b-12d3-a456-426614174001"))
+                    .setLogin("minuser")
+                    .setEmail("min@example.com")
+                    .setPasswordHash("hashedPassword")
+                    .setPasswordSalt("salt")
+                    .setStatus(UserStatus.ACTIVE)
+                    .setRole(UserRole.USER);
+
+            UserResponseDto minimalResponse = new UserResponseDto(
+                    savedMinimalUser.getId(),
+                    "minuser",
+                    null,
+                    null,
+                    "min@example.com",
+                    UserStatus.ACTIVE,
+                    UserRole.USER
+            );
+
+            when(userMapper.toUser(minimalRequest)).thenReturn(minimalUser);
+            when(userRepository.save(any(User.class))).thenReturn(savedMinimalUser);
+            when(userMapper.toUserResponseDto(savedMinimalUser)).thenReturn(minimalResponse);
+
+            UserResponseDto result = userService.createUser(minimalRequest);
+
+            assertThat(result).isNotNull();
+            assertThat(result.login()).isEqualTo("minuser");
+            assertThat(result.firstName()).isNull();
+            assertThat(result.lastName()).isNull();
+            assertThat(result.email()).isEqualTo("min@example.com");
+            assertThat(result.status()).isEqualTo(UserStatus.ACTIVE);
+            assertThat(result.role()).isEqualTo(UserRole.USER);
+
+            verify(userMapper).toUser(minimalRequest);
+            verify(userRepository).save(any(User.class));
+            verify(userMapper).toUserResponseDto(savedMinimalUser);
+        }
+
+        @Test
+        void createUser_ShouldCallMapperWithCorrectRequest() {
+            when(userMapper.toUser(testUserRequestDto)).thenReturn(testUser);
+            when(userRepository.save(any(User.class))).thenReturn(savedUser);
+            when(userMapper.toUserResponseDto(savedUser)).thenReturn(testUserResponseDto);
+
+            userService.createUser(testUserRequestDto);
+
+            verify(userMapper).toUser(testUserRequestDto);
+        }
+
+        @Test
+        void createUser_ShouldCallRepositoryWithModifiedUser() {
+            when(userMapper.toUser(testUserRequestDto)).thenReturn(testUser);
+            when(userRepository.save(any(User.class))).thenReturn(savedUser);
+            when(userMapper.toUserResponseDto(savedUser)).thenReturn(testUserResponseDto);
+
+            userService.createUser(testUserRequestDto);
+
+            verify(userRepository).save(any(User.class));
+        }
+
+        @Test
+        void createUser_ShouldCallMapperWithSavedUser() {
+            when(userMapper.toUser(testUserRequestDto)).thenReturn(testUser);
+            when(userRepository.save(any(User.class))).thenReturn(savedUser);
+            when(userMapper.toUserResponseDto(savedUser)).thenReturn(testUserResponseDto);
+
+            userService.createUser(testUserRequestDto);
+
+            verify(userMapper).toUserResponseDto(savedUser);
         }
     }
 }
