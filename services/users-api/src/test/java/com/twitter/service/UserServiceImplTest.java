@@ -1,6 +1,9 @@
 package com.twitter.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.twitter.dto.UserPatchDto;
 import com.twitter.dto.UserRequestDto;
 import com.twitter.dto.UserResponseDto;
 import com.twitter.dto.UserUpdateDto;
@@ -16,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -33,6 +37,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+import java.io.IOException;
+
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
 
@@ -42,7 +48,7 @@ class UserServiceImplTest {
     @Mock
     private UserMapper userMapper;
 
-    @Mock
+    @Spy
     private ObjectMapper objectMapper;
 
     @InjectMocks
@@ -736,6 +742,322 @@ class UserServiceImplTest {
             verify(userMapper).updateUserFromUpdateDto(testUserUpdateDto, testUser);
             verify(userRepository).save(testUser);
             verify(userMapper).toUserResponseDto(updatedUser);
+        }
+    }
+
+    @Nested
+    class PatchUserTest {
+
+        private User testUser;
+        private User updatedUser;
+        private UserResponseDto testUserResponseDto;
+        private UserPatchDto testUserPatchDto;
+        private JsonNode testJsonNode;
+        private UUID testUserId;
+
+        @BeforeEach
+        void setUp() throws Exception {
+            testUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+            
+            testUser = new User()
+                    .setId(testUserId)
+                    .setLogin("testuser")
+                    .setFirstName("Test")
+                    .setLastName("User")
+                    .setEmail("test@example.com")
+                    .setPasswordHash("hashedPassword")
+                    .setPasswordSalt("salt")
+                    .setStatus(UserStatus.ACTIVE)
+                    .setRole(UserRole.USER);
+
+            updatedUser = new User()
+                    .setId(testUserId)
+                    .setLogin("patcheduser")
+                    .setFirstName("Patched")
+                    .setLastName("User")
+                    .setEmail("patched@example.com")
+                    .setPasswordHash("hashedPassword")
+                    .setPasswordSalt("salt")
+                    .setStatus(UserStatus.ACTIVE)
+                    .setRole(UserRole.USER);
+
+            testUserPatchDto = new UserPatchDto();
+            testUserPatchDto.setLogin("patcheduser");
+            testUserPatchDto.setFirstName("Patched");
+            testUserPatchDto.setLastName("User");
+            testUserPatchDto.setEmail("patched@example.com");
+
+            testUserResponseDto = new UserResponseDto(
+                    testUserId,
+                    "patcheduser",
+                    "Patched",
+                    "User",
+                    "patched@example.com",
+                    UserStatus.ACTIVE,
+                    UserRole.USER
+            );
+
+            testJsonNode = objectMapper.readTree("{\"login\":\"patcheduser\",\"firstName\":\"Patched\"," +
+                "\"lastName\":\"User\",\"email\":\"patched@example.com\"}");
+        }
+
+        @Test
+        void patchUser_WhenUserExists_ShouldPatchAndReturnUser() throws Exception {
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+            when(userMapper.toUserPatchDto(testUser)).thenReturn(testUserPatchDto);
+            when(userRepository.save(any(User.class))).thenReturn(updatedUser);
+            when(userMapper.toUserResponseDto(updatedUser)).thenReturn(testUserResponseDto);
+
+            Optional<UserResponseDto> result = userService.patchUser(testUserId, testJsonNode);
+
+            assertThat(result).isPresent();
+            assertThat(result.get()).isEqualTo(testUserResponseDto);
+            assertThat(result.get().id()).isEqualTo(testUserId);
+            assertThat(result.get().login()).isEqualTo("patcheduser");
+            assertThat(result.get().firstName()).isEqualTo("Patched");
+            assertThat(result.get().lastName()).isEqualTo("User");
+            assertThat(result.get().email()).isEqualTo("patched@example.com");
+
+            verify(userRepository).findById(testUserId);
+            verify(userMapper).toUserPatchDto(testUser);
+            verify(userMapper).updateUserFromPatchDto(testUserPatchDto, testUser);
+            verify(userRepository).save(testUser);
+            verify(userMapper).toUserResponseDto(updatedUser);
+        }
+
+        @Test
+        void patchUser_WhenUserDoesNotExist_ShouldReturnEmptyOptional() {
+            UUID nonExistentUserId = UUID.fromString("999e4567-e89b-12d3-a456-426614174999");
+
+            when(userRepository.findById(nonExistentUserId)).thenReturn(Optional.empty());
+
+            Optional<UserResponseDto> result = userService.patchUser(nonExistentUserId, testJsonNode);
+
+            assertThat(result).isEmpty();
+
+            verify(userRepository).findById(nonExistentUserId);
+            verify(userMapper, never()).toUserPatchDto(any());
+            verify(userMapper, never()).updateUserFromPatchDto(any(), any());
+            verify(userRepository, never()).save(any());
+            verify(userMapper, never()).toUserResponseDto(any());
+        }
+
+        @Test
+        void patchUser_WithPartialData_ShouldPatchOnlyProvidedFields() throws Exception {
+            JsonNode partialJsonNode = objectMapper.readTree("{\"firstName\":\"NewName\"," +
+                "\"email\":\"newemail@example.com\"}");
+            
+            UserPatchDto partialPatchDto = new UserPatchDto();
+            partialPatchDto.setFirstName("NewName");
+            partialPatchDto.setEmail("newemail@example.com");
+
+            User partiallyUpdatedUser = new User()
+                    .setId(testUserId)
+                    .setLogin("testuser")
+                    .setFirstName("NewName")
+                    .setLastName("User")
+                    .setEmail("newemail@example.com")
+                    .setPasswordHash("hashedPassword")
+                    .setPasswordSalt("salt")
+                    .setStatus(UserStatus.ACTIVE)
+                    .setRole(UserRole.USER);
+
+            UserResponseDto partialResponseDto = new UserResponseDto(
+                    testUserId,
+                    "testuser",
+                    "NewName",
+                    "User",
+                    "newemail@example.com",
+                    UserStatus.ACTIVE,
+                    UserRole.USER
+            );
+
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+            when(userMapper.toUserPatchDto(testUser)).thenReturn(partialPatchDto);
+            when(userRepository.save(any(User.class))).thenReturn(partiallyUpdatedUser);
+            when(userMapper.toUserResponseDto(partiallyUpdatedUser)).thenReturn(partialResponseDto);
+
+            Optional<UserResponseDto> result = userService.patchUser(testUserId, partialJsonNode);
+
+            assertThat(result).isPresent();
+            assertThat(result.get().login()).isEqualTo("testuser");
+            assertThat(result.get().firstName()).isEqualTo("NewName");
+            assertThat(result.get().lastName()).isEqualTo("User");
+            assertThat(result.get().email()).isEqualTo("newemail@example.com");
+
+            verify(userRepository).findById(testUserId);
+            verify(userMapper).toUserPatchDto(testUser);
+            verify(userMapper).updateUserFromPatchDto(partialPatchDto, testUser);
+            verify(userRepository).save(testUser);
+            verify(userMapper).toUserResponseDto(partiallyUpdatedUser);
+        }
+
+        @Test
+        void patchUser_WithEmptyJson_ShouldNotChangeUser() throws Exception {
+            JsonNode emptyJsonNode = objectMapper.readTree("{}");
+            
+            UserPatchDto emptyPatchDto = new UserPatchDto();
+
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+            when(userMapper.toUserPatchDto(testUser)).thenReturn(emptyPatchDto);
+            when(userRepository.save(any(User.class))).thenReturn(testUser);
+            when(userMapper.toUserResponseDto(testUser)).thenReturn(testUserResponseDto);
+
+            Optional<UserResponseDto> result = userService.patchUser(testUserId, emptyJsonNode);
+
+            assertThat(result).isPresent();
+            assertThat(result.get()).isEqualTo(testUserResponseDto);
+
+            verify(userRepository).findById(testUserId);
+            verify(userMapper).toUserPatchDto(testUser);
+            verify(userMapper).updateUserFromPatchDto(emptyPatchDto, testUser);
+            verify(userRepository).save(testUser);
+            verify(userMapper).toUserResponseDto(testUser);
+        }
+
+        @Test
+        void patchUser_WithNullJsonNode_ShouldThrowException() {
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+            when(userMapper.toUserPatchDto(testUser)).thenReturn(testUserPatchDto);
+
+            assertThatThrownBy(() -> userService.patchUser(testUserId, null))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("argument \"content\" is null");
+
+            verify(userRepository).findById(testUserId);
+            verify(userMapper).toUserPatchDto(testUser);
+        }
+
+        @Test
+        void patchUser_WithInvalidJson_ShouldThrowResponseStatusException() throws Exception {
+            ObjectMapper mockObjectMapper = mock(ObjectMapper.class);
+            ObjectReader mockObjectReader = mock(ObjectReader.class);
+            UserServiceImpl userServiceWithMockMapper = new UserServiceImpl(mockObjectMapper, userMapper, userRepository);
+            JsonNode invalidJsonNode = objectMapper.readTree("{\"invalid\":\"json\"}");
+            
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+            when(userMapper.toUserPatchDto(testUser)).thenReturn(testUserPatchDto);
+            when(mockObjectMapper.readerForUpdating(any(UserPatchDto.class))).thenReturn(mockObjectReader);
+            when(mockObjectReader.readValue(invalidJsonNode))
+                    .thenThrow(new IOException("Invalid JSON structure"));
+
+            assertThatThrownBy(() -> userServiceWithMockMapper.patchUser(testUserId, invalidJsonNode))
+                    .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
+                    .hasMessageContaining("Error patching user");
+
+            verify(userRepository).findById(testUserId);
+            verify(userMapper).toUserPatchDto(testUser);
+            verify(userMapper, never()).updateUserFromPatchDto(any(), any());
+            verify(userRepository, never()).save(any());
+            verify(userMapper, never()).toUserResponseDto(any());
+        }
+
+        @Test
+        void patchUser_WithIOException_ShouldThrowResponseStatusException() throws Exception {
+            ObjectMapper mockObjectMapper = mock(ObjectMapper.class);
+            ObjectReader mockObjectReader = mock(ObjectReader.class);
+            UserServiceImpl userServiceWithMockMapper = new UserServiceImpl(mockObjectMapper, userMapper, userRepository);
+            
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+            when(userMapper.toUserPatchDto(testUser)).thenReturn(testUserPatchDto);
+            when(mockObjectMapper.readerForUpdating(any(UserPatchDto.class))).thenReturn(mockObjectReader);
+            when(mockObjectReader.readValue(testJsonNode))
+                    .thenThrow(new IOException("JSON parsing error"));
+
+            assertThatThrownBy(() -> userServiceWithMockMapper.patchUser(testUserId, testJsonNode))
+                    .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
+                    .hasMessageContaining("Error patching user: JSON parsing error");
+
+            verify(userRepository).findById(testUserId);
+            verify(userMapper).toUserPatchDto(testUser);
+            verify(userMapper, never()).updateUserFromPatchDto(any(), any());
+            verify(userRepository, never()).save(any());
+            verify(userMapper, never()).toUserResponseDto(any());
+        }
+
+        @Test
+        void patchUser_ShouldCallMapperWithCorrectParameters() throws Exception {
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+            when(userMapper.toUserPatchDto(testUser)).thenReturn(testUserPatchDto);
+            when(userRepository.save(any(User.class))).thenReturn(updatedUser);
+            when(userMapper.toUserResponseDto(updatedUser)).thenReturn(testUserResponseDto);
+
+            userService.patchUser(testUserId, testJsonNode);
+
+            verify(userMapper).toUserPatchDto(testUser);
+            verify(userMapper).updateUserFromPatchDto(testUserPatchDto, testUser);
+        }
+
+        @Test
+        void patchUser_ShouldCallRepositoryWithModifiedUser() throws Exception {
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+            when(userMapper.toUserPatchDto(testUser)).thenReturn(testUserPatchDto);
+            when(userRepository.save(any(User.class))).thenReturn(updatedUser);
+            when(userMapper.toUserResponseDto(updatedUser)).thenReturn(testUserResponseDto);
+
+            userService.patchUser(testUserId, testJsonNode);
+
+            verify(userRepository).save(testUser);
+        }
+
+        @Test
+        void patchUser_ShouldCallMapperWithSavedUser() throws Exception {
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+            when(userMapper.toUserPatchDto(testUser)).thenReturn(testUserPatchDto);
+            when(userRepository.save(any(User.class))).thenReturn(updatedUser);
+            when(userMapper.toUserResponseDto(updatedUser)).thenReturn(testUserResponseDto);
+
+            userService.patchUser(testUserId, testJsonNode);
+
+            verify(userMapper).toUserResponseDto(updatedUser);
+        }
+
+        @Test
+        void patchUser_WithSingleFieldUpdate_ShouldUpdateOnlyThatField() throws Exception {
+            JsonNode singleFieldJsonNode = objectMapper.readTree("{\"login\":\"newlogin\"}");
+            
+            UserPatchDto singleFieldPatchDto = new UserPatchDto();
+            singleFieldPatchDto.setLogin("newlogin");
+
+            User singleFieldUpdatedUser = new User()
+                    .setId(testUserId)
+                    .setLogin("newlogin")
+                    .setFirstName("Test")
+                    .setLastName("User")
+                    .setEmail("test@example.com")
+                    .setPasswordHash("hashedPassword")
+                    .setPasswordSalt("salt")
+                    .setStatus(UserStatus.ACTIVE)
+                    .setRole(UserRole.USER);
+
+            UserResponseDto singleFieldResponseDto = new UserResponseDto(
+                    testUserId,
+                    "newlogin",
+                    "Test",
+                    "User",
+                    "test@example.com",
+                    UserStatus.ACTIVE,
+                    UserRole.USER
+            );
+
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+            when(userMapper.toUserPatchDto(testUser)).thenReturn(singleFieldPatchDto);
+            when(userRepository.save(any(User.class))).thenReturn(singleFieldUpdatedUser);
+            when(userMapper.toUserResponseDto(singleFieldUpdatedUser)).thenReturn(singleFieldResponseDto);
+
+            Optional<UserResponseDto> result = userService.patchUser(testUserId, singleFieldJsonNode);
+
+            assertThat(result).isPresent();
+            assertThat(result.get().login()).isEqualTo("newlogin");
+            assertThat(result.get().firstName()).isEqualTo("Test");
+            assertThat(result.get().lastName()).isEqualTo("User");
+            assertThat(result.get().email()).isEqualTo("test@example.com");
+
+            verify(userRepository).findById(testUserId);
+            verify(userMapper).toUserPatchDto(testUser);
+            verify(userMapper).updateUserFromPatchDto(singleFieldPatchDto, testUser);
+            verify(userRepository).save(testUser);
+            verify(userMapper).toUserResponseDto(singleFieldUpdatedUser);
         }
     }
 }
