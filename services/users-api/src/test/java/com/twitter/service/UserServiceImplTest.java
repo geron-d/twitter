@@ -7,6 +7,7 @@ import com.twitter.common.exception.LastAdminDeactivationException;
 import com.twitter.dto.UserPatchDto;
 import com.twitter.dto.UserRequestDto;
 import com.twitter.dto.UserResponseDto;
+import com.twitter.dto.UserRoleUpdateDto;
 import com.twitter.dto.UserUpdateDto;
 import com.twitter.dto.filter.UserFilter;
 import com.twitter.entity.User;
@@ -114,17 +115,6 @@ class UserServiceImplTest {
 
             verify(userRepository).findById(nonExistentUserId);
             verify(userMapper, never()).toUserResponseDto(any());
-        }
-
-        @Test
-        void getUserById_ShouldCallRepositoryAndMapperWithCorrectParameters() {
-            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            when(userMapper.toUserResponseDto(testUser)).thenReturn(testUserResponseDto);
-
-            userService.getUserById(testUserId);
-
-            verify(userRepository).findById(testUserId);
-            verify(userMapper).toUserResponseDto(testUser);
         }
     }
 
@@ -304,20 +294,6 @@ class UserServiceImplTest {
 
             verify(userRepository).findAll(any(Specification.class), eq(customPageable));
             verify(userMapper).toUserResponseDto(testUser1);
-        }
-
-        @Test
-        void findAll_ShouldCallRepositoryWithCorrectParameters() {
-            UserFilter userFilter = new UserFilter("John", "Doe", "john@example.com", "user1", UserRole.USER);
-            List<User> users = List.of(testUser1);
-            Page<User> userPage = new PageImpl<>(users, pageable, 1);
-
-            when(userRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(userPage);
-            when(userMapper.toUserResponseDto(testUser1)).thenReturn(testUserResponseDto1);
-
-            userService.findAll(userFilter, pageable);
-
-            verify(userRepository).findAll(any(Specification.class), eq(pageable));
         }
 
         @Test
@@ -504,39 +480,6 @@ class UserServiceImplTest {
             verify(userRepository).save(any(User.class));
             verify(userMapper).toUserResponseDto(savedMinimalUser);
         }
-
-        @Test
-        void createUser_ShouldCallMapperWithCorrectRequest() {
-            when(userMapper.toUser(testUserRequestDto)).thenReturn(testUser);
-            when(userRepository.save(any(User.class))).thenReturn(savedUser);
-            when(userMapper.toUserResponseDto(savedUser)).thenReturn(testUserResponseDto);
-
-            userService.createUser(testUserRequestDto);
-
-            verify(userMapper).toUser(testUserRequestDto);
-        }
-
-        @Test
-        void createUser_ShouldCallRepositoryWithModifiedUser() {
-            when(userMapper.toUser(testUserRequestDto)).thenReturn(testUser);
-            when(userRepository.save(any(User.class))).thenReturn(savedUser);
-            when(userMapper.toUserResponseDto(savedUser)).thenReturn(testUserResponseDto);
-
-            userService.createUser(testUserRequestDto);
-
-            verify(userRepository).save(any(User.class));
-        }
-
-        @Test
-        void createUser_ShouldCallMapperWithSavedUser() {
-            when(userMapper.toUser(testUserRequestDto)).thenReturn(testUser);
-            when(userRepository.save(any(User.class))).thenReturn(savedUser);
-            when(userMapper.toUserResponseDto(savedUser)).thenReturn(testUserResponseDto);
-
-            userService.createUser(testUserRequestDto);
-
-            verify(userMapper).toUserResponseDto(savedUser);
-        }
     }
 
     @Nested
@@ -688,39 +631,6 @@ class UserServiceImplTest {
             verify(userMapper).updateUserFromUpdateDto(minimalUpdateDto, testUser);
             verify(userRepository).save(testUser);
             verify(userMapper).toUserResponseDto(minimalUpdatedUser);
-        }
-
-        @Test
-        void updateUser_ShouldCallMapperWithCorrectParameters() {
-            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            when(userRepository.save(any(User.class))).thenReturn(updatedUser);
-            when(userMapper.toUserResponseDto(updatedUser)).thenReturn(testUserResponseDto);
-
-            userService.updateUser(testUserId, testUserUpdateDto);
-
-            verify(userMapper).updateUserFromUpdateDto(testUserUpdateDto, testUser);
-        }
-
-        @Test
-        void updateUser_ShouldCallRepositoryWithModifiedUser() {
-            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            when(userRepository.save(any(User.class))).thenReturn(updatedUser);
-            when(userMapper.toUserResponseDto(updatedUser)).thenReturn(testUserResponseDto);
-
-            userService.updateUser(testUserId, testUserUpdateDto);
-
-            verify(userRepository).save(testUser);
-        }
-
-        @Test
-        void updateUser_ShouldCallMapperWithSavedUser() {
-            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            when(userRepository.save(any(User.class))).thenReturn(updatedUser);
-            when(userMapper.toUserResponseDto(updatedUser)).thenReturn(testUserResponseDto);
-
-            userService.updateUser(testUserId, testUserUpdateDto);
-
-            verify(userMapper).toUserResponseDto(updatedUser);
         }
 
         @Test
@@ -974,43 +884,6 @@ class UserServiceImplTest {
             verify(userMapper, never()).updateUserFromPatchDto(any(), any());
             verify(userRepository, never()).save(any());
             verify(userMapper, never()).toUserResponseDto(any());
-        }
-
-        @Test
-        void patchUser_ShouldCallMapperWithCorrectParameters() throws Exception {
-            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            when(userMapper.toUserPatchDto(testUser)).thenReturn(testUserPatchDto);
-            when(userRepository.save(any(User.class))).thenReturn(updatedUser);
-            when(userMapper.toUserResponseDto(updatedUser)).thenReturn(testUserResponseDto);
-
-            userService.patchUser(testUserId, testJsonNode);
-
-            verify(userMapper).toUserPatchDto(testUser);
-            verify(userMapper).updateUserFromPatchDto(testUserPatchDto, testUser);
-        }
-
-        @Test
-        void patchUser_ShouldCallRepositoryWithModifiedUser() throws Exception {
-            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            when(userMapper.toUserPatchDto(testUser)).thenReturn(testUserPatchDto);
-            when(userRepository.save(any(User.class))).thenReturn(updatedUser);
-            when(userMapper.toUserResponseDto(updatedUser)).thenReturn(testUserResponseDto);
-
-            userService.patchUser(testUserId, testJsonNode);
-
-            verify(userRepository).save(testUser);
-        }
-
-        @Test
-        void patchUser_ShouldCallMapperWithSavedUser() throws Exception {
-            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            when(userMapper.toUserPatchDto(testUser)).thenReturn(testUserPatchDto);
-            when(userRepository.save(any(User.class))).thenReturn(updatedUser);
-            when(userMapper.toUserResponseDto(updatedUser)).thenReturn(testUserResponseDto);
-
-            userService.patchUser(testUserId, testJsonNode);
-
-            verify(userMapper).toUserResponseDto(updatedUser);
         }
 
         @Test
@@ -1294,28 +1167,257 @@ class UserServiceImplTest {
             verify(userRepository).save(moderatorUser);
             verify(userMapper).toUserResponseDto(inactivatedModeratorUser);
         }
+    }
 
-        @Test
-        void inactivateUser_ShouldCallRepositoryWithCorrectParameters() {
-            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            when(userRepository.save(any(User.class))).thenReturn(inactivatedUser);
-            when(userMapper.toUserResponseDto(inactivatedUser)).thenReturn(testUserResponseDto);
+    @Nested
+    class UpdateUserRoleTest {
 
-            userService.inactivateUser(testUserId);
+        private User testUser;
+        private User updatedUser;
+        private UserResponseDto testUserResponseDto;
+        private UserRoleUpdateDto testRoleUpdateDto;
+        private UUID testUserId;
 
-            verify(userRepository).findById(testUserId);
-            verify(userRepository).save(testUser);
+        @BeforeEach
+        void setUp() {
+            testUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+            
+            testUser = new User()
+                    .setId(testUserId)
+                    .setLogin("testuser")
+                    .setFirstName("Test")
+                    .setLastName("User")
+                    .setEmail("test@example.com")
+                    .setPasswordHash("hashedPassword")
+                    .setPasswordSalt("salt")
+                    .setStatus(UserStatus.ACTIVE)
+                    .setRole(UserRole.USER);
+
+            updatedUser = new User()
+                    .setId(testUserId)
+                    .setLogin("testuser")
+                    .setFirstName("Test")
+                    .setLastName("User")
+                    .setEmail("test@example.com")
+                    .setPasswordHash("hashedPassword")
+                    .setPasswordSalt("salt")
+                    .setStatus(UserStatus.ACTIVE)
+                    .setRole(UserRole.MODERATOR);
+
+            testRoleUpdateDto = new UserRoleUpdateDto(UserRole.MODERATOR);
+
+            testUserResponseDto = new UserResponseDto(
+                    testUserId,
+                    "testuser",
+                    "Test",
+                    "User",
+                    "test@example.com",
+                    UserStatus.ACTIVE,
+                    UserRole.MODERATOR
+            );
         }
 
         @Test
-        void inactivateUser_ShouldCallMapperWithInactivatedUser() {
+        void updateUserRole_WhenUserExistsAndIsNotAdmin_ShouldUpdateRoleAndReturnUser() {
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            when(userRepository.save(any(User.class))).thenReturn(inactivatedUser);
-            when(userMapper.toUserResponseDto(inactivatedUser)).thenReturn(testUserResponseDto);
+            when(userRepository.save(any(User.class))).thenReturn(updatedUser);
+            when(userMapper.toUserResponseDto(updatedUser)).thenReturn(testUserResponseDto);
 
-            userService.inactivateUser(testUserId);
+            Optional<UserResponseDto> result = userService.updateUserRole(testUserId, testRoleUpdateDto);
 
-            verify(userMapper).toUserResponseDto(inactivatedUser);
+            assertThat(result).isPresent();
+            assertThat(result.get()).isEqualTo(testUserResponseDto);
+            assertThat(result.get().role()).isEqualTo(UserRole.MODERATOR);
+
+            verify(userRepository).findById(testUserId);
+            verify(userRepository).save(testUser);
+            verify(userMapper).toUserResponseDto(updatedUser);
+        }
+
+        @Test
+        void updateUserRole_WhenUserExistsAndIsAdminWithOtherActiveAdmins_ShouldUpdateRoleAndReturnUser() {
+            User adminUser = new User()
+                    .setId(testUserId)
+                    .setLogin("adminuser")
+                    .setFirstName("Admin")
+                    .setLastName("User")
+                    .setEmail("admin@example.com")
+                    .setPasswordHash("hashedPassword")
+                    .setPasswordSalt("salt")
+                    .setStatus(UserStatus.ACTIVE)
+                    .setRole(UserRole.ADMIN);
+
+            User updatedAdminUser = new User()
+                    .setId(testUserId)
+                    .setLogin("adminuser")
+                    .setFirstName("Admin")
+                    .setLastName("User")
+                    .setEmail("admin@example.com")
+                    .setPasswordHash("hashedPassword")
+                    .setPasswordSalt("salt")
+                    .setStatus(UserStatus.ACTIVE)
+                    .setRole(UserRole.MODERATOR);
+
+            UserResponseDto adminResponseDto = new UserResponseDto(
+                    testUserId,
+                    "adminuser",
+                    "Admin",
+                    "User",
+                    "admin@example.com",
+                    UserStatus.ACTIVE,
+                    UserRole.MODERATOR
+            );
+
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(adminUser));
+            when(userRepository.countByRoleAndStatus(UserRole.ADMIN, UserStatus.ACTIVE)).thenReturn(2L);
+            when(userRepository.save(any(User.class))).thenReturn(updatedAdminUser);
+            when(userMapper.toUserResponseDto(updatedAdminUser)).thenReturn(adminResponseDto);
+
+            Optional<UserResponseDto> result = userService.updateUserRole(testUserId, testRoleUpdateDto);
+
+            assertThat(result).isPresent();
+            assertThat(result.get()).isEqualTo(adminResponseDto);
+            assertThat(result.get().role()).isEqualTo(UserRole.MODERATOR);
+
+            verify(userRepository).findById(testUserId);
+            verify(userRepository).countByRoleAndStatus(UserRole.ADMIN, UserStatus.ACTIVE);
+            verify(userRepository).save(adminUser);
+            verify(userMapper).toUserResponseDto(updatedAdminUser);
+        }
+
+        @Test
+        void updateUserRole_WhenUserDoesNotExist_ShouldReturnEmptyOptional() {
+            UUID nonExistentUserId = UUID.fromString("999e4567-e89b-12d3-a456-426614174999");
+
+            when(userRepository.findById(nonExistentUserId)).thenReturn(Optional.empty());
+
+            Optional<UserResponseDto> result = userService.updateUserRole(nonExistentUserId, testRoleUpdateDto);
+
+            assertThat(result).isEmpty();
+
+            verify(userRepository).findById(nonExistentUserId);
+            verify(userRepository, never()).countByRoleAndStatus(any(), any());
+            verify(userRepository, never()).save(any());
+            verify(userMapper, never()).toUserResponseDto(any());
+        }
+
+        @Test
+        void updateUserRole_WhenUserIsLastActiveAdmin_ShouldThrowLastAdminDeactivationException() {
+            User adminUser = new User()
+                    .setId(testUserId)
+                    .setLogin("adminuser")
+                    .setFirstName("Admin")
+                    .setLastName("User")
+                    .setEmail("admin@example.com")
+                    .setPasswordHash("hashedPassword")
+                    .setPasswordSalt("salt")
+                    .setStatus(UserStatus.ACTIVE)
+                    .setRole(UserRole.ADMIN);
+
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(adminUser));
+            when(userRepository.countByRoleAndStatus(UserRole.ADMIN, UserStatus.ACTIVE)).thenReturn(1L);
+
+            assertThatThrownBy(() -> userService.updateUserRole(testUserId, testRoleUpdateDto))
+                    .isInstanceOf(LastAdminDeactivationException.class)
+                    .hasMessage("409 CONFLICT \"Cannot change role of the last active administrator\"");
+
+            verify(userRepository).findById(testUserId);
+            verify(userRepository).countByRoleAndStatus(UserRole.ADMIN, UserStatus.ACTIVE);
+            verify(userRepository, never()).save(any());
+            verify(userMapper, never()).toUserResponseDto(any());
+        }
+
+        @Test
+        void updateUserRole_WhenChangingUserToAdmin_ShouldUpdateRoleAndReturnUser() {
+            UserRoleUpdateDto userToAdminDto = new UserRoleUpdateDto(UserRole.ADMIN);
+
+            User updatedToAdminUser = new User()
+                    .setId(testUserId)
+                    .setLogin("testuser")
+                    .setFirstName("Test")
+                    .setLastName("User")
+                    .setEmail("test@example.com")
+                    .setPasswordHash("hashedPassword")
+                    .setPasswordSalt("salt")
+                    .setStatus(UserStatus.ACTIVE)
+                    .setRole(UserRole.ADMIN);
+
+            UserResponseDto adminResponseDto = new UserResponseDto(
+                    testUserId,
+                    "testuser",
+                    "Test",
+                    "User",
+                    "test@example.com",
+                    UserStatus.ACTIVE,
+                    UserRole.ADMIN
+            );
+
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+            when(userRepository.save(any(User.class))).thenReturn(updatedToAdminUser);
+            when(userMapper.toUserResponseDto(updatedToAdminUser)).thenReturn(adminResponseDto);
+
+            Optional<UserResponseDto> result = userService.updateUserRole(testUserId, userToAdminDto);
+
+            assertThat(result).isPresent();
+            assertThat(result.get()).isEqualTo(adminResponseDto);
+            assertThat(result.get().role()).isEqualTo(UserRole.ADMIN);
+
+            verify(userRepository).findById(testUserId);
+            verify(userRepository, never()).countByRoleAndStatus(any(), any());
+            verify(userRepository).save(testUser);
+            verify(userMapper).toUserResponseDto(updatedToAdminUser);
+        }
+
+        @Test
+        void updateUserRole_WhenChangingModeratorToUser_ShouldUpdateRoleAndReturnUser() {
+            User moderatorUser = new User()
+                    .setId(testUserId)
+                    .setLogin("moduser")
+                    .setFirstName("Moderator")
+                    .setLastName("User")
+                    .setEmail("mod@example.com")
+                    .setPasswordHash("hashedPassword")
+                    .setPasswordSalt("salt")
+                    .setStatus(UserStatus.ACTIVE)
+                    .setRole(UserRole.MODERATOR);
+
+            UserRoleUpdateDto moderatorToUserDto = new UserRoleUpdateDto(UserRole.USER);
+
+            User updatedToUser = new User()
+                    .setId(testUserId)
+                    .setLogin("moduser")
+                    .setFirstName("Moderator")
+                    .setLastName("User")
+                    .setEmail("mod@example.com")
+                    .setPasswordHash("hashedPassword")
+                    .setPasswordSalt("salt")
+                    .setStatus(UserStatus.ACTIVE)
+                    .setRole(UserRole.USER);
+
+            UserResponseDto userResponseDto = new UserResponseDto(
+                    testUserId,
+                    "moduser",
+                    "Moderator",
+                    "User",
+                    "mod@example.com",
+                    UserStatus.ACTIVE,
+                    UserRole.USER
+            );
+
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(moderatorUser));
+            when(userRepository.save(any(User.class))).thenReturn(updatedToUser);
+            when(userMapper.toUserResponseDto(updatedToUser)).thenReturn(userResponseDto);
+
+            Optional<UserResponseDto> result = userService.updateUserRole(testUserId, moderatorToUserDto);
+
+            assertThat(result).isPresent();
+            assertThat(result.get()).isEqualTo(userResponseDto);
+            assertThat(result.get().role()).isEqualTo(UserRole.USER);
+
+            verify(userRepository).findById(testUserId);
+            verify(userRepository, never()).countByRoleAndStatus(any(), any());
+            verify(userRepository).save(moderatorUser);
+            verify(userMapper).toUserResponseDto(updatedToUser);
         }
     }
 }
