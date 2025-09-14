@@ -3,6 +3,7 @@ package com.twitter.mapper;
 import com.twitter.dto.UserPatchDto;
 import com.twitter.dto.UserRequestDto;
 import com.twitter.dto.UserResponseDto;
+import com.twitter.dto.UserUpdateDto;
 import com.twitter.entity.User;
 import com.twitter.enums.UserRole;
 import com.twitter.enums.UserStatus;
@@ -334,6 +335,247 @@ class UserMapperTest {
             assertThat(user.getFirstName()).isNull();
             assertThat(user.getLastName()).isNull();
             assertThat(user.getEmail()).isEqualTo("new@example.com");
+        }
+    }
+
+    @Nested
+    class UpdateUserFromUpdateDtoTest {
+
+        @Test
+        void updateUserFromUpdateDto_WithAllFields_ShouldUpdateAllFields() {
+            UserUpdateDto userUpdateDto = new UserUpdateDto(
+                "newlogin",
+                "NewFirst",
+                "NewLast",
+                "new@example.com",
+                "newPassword123"
+            );
+
+            User user = new User()
+                .setId(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"))
+                .setLogin("oldlogin")
+                .setFirstName("OldFirst")
+                .setLastName("OldLast")
+                .setEmail("old@example.com")
+                .setPasswordHash("oldHashedPassword")
+                .setPasswordSalt("oldSalt")
+                .setStatus(UserStatus.ACTIVE)
+                .setRole(UserRole.USER);
+
+            userMapper.updateUserFromUpdateDto(userUpdateDto, user);
+
+            assertThat(user.getLogin()).isEqualTo("newlogin");
+            assertThat(user.getFirstName()).isEqualTo("NewFirst");
+            assertThat(user.getLastName()).isEqualTo("NewLast");
+            assertThat(user.getEmail()).isEqualTo("new@example.com");
+            assertThat(user.getId()).isEqualTo(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"));
+            assertThat(user.getPasswordHash()).isEqualTo("oldHashedPassword");
+            assertThat(user.getPasswordSalt()).isEqualTo("oldSalt");
+            assertThat(user.getStatus()).isEqualTo(UserStatus.ACTIVE);
+            assertThat(user.getRole()).isEqualTo(UserRole.USER);
+        }
+
+        @Test
+        void updateUserFromUpdateDto_WithNullFields_ShouldSetNullFields() {
+            UserUpdateDto userUpdateDto = new UserUpdateDto(
+                "newlogin",
+                null,
+                null,
+                "new@example.com",
+                "newPassword123"
+            );
+
+            User user = new User()
+                .setId(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"))
+                .setLogin("oldlogin")
+                .setFirstName("OldFirst")
+                .setLastName("OldLast")
+                .setEmail("old@example.com")
+                .setPasswordHash("oldHashedPassword")
+                .setPasswordSalt("oldSalt")
+                .setStatus(UserStatus.ACTIVE)
+                .setRole(UserRole.USER);
+
+            userMapper.updateUserFromUpdateDto(userUpdateDto, user);
+
+            assertThat(user.getLogin()).isEqualTo("newlogin");
+            assertThat(user.getFirstName()).isNull();
+            assertThat(user.getLastName()).isNull();
+            assertThat(user.getEmail()).isEqualTo("new@example.com");
+            assertThat(user.getId()).isEqualTo(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"));
+            assertThat(user.getPasswordHash()).isEqualTo("oldHashedPassword");
+            assertThat(user.getPasswordSalt()).isEqualTo("oldSalt");
+            assertThat(user.getStatus()).isEqualTo(UserStatus.ACTIVE);
+            assertThat(user.getRole()).isEqualTo(UserRole.USER);
+        }
+
+        @Test
+        void updateUserFromUpdateDto_WithMinimalData_ShouldUpdateOnlyProvidedFields() {
+            UserUpdateDto userUpdateDto = new UserUpdateDto(
+                "minlogin",
+                "MinFirst",
+                "MinLast",
+                "min@example.com",
+                "minPassword123"
+            );
+
+            User user = new User()
+                .setId(UUID.fromString("223e4567-e89b-12d3-a456-426614174001"))
+                .setLogin("oldlogin")
+                .setFirstName("OldFirst")
+                .setLastName("OldLast")
+                .setEmail("old@example.com")
+                .setPasswordHash("oldHashedPassword")
+                .setPasswordSalt("oldSalt")
+                .setStatus(UserStatus.INACTIVE)
+                .setRole(UserRole.MODERATOR);
+
+            userMapper.updateUserFromUpdateDto(userUpdateDto, user);
+
+            assertThat(user.getLogin()).isEqualTo("minlogin");
+            assertThat(user.getFirstName()).isEqualTo("MinFirst");
+            assertThat(user.getLastName()).isEqualTo("MinLast");
+            assertThat(user.getEmail()).isEqualTo("min@example.com");
+            assertThat(user.getId()).isEqualTo(UUID.fromString("223e4567-e89b-12d3-a456-426614174001"));
+            assertThat(user.getPasswordHash()).isEqualTo("oldHashedPassword");
+            assertThat(user.getPasswordSalt()).isEqualTo("oldSalt");
+            assertThat(user.getStatus()).isEqualTo(UserStatus.INACTIVE);
+            assertThat(user.getRole()).isEqualTo(UserRole.MODERATOR);
+        }
+
+        @Test
+        void updateUserFromUpdateDto_ShouldIgnoreIdField() {
+            UserUpdateDto userUpdateDto = new UserUpdateDto(
+                "newlogin",
+                "NewFirst",
+                "NewLast",
+                "new@example.com",
+                "newPassword123"
+            );
+
+            UUID originalId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+            User user = new User()
+                .setId(originalId)
+                .setLogin("oldlogin")
+                .setFirstName("OldFirst")
+                .setLastName("OldLast")
+                .setEmail("old@example.com")
+                .setPasswordHash("oldHashedPassword")
+                .setPasswordSalt("oldSalt")
+                .setStatus(UserStatus.ACTIVE)
+                .setRole(UserRole.USER);
+
+            userMapper.updateUserFromUpdateDto(userUpdateDto, user);
+
+            assertThat(user.getId()).isEqualTo(originalId);
+        }
+
+        @Test
+        void updateUserFromUpdateDto_ShouldIgnorePasswordHashField() {
+            UserUpdateDto userUpdateDto = new UserUpdateDto(
+                "newlogin",
+                "NewFirst",
+                "NewLast",
+                "new@example.com",
+                "newPassword123"
+            );
+
+            String originalPasswordHash = "oldHashedPassword";
+            User user = new User()
+                .setId(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"))
+                .setLogin("oldlogin")
+                .setFirstName("OldFirst")
+                .setLastName("OldLast")
+                .setEmail("old@example.com")
+                .setPasswordHash(originalPasswordHash)
+                .setPasswordSalt("oldSalt")
+                .setStatus(UserStatus.ACTIVE)
+                .setRole(UserRole.USER);
+
+            userMapper.updateUserFromUpdateDto(userUpdateDto, user);
+
+            assertThat(user.getPasswordHash()).isEqualTo(originalPasswordHash);
+        }
+
+        @Test
+        void updateUserFromUpdateDto_ShouldIgnorePasswordSaltField() {
+            UserUpdateDto userUpdateDto = new UserUpdateDto(
+                "newlogin",
+                "NewFirst",
+                "NewLast",
+                "new@example.com",
+                "newPassword123"
+            );
+
+            String originalPasswordSalt = "oldSalt";
+            User user = new User()
+                .setId(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"))
+                .setLogin("oldlogin")
+                .setFirstName("OldFirst")
+                .setLastName("OldLast")
+                .setEmail("old@example.com")
+                .setPasswordHash("oldHashedPassword")
+                .setPasswordSalt(originalPasswordSalt)
+                .setStatus(UserStatus.ACTIVE)
+                .setRole(UserRole.USER);
+
+            userMapper.updateUserFromUpdateDto(userUpdateDto, user);
+
+            assertThat(user.getPasswordSalt()).isEqualTo(originalPasswordSalt);
+        }
+
+        @Test
+        void updateUserFromUpdateDto_ShouldIgnoreStatusField() {
+            UserUpdateDto userUpdateDto = new UserUpdateDto(
+                "newlogin",
+                "NewFirst",
+                "NewLast",
+                "new@example.com",
+                "newPassword123"
+            );
+
+            UserStatus originalStatus = UserStatus.INACTIVE;
+            User user = new User()
+                .setId(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"))
+                .setLogin("oldlogin")
+                .setFirstName("OldFirst")
+                .setLastName("OldLast")
+                .setEmail("old@example.com")
+                .setPasswordHash("oldHashedPassword")
+                .setPasswordSalt("oldSalt")
+                .setStatus(originalStatus)
+                .setRole(UserRole.USER);
+
+            userMapper.updateUserFromUpdateDto(userUpdateDto, user);
+
+            assertThat(user.getStatus()).isEqualTo(originalStatus);
+        }
+
+        @Test
+        void updateUserFromUpdateDto_ShouldIgnoreRoleField() {
+            UserUpdateDto userUpdateDto = new UserUpdateDto(
+                "newlogin",
+                "NewFirst",
+                "NewLast",
+                "new@example.com",
+                "newPassword123"
+            );
+
+            UserRole originalRole = UserRole.ADMIN;
+            User user = new User()
+                .setId(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"))
+                .setLogin("oldlogin")
+                .setFirstName("OldFirst")
+                .setLastName("OldLast")
+                .setEmail("old@example.com")
+                .setPasswordHash("oldHashedPassword")
+                .setPasswordSalt("oldSalt")
+                .setStatus(UserStatus.ACTIVE)
+                .setRole(originalRole);
+
+            userMapper.updateUserFromUpdateDto(userUpdateDto, user);
+
+            assertThat(user.getRole()).isEqualTo(originalRole);
         }
     }
 }
