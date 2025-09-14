@@ -1,8 +1,12 @@
 package com.twitter.mapper;
 
 import com.twitter.dto.UserRequestDto;
+import com.twitter.dto.UserResponseDto;
 import com.twitter.entity.User;
-import org.junit.jupiter.api.BeforeEach;
+import com.twitter.enums.UserRole;
+import com.twitter.enums.UserStatus;
+
+import java.util.UUID;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,7 +14,6 @@ import org.mapstruct.factory.Mappers;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @ExtendWith(MockitoExtension.class)
 class UserMapperTest {
@@ -153,6 +156,65 @@ class UserMapperTest {
 
             assertThat(result).isNotNull();
             assertThat(result.getPasswordSalt()).isNull();
+        }
+    }
+
+    @Nested
+    class ToUserResponseDtoTest {
+
+        @Test
+        void toUserResponseDto_WithValidData_ShouldMapCorrectly() {
+            UUID userId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+            User user = new User()
+                    .setId(userId)
+                    .setLogin("testuser")
+                    .setFirstName("John")
+                    .setLastName("Doe")
+                    .setEmail("john.doe@example.com")
+                    .setPasswordHash("hashedPassword")
+                    .setPasswordSalt("salt")
+                    .setStatus(UserStatus.ACTIVE)
+                    .setRole(UserRole.USER);
+
+            UserResponseDto result = userMapper.toUserResponseDto(user);
+
+            assertThat(result).isNotNull();
+            assertThat(result.id()).isEqualTo(userId);
+            assertThat(result.login()).isEqualTo("testuser");
+            assertThat(result.firstName()).isEqualTo("John");
+            assertThat(result.lastName()).isEqualTo("Doe");
+            assertThat(result.email()).isEqualTo("john.doe@example.com");
+            assertThat(result.status()).isEqualTo(UserStatus.ACTIVE);
+            assertThat(result.role()).isEqualTo(UserRole.USER);
+        }
+
+        @Test
+        void toUserResponseDto_WithMinimalData_ShouldMapCorrectly() {
+            UUID userId = UUID.fromString("223e4567-e89b-12d3-a456-426614174001");
+            User user = new User()
+                    .setId(userId)
+                    .setLogin("minuser")
+                    .setEmail("min@example.com")
+                    .setStatus(UserStatus.INACTIVE)
+                    .setRole(UserRole.MODERATOR);
+
+            UserResponseDto result = userMapper.toUserResponseDto(user);
+
+            assertThat(result).isNotNull();
+            assertThat(result.id()).isEqualTo(userId);
+            assertThat(result.login()).isEqualTo("minuser");
+            assertThat(result.firstName()).isNull();
+            assertThat(result.lastName()).isNull();
+            assertThat(result.email()).isEqualTo("min@example.com");
+            assertThat(result.status()).isEqualTo(UserStatus.INACTIVE);
+            assertThat(result.role()).isEqualTo(UserRole.MODERATOR);
+        }
+
+        @Test
+        void toUserResponseDto_WithNullInput_ShouldReturnNull() {
+            UserResponseDto result = userMapper.toUserResponseDto(null);
+
+            assertThat(result).isNull();
         }
     }
 }
