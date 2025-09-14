@@ -94,4 +94,120 @@ class PasswordUtilTest {
             });
         }
     }
+
+    @Nested
+    class HashPasswordTests {
+
+        @Test
+        void shouldHashPasswordSuccessfully() throws Exception {
+            String password = "testPassword123";
+            byte[] salt = new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+
+            String result = PasswordUtil.hashPassword(password, salt);
+
+            assertNotNull(result);
+            assertFalse(result.isEmpty());
+            assertTrue(result.matches("^[A-Za-z0-9+/]*={0,2}$"));
+        }
+
+        @Test
+        void shouldReturnDifferentHashesForSamePasswordWithDifferentSalt() throws Exception {
+            String password = "testPassword123";
+            byte[] salt1 = new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+            byte[] salt2 = new byte[]{16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
+
+            String hash1 = PasswordUtil.hashPassword(password, salt1);
+            String hash2 = PasswordUtil.hashPassword(password, salt2);
+
+            assertNotEquals(hash1, hash2);
+        }
+
+        @Test
+        void shouldReturnSameHashForSamePasswordAndSalt() throws Exception {
+            String password = "testPassword123";
+            byte[] salt = new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+
+            String hash1 = PasswordUtil.hashPassword(password, salt);
+            String hash2 = PasswordUtil.hashPassword(password, salt);
+
+            assertEquals(hash1, hash2);
+        }
+
+        @Test
+        void shouldHandleEmptyPassword() throws Exception {
+            String password = "";
+            byte[] salt = new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+
+            String result = PasswordUtil.hashPassword(password, salt);
+
+            assertNotNull(result);
+            assertFalse(result.isEmpty());
+            assertTrue(result.matches("^[A-Za-z0-9+/]*={0,2}$"));
+        }
+
+        @Test
+        void shouldHandleNullPassword() {
+            String password = null;
+            byte[] salt = new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+
+            assertThrows(NullPointerException.class, () -> {
+                PasswordUtil.hashPassword(password, salt);
+            });
+        }
+
+        @Test
+        void shouldHandleEmptySalt() {
+            String password = "testPassword123";
+            byte[] salt = new byte[0];
+
+            assertThrows(IllegalArgumentException.class, () -> {
+                PasswordUtil.hashPassword(password, salt);
+            });
+        }
+
+        @Test
+        void shouldHandleNullSalt() {
+            String password = "testPassword123";
+            byte[] salt = null;
+
+            assertThrows(NullPointerException.class, () -> {
+                PasswordUtil.hashPassword(password, salt);
+            });
+        }
+
+        @Test
+        void shouldHandleSpecialCharactersInPassword() throws Exception {
+            String password = "!@#$%^&*()_+-=[]{}|;':\",./<>?`~";
+            byte[] salt = new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+
+            String result = PasswordUtil.hashPassword(password, salt);
+
+            assertNotNull(result);
+            assertFalse(result.isEmpty());
+            assertTrue(result.matches("^[A-Za-z0-9+/]*={0,2}$"));
+        }
+
+        @Test
+        void shouldHandleVeryLongPassword() throws Exception {
+            String password = "a".repeat(1000);
+            byte[] salt = new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+
+            String result = PasswordUtil.hashPassword(password, salt);
+
+            assertNotNull(result);
+            assertFalse(result.isEmpty());
+            assertTrue(result.matches("^[A-Za-z0-9+/]*={0,2}$"));
+        }
+
+        @Test
+        void shouldReturnConsistentHashLength() throws Exception {
+            String password = "testPassword123";
+            byte[] salt = new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+
+            String hash1 = PasswordUtil.hashPassword(password, salt);
+            String hash2 = PasswordUtil.hashPassword("differentPassword", salt);
+
+            assertEquals(hash1.length(), hash2.length());
+        }
+    }
 }
