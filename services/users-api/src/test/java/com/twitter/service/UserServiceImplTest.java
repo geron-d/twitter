@@ -3,6 +3,7 @@ package com.twitter.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+import com.twitter.common.exception.LastAdminDeactivationException;
 import com.twitter.dto.UserPatchDto;
 import com.twitter.dto.UserRequestDto;
 import com.twitter.dto.UserResponseDto;
@@ -1058,6 +1059,263 @@ class UserServiceImplTest {
             verify(userMapper).updateUserFromPatchDto(singleFieldPatchDto, testUser);
             verify(userRepository).save(testUser);
             verify(userMapper).toUserResponseDto(singleFieldUpdatedUser);
+        }
+    }
+
+    @Nested
+    class InactivateUserTest {
+
+        private User testUser;
+        private User inactivatedUser;
+        private UserResponseDto testUserResponseDto;
+        private UUID testUserId;
+
+        @BeforeEach
+        void setUp() {
+            testUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+            
+            testUser = new User()
+                    .setId(testUserId)
+                    .setLogin("testuser")
+                    .setFirstName("Test")
+                    .setLastName("User")
+                    .setEmail("test@example.com")
+                    .setPasswordHash("hashedPassword")
+                    .setPasswordSalt("salt")
+                    .setStatus(UserStatus.ACTIVE)
+                    .setRole(UserRole.USER);
+
+            inactivatedUser = new User()
+                    .setId(testUserId)
+                    .setLogin("testuser")
+                    .setFirstName("Test")
+                    .setLastName("User")
+                    .setEmail("test@example.com")
+                    .setPasswordHash("hashedPassword")
+                    .setPasswordSalt("salt")
+                    .setStatus(UserStatus.INACTIVE)
+                    .setRole(UserRole.USER);
+
+            testUserResponseDto = new UserResponseDto(
+                    testUserId,
+                    "testuser",
+                    "Test",
+                    "User",
+                    "test@example.com",
+                    UserStatus.INACTIVE,
+                    UserRole.USER
+            );
+        }
+
+        @Test
+        void inactivateUser_WhenUserExistsAndIsNotAdmin_ShouldInactivateAndReturnUser() {
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+            when(userRepository.save(any(User.class))).thenReturn(inactivatedUser);
+            when(userMapper.toUserResponseDto(inactivatedUser)).thenReturn(testUserResponseDto);
+
+            Optional<UserResponseDto> result = userService.inactivateUser(testUserId);
+
+            assertThat(result).isPresent();
+            assertThat(result.get()).isEqualTo(testUserResponseDto);
+            assertThat(result.get().status()).isEqualTo(UserStatus.INACTIVE);
+
+            verify(userRepository).findById(testUserId);
+            verify(userRepository).save(testUser);
+            verify(userMapper).toUserResponseDto(inactivatedUser);
+        }
+
+        @Test
+        void inactivateUser_WhenUserExistsAndIsAdminWithOtherActiveAdmins_ShouldInactivateAndReturnUser() {
+            User adminUser = new User()
+                    .setId(testUserId)
+                    .setLogin("adminuser")
+                    .setFirstName("Admin")
+                    .setLastName("User")
+                    .setEmail("admin@example.com")
+                    .setPasswordHash("hashedPassword")
+                    .setPasswordSalt("salt")
+                    .setStatus(UserStatus.ACTIVE)
+                    .setRole(UserRole.ADMIN);
+
+            User inactivatedAdminUser = new User()
+                    .setId(testUserId)
+                    .setLogin("adminuser")
+                    .setFirstName("Admin")
+                    .setLastName("User")
+                    .setEmail("admin@example.com")
+                    .setPasswordHash("hashedPassword")
+                    .setPasswordSalt("salt")
+                    .setStatus(UserStatus.INACTIVE)
+                    .setRole(UserRole.ADMIN);
+
+            UserResponseDto adminResponseDto = new UserResponseDto(
+                    testUserId,
+                    "adminuser",
+                    "Admin",
+                    "User",
+                    "admin@example.com",
+                    UserStatus.INACTIVE,
+                    UserRole.ADMIN
+            );
+
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(adminUser));
+            when(userRepository.countByRoleAndStatus(UserRole.ADMIN, UserStatus.ACTIVE)).thenReturn(2L);
+            when(userRepository.save(any(User.class))).thenReturn(inactivatedAdminUser);
+            when(userMapper.toUserResponseDto(inactivatedAdminUser)).thenReturn(adminResponseDto);
+
+            Optional<UserResponseDto> result = userService.inactivateUser(testUserId);
+
+            assertThat(result).isPresent();
+            assertThat(result.get()).isEqualTo(adminResponseDto);
+            assertThat(result.get().status()).isEqualTo(UserStatus.INACTIVE);
+
+            verify(userRepository).findById(testUserId);
+            verify(userRepository).countByRoleAndStatus(UserRole.ADMIN, UserStatus.ACTIVE);
+            verify(userRepository).save(adminUser);
+            verify(userMapper).toUserResponseDto(inactivatedAdminUser);
+        }
+
+        @Test
+        void inactivateUser_WhenUserDoesNotExist_ShouldReturnEmptyOptional() {
+            UUID nonExistentUserId = UUID.fromString("999e4567-e89b-12d3-a456-426614174999");
+
+            when(userRepository.findById(nonExistentUserId)).thenReturn(Optional.empty());
+
+            Optional<UserResponseDto> result = userService.inactivateUser(nonExistentUserId);
+
+            assertThat(result).isEmpty();
+
+            verify(userRepository).findById(nonExistentUserId);
+            verify(userRepository, never()).countByRoleAndStatus(any(), any());
+            verify(userRepository, never()).save(any());
+            verify(userMapper, never()).toUserResponseDto(any());
+        }
+
+        @Test
+        void inactivateUser_WhenUserIsLastActiveAdmin_ShouldThrowLastAdminDeactivationException() {
+            User adminUser = new User()
+                    .setId(testUserId)
+                    .setLogin("adminuser")
+                    .setFirstName("Admin")
+                    .setLastName("User")
+                    .setEmail("admin@example.com")
+                    .setPasswordHash("hashedPassword")
+                    .setPasswordSalt("salt")
+                    .setStatus(UserStatus.ACTIVE)
+                    .setRole(UserRole.ADMIN);
+
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(adminUser));
+            when(userRepository.countByRoleAndStatus(UserRole.ADMIN, UserStatus.ACTIVE)).thenReturn(1L);
+
+            assertThatThrownBy(() -> userService.inactivateUser(testUserId))
+                    .isInstanceOf(LastAdminDeactivationException.class)
+                    .hasMessage("409 CONFLICT \"Cannot deactivate the last active administrator\"");
+
+            verify(userRepository).findById(testUserId);
+            verify(userRepository).countByRoleAndStatus(UserRole.ADMIN, UserStatus.ACTIVE);
+            verify(userRepository, never()).save(any());
+            verify(userMapper, never()).toUserResponseDto(any());
+        }
+
+        @Test
+        void inactivateUser_WhenUserIsAlreadyInactive_ShouldInactivateAndReturnUser() {
+            User inactiveUser = new User()
+                    .setId(testUserId)
+                    .setLogin("testuser")
+                    .setFirstName("Test")
+                    .setLastName("User")
+                    .setEmail("test@example.com")
+                    .setPasswordHash("hashedPassword")
+                    .setPasswordSalt("salt")
+                    .setStatus(UserStatus.INACTIVE)
+                    .setRole(UserRole.USER);
+
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(inactiveUser));
+            when(userRepository.save(any(User.class))).thenReturn(inactiveUser);
+            when(userMapper.toUserResponseDto(inactiveUser)).thenReturn(testUserResponseDto);
+
+            Optional<UserResponseDto> result = userService.inactivateUser(testUserId);
+
+            assertThat(result).isPresent();
+            assertThat(result.get()).isEqualTo(testUserResponseDto);
+            assertThat(result.get().status()).isEqualTo(UserStatus.INACTIVE);
+
+            verify(userRepository).findById(testUserId);
+            verify(userRepository).save(inactiveUser);
+            verify(userMapper).toUserResponseDto(inactiveUser);
+        }
+
+        @Test
+        void inactivateUser_WhenUserIsModerator_ShouldInactivateAndReturnUser() {
+            User moderatorUser = new User()
+                    .setId(testUserId)
+                    .setLogin("moduser")
+                    .setFirstName("Moderator")
+                    .setLastName("User")
+                    .setEmail("mod@example.com")
+                    .setPasswordHash("hashedPassword")
+                    .setPasswordSalt("salt")
+                    .setStatus(UserStatus.ACTIVE)
+                    .setRole(UserRole.MODERATOR);
+
+            User inactivatedModeratorUser = new User()
+                    .setId(testUserId)
+                    .setLogin("moduser")
+                    .setFirstName("Moderator")
+                    .setLastName("User")
+                    .setEmail("mod@example.com")
+                    .setPasswordHash("hashedPassword")
+                    .setPasswordSalt("salt")
+                    .setStatus(UserStatus.INACTIVE)
+                    .setRole(UserRole.MODERATOR);
+
+            UserResponseDto moderatorResponseDto = new UserResponseDto(
+                    testUserId,
+                    "moduser",
+                    "Moderator",
+                    "User",
+                    "mod@example.com",
+                    UserStatus.INACTIVE,
+                    UserRole.MODERATOR
+            );
+
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(moderatorUser));
+            when(userRepository.save(any(User.class))).thenReturn(inactivatedModeratorUser);
+            when(userMapper.toUserResponseDto(inactivatedModeratorUser)).thenReturn(moderatorResponseDto);
+
+            Optional<UserResponseDto> result = userService.inactivateUser(testUserId);
+
+            assertThat(result).isPresent();
+            assertThat(result.get()).isEqualTo(moderatorResponseDto);
+            assertThat(result.get().status()).isEqualTo(UserStatus.INACTIVE);
+
+            verify(userRepository).findById(testUserId);
+            verify(userRepository, never()).countByRoleAndStatus(any(), any());
+            verify(userRepository).save(moderatorUser);
+            verify(userMapper).toUserResponseDto(inactivatedModeratorUser);
+        }
+
+        @Test
+        void inactivateUser_ShouldCallRepositoryWithCorrectParameters() {
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+            when(userRepository.save(any(User.class))).thenReturn(inactivatedUser);
+            when(userMapper.toUserResponseDto(inactivatedUser)).thenReturn(testUserResponseDto);
+
+            userService.inactivateUser(testUserId);
+
+            verify(userRepository).findById(testUserId);
+            verify(userRepository).save(testUser);
+        }
+
+        @Test
+        void inactivateUser_ShouldCallMapperWithInactivatedUser() {
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+            when(userRepository.save(any(User.class))).thenReturn(inactivatedUser);
+            when(userMapper.toUserResponseDto(inactivatedUser)).thenReturn(testUserResponseDto);
+
+            userService.inactivateUser(testUserId);
+
+            verify(userMapper).toUserResponseDto(inactivatedUser);
         }
     }
 }
