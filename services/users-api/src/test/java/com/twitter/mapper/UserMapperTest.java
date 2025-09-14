@@ -1,5 +1,6 @@
 package com.twitter.mapper;
 
+import com.twitter.dto.UserPatchDto;
 import com.twitter.dto.UserRequestDto;
 import com.twitter.dto.UserResponseDto;
 import com.twitter.entity.User;
@@ -213,6 +214,61 @@ class UserMapperTest {
         @Test
         void toUserResponseDto_WithNullInput_ShouldReturnNull() {
             UserResponseDto result = userMapper.toUserResponseDto(null);
+
+            assertThat(result).isNull();
+        }
+    }
+
+    @Nested
+    class ToUserPatchDtoTest {
+
+        @Test
+        void toUserPatchDto_WithValidData_ShouldMapCorrectly() {
+            UUID userId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+            User user = new User()
+                    .setId(userId)
+                    .setLogin("testuser")
+                    .setFirstName("John")
+                    .setLastName("Doe")
+                    .setEmail("john.doe@example.com")
+                    .setPasswordHash("hashedPassword")
+                    .setPasswordSalt("salt")
+                    .setStatus(UserStatus.ACTIVE)
+                    .setRole(UserRole.USER);
+
+            UserPatchDto result = userMapper.toUserPatchDto(user);
+
+            assertThat(result).isNotNull();
+            assertThat(result.getLogin()).isEqualTo("testuser");
+            assertThat(result.getFirstName()).isEqualTo("John");
+            assertThat(result.getLastName()).isEqualTo("Doe");
+            assertThat(result.getEmail()).isEqualTo("john.doe@example.com");
+        }
+
+        @Test
+        void toUserPatchDto_WithMinimalData_ShouldMapCorrectly() {
+            UUID userId = UUID.fromString("223e4567-e89b-12d3-a456-426614174001");
+            User user = new User()
+                    .setId(userId)
+                    .setLogin("minuser")
+                    .setEmail("min@example.com")
+                    .setPasswordHash("hashedPassword")
+                    .setPasswordSalt("salt")
+                    .setStatus(UserStatus.INACTIVE)
+                    .setRole(UserRole.MODERATOR);
+
+            UserPatchDto result = userMapper.toUserPatchDto(user);
+
+            assertThat(result).isNotNull();
+            assertThat(result.getLogin()).isEqualTo("minuser");
+            assertThat(result.getFirstName()).isNull();
+            assertThat(result.getLastName()).isNull();
+            assertThat(result.getEmail()).isEqualTo("min@example.com");
+        }
+
+        @Test
+        void toUserPatchDto_WithNullInput_ShouldReturnNull() {
+            UserPatchDto result = userMapper.toUserPatchDto(null);
 
             assertThat(result).isNull();
         }
