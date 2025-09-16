@@ -63,7 +63,6 @@ public class UserControllerTest {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-        userRepository.deleteAllInBatch();
     }
 
     @Nested
