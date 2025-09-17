@@ -4,11 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.twitter.common.exception.LastAdminDeactivationException;
-import com.twitter.dto.UserPatchDto;
-import com.twitter.dto.UserRequestDto;
-import com.twitter.dto.UserResponseDto;
-import com.twitter.dto.UserRoleUpdateDto;
-import com.twitter.dto.UserUpdateDto;
+import com.twitter.dto.*;
 import com.twitter.dto.filter.UserFilter;
 import com.twitter.entity.User;
 import com.twitter.enums.UserRole;
@@ -29,6 +25,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -38,8 +35,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-
-import java.io.IOException;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
@@ -66,26 +61,26 @@ class UserServiceImplTest {
         @BeforeEach
         void setUp() {
             testUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
-            
+
             testUser = new User()
-                    .setId(testUserId)
-                    .setLogin("testuser")
-                    .setFirstName("Test")
-                    .setLastName("User")
-                    .setEmail("test@example.com")
-                    .setPasswordHash("hashedPassword")
-                    .setPasswordSalt("salt")
-                    .setStatus(UserStatus.ACTIVE)
-                    .setRole(UserRole.USER);
+                .setId(testUserId)
+                .setLogin("testuser")
+                .setFirstName("Test")
+                .setLastName("User")
+                .setEmail("test@example.com")
+                .setPasswordHash("hashedPassword")
+                .setPasswordSalt("salt")
+                .setStatus(UserStatus.ACTIVE)
+                .setRole(UserRole.USER);
 
             testUserResponseDto = new UserResponseDto(
-                    testUserId,
-                    "testuser",
-                    "Test",
-                    "User",
-                    "test@example.com",
-                    UserStatus.ACTIVE,
-                    UserRole.USER
+                testUserId,
+                "testuser",
+                "Test",
+                "User",
+                "test@example.com",
+                UserStatus.ACTIVE,
+                UserRole.USER
             );
         }
 
@@ -134,45 +129,45 @@ class UserServiceImplTest {
             UUID userId2 = UUID.fromString("223e4567-e89b-12d3-a456-426614174001");
 
             testUser1 = new User()
-                    .setId(userId1)
-                    .setLogin("user1")
-                    .setFirstName("John")
-                    .setLastName("Doe")
-                    .setEmail("john@example.com")
-                    .setPasswordHash("hashedPassword1")
-                    .setPasswordSalt("salt1")
-                    .setStatus(UserStatus.ACTIVE)
-                    .setRole(UserRole.USER);
+                .setId(userId1)
+                .setLogin("user1")
+                .setFirstName("John")
+                .setLastName("Doe")
+                .setEmail("john@example.com")
+                .setPasswordHash("hashedPassword1")
+                .setPasswordSalt("salt1")
+                .setStatus(UserStatus.ACTIVE)
+                .setRole(UserRole.USER);
 
             testUser2 = new User()
-                    .setId(userId2)
-                    .setLogin("user2")
-                    .setFirstName("Jane")
-                    .setLastName("Smith")
-                    .setEmail("jane@example.com")
-                    .setPasswordHash("hashedPassword2")
-                    .setPasswordSalt("salt2")
-                    .setStatus(UserStatus.ACTIVE)
-                    .setRole(UserRole.ADMIN);
+                .setId(userId2)
+                .setLogin("user2")
+                .setFirstName("Jane")
+                .setLastName("Smith")
+                .setEmail("jane@example.com")
+                .setPasswordHash("hashedPassword2")
+                .setPasswordSalt("salt2")
+                .setStatus(UserStatus.ACTIVE)
+                .setRole(UserRole.ADMIN);
 
             testUserResponseDto1 = new UserResponseDto(
-                    userId1,
-                    "user1",
-                    "John",
-                    "Doe",
-                    "john@example.com",
-                    UserStatus.ACTIVE,
-                    UserRole.USER
+                userId1,
+                "user1",
+                "John",
+                "Doe",
+                "john@example.com",
+                UserStatus.ACTIVE,
+                UserRole.USER
             );
 
             testUserResponseDto2 = new UserResponseDto(
-                    userId2,
-                    "user2",
-                    "Jane",
-                    "Smith",
-                    "jane@example.com",
-                    UserStatus.ACTIVE,
-                    UserRole.ADMIN
+                userId2,
+                "user2",
+                "Jane",
+                "Smith",
+                "jane@example.com",
+                UserStatus.ACTIVE,
+                UserRole.ADMIN
             );
 
             pageable = PageRequest.of(0, 10);
@@ -324,38 +319,38 @@ class UserServiceImplTest {
         @BeforeEach
         void setUp() {
             testUserRequestDto = new UserRequestDto(
-                    "testuser",
-                    "Test",
-                    "User",
-                    "test@example.com",
-                    "password123"
+                "testuser",
+                "Test",
+                "User",
+                "test@example.com",
+                "password123"
             );
 
             testUser = new User()
-                    .setLogin("testuser")
-                    .setFirstName("Test")
-                    .setLastName("User")
-                    .setEmail("test@example.com");
+                .setLogin("testuser")
+                .setFirstName("Test")
+                .setLastName("User")
+                .setEmail("test@example.com");
 
             savedUser = new User()
-                    .setId(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"))
-                    .setLogin("testuser")
-                    .setFirstName("Test")
-                    .setLastName("User")
-                    .setEmail("test@example.com")
-                    .setPasswordHash("hashedPassword")
-                    .setPasswordSalt("salt")
-                    .setStatus(UserStatus.ACTIVE)
-                    .setRole(UserRole.USER);
+                .setId(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"))
+                .setLogin("testuser")
+                .setFirstName("Test")
+                .setLastName("User")
+                .setEmail("test@example.com")
+                .setPasswordHash("hashedPassword")
+                .setPasswordSalt("salt")
+                .setStatus(UserStatus.ACTIVE)
+                .setRole(UserRole.USER);
 
             testUserResponseDto = new UserResponseDto(
-                    savedUser.getId(),
-                    "testuser",
-                    "Test",
-                    "User",
-                    "test@example.com",
-                    UserStatus.ACTIVE,
-                    UserRole.USER
+                savedUser.getId(),
+                "testuser",
+                "Test",
+                "User",
+                "test@example.com",
+                UserStatus.ACTIVE,
+                UserRole.USER
             );
         }
 
@@ -448,34 +443,34 @@ class UserServiceImplTest {
         @Test
         void createUser_WithMinimalData_ShouldCreateUser() {
             UserRequestDto minimalRequest = new UserRequestDto(
-                    "minuser",
-                    null,
-                    null,
-                    "min@example.com",
-                    "password123"
+                "minuser",
+                null,
+                null,
+                "min@example.com",
+                "password123"
             );
 
             User minimalUser = new User()
-                    .setLogin("minuser")
-                    .setEmail("min@example.com");
+                .setLogin("minuser")
+                .setEmail("min@example.com");
 
             User savedMinimalUser = new User()
-                    .setId(UUID.fromString("223e4567-e89b-12d3-a456-426614174001"))
-                    .setLogin("minuser")
-                    .setEmail("min@example.com")
-                    .setPasswordHash("hashedPassword")
-                    .setPasswordSalt("salt")
-                    .setStatus(UserStatus.ACTIVE)
-                    .setRole(UserRole.USER);
+                .setId(UUID.fromString("223e4567-e89b-12d3-a456-426614174001"))
+                .setLogin("minuser")
+                .setEmail("min@example.com")
+                .setPasswordHash("hashedPassword")
+                .setPasswordSalt("salt")
+                .setStatus(UserStatus.ACTIVE)
+                .setRole(UserRole.USER);
 
             UserResponseDto minimalResponse = new UserResponseDto(
-                    savedMinimalUser.getId(),
-                    "minuser",
-                    null,
-                    null,
-                    "min@example.com",
-                    UserStatus.ACTIVE,
-                    UserRole.USER
+                savedMinimalUser.getId(),
+                "minuser",
+                null,
+                null,
+                "min@example.com",
+                UserStatus.ACTIVE,
+                UserRole.USER
             );
 
             when(userRepository.existsByLogin("minuser")).thenReturn(false);
@@ -506,9 +501,9 @@ class UserServiceImplTest {
             when(userRepository.existsByLogin("testuser")).thenReturn(true);
 
             assertThatThrownBy(() -> userService.createUser(testUserRequestDto))
-                    .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
-                    .hasMessageContaining("409 CONFLICT")
-                    .hasMessageContaining("User with login 'testuser' already exists");
+                .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
+                .hasMessageContaining("409 CONFLICT")
+                .hasMessageContaining("User with login 'testuser' already exists");
 
             verify(userRepository).existsByLogin("testuser");
             verify(userRepository, never()).existsByEmail(any());
@@ -523,9 +518,9 @@ class UserServiceImplTest {
             when(userRepository.existsByEmail("test@example.com")).thenReturn(true);
 
             assertThatThrownBy(() -> userService.createUser(testUserRequestDto))
-                    .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
-                    .hasMessageContaining("409 CONFLICT")
-                    .hasMessageContaining("User with email 'test@example.com' already exists");
+                .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
+                .hasMessageContaining("409 CONFLICT")
+                .hasMessageContaining("User with email 'test@example.com' already exists");
 
             verify(userRepository).existsByLogin("testuser");
             verify(userRepository).existsByEmail("test@example.com");
@@ -547,45 +542,45 @@ class UserServiceImplTest {
         @BeforeEach
         void setUp() {
             testUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
-            
+
             testUser = new User()
-                    .setId(testUserId)
-                    .setLogin("testuser")
-                    .setFirstName("Test")
-                    .setLastName("User")
-                    .setEmail("test@example.com")
-                    .setPasswordHash("oldHashedPassword")
-                    .setPasswordSalt("oldSalt")
-                    .setStatus(UserStatus.ACTIVE)
-                    .setRole(UserRole.USER);
+                .setId(testUserId)
+                .setLogin("testuser")
+                .setFirstName("Test")
+                .setLastName("User")
+                .setEmail("test@example.com")
+                .setPasswordHash("oldHashedPassword")
+                .setPasswordSalt("oldSalt")
+                .setStatus(UserStatus.ACTIVE)
+                .setRole(UserRole.USER);
 
             updatedUser = new User()
-                    .setId(testUserId)
-                    .setLogin("updateduser")
-                    .setFirstName("Updated")
-                    .setLastName("User")
-                    .setEmail("updated@example.com")
-                    .setPasswordHash("newHashedPassword")
-                    .setPasswordSalt("newSalt")
-                    .setStatus(UserStatus.ACTIVE)
-                    .setRole(UserRole.USER);
+                .setId(testUserId)
+                .setLogin("updateduser")
+                .setFirstName("Updated")
+                .setLastName("User")
+                .setEmail("updated@example.com")
+                .setPasswordHash("newHashedPassword")
+                .setPasswordSalt("newSalt")
+                .setStatus(UserStatus.ACTIVE)
+                .setRole(UserRole.USER);
 
             testUserUpdateDto = new UserUpdateDto(
-                    "updateduser",
-                    "Updated",
-                    "User",
-                    "updated@example.com",
-                    "newPassword123"
+                "updateduser",
+                "Updated",
+                "User",
+                "updated@example.com",
+                "newPassword123"
             );
 
             testUserResponseDto = new UserResponseDto(
-                    testUserId,
-                    "updateduser",
-                    "Updated",
-                    "User",
-                    "updated@example.com",
-                    UserStatus.ACTIVE,
-                    UserRole.USER
+                testUserId,
+                "updateduser",
+                "Updated",
+                "User",
+                "updated@example.com",
+                UserStatus.ACTIVE,
+                UserRole.USER
             );
         }
 
@@ -632,7 +627,7 @@ class UserServiceImplTest {
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
 
             assertThatThrownBy(() -> userService.updateUser(testUserId, null))
-                    .isInstanceOf(NullPointerException.class);
+                .isInstanceOf(NullPointerException.class);
 
             verify(userRepository).findById(testUserId);
         }
@@ -640,32 +635,32 @@ class UserServiceImplTest {
         @Test
         void updateUser_WithMinimalUpdateData_ShouldUpdateUser() {
             UserUpdateDto minimalUpdateDto = new UserUpdateDto(
-                    "newlogin",
-                    null,
-                    null,
-                    "newemail@example.com",
-                    null
+                "newlogin",
+                null,
+                null,
+                "newemail@example.com",
+                null
             );
 
             User minimalUpdatedUser = new User()
-                    .setId(testUserId)
-                    .setLogin("newlogin")
-                    .setFirstName("Test")
-                    .setLastName("User")
-                    .setEmail("newemail@example.com")
-                    .setPasswordHash("oldHashedPassword")
-                    .setPasswordSalt("oldSalt")
-                    .setStatus(UserStatus.ACTIVE)
-                    .setRole(UserRole.USER);
+                .setId(testUserId)
+                .setLogin("newlogin")
+                .setFirstName("Test")
+                .setLastName("User")
+                .setEmail("newemail@example.com")
+                .setPasswordHash("oldHashedPassword")
+                .setPasswordSalt("oldSalt")
+                .setStatus(UserStatus.ACTIVE)
+                .setRole(UserRole.USER);
 
             UserResponseDto minimalResponseDto = new UserResponseDto(
-                    testUserId,
-                    "newlogin",
-                    "Test",
-                    "User",
-                    "newemail@example.com",
-                    UserStatus.ACTIVE,
-                    UserRole.USER
+                testUserId,
+                "newlogin",
+                "Test",
+                "User",
+                "newemail@example.com",
+                UserStatus.ACTIVE,
+                UserRole.USER
             );
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
@@ -707,6 +702,111 @@ class UserServiceImplTest {
             verify(userRepository).save(testUser);
             verify(userMapper).toUserResponseDto(updatedUser);
         }
+
+        @Test
+        void updateUser_WithExistingLogin_ShouldThrowResponseStatusException() {
+            UserUpdateDto updateDtoWithExistingLogin = new UserUpdateDto(
+                "existinguser", // логин, который уже существует
+                "Updated",
+                "User",
+                "updated@example.com",
+                "newPassword123"
+            );
+
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+            when(userRepository.existsByLoginAndIdNot("existinguser", testUserId)).thenReturn(true);
+
+            assertThatThrownBy(() -> userService.updateUser(testUserId, updateDtoWithExistingLogin))
+                .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
+                .hasMessageContaining("409 CONFLICT")
+                .hasMessageContaining("User with login 'existinguser' already exists");
+
+            verify(userRepository).findById(testUserId);
+            verify(userRepository).existsByLoginAndIdNot("existinguser", testUserId);
+            verify(userMapper, never()).updateUserFromUpdateDto(any(), any());
+            verify(userRepository, never()).save(any());
+            verify(userMapper, never()).toUserResponseDto(any());
+        }
+
+        @Test
+        void updateUser_WithExistingEmail_ShouldThrowResponseStatusException() {
+            UserUpdateDto updateDtoWithExistingEmail = new UserUpdateDto(
+                "updateduser",
+                "Updated",
+                "User",
+                "existing@example.com", // email, который уже существует
+                "newPassword123"
+            );
+
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+            when(userRepository.existsByLoginAndIdNot("updateduser", testUserId)).thenReturn(false);
+            when(userRepository.existsByEmailAndIdNot("existing@example.com", testUserId)).thenReturn(true);
+
+            assertThatThrownBy(() -> userService.updateUser(testUserId, updateDtoWithExistingEmail))
+                .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
+                .hasMessageContaining("409 CONFLICT")
+                .hasMessageContaining("User with email 'existing@example.com' already exists");
+
+            verify(userRepository).findById(testUserId);
+            verify(userRepository).existsByLoginAndIdNot("updateduser", testUserId);
+            verify(userRepository).existsByEmailAndIdNot("existing@example.com", testUserId);
+            verify(userMapper, never()).updateUserFromUpdateDto(any(), any());
+            verify(userRepository, never()).save(any());
+            verify(userMapper, never()).toUserResponseDto(any());
+        }
+
+        @Test
+        void updateUser_WithSameLoginAndEmail_ShouldUpdateUser() {
+            UserUpdateDto updateDtoWithSameData = new UserUpdateDto(
+                "testuser", // тот же логин
+                "Updated",
+                "User",
+                "test@example.com", // тот же email
+                "newPassword123"
+            );
+
+            User updatedUserWithSameData = new User()
+                .setId(testUserId)
+                .setLogin("testuser")
+                .setFirstName("Updated")
+                .setLastName("User")
+                .setEmail("test@example.com")
+                .setPasswordHash("newHashedPassword")
+                .setPasswordSalt("newSalt")
+                .setStatus(UserStatus.ACTIVE)
+                .setRole(UserRole.USER);
+
+            UserResponseDto responseDtoWithSameData = new UserResponseDto(
+                testUserId,
+                "testuser",
+                "Updated",
+                "User",
+                "test@example.com",
+                UserStatus.ACTIVE,
+                UserRole.USER
+            );
+
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+            when(userRepository.existsByLoginAndIdNot("testuser", testUserId)).thenReturn(false);
+            when(userRepository.existsByEmailAndIdNot("test@example.com", testUserId)).thenReturn(false);
+            when(userRepository.save(any(User.class))).thenReturn(updatedUserWithSameData);
+            when(userMapper.toUserResponseDto(updatedUserWithSameData)).thenReturn(responseDtoWithSameData);
+
+            Optional<UserResponseDto> result = userService.updateUser(testUserId, updateDtoWithSameData);
+
+            assertThat(result).isPresent();
+            assertThat(result.get()).isEqualTo(responseDtoWithSameData);
+            assertThat(result.get().login()).isEqualTo("testuser");
+            assertThat(result.get().email()).isEqualTo("test@example.com");
+            assertThat(result.get().firstName()).isEqualTo("Updated");
+
+            verify(userRepository).findById(testUserId);
+            verify(userRepository).existsByLoginAndIdNot("testuser", testUserId);
+            verify(userRepository).existsByEmailAndIdNot("test@example.com", testUserId);
+            verify(userMapper).updateUserFromUpdateDto(updateDtoWithSameData, testUser);
+            verify(userRepository).save(testUser);
+            verify(userMapper).toUserResponseDto(updatedUserWithSameData);
+        }
     }
 
     @Nested
@@ -722,28 +822,28 @@ class UserServiceImplTest {
         @BeforeEach
         void setUp() throws Exception {
             testUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
-            
+
             testUser = new User()
-                    .setId(testUserId)
-                    .setLogin("testuser")
-                    .setFirstName("Test")
-                    .setLastName("User")
-                    .setEmail("test@example.com")
-                    .setPasswordHash("hashedPassword")
-                    .setPasswordSalt("salt")
-                    .setStatus(UserStatus.ACTIVE)
-                    .setRole(UserRole.USER);
+                .setId(testUserId)
+                .setLogin("testuser")
+                .setFirstName("Test")
+                .setLastName("User")
+                .setEmail("test@example.com")
+                .setPasswordHash("hashedPassword")
+                .setPasswordSalt("salt")
+                .setStatus(UserStatus.ACTIVE)
+                .setRole(UserRole.USER);
 
             updatedUser = new User()
-                    .setId(testUserId)
-                    .setLogin("patcheduser")
-                    .setFirstName("Patched")
-                    .setLastName("User")
-                    .setEmail("patched@example.com")
-                    .setPasswordHash("hashedPassword")
-                    .setPasswordSalt("salt")
-                    .setStatus(UserStatus.ACTIVE)
-                    .setRole(UserRole.USER);
+                .setId(testUserId)
+                .setLogin("patcheduser")
+                .setFirstName("Patched")
+                .setLastName("User")
+                .setEmail("patched@example.com")
+                .setPasswordHash("hashedPassword")
+                .setPasswordSalt("salt")
+                .setStatus(UserStatus.ACTIVE)
+                .setRole(UserRole.USER);
 
             testUserPatchDto = new UserPatchDto();
             testUserPatchDto.setLogin("patcheduser");
@@ -752,13 +852,13 @@ class UserServiceImplTest {
             testUserPatchDto.setEmail("patched@example.com");
 
             testUserResponseDto = new UserResponseDto(
-                    testUserId,
-                    "patcheduser",
-                    "Patched",
-                    "User",
-                    "patched@example.com",
-                    UserStatus.ACTIVE,
-                    UserRole.USER
+                testUserId,
+                "patcheduser",
+                "Patched",
+                "User",
+                "patched@example.com",
+                UserStatus.ACTIVE,
+                UserRole.USER
             );
 
             testJsonNode = objectMapper.readTree("{\"login\":\"patcheduser\",\"firstName\":\"Patched\"," +
@@ -810,30 +910,30 @@ class UserServiceImplTest {
         void patchUser_WithPartialData_ShouldPatchOnlyProvidedFields() throws Exception {
             JsonNode partialJsonNode = objectMapper.readTree("{\"firstName\":\"NewName\"," +
                 "\"email\":\"newemail@example.com\"}");
-            
+
             UserPatchDto partialPatchDto = new UserPatchDto();
             partialPatchDto.setFirstName("NewName");
             partialPatchDto.setEmail("newemail@example.com");
 
             User partiallyUpdatedUser = new User()
-                    .setId(testUserId)
-                    .setLogin("testuser")
-                    .setFirstName("NewName")
-                    .setLastName("User")
-                    .setEmail("newemail@example.com")
-                    .setPasswordHash("hashedPassword")
-                    .setPasswordSalt("salt")
-                    .setStatus(UserStatus.ACTIVE)
-                    .setRole(UserRole.USER);
+                .setId(testUserId)
+                .setLogin("testuser")
+                .setFirstName("NewName")
+                .setLastName("User")
+                .setEmail("newemail@example.com")
+                .setPasswordHash("hashedPassword")
+                .setPasswordSalt("salt")
+                .setStatus(UserStatus.ACTIVE)
+                .setRole(UserRole.USER);
 
             UserResponseDto partialResponseDto = new UserResponseDto(
-                    testUserId,
-                    "testuser",
-                    "NewName",
-                    "User",
-                    "newemail@example.com",
-                    UserStatus.ACTIVE,
-                    UserRole.USER
+                testUserId,
+                "testuser",
+                "NewName",
+                "User",
+                "newemail@example.com",
+                UserStatus.ACTIVE,
+                UserRole.USER
             );
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
@@ -859,7 +959,7 @@ class UserServiceImplTest {
         @Test
         void patchUser_WithEmptyJson_ShouldNotChangeUser() throws Exception {
             JsonNode emptyJsonNode = objectMapper.readTree("{}");
-            
+
             UserPatchDto emptyPatchDto = new UserPatchDto();
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
@@ -885,8 +985,8 @@ class UserServiceImplTest {
             when(userMapper.toUserPatchDto(testUser)).thenReturn(testUserPatchDto);
 
             assertThatThrownBy(() -> userService.patchUser(testUserId, null))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("argument \"content\" is null");
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("argument \"content\" is null");
 
             verify(userRepository).findById(testUserId);
             verify(userMapper).toUserPatchDto(testUser);
@@ -898,16 +998,16 @@ class UserServiceImplTest {
             ObjectReader mockObjectReader = mock(ObjectReader.class);
             UserServiceImpl userServiceWithMockMapper = new UserServiceImpl(mockObjectMapper, userMapper, userRepository);
             JsonNode invalidJsonNode = objectMapper.readTree("{\"invalid\":\"json\"}");
-            
+
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
             when(userMapper.toUserPatchDto(testUser)).thenReturn(testUserPatchDto);
             when(mockObjectMapper.readerForUpdating(any(UserPatchDto.class))).thenReturn(mockObjectReader);
             when(mockObjectReader.readValue(invalidJsonNode))
-                    .thenThrow(new IOException("Invalid JSON structure"));
+                .thenThrow(new IOException("Invalid JSON structure"));
 
             assertThatThrownBy(() -> userServiceWithMockMapper.patchUser(testUserId, invalidJsonNode))
-                    .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
-                    .hasMessageContaining("Error patching user");
+                .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
+                .hasMessageContaining("Error patching user");
 
             verify(userRepository).findById(testUserId);
             verify(userMapper).toUserPatchDto(testUser);
@@ -921,16 +1021,16 @@ class UserServiceImplTest {
             ObjectMapper mockObjectMapper = mock(ObjectMapper.class);
             ObjectReader mockObjectReader = mock(ObjectReader.class);
             UserServiceImpl userServiceWithMockMapper = new UserServiceImpl(mockObjectMapper, userMapper, userRepository);
-            
+
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
             when(userMapper.toUserPatchDto(testUser)).thenReturn(testUserPatchDto);
             when(mockObjectMapper.readerForUpdating(any(UserPatchDto.class))).thenReturn(mockObjectReader);
             when(mockObjectReader.readValue(testJsonNode))
-                    .thenThrow(new IOException("JSON parsing error"));
+                .thenThrow(new IOException("JSON parsing error"));
 
             assertThatThrownBy(() -> userServiceWithMockMapper.patchUser(testUserId, testJsonNode))
-                    .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
-                    .hasMessageContaining("Error patching user: JSON parsing error");
+                .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
+                .hasMessageContaining("Error patching user: JSON parsing error");
 
             verify(userRepository).findById(testUserId);
             verify(userMapper).toUserPatchDto(testUser);
@@ -942,29 +1042,29 @@ class UserServiceImplTest {
         @Test
         void patchUser_WithSingleFieldUpdate_ShouldUpdateOnlyThatField() throws Exception {
             JsonNode singleFieldJsonNode = objectMapper.readTree("{\"login\":\"newlogin\"}");
-            
+
             UserPatchDto singleFieldPatchDto = new UserPatchDto();
             singleFieldPatchDto.setLogin("newlogin");
 
             User singleFieldUpdatedUser = new User()
-                    .setId(testUserId)
-                    .setLogin("newlogin")
-                    .setFirstName("Test")
-                    .setLastName("User")
-                    .setEmail("test@example.com")
-                    .setPasswordHash("hashedPassword")
-                    .setPasswordSalt("salt")
-                    .setStatus(UserStatus.ACTIVE)
-                    .setRole(UserRole.USER);
+                .setId(testUserId)
+                .setLogin("newlogin")
+                .setFirstName("Test")
+                .setLastName("User")
+                .setEmail("test@example.com")
+                .setPasswordHash("hashedPassword")
+                .setPasswordSalt("salt")
+                .setStatus(UserStatus.ACTIVE)
+                .setRole(UserRole.USER);
 
             UserResponseDto singleFieldResponseDto = new UserResponseDto(
-                    testUserId,
-                    "newlogin",
-                    "Test",
-                    "User",
-                    "test@example.com",
-                    UserStatus.ACTIVE,
-                    UserRole.USER
+                testUserId,
+                "newlogin",
+                "Test",
+                "User",
+                "test@example.com",
+                UserStatus.ACTIVE,
+                UserRole.USER
             );
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
@@ -986,6 +1086,109 @@ class UserServiceImplTest {
             verify(userRepository).save(testUser);
             verify(userMapper).toUserResponseDto(singleFieldUpdatedUser);
         }
+
+        @Test
+        void patchUser_WithExistingLogin_ShouldThrowResponseStatusException() throws Exception {
+            JsonNode jsonNodeWithExistingLogin = objectMapper.readTree("{\"login\":\"existinguser\"}");
+
+            UserPatchDto patchDtoWithExistingLogin = new UserPatchDto();
+            patchDtoWithExistingLogin.setLogin("existinguser");
+
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+            when(userMapper.toUserPatchDto(testUser)).thenReturn(patchDtoWithExistingLogin);
+            when(userRepository.existsByLoginAndIdNot("existinguser", testUserId)).thenReturn(true);
+
+            assertThatThrownBy(() -> userService.patchUser(testUserId, jsonNodeWithExistingLogin))
+                .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
+                .hasMessageContaining("409 CONFLICT")
+                .hasMessageContaining("User with login 'existinguser' already exists");
+
+            verify(userRepository).findById(testUserId);
+            verify(userMapper).toUserPatchDto(testUser);
+            verify(userRepository).existsByLoginAndIdNot("existinguser", testUserId);
+            verify(userMapper, never()).updateUserFromPatchDto(any(), any());
+            verify(userRepository, never()).save(any());
+            verify(userMapper, never()).toUserResponseDto(any());
+        }
+
+        @Test
+        void patchUser_WithExistingEmail_ShouldThrowResponseStatusException() throws Exception {
+            JsonNode jsonNodeWithExistingEmail = objectMapper.readTree("{\"email\":\"existing@example.com\"}");
+
+            UserPatchDto patchDtoWithExistingEmail = new UserPatchDto();
+            patchDtoWithExistingEmail.setLogin("testuser"); // устанавливаем логин из текущего пользователя
+            patchDtoWithExistingEmail.setEmail("existing@example.com");
+
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+            when(userMapper.toUserPatchDto(testUser)).thenReturn(patchDtoWithExistingEmail);
+            when(userRepository.existsByLoginAndIdNot("testuser", testUserId)).thenReturn(false);
+            when(userRepository.existsByEmailAndIdNot("existing@example.com", testUserId)).thenReturn(true);
+
+            assertThatThrownBy(() -> userService.patchUser(testUserId, jsonNodeWithExistingEmail))
+                .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
+                .hasMessageContaining("409 CONFLICT")
+                .hasMessageContaining("User with email 'existing@example.com' already exists");
+
+            verify(userRepository).findById(testUserId);
+            verify(userMapper).toUserPatchDto(testUser);
+            verify(userRepository).existsByLoginAndIdNot("testuser", testUserId);
+            verify(userRepository).existsByEmailAndIdNot("existing@example.com", testUserId);
+            verify(userMapper, never()).updateUserFromPatchDto(any(), any());
+            verify(userRepository, never()).save(any());
+            verify(userMapper, never()).toUserResponseDto(any());
+        }
+
+        @Test
+        void patchUser_WithSameLoginAndEmail_ShouldPatchUser() throws Exception {
+            JsonNode jsonNodeWithSameData = objectMapper.readTree("{\"login\":\"testuser\",\"email\":\"test@example.com\"}");
+
+            UserPatchDto patchDtoWithSameData = new UserPatchDto();
+            patchDtoWithSameData.setLogin("testuser");
+            patchDtoWithSameData.setEmail("test@example.com");
+
+            User patchedUserWithSameData = new User()
+                .setId(testUserId)
+                .setLogin("testuser")
+                .setFirstName("Test")
+                .setLastName("User")
+                .setEmail("test@example.com")
+                .setPasswordHash("hashedPassword")
+                .setPasswordSalt("salt")
+                .setStatus(UserStatus.ACTIVE)
+                .setRole(UserRole.USER);
+
+            UserResponseDto responseDtoWithSameData = new UserResponseDto(
+                testUserId,
+                "testuser",
+                "Test",
+                "User",
+                "test@example.com",
+                UserStatus.ACTIVE,
+                UserRole.USER
+            );
+
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+            when(userMapper.toUserPatchDto(testUser)).thenReturn(patchDtoWithSameData);
+            when(userRepository.existsByLoginAndIdNot("testuser", testUserId)).thenReturn(false);
+            when(userRepository.existsByEmailAndIdNot("test@example.com", testUserId)).thenReturn(false);
+            when(userRepository.save(any(User.class))).thenReturn(patchedUserWithSameData);
+            when(userMapper.toUserResponseDto(patchedUserWithSameData)).thenReturn(responseDtoWithSameData);
+
+            Optional<UserResponseDto> result = userService.patchUser(testUserId, jsonNodeWithSameData);
+
+            assertThat(result).isPresent();
+            assertThat(result.get()).isEqualTo(responseDtoWithSameData);
+            assertThat(result.get().login()).isEqualTo("testuser");
+            assertThat(result.get().email()).isEqualTo("test@example.com");
+
+            verify(userRepository).findById(testUserId);
+            verify(userMapper).toUserPatchDto(testUser);
+            verify(userRepository).existsByLoginAndIdNot("testuser", testUserId);
+            verify(userRepository).existsByEmailAndIdNot("test@example.com", testUserId);
+            verify(userMapper).updateUserFromPatchDto(patchDtoWithSameData, testUser);
+            verify(userRepository).save(testUser);
+            verify(userMapper).toUserResponseDto(patchedUserWithSameData);
+        }
     }
 
     @Nested
@@ -999,37 +1202,37 @@ class UserServiceImplTest {
         @BeforeEach
         void setUp() {
             testUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
-            
+
             testUser = new User()
-                    .setId(testUserId)
-                    .setLogin("testuser")
-                    .setFirstName("Test")
-                    .setLastName("User")
-                    .setEmail("test@example.com")
-                    .setPasswordHash("hashedPassword")
-                    .setPasswordSalt("salt")
-                    .setStatus(UserStatus.ACTIVE)
-                    .setRole(UserRole.USER);
+                .setId(testUserId)
+                .setLogin("testuser")
+                .setFirstName("Test")
+                .setLastName("User")
+                .setEmail("test@example.com")
+                .setPasswordHash("hashedPassword")
+                .setPasswordSalt("salt")
+                .setStatus(UserStatus.ACTIVE)
+                .setRole(UserRole.USER);
 
             inactivatedUser = new User()
-                    .setId(testUserId)
-                    .setLogin("testuser")
-                    .setFirstName("Test")
-                    .setLastName("User")
-                    .setEmail("test@example.com")
-                    .setPasswordHash("hashedPassword")
-                    .setPasswordSalt("salt")
-                    .setStatus(UserStatus.INACTIVE)
-                    .setRole(UserRole.USER);
+                .setId(testUserId)
+                .setLogin("testuser")
+                .setFirstName("Test")
+                .setLastName("User")
+                .setEmail("test@example.com")
+                .setPasswordHash("hashedPassword")
+                .setPasswordSalt("salt")
+                .setStatus(UserStatus.INACTIVE)
+                .setRole(UserRole.USER);
 
             testUserResponseDto = new UserResponseDto(
-                    testUserId,
-                    "testuser",
-                    "Test",
-                    "User",
-                    "test@example.com",
-                    UserStatus.INACTIVE,
-                    UserRole.USER
+                testUserId,
+                "testuser",
+                "Test",
+                "User",
+                "test@example.com",
+                UserStatus.INACTIVE,
+                UserRole.USER
             );
         }
 
@@ -1053,35 +1256,35 @@ class UserServiceImplTest {
         @Test
         void inactivateUser_WhenUserExistsAndIsAdminWithOtherActiveAdmins_ShouldInactivateAndReturnUser() {
             User adminUser = new User()
-                    .setId(testUserId)
-                    .setLogin("adminuser")
-                    .setFirstName("Admin")
-                    .setLastName("User")
-                    .setEmail("admin@example.com")
-                    .setPasswordHash("hashedPassword")
-                    .setPasswordSalt("salt")
-                    .setStatus(UserStatus.ACTIVE)
-                    .setRole(UserRole.ADMIN);
+                .setId(testUserId)
+                .setLogin("adminuser")
+                .setFirstName("Admin")
+                .setLastName("User")
+                .setEmail("admin@example.com")
+                .setPasswordHash("hashedPassword")
+                .setPasswordSalt("salt")
+                .setStatus(UserStatus.ACTIVE)
+                .setRole(UserRole.ADMIN);
 
             User inactivatedAdminUser = new User()
-                    .setId(testUserId)
-                    .setLogin("adminuser")
-                    .setFirstName("Admin")
-                    .setLastName("User")
-                    .setEmail("admin@example.com")
-                    .setPasswordHash("hashedPassword")
-                    .setPasswordSalt("salt")
-                    .setStatus(UserStatus.INACTIVE)
-                    .setRole(UserRole.ADMIN);
+                .setId(testUserId)
+                .setLogin("adminuser")
+                .setFirstName("Admin")
+                .setLastName("User")
+                .setEmail("admin@example.com")
+                .setPasswordHash("hashedPassword")
+                .setPasswordSalt("salt")
+                .setStatus(UserStatus.INACTIVE)
+                .setRole(UserRole.ADMIN);
 
             UserResponseDto adminResponseDto = new UserResponseDto(
-                    testUserId,
-                    "adminuser",
-                    "Admin",
-                    "User",
-                    "admin@example.com",
-                    UserStatus.INACTIVE,
-                    UserRole.ADMIN
+                testUserId,
+                "adminuser",
+                "Admin",
+                "User",
+                "admin@example.com",
+                UserStatus.INACTIVE,
+                UserRole.ADMIN
             );
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(adminUser));
@@ -1120,22 +1323,22 @@ class UserServiceImplTest {
         @Test
         void inactivateUser_WhenUserIsLastActiveAdmin_ShouldThrowLastAdminDeactivationException() {
             User adminUser = new User()
-                    .setId(testUserId)
-                    .setLogin("adminuser")
-                    .setFirstName("Admin")
-                    .setLastName("User")
-                    .setEmail("admin@example.com")
-                    .setPasswordHash("hashedPassword")
-                    .setPasswordSalt("salt")
-                    .setStatus(UserStatus.ACTIVE)
-                    .setRole(UserRole.ADMIN);
+                .setId(testUserId)
+                .setLogin("adminuser")
+                .setFirstName("Admin")
+                .setLastName("User")
+                .setEmail("admin@example.com")
+                .setPasswordHash("hashedPassword")
+                .setPasswordSalt("salt")
+                .setStatus(UserStatus.ACTIVE)
+                .setRole(UserRole.ADMIN);
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(adminUser));
             when(userRepository.countByRoleAndStatus(UserRole.ADMIN, UserStatus.ACTIVE)).thenReturn(1L);
 
             assertThatThrownBy(() -> userService.inactivateUser(testUserId))
-                    .isInstanceOf(LastAdminDeactivationException.class)
-                    .hasMessage("409 CONFLICT \"Cannot deactivate the last active administrator\"");
+                .isInstanceOf(LastAdminDeactivationException.class)
+                .hasMessage("409 CONFLICT \"Cannot deactivate the last active administrator\"");
 
             verify(userRepository).findById(testUserId);
             verify(userRepository).countByRoleAndStatus(UserRole.ADMIN, UserStatus.ACTIVE);
@@ -1146,15 +1349,15 @@ class UserServiceImplTest {
         @Test
         void inactivateUser_WhenUserIsAlreadyInactive_ShouldInactivateAndReturnUser() {
             User inactiveUser = new User()
-                    .setId(testUserId)
-                    .setLogin("testuser")
-                    .setFirstName("Test")
-                    .setLastName("User")
-                    .setEmail("test@example.com")
-                    .setPasswordHash("hashedPassword")
-                    .setPasswordSalt("salt")
-                    .setStatus(UserStatus.INACTIVE)
-                    .setRole(UserRole.USER);
+                .setId(testUserId)
+                .setLogin("testuser")
+                .setFirstName("Test")
+                .setLastName("User")
+                .setEmail("test@example.com")
+                .setPasswordHash("hashedPassword")
+                .setPasswordSalt("salt")
+                .setStatus(UserStatus.INACTIVE)
+                .setRole(UserRole.USER);
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(inactiveUser));
             when(userRepository.save(any(User.class))).thenReturn(inactiveUser);
@@ -1174,35 +1377,35 @@ class UserServiceImplTest {
         @Test
         void inactivateUser_WhenUserIsModerator_ShouldInactivateAndReturnUser() {
             User moderatorUser = new User()
-                    .setId(testUserId)
-                    .setLogin("moduser")
-                    .setFirstName("Moderator")
-                    .setLastName("User")
-                    .setEmail("mod@example.com")
-                    .setPasswordHash("hashedPassword")
-                    .setPasswordSalt("salt")
-                    .setStatus(UserStatus.ACTIVE)
-                    .setRole(UserRole.MODERATOR);
+                .setId(testUserId)
+                .setLogin("moduser")
+                .setFirstName("Moderator")
+                .setLastName("User")
+                .setEmail("mod@example.com")
+                .setPasswordHash("hashedPassword")
+                .setPasswordSalt("salt")
+                .setStatus(UserStatus.ACTIVE)
+                .setRole(UserRole.MODERATOR);
 
             User inactivatedModeratorUser = new User()
-                    .setId(testUserId)
-                    .setLogin("moduser")
-                    .setFirstName("Moderator")
-                    .setLastName("User")
-                    .setEmail("mod@example.com")
-                    .setPasswordHash("hashedPassword")
-                    .setPasswordSalt("salt")
-                    .setStatus(UserStatus.INACTIVE)
-                    .setRole(UserRole.MODERATOR);
+                .setId(testUserId)
+                .setLogin("moduser")
+                .setFirstName("Moderator")
+                .setLastName("User")
+                .setEmail("mod@example.com")
+                .setPasswordHash("hashedPassword")
+                .setPasswordSalt("salt")
+                .setStatus(UserStatus.INACTIVE)
+                .setRole(UserRole.MODERATOR);
 
             UserResponseDto moderatorResponseDto = new UserResponseDto(
-                    testUserId,
-                    "moduser",
-                    "Moderator",
-                    "User",
-                    "mod@example.com",
-                    UserStatus.INACTIVE,
-                    UserRole.MODERATOR
+                testUserId,
+                "moduser",
+                "Moderator",
+                "User",
+                "mod@example.com",
+                UserStatus.INACTIVE,
+                UserRole.MODERATOR
             );
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(moderatorUser));
@@ -1234,39 +1437,39 @@ class UserServiceImplTest {
         @BeforeEach
         void setUp() {
             testUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
-            
+
             testUser = new User()
-                    .setId(testUserId)
-                    .setLogin("testuser")
-                    .setFirstName("Test")
-                    .setLastName("User")
-                    .setEmail("test@example.com")
-                    .setPasswordHash("hashedPassword")
-                    .setPasswordSalt("salt")
-                    .setStatus(UserStatus.ACTIVE)
-                    .setRole(UserRole.USER);
+                .setId(testUserId)
+                .setLogin("testuser")
+                .setFirstName("Test")
+                .setLastName("User")
+                .setEmail("test@example.com")
+                .setPasswordHash("hashedPassword")
+                .setPasswordSalt("salt")
+                .setStatus(UserStatus.ACTIVE)
+                .setRole(UserRole.USER);
 
             updatedUser = new User()
-                    .setId(testUserId)
-                    .setLogin("testuser")
-                    .setFirstName("Test")
-                    .setLastName("User")
-                    .setEmail("test@example.com")
-                    .setPasswordHash("hashedPassword")
-                    .setPasswordSalt("salt")
-                    .setStatus(UserStatus.ACTIVE)
-                    .setRole(UserRole.MODERATOR);
+                .setId(testUserId)
+                .setLogin("testuser")
+                .setFirstName("Test")
+                .setLastName("User")
+                .setEmail("test@example.com")
+                .setPasswordHash("hashedPassword")
+                .setPasswordSalt("salt")
+                .setStatus(UserStatus.ACTIVE)
+                .setRole(UserRole.MODERATOR);
 
             testRoleUpdateDto = new UserRoleUpdateDto(UserRole.MODERATOR);
 
             testUserResponseDto = new UserResponseDto(
-                    testUserId,
-                    "testuser",
-                    "Test",
-                    "User",
-                    "test@example.com",
-                    UserStatus.ACTIVE,
-                    UserRole.MODERATOR
+                testUserId,
+                "testuser",
+                "Test",
+                "User",
+                "test@example.com",
+                UserStatus.ACTIVE,
+                UserRole.MODERATOR
             );
         }
 
@@ -1290,35 +1493,35 @@ class UserServiceImplTest {
         @Test
         void updateUserRole_WhenUserExistsAndIsAdminWithOtherActiveAdmins_ShouldUpdateRoleAndReturnUser() {
             User adminUser = new User()
-                    .setId(testUserId)
-                    .setLogin("adminuser")
-                    .setFirstName("Admin")
-                    .setLastName("User")
-                    .setEmail("admin@example.com")
-                    .setPasswordHash("hashedPassword")
-                    .setPasswordSalt("salt")
-                    .setStatus(UserStatus.ACTIVE)
-                    .setRole(UserRole.ADMIN);
+                .setId(testUserId)
+                .setLogin("adminuser")
+                .setFirstName("Admin")
+                .setLastName("User")
+                .setEmail("admin@example.com")
+                .setPasswordHash("hashedPassword")
+                .setPasswordSalt("salt")
+                .setStatus(UserStatus.ACTIVE)
+                .setRole(UserRole.ADMIN);
 
             User updatedAdminUser = new User()
-                    .setId(testUserId)
-                    .setLogin("adminuser")
-                    .setFirstName("Admin")
-                    .setLastName("User")
-                    .setEmail("admin@example.com")
-                    .setPasswordHash("hashedPassword")
-                    .setPasswordSalt("salt")
-                    .setStatus(UserStatus.ACTIVE)
-                    .setRole(UserRole.MODERATOR);
+                .setId(testUserId)
+                .setLogin("adminuser")
+                .setFirstName("Admin")
+                .setLastName("User")
+                .setEmail("admin@example.com")
+                .setPasswordHash("hashedPassword")
+                .setPasswordSalt("salt")
+                .setStatus(UserStatus.ACTIVE)
+                .setRole(UserRole.MODERATOR);
 
             UserResponseDto adminResponseDto = new UserResponseDto(
-                    testUserId,
-                    "adminuser",
-                    "Admin",
-                    "User",
-                    "admin@example.com",
-                    UserStatus.ACTIVE,
-                    UserRole.MODERATOR
+                testUserId,
+                "adminuser",
+                "Admin",
+                "User",
+                "admin@example.com",
+                UserStatus.ACTIVE,
+                UserRole.MODERATOR
             );
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(adminUser));
@@ -1357,22 +1560,22 @@ class UserServiceImplTest {
         @Test
         void updateUserRole_WhenUserIsLastActiveAdmin_ShouldThrowLastAdminDeactivationException() {
             User adminUser = new User()
-                    .setId(testUserId)
-                    .setLogin("adminuser")
-                    .setFirstName("Admin")
-                    .setLastName("User")
-                    .setEmail("admin@example.com")
-                    .setPasswordHash("hashedPassword")
-                    .setPasswordSalt("salt")
-                    .setStatus(UserStatus.ACTIVE)
-                    .setRole(UserRole.ADMIN);
+                .setId(testUserId)
+                .setLogin("adminuser")
+                .setFirstName("Admin")
+                .setLastName("User")
+                .setEmail("admin@example.com")
+                .setPasswordHash("hashedPassword")
+                .setPasswordSalt("salt")
+                .setStatus(UserStatus.ACTIVE)
+                .setRole(UserRole.ADMIN);
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(adminUser));
             when(userRepository.countByRoleAndStatus(UserRole.ADMIN, UserStatus.ACTIVE)).thenReturn(1L);
 
             assertThatThrownBy(() -> userService.updateUserRole(testUserId, testRoleUpdateDto))
-                    .isInstanceOf(LastAdminDeactivationException.class)
-                    .hasMessage("409 CONFLICT \"Cannot change role of the last active administrator\"");
+                .isInstanceOf(LastAdminDeactivationException.class)
+                .hasMessage("409 CONFLICT \"Cannot change role of the last active administrator\"");
 
             verify(userRepository).findById(testUserId);
             verify(userRepository).countByRoleAndStatus(UserRole.ADMIN, UserStatus.ACTIVE);
@@ -1385,24 +1588,24 @@ class UserServiceImplTest {
             UserRoleUpdateDto userToAdminDto = new UserRoleUpdateDto(UserRole.ADMIN);
 
             User updatedToAdminUser = new User()
-                    .setId(testUserId)
-                    .setLogin("testuser")
-                    .setFirstName("Test")
-                    .setLastName("User")
-                    .setEmail("test@example.com")
-                    .setPasswordHash("hashedPassword")
-                    .setPasswordSalt("salt")
-                    .setStatus(UserStatus.ACTIVE)
-                    .setRole(UserRole.ADMIN);
+                .setId(testUserId)
+                .setLogin("testuser")
+                .setFirstName("Test")
+                .setLastName("User")
+                .setEmail("test@example.com")
+                .setPasswordHash("hashedPassword")
+                .setPasswordSalt("salt")
+                .setStatus(UserStatus.ACTIVE)
+                .setRole(UserRole.ADMIN);
 
             UserResponseDto adminResponseDto = new UserResponseDto(
-                    testUserId,
-                    "testuser",
-                    "Test",
-                    "User",
-                    "test@example.com",
-                    UserStatus.ACTIVE,
-                    UserRole.ADMIN
+                testUserId,
+                "testuser",
+                "Test",
+                "User",
+                "test@example.com",
+                UserStatus.ACTIVE,
+                UserRole.ADMIN
             );
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
@@ -1424,37 +1627,37 @@ class UserServiceImplTest {
         @Test
         void updateUserRole_WhenChangingModeratorToUser_ShouldUpdateRoleAndReturnUser() {
             User moderatorUser = new User()
-                    .setId(testUserId)
-                    .setLogin("moduser")
-                    .setFirstName("Moderator")
-                    .setLastName("User")
-                    .setEmail("mod@example.com")
-                    .setPasswordHash("hashedPassword")
-                    .setPasswordSalt("salt")
-                    .setStatus(UserStatus.ACTIVE)
-                    .setRole(UserRole.MODERATOR);
+                .setId(testUserId)
+                .setLogin("moduser")
+                .setFirstName("Moderator")
+                .setLastName("User")
+                .setEmail("mod@example.com")
+                .setPasswordHash("hashedPassword")
+                .setPasswordSalt("salt")
+                .setStatus(UserStatus.ACTIVE)
+                .setRole(UserRole.MODERATOR);
 
             UserRoleUpdateDto moderatorToUserDto = new UserRoleUpdateDto(UserRole.USER);
 
             User updatedToUser = new User()
-                    .setId(testUserId)
-                    .setLogin("moduser")
-                    .setFirstName("Moderator")
-                    .setLastName("User")
-                    .setEmail("mod@example.com")
-                    .setPasswordHash("hashedPassword")
-                    .setPasswordSalt("salt")
-                    .setStatus(UserStatus.ACTIVE)
-                    .setRole(UserRole.USER);
+                .setId(testUserId)
+                .setLogin("moduser")
+                .setFirstName("Moderator")
+                .setLastName("User")
+                .setEmail("mod@example.com")
+                .setPasswordHash("hashedPassword")
+                .setPasswordSalt("salt")
+                .setStatus(UserStatus.ACTIVE)
+                .setRole(UserRole.USER);
 
             UserResponseDto userResponseDto = new UserResponseDto(
-                    testUserId,
-                    "moduser",
-                    "Moderator",
-                    "User",
-                    "mod@example.com",
-                    UserStatus.ACTIVE,
-                    UserRole.USER
+                testUserId,
+                "moduser",
+                "Moderator",
+                "User",
+                "mod@example.com",
+                UserStatus.ACTIVE,
+                UserRole.USER
             );
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(moderatorUser));
