@@ -52,6 +52,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto createUser(UserRequestDto userRequest) {
+        if (userRepository.existsByLogin(userRequest.login())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "User with login '" + userRequest.login() + "' already exists");
+        }
+        
+        if (userRepository.existsByEmail(userRequest.email())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "User with email '" + userRequest.email() + "' already exists");
+        }
+        
         User user = userMapper.toUser(userRequest);
         user.setStatus(UserStatus.ACTIVE);
         user.setRole(UserRole.USER);

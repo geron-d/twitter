@@ -361,6 +361,8 @@ class UserServiceImplTest {
 
         @Test
         void createUser_WithValidData_ShouldCreateAndReturnUser() {
+            when(userRepository.existsByLogin("testuser")).thenReturn(false);
+            when(userRepository.existsByEmail("test@example.com")).thenReturn(false);
             when(userMapper.toUser(testUserRequestDto)).thenReturn(testUser);
             when(userRepository.save(any(User.class))).thenReturn(savedUser);
             when(userMapper.toUserResponseDto(savedUser)).thenReturn(testUserResponseDto);
@@ -377,6 +379,8 @@ class UserServiceImplTest {
             assertThat(result.status()).isEqualTo(UserStatus.ACTIVE);
             assertThat(result.role()).isEqualTo(UserRole.USER);
 
+            verify(userRepository).existsByLogin("testuser");
+            verify(userRepository).existsByEmail("test@example.com");
             verify(userMapper).toUser(testUserRequestDto);
             verify(userRepository).save(any(User.class));
             verify(userMapper).toUserResponseDto(savedUser);
@@ -384,6 +388,8 @@ class UserServiceImplTest {
 
         @Test
         void createUser_ShouldSetStatusToActive() {
+            when(userRepository.existsByLogin("testuser")).thenReturn(false);
+            when(userRepository.existsByEmail("test@example.com")).thenReturn(false);
             when(userMapper.toUser(testUserRequestDto)).thenReturn(testUser);
             when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
                 User user = invocation.getArgument(0);
@@ -394,11 +400,15 @@ class UserServiceImplTest {
 
             userService.createUser(testUserRequestDto);
 
+            verify(userRepository).existsByLogin("testuser");
+            verify(userRepository).existsByEmail("test@example.com");
             verify(userRepository).save(any(User.class));
         }
 
         @Test
         void createUser_ShouldSetRoleToUser() {
+            when(userRepository.existsByLogin("testuser")).thenReturn(false);
+            when(userRepository.existsByEmail("test@example.com")).thenReturn(false);
             when(userMapper.toUser(testUserRequestDto)).thenReturn(testUser);
             when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
                 User user = invocation.getArgument(0);
@@ -409,11 +419,15 @@ class UserServiceImplTest {
 
             userService.createUser(testUserRequestDto);
 
+            verify(userRepository).existsByLogin("testuser");
+            verify(userRepository).existsByEmail("test@example.com");
             verify(userRepository).save(any(User.class));
         }
 
         @Test
         void createUser_ShouldHashPassword() {
+            when(userRepository.existsByLogin("testuser")).thenReturn(false);
+            when(userRepository.existsByEmail("test@example.com")).thenReturn(false);
             when(userMapper.toUser(testUserRequestDto)).thenReturn(testUser);
             when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
                 User user = invocation.getArgument(0);
@@ -426,6 +440,8 @@ class UserServiceImplTest {
 
             userService.createUser(testUserRequestDto);
 
+            verify(userRepository).existsByLogin("testuser");
+            verify(userRepository).existsByEmail("test@example.com");
             verify(userRepository).save(any(User.class));
         }
 
@@ -462,6 +478,8 @@ class UserServiceImplTest {
                     UserRole.USER
             );
 
+            when(userRepository.existsByLogin("minuser")).thenReturn(false);
+            when(userRepository.existsByEmail("min@example.com")).thenReturn(false);
             when(userMapper.toUser(minimalRequest)).thenReturn(minimalUser);
             when(userRepository.save(any(User.class))).thenReturn(savedMinimalUser);
             when(userMapper.toUserResponseDto(savedMinimalUser)).thenReturn(minimalResponse);
@@ -476,9 +494,44 @@ class UserServiceImplTest {
             assertThat(result.status()).isEqualTo(UserStatus.ACTIVE);
             assertThat(result.role()).isEqualTo(UserRole.USER);
 
+            verify(userRepository).existsByLogin("minuser");
+            verify(userRepository).existsByEmail("min@example.com");
             verify(userMapper).toUser(minimalRequest);
             verify(userRepository).save(any(User.class));
             verify(userMapper).toUserResponseDto(savedMinimalUser);
+        }
+
+        @Test
+        void createUser_WhenLoginExists_ShouldThrowResponseStatusException() {
+            when(userRepository.existsByLogin("testuser")).thenReturn(true);
+
+            assertThatThrownBy(() -> userService.createUser(testUserRequestDto))
+                    .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
+                    .hasMessageContaining("409 CONFLICT")
+                    .hasMessageContaining("User with login 'testuser' already exists");
+
+            verify(userRepository).existsByLogin("testuser");
+            verify(userRepository, never()).existsByEmail(any());
+            verify(userMapper, never()).toUser(any());
+            verify(userRepository, never()).save(any());
+            verify(userMapper, never()).toUserResponseDto(any());
+        }
+
+        @Test
+        void createUser_WhenEmailExists_ShouldThrowResponseStatusException() {
+            when(userRepository.existsByLogin("testuser")).thenReturn(false);
+            when(userRepository.existsByEmail("test@example.com")).thenReturn(true);
+
+            assertThatThrownBy(() -> userService.createUser(testUserRequestDto))
+                    .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
+                    .hasMessageContaining("409 CONFLICT")
+                    .hasMessageContaining("User with email 'test@example.com' already exists");
+
+            verify(userRepository).existsByLogin("testuser");
+            verify(userRepository).existsByEmail("test@example.com");
+            verify(userMapper, never()).toUser(any());
+            verify(userRepository, never()).save(any());
+            verify(userMapper, never()).toUserResponseDto(any());
         }
     }
 
@@ -713,7 +766,7 @@ class UserServiceImplTest {
         }
 
         @Test
-        void patchUser_WhenUserExists_ShouldPatchAndReturnUser() throws Exception {
+        void patchUser_WhenUserExists_ShouldPatchAndReturnUser() {
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
             when(userMapper.toUserPatchDto(testUser)).thenReturn(testUserPatchDto);
             when(userRepository.save(any(User.class))).thenReturn(updatedUser);

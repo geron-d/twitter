@@ -1,5 +1,7 @@
 package com.twitter.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.twitter.dto.UserRequestDto;
 import com.twitter.entity.User;
 import com.twitter.enums.UserRole;
 import com.twitter.enums.UserStatus;
@@ -26,6 +28,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -57,6 +60,9 @@ public class UserControllerTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private MockMvc mockMvc;
 
@@ -255,6 +261,220 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.page.totalPages").value(4))
                 .andExpect(jsonPath("$.page.number").value(0))
                 .andExpect(jsonPath("$.page.totalElements").value(10));
+        }
+    }
+
+    @Nested
+    class CreateUserIntegrationTests {
+
+        @Test
+        void createUser_WithValidMinimalData_ShouldCreateUserWith200Ok() throws Exception {
+            UserRequestDto userRequest = new UserRequestDto(
+                "testuser",
+                null,
+                null,
+                "test@example.com",
+                "password123"
+            );
+            String requestJson = objectMapper.writeValueAsString(userRequest);
+
+            mockMvc.perform(post("/api/v1/users")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(requestJson))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.login").value("testuser"))
+                .andExpect(jsonPath("$.firstName").isEmpty())
+                .andExpect(jsonPath("$.lastName").isEmpty())
+                .andExpect(jsonPath("$.email").value("test@example.com"))
+                .andExpect(jsonPath("$.status").value("ACTIVE"))
+                .andExpect(jsonPath("$.role").value("USER"))
+                .andExpect(jsonPath("$.id").isNotEmpty());
+        }
+
+        @Test
+        void createUser_WithValidFullData_ShouldCreateUserWith200Ok() throws Exception {
+            UserRequestDto userRequest = new UserRequestDto(
+                "fulluser",
+                "John",
+                "Doe",
+                "john.doe@example.com",
+                "password123"
+            );
+            String requestJson = objectMapper.writeValueAsString(userRequest);
+
+            mockMvc.perform(post("/api/v1/users")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(requestJson))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.login").value("fulluser"))
+                .andExpect(jsonPath("$.firstName").value("John"))
+                .andExpect(jsonPath("$.lastName").value("Doe"))
+                .andExpect(jsonPath("$.email").value("john.doe@example.com"))
+                .andExpect(jsonPath("$.status").value("ACTIVE"))
+                .andExpect(jsonPath("$.role").value("USER"))
+                .andExpect(jsonPath("$.id").isNotEmpty());
+        }
+
+        @Test
+        void createUser_WithBlankLogin_ShouldReturn400BadRequest() throws Exception {
+            UserRequestDto userRequest = new UserRequestDto(
+                "",
+                "John",
+                "Doe",
+                "john.doe@example.com",
+                "password123"
+            );
+            String requestJson = objectMapper.writeValueAsString(userRequest);
+
+            mockMvc.perform(post("/api/v1/users")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(requestJson))
+                .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        void createUser_WithTooShortLogin_ShouldReturn400BadRequest() throws Exception {
+            UserRequestDto userRequest = new UserRequestDto(
+                "ab",
+                "John",
+                "Doe",
+                "john.doe@example.com",
+                "password123"
+            );
+            String requestJson = objectMapper.writeValueAsString(userRequest);
+
+            mockMvc.perform(post("/api/v1/users")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(requestJson))
+                .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        void createUser_WithTooLongLogin_ShouldReturn400BadRequest() throws Exception {
+            String longLogin = "a".repeat(51);
+            UserRequestDto userRequest = new UserRequestDto(
+                longLogin,
+                "John",
+                "Doe",
+                "john.doe@example.com",
+                "password123"
+            );
+            String requestJson = objectMapper.writeValueAsString(userRequest);
+
+            mockMvc.perform(post("/api/v1/users")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(requestJson))
+                .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        void createUser_WithBlankEmail_ShouldReturn400BadRequest() throws Exception {
+            UserRequestDto userRequest = new UserRequestDto(
+                "testuser",
+                "John",
+                "Doe",
+                "",
+                "password123"
+            );
+            String requestJson = objectMapper.writeValueAsString(userRequest);
+
+            mockMvc.perform(post("/api/v1/users")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(requestJson))
+                .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        void createUser_WithInvalidEmailFormat_ShouldReturn400BadRequest() throws Exception {
+            UserRequestDto userRequest = new UserRequestDto(
+                "testuser",
+                "John",
+                "Doe",
+                "invalid-email",
+                "password123"
+            );
+            String requestJson = objectMapper.writeValueAsString(userRequest);
+
+            mockMvc.perform(post("/api/v1/users")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(requestJson))
+                .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        void createUser_WithBlankPassword_ShouldReturn400BadRequest() throws Exception {
+            UserRequestDto userRequest = new UserRequestDto(
+                "testuser",
+                "John",
+                "Doe",
+                "john.doe@example.com",
+                ""
+            );
+            String requestJson = objectMapper.writeValueAsString(userRequest);
+
+            mockMvc.perform(post("/api/v1/users")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(requestJson))
+                .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        void createUser_WithTooShortPassword_ShouldReturn400BadRequest() throws Exception {
+            UserRequestDto userRequest = new UserRequestDto(
+                "testuser",
+                "John",
+                "Doe",
+                "john.doe@example.com",
+                "1234567"
+            );
+            String requestJson = objectMapper.writeValueAsString(userRequest);
+
+            mockMvc.perform(post("/api/v1/users")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(requestJson))
+                .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        void createUser_WithDuplicateLogin_ShouldReturn409Conflict() throws Exception {
+            User existingUser = createTestUser("duplicateuser", "Existing", "User", "existing@example.com");
+            userRepository.save(existingUser);
+
+            UserRequestDto userRequest = new UserRequestDto(
+                "duplicateuser",
+                "New",
+                "User",
+                "new@example.com",
+                "password123"
+            );
+            String requestJson = objectMapper.writeValueAsString(userRequest);
+
+            mockMvc.perform(post("/api/v1/users")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(requestJson))
+                .andExpect(status().isConflict());
+        }
+
+        @Test
+        void createUser_WithDuplicateEmail_ShouldReturn409Conflict() throws Exception {
+            User existingUser = createTestUser("existinguser", "Existing", "User", "duplicate@example.com");
+            userRepository.save(existingUser);
+
+            UserRequestDto userRequest = new UserRequestDto(
+                "newuser",
+                "New",
+                "User",
+                "duplicate@example.com",
+                "password123"
+            );
+            String requestJson = objectMapper.writeValueAsString(userRequest);
+
+            mockMvc.perform(post("/api/v1/users")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(requestJson))
+                .andExpect(status().isConflict());
         }
     }
 
