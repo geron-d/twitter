@@ -21,6 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
@@ -52,13 +53,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto createUser(UserRequestDto userRequest) {
-        if (userRepository.existsByLogin(userRequest.login())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "User with login '" + userRequest.login() + "' already exists");
-        }
-        
-        if (userRepository.existsByEmail(userRequest.email())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "User with email '" + userRequest.email() + "' already exists");
-        }
+        validateUserUniqueness(userRequest.login(), userRequest.email(), null);
         
         User user = userMapper.toUser(userRequest);
         user.setStatus(UserStatus.ACTIVE);
@@ -73,6 +68,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public Optional<UserResponseDto> updateUser(UUID id, UserUpdateDto userDetails) {
         return userRepository.findById(id).map(user -> {
+            validateUserUniqueness(userDetails.login(), userDetails.email(), id);
+            
             userMapper.updateUserFromUpdateDto(userDetails, user);
 
             if (userDetails.password() != null && !userDetails.password().isEmpty()) {
@@ -94,6 +91,8 @@ public class UserServiceImpl implements UserService {
             } catch (IOException e) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error patching user: " + e.getMessage(), e);
             }
+            
+            validateUserUniqueness(userPatchDto.getLogin(), userPatchDto.getEmail(), id);
             userMapper.updateUserFromPatchDto(userPatchDto, user);
 
             User updatedUser = userRepository.save(user);
@@ -141,6 +140,35 @@ public class UserServiceImpl implements UserService {
             log.info("User role updated for ID {}: {} -> {}", id, oldRole, newRole);
             return userMapper.toUserResponseDto(updatedUser);
         });
+    }
+
+    /**
+     * Проверяет уникальность логина и email пользователя
+     *
+     * @param login         логин для проверки
+     * @param email         email для проверки
+     * @param excludeUserId ID пользователя, который исключается из проверки (для случаев обновления)
+     */
+    private void validateUserUniqueness(String login, String email, UUID excludeUserId) {
+        if (!ObjectUtils.isEmpty(login)) {
+            boolean loginExists = excludeUserId != null 
+                ? userRepository.existsByLoginAndIdNot(login, excludeUserId)
+                : userRepository.existsByLogin(login);
+            
+            if (loginExists) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "User with login '" + login + "' already exists");
+            }
+        }
+
+        if (!ObjectUtils.isEmpty(email)) {
+            boolean emailExists = excludeUserId != null 
+                ? userRepository.existsByEmailAndIdNot(email, excludeUserId)
+                : userRepository.existsByEmail(email);
+            
+            if (emailExists) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "User with email '" + email + "' already exists");
+            }
+        }
     }
 
     /**
