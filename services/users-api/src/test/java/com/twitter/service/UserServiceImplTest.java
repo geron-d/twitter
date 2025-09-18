@@ -11,6 +11,7 @@ import com.twitter.enums.UserRole;
 import com.twitter.enums.UserStatus;
 import com.twitter.mapper.UserMapper;
 import com.twitter.repository.UserRepository;
+import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -28,6 +29,7 @@ import org.springframework.data.jpa.domain.Specification;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,6 +49,9 @@ class UserServiceImplTest {
 
     @Spy
     private ObjectMapper objectMapper;
+
+    @Mock
+    private Validator validator;
 
     @InjectMocks
     private UserServiceImpl userService;
@@ -823,6 +828,8 @@ class UserServiceImplTest {
         void setUp() throws Exception {
             testUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
 
+            lenient().when(validator.validate(any(UserPatchDto.class))).thenReturn(Set.of());
+
             testUser = new User()
                 .setId(testUserId)
                 .setLogin("testuser")
@@ -996,12 +1003,14 @@ class UserServiceImplTest {
         void patchUser_WithInvalidJson_ShouldThrowResponseStatusException() throws Exception {
             ObjectMapper mockObjectMapper = mock(ObjectMapper.class);
             ObjectReader mockObjectReader = mock(ObjectReader.class);
-            UserServiceImpl userServiceWithMockMapper = new UserServiceImpl(mockObjectMapper, userMapper, userRepository);
+            Validator mockValidator = mock(Validator.class);
+            UserServiceImpl userServiceWithMockMapper = new UserServiceImpl(mockObjectMapper, userMapper, userRepository, mockValidator);
             JsonNode invalidJsonNode = objectMapper.readTree("{\"invalid\":\"json\"}");
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
             when(userMapper.toUserPatchDto(testUser)).thenReturn(testUserPatchDto);
             when(mockObjectMapper.readerForUpdating(any(UserPatchDto.class))).thenReturn(mockObjectReader);
+            lenient().when(mockValidator.validate(any(UserPatchDto.class))).thenReturn(Set.of());
             when(mockObjectReader.readValue(invalidJsonNode))
                 .thenThrow(new IOException("Invalid JSON structure"));
 
@@ -1020,11 +1029,13 @@ class UserServiceImplTest {
         void patchUser_WithIOException_ShouldThrowResponseStatusException() throws Exception {
             ObjectMapper mockObjectMapper = mock(ObjectMapper.class);
             ObjectReader mockObjectReader = mock(ObjectReader.class);
-            UserServiceImpl userServiceWithMockMapper = new UserServiceImpl(mockObjectMapper, userMapper, userRepository);
+            Validator mockValidator = mock(Validator.class);
+            UserServiceImpl userServiceWithMockMapper = new UserServiceImpl(mockObjectMapper, userMapper, userRepository, mockValidator);
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
             when(userMapper.toUserPatchDto(testUser)).thenReturn(testUserPatchDto);
             when(mockObjectMapper.readerForUpdating(any(UserPatchDto.class))).thenReturn(mockObjectReader);
+            lenient().when(mockValidator.validate(any(UserPatchDto.class))).thenReturn(Set.of());
             when(mockObjectReader.readValue(testJsonNode))
                 .thenThrow(new IOException("JSON parsing error"));
 

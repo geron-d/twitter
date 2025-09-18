@@ -28,9 +28,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.util.List;
 import java.util.UUID;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -761,6 +759,161 @@ public class UserControllerTest {
             mockMvc.perform(put("/api/v1/users/{id}", userId1)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(requestJson))
+                .andExpect(status().isConflict());
+        }
+    }
+
+    @Nested
+    class PatchUserIntegrationTests {
+
+        @Test
+        void patchUser_WithValidSingleField_ShouldUpdateUserWith200Ok() throws Exception {
+            User existingUser = createTestUser("testuser", "Original", "Name", "original@example.com");
+            User savedUser = userRepository.save(existingUser);
+            UUID userId = savedUser.getId();
+
+            String patchJson = "{\"firstName\": \"UpdatedFirstName\"}";
+
+            mockMvc.perform(patch("/api/v1/users/{id}", userId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(patchJson))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(userId.toString()))
+                .andExpect(jsonPath("$.login").value("testuser"))
+                .andExpect(jsonPath("$.firstName").value("UpdatedFirstName"))
+                .andExpect(jsonPath("$.lastName").value("Name"))
+                .andExpect(jsonPath("$.email").value("original@example.com"))
+                .andExpect(jsonPath("$.status").value("ACTIVE"))
+                .andExpect(jsonPath("$.role").value("USER"));
+        }
+
+        @Test
+        void patchUser_WithValidMultipleFields_ShouldUpdateUserWith200Ok() throws Exception {
+            User existingUser = createTestUser("testuser", "Original", "Name", "original@example.com");
+            User savedUser = userRepository.save(existingUser);
+            UUID userId = savedUser.getId();
+
+            String patchJson = "{\"firstName\": \"UpdatedFirstName\", \"lastName\": \"UpdatedLastName\", \"email\": \"updated@example.com\"}";
+
+            mockMvc.perform(patch("/api/v1/users/{id}", userId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(patchJson))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(userId.toString()))
+                .andExpect(jsonPath("$.login").value("testuser"))
+                .andExpect(jsonPath("$.firstName").value("UpdatedFirstName"))
+                .andExpect(jsonPath("$.lastName").value("UpdatedLastName"))
+                .andExpect(jsonPath("$.email").value("updated@example.com"))
+                .andExpect(jsonPath("$.status").value("ACTIVE"))
+                .andExpect(jsonPath("$.role").value("USER"));
+        }
+
+        @Test
+        void patchUser_WithEmptyFields_ShouldUpdateUserWith200Ok() throws Exception {
+            User existingUser = createTestUser("testuser", "Original", "Name", "original@example.com");
+            User savedUser = userRepository.save(existingUser);
+            UUID userId = savedUser.getId();
+
+            String patchJson = "{\"firstName\": null, \"lastName\": \"\"}";
+
+            mockMvc.perform(patch("/api/v1/users/{id}", userId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(patchJson))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(userId.toString()))
+                .andExpect(jsonPath("$.login").value("testuser"))
+                .andExpect(jsonPath("$.firstName").isEmpty())
+                .andExpect(jsonPath("$.lastName").isEmpty())
+                .andExpect(jsonPath("$.email").value("original@example.com"))
+                .andExpect(jsonPath("$.status").value("ACTIVE"))
+                .andExpect(jsonPath("$.role").value("USER"));
+        }
+
+        @Test
+        void patchUser_WithNonExistentUserId_ShouldReturn404NotFound() throws Exception {
+            UUID nonExistentUserId = UUID.randomUUID();
+
+            String patchJson = "{\"firstName\": \"UpdatedFirstName\"}";
+
+            mockMvc.perform(patch("/api/v1/users/{id}", nonExistentUserId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(patchJson))
+                .andExpect(status().isNotFound());
+        }
+
+        @Test
+        void patchUser_WithTooShortLogin_ShouldReturn400BadRequest() throws Exception {
+            User existingUser = createTestUser("testuser", "Original", "Name", "original@example.com");
+            User savedUser = userRepository.save(existingUser);
+            UUID userId = savedUser.getId();
+
+            String patchJson = "{\"login\": \"ab\"}";
+
+            mockMvc.perform(patch("/api/v1/users/{id}", userId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(patchJson))
+                .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        void patchUser_WithTooLongLogin_ShouldReturn400BadRequest() throws Exception {
+            User existingUser = createTestUser("testuser", "Original", "Name", "original@example.com");
+            User savedUser = userRepository.save(existingUser);
+            UUID userId = savedUser.getId();
+
+            String longLogin = "a".repeat(51);
+            String patchJson = "{\"login\": \"" + longLogin + "\"}";
+
+            mockMvc.perform(patch("/api/v1/users/{id}", userId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(patchJson))
+                .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        void patchUser_WithInvalidEmailFormat_ShouldReturn400BadRequest() throws Exception {
+            User existingUser = createTestUser("testuser", "Original", "Name", "original@example.com");
+            User savedUser = userRepository.save(existingUser);
+            UUID userId = savedUser.getId();
+
+            String patchJson = "{\"email\": \"invalid-email\"}";
+
+            mockMvc.perform(patch("/api/v1/users/{id}", userId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(patchJson))
+                .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        void patchUser_WithDuplicateLogin_ShouldReturn409Conflict() throws Exception {
+            User existingUser1 = createTestUser("user1", "User", "One", "user1@example.com");
+            User existingUser2 = createTestUser("user2", "User", "Two", "user2@example.com");
+            userRepository.saveAll(List.of(existingUser1, existingUser2));
+            UUID userId1 = existingUser1.getId();
+
+            String patchJson = "{\"login\": \"user2\"}";
+
+            mockMvc.perform(patch("/api/v1/users/{id}", userId1)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(patchJson))
+                .andExpect(status().isConflict());
+        }
+
+        @Test
+        void patchUser_WithDuplicateEmail_ShouldReturn409Conflict() throws Exception {
+            User existingUser1 = createTestUser("user1", "User", "One", "user1@example.com");
+            User existingUser2 = createTestUser("user2", "User", "Two", "user2@example.com");
+            userRepository.saveAll(List.of(existingUser1, existingUser2));
+            UUID userId1 = existingUser1.getId();
+
+            String patchJson = "{\"email\": \"user2@example.com\"}";
+
+            mockMvc.perform(patch("/api/v1/users/{id}", userId1)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(patchJson))
                 .andExpect(status().isConflict());
         }
     }
