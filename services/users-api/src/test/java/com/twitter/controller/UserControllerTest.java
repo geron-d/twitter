@@ -518,7 +518,6 @@ public class UserControllerTest {
 
         @Test
         void updateUser_WithValidFullData_ShouldUpdateUserWith200Ok() throws Exception {
-            // Arrange
             User existingUser = createTestUser("testuser", "Original", "Name", "original@example.com");
             User savedUser = userRepository.save(existingUser);
             UUID userId = savedUser.getId();
@@ -532,7 +531,6 @@ public class UserControllerTest {
             );
             String requestJson = objectMapper.writeValueAsString(updateRequest);
 
-            // Act & Assert
             mockMvc.perform(put("/api/v1/users/{id}", userId)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(requestJson))
@@ -549,44 +547,41 @@ public class UserControllerTest {
 
         @Test
         void updateUser_WithPartialData_ShouldUpdateOnlySpecifiedFieldsWith200Ok() throws Exception {
-            // Arrange
             User existingUser = createTestUser("testuser", "Original", "Name", "original@example.com");
             User savedUser = userRepository.save(existingUser);
             UUID userId = savedUser.getId();
 
             UserUpdateDto updateRequest = new UserUpdateDto(
-                "testuser", // login остается тем же
+                "testuser",
                 "UpdatedFirstName",
                 "UpdatedLastName",
-                "original@example.com", // email остается тем же
-                "newpassword123" // обновляем пароль
+                "original@example.com",
+                "newpassword123"
             );
             String requestJson = objectMapper.writeValueAsString(updateRequest);
 
-            // Act & Assert
             mockMvc.perform(put("/api/v1/users/{id}", userId)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(requestJson))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").value(userId.toString()))
-                .andExpect(jsonPath("$.login").value("testuser")) // остается прежним
+                .andExpect(jsonPath("$.login").value("testuser"))
                 .andExpect(jsonPath("$.firstName").value("UpdatedFirstName"))
                 .andExpect(jsonPath("$.lastName").value("UpdatedLastName"))
-                .andExpect(jsonPath("$.email").value("original@example.com")) // остается прежним
+                .andExpect(jsonPath("$.email").value("original@example.com"))
                 .andExpect(jsonPath("$.status").value("ACTIVE"))
                 .andExpect(jsonPath("$.role").value("USER"));
         }
 
         @Test
         void updateUser_WithTooShortLogin_ShouldReturn400BadRequest() throws Exception {
-            // Arrange
             User existingUser = createTestUser("testuser", "Original", "Name", "original@example.com");
             User savedUser = userRepository.save(existingUser);
             UUID userId = savedUser.getId();
 
             UserUpdateDto updateRequest = new UserUpdateDto(
-                "ab", // слишком короткий логин
+                "ab",
                 "Updated",
                 "Name",
                 "updated@example.com",
@@ -594,7 +589,6 @@ public class UserControllerTest {
             );
             String requestJson = objectMapper.writeValueAsString(updateRequest);
 
-            // Act & Assert
             mockMvc.perform(put("/api/v1/users/{id}", userId)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(requestJson))
@@ -603,14 +597,13 @@ public class UserControllerTest {
 
         @Test
         void updateUser_WithTooLongLogin_ShouldReturn400BadRequest() throws Exception {
-            // Arrange
             User existingUser = createTestUser("testuser", "Original", "Name", "original@example.com");
             User savedUser = userRepository.save(existingUser);
             UUID userId = savedUser.getId();
 
             String longLogin = "a".repeat(51);
             UserUpdateDto updateRequest = new UserUpdateDto(
-                longLogin, // слишком длинный логин
+                longLogin,
                 "Updated",
                 "Name",
                 "updated@example.com",
@@ -618,7 +611,6 @@ public class UserControllerTest {
             );
             String requestJson = objectMapper.writeValueAsString(updateRequest);
 
-            // Act & Assert
             mockMvc.perform(put("/api/v1/users/{id}", userId)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(requestJson))
@@ -627,7 +619,6 @@ public class UserControllerTest {
 
         @Test
         void updateUser_WithInvalidEmail_ShouldReturn400BadRequest() throws Exception {
-            // Arrange
             User existingUser = createTestUser("testuser", "Original", "Name", "original@example.com");
             User savedUser = userRepository.save(existingUser);
             UUID userId = savedUser.getId();
@@ -636,12 +627,11 @@ public class UserControllerTest {
                 "updateduser",
                 "Updated",
                 "Name",
-                "invalid-email", // невалидный email
+                "invalid-email",
                 "newpassword123"
             );
             String requestJson = objectMapper.writeValueAsString(updateRequest);
 
-            // Act & Assert
             mockMvc.perform(put("/api/v1/users/{id}", userId)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(requestJson))
@@ -650,7 +640,6 @@ public class UserControllerTest {
 
         @Test
         void updateUser_WithTooShortPassword_ShouldReturn400BadRequest() throws Exception {
-            // Arrange
             User existingUser = createTestUser("testuser", "Original", "Name", "original@example.com");
             User savedUser = userRepository.save(existingUser);
             UUID userId = savedUser.getId();
@@ -660,11 +649,10 @@ public class UserControllerTest {
                 "Updated",
                 "Name",
                 "updated@example.com",
-                "1234567" // слишком короткий пароль
+                "1234567"
             );
             String requestJson = objectMapper.writeValueAsString(updateRequest);
 
-            // Act & Assert
             mockMvc.perform(put("/api/v1/users/{id}", userId)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(requestJson))
@@ -673,13 +661,12 @@ public class UserControllerTest {
 
         @Test
         void updateUser_WithEmptyLogin_ShouldReturn400BadRequest() throws Exception {
-            // Arrange
             User existingUser = createTestUser("testuser", "Original", "Name", "original@example.com");
             User savedUser = userRepository.save(existingUser);
             UUID userId = savedUser.getId();
 
             UserUpdateDto updateRequest = new UserUpdateDto(
-                "", // пустой логин
+                "",
                 "Updated",
                 "Name",
                 "updated@example.com",
@@ -687,7 +674,6 @@ public class UserControllerTest {
             );
             String requestJson = objectMapper.writeValueAsString(updateRequest);
 
-            // Act & Assert
             mockMvc.perform(put("/api/v1/users/{id}", userId)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(requestJson))
@@ -696,13 +682,12 @@ public class UserControllerTest {
 
         @Test
         void updateUser_WithNullLogin_ShouldReturn400BadRequest() throws Exception {
-            // Arrange
             User existingUser = createTestUser("testuser", "Original", "Name", "original@example.com");
             User savedUser = userRepository.save(existingUser);
             UUID userId = savedUser.getId();
 
             UserUpdateDto updateRequest = new UserUpdateDto(
-                null, // null логин
+                null,
                 "Updated",
                 "Name",
                 "updated@example.com",
@@ -710,7 +695,6 @@ public class UserControllerTest {
             );
             String requestJson = objectMapper.writeValueAsString(updateRequest);
 
-            // Act & Assert
             mockMvc.perform(put("/api/v1/users/{id}", userId)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(requestJson))
@@ -719,7 +703,6 @@ public class UserControllerTest {
 
         @Test
         void updateUser_WithNonExistentUserId_ShouldReturn404NotFound() throws Exception {
-            // Arrange
             UUID nonExistentUserId = UUID.randomUUID();
 
             UserUpdateDto updateRequest = new UserUpdateDto(
@@ -731,7 +714,6 @@ public class UserControllerTest {
             );
             String requestJson = objectMapper.writeValueAsString(updateRequest);
 
-            // Act & Assert
             mockMvc.perform(put("/api/v1/users/{id}", nonExistentUserId)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(requestJson))
@@ -740,7 +722,6 @@ public class UserControllerTest {
 
         @Test
         void updateUser_WithDuplicateEmail_ShouldReturn409Conflict() throws Exception {
-            // Arrange
             User existingUser1 = createTestUser("user1", "User", "One", "user1@example.com");
             User existingUser2 = createTestUser("user2", "User", "Two", "user2@example.com");
             userRepository.saveAll(List.of(existingUser1, existingUser2));
@@ -750,12 +731,11 @@ public class UserControllerTest {
                 "updateduser1",
                 "Updated",
                 "Name",
-                "user2@example.com", // email уже используется другим пользователем
+                "user2@example.com",
                 "newpassword123"
             );
             String requestJson = objectMapper.writeValueAsString(updateRequest);
 
-            // Act & Assert
             mockMvc.perform(put("/api/v1/users/{id}", userId1)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(requestJson))
@@ -764,14 +744,13 @@ public class UserControllerTest {
 
         @Test
         void updateUser_WithDuplicateLogin_ShouldReturn409Conflict() throws Exception {
-            // Arrange
             User existingUser1 = createTestUser("user1", "User", "One", "user1@example.com");
             User existingUser2 = createTestUser("user2", "User", "Two", "user2@example.com");
             userRepository.saveAll(List.of(existingUser1, existingUser2));
             UUID userId1 = existingUser1.getId();
 
             UserUpdateDto updateRequest = new UserUpdateDto(
-                "user2", // login уже используется другим пользователем
+                "user2",
                 "Updated",
                 "Name",
                 "updated@example.com",
@@ -779,7 +758,6 @@ public class UserControllerTest {
             );
             String requestJson = objectMapper.writeValueAsString(updateRequest);
 
-            // Act & Assert
             mockMvc.perform(put("/api/v1/users/{id}", userId1)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(requestJson))
