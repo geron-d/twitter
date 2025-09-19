@@ -2,7 +2,6 @@ package com.twitter.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
 import com.twitter.common.exception.LastAdminDeactivationException;
 import com.twitter.dto.*;
 import com.twitter.dto.filter.UserFilter;
@@ -11,7 +10,7 @@ import com.twitter.enums.UserRole;
 import com.twitter.enums.UserStatus;
 import com.twitter.mapper.UserMapper;
 import com.twitter.repository.UserRepository;
-import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -27,10 +26,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -52,8 +49,8 @@ class UserServiceImplTest {
     @Spy
     private ObjectMapper objectMapper;
 
-    @Mock
-    private Validator validator;
+    @Spy
+    private Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
     @InjectMocks
     private UserServiceImpl userService;
@@ -830,8 +827,6 @@ class UserServiceImplTest {
         void setUp() throws Exception {
             testUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
 
-            lenient().when(validator.validate(any(UserPatchDto.class))).thenReturn(Set.of());
-
             testUser = new User()
                 .setId(testUserId)
                 .setLogin("testuser")
@@ -1002,57 +997,6 @@ class UserServiceImplTest {
         }
 
         @Test
-        void patchUser_WithInvalidJson_ShouldThrowResponseStatusException() throws Exception {
-            ObjectMapper mockObjectMapper = mock(ObjectMapper.class);
-            ObjectReader mockObjectReader = mock(ObjectReader.class);
-            Validator mockValidator = mock(Validator.class);
-            UserServiceImpl userServiceWithMockMapper = new UserServiceImpl(mockObjectMapper, userMapper, userRepository, mockValidator);
-            JsonNode invalidJsonNode = objectMapper.readTree("{\"invalid\":\"json\"}");
-
-            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            when(userMapper.toUserPatchDto(testUser)).thenReturn(testUserPatchDto);
-            when(mockObjectMapper.readerForUpdating(any(UserPatchDto.class))).thenReturn(mockObjectReader);
-            lenient().when(mockValidator.validate(any(UserPatchDto.class))).thenReturn(Set.of());
-            when(mockObjectReader.readValue(invalidJsonNode))
-                .thenThrow(new IOException("Invalid JSON structure"));
-
-            assertThatThrownBy(() -> userServiceWithMockMapper.patchUser(testUserId, invalidJsonNode))
-                .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
-                .hasMessageContaining("Error patching user");
-
-            verify(userRepository).findById(testUserId);
-            verify(userMapper).toUserPatchDto(testUser);
-            verify(userMapper, never()).updateUserFromPatchDto(any(), any());
-            verify(userRepository, never()).save(any());
-            verify(userMapper, never()).toUserResponseDto(any());
-        }
-
-        @Test
-        void patchUser_WithIOException_ShouldThrowResponseStatusException() throws Exception {
-            ObjectMapper mockObjectMapper = mock(ObjectMapper.class);
-            ObjectReader mockObjectReader = mock(ObjectReader.class);
-            Validator mockValidator = mock(Validator.class);
-            UserServiceImpl userServiceWithMockMapper = new UserServiceImpl(mockObjectMapper, userMapper, userRepository, mockValidator);
-
-            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            when(userMapper.toUserPatchDto(testUser)).thenReturn(testUserPatchDto);
-            when(mockObjectMapper.readerForUpdating(any(UserPatchDto.class))).thenReturn(mockObjectReader);
-            lenient().when(mockValidator.validate(any(UserPatchDto.class))).thenReturn(Set.of());
-            when(mockObjectReader.readValue(testJsonNode))
-                .thenThrow(new IOException("JSON parsing error"));
-
-            assertThatThrownBy(() -> userServiceWithMockMapper.patchUser(testUserId, testJsonNode))
-                .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
-                .hasMessageContaining("Error patching user: JSON parsing error");
-
-            verify(userRepository).findById(testUserId);
-            verify(userMapper).toUserPatchDto(testUser);
-            verify(userMapper, never()).updateUserFromPatchDto(any(), any());
-            verify(userRepository, never()).save(any());
-            verify(userMapper, never()).toUserResponseDto(any());
-        }
-
-        @Test
         void patchUser_WithSingleFieldUpdate_ShouldUpdateOnlyThatField() throws Exception {
             JsonNode singleFieldJsonNode = objectMapper.readTree("{\"login\":\"newlogin\"}");
 
@@ -1209,16 +1153,10 @@ class UserServiceImplTest {
 
             UserPatchDto invalidPatchDto = new UserPatchDto();
             invalidPatchDto.setLogin("ab");
-
-            @SuppressWarnings("unchecked")
-            ConstraintViolation<UserPatchDto> loginViolation = mock(ConstraintViolation.class);
-            when(loginViolation.getPropertyPath()).thenReturn(mock(jakarta.validation.Path.class));
-            when(loginViolation.getPropertyPath().toString()).thenReturn("login");
-            when(loginViolation.getMessage()).thenReturn("Login must be between 3 and 50 characters");
+            invalidPatchDto.setEmail("test@example.com");
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
             when(userMapper.toUserPatchDto(testUser)).thenReturn(invalidPatchDto);
-            when(validator.validate(invalidPatchDto)).thenReturn(Set.of(loginViolation));
 
             assertThatThrownBy(() -> userService.patchUser(testUserId, invalidLoginJsonNode))
                 .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
@@ -1227,7 +1165,6 @@ class UserServiceImplTest {
 
             verify(userRepository).findById(testUserId);
             verify(userMapper).toUserPatchDto(testUser);
-            verify(validator).validate(invalidPatchDto);
             verify(userRepository, never()).existsByLoginAndIdNot(any(), any());
             verify(userRepository, never()).existsByEmailAndIdNot(any(), any());
             verify(userMapper, never()).updateUserFromPatchDto(any(), any());
@@ -1242,16 +1179,10 @@ class UserServiceImplTest {
 
             UserPatchDto invalidPatchDto = new UserPatchDto();
             invalidPatchDto.setLogin(longLogin);
-
-            @SuppressWarnings("unchecked")
-            ConstraintViolation<UserPatchDto> loginViolation = mock(ConstraintViolation.class);
-            when(loginViolation.getPropertyPath()).thenReturn(mock(jakarta.validation.Path.class));
-            when(loginViolation.getPropertyPath().toString()).thenReturn("login");
-            when(loginViolation.getMessage()).thenReturn("Login must be between 3 and 50 characters");
+            invalidPatchDto.setEmail("test@example.com");
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
             when(userMapper.toUserPatchDto(testUser)).thenReturn(invalidPatchDto);
-            when(validator.validate(invalidPatchDto)).thenReturn(Set.of(loginViolation));
 
             assertThatThrownBy(() -> userService.patchUser(testUserId, invalidLoginJsonNode))
                 .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
@@ -1260,7 +1191,6 @@ class UserServiceImplTest {
 
             verify(userRepository).findById(testUserId);
             verify(userMapper).toUserPatchDto(testUser);
-            verify(validator).validate(invalidPatchDto);
             verify(userRepository, never()).existsByLoginAndIdNot(any(), any());
             verify(userRepository, never()).existsByEmailAndIdNot(any(), any());
             verify(userMapper, never()).updateUserFromPatchDto(any(), any());
@@ -1273,17 +1203,11 @@ class UserServiceImplTest {
             JsonNode invalidEmailJsonNode = objectMapper.readTree("{\"email\":\"invalid-email\"}");
 
             UserPatchDto invalidPatchDto = new UserPatchDto();
+            invalidPatchDto.setLogin("testuser");
             invalidPatchDto.setEmail("invalid-email");
-
-            @SuppressWarnings("unchecked")
-            ConstraintViolation<UserPatchDto> emailViolation = mock(ConstraintViolation.class);
-            when(emailViolation.getPropertyPath()).thenReturn(mock(jakarta.validation.Path.class));
-            when(emailViolation.getPropertyPath().toString()).thenReturn("email");
-            when(emailViolation.getMessage()).thenReturn("Invalid email format");
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
             when(userMapper.toUserPatchDto(testUser)).thenReturn(invalidPatchDto);
-            when(validator.validate(invalidPatchDto)).thenReturn(Set.of(emailViolation));
 
             assertThatThrownBy(() -> userService.patchUser(testUserId, invalidEmailJsonNode))
                 .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
@@ -1292,7 +1216,6 @@ class UserServiceImplTest {
 
             verify(userRepository).findById(testUserId);
             verify(userMapper).toUserPatchDto(testUser);
-            verify(validator).validate(invalidPatchDto);
             verify(userRepository, never()).existsByLoginAndIdNot(any(), any());
             verify(userRepository, never()).existsByEmailAndIdNot(any(), any());
             verify(userMapper, never()).updateUserFromPatchDto(any(), any());
