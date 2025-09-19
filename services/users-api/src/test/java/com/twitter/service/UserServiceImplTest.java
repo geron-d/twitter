@@ -11,6 +11,7 @@ import com.twitter.enums.UserRole;
 import com.twitter.enums.UserStatus;
 import com.twitter.mapper.UserMapper;
 import com.twitter.repository.UserRepository;
+import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -39,6 +40,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("unused")
 class UserServiceImplTest {
 
     @Mock
@@ -1199,6 +1201,103 @@ class UserServiceImplTest {
             verify(userMapper).updateUserFromPatchDto(patchDtoWithSameData, testUser);
             verify(userRepository).save(testUser);
             verify(userMapper).toUserResponseDto(patchedUserWithSameData);
+        }
+
+        @Test
+        void patchUser_WithInvalidLoginTooShort_ShouldThrowResponseStatusException() throws Exception {
+            JsonNode invalidLoginJsonNode = objectMapper.readTree("{\"login\":\"ab\"}");
+
+            UserPatchDto invalidPatchDto = new UserPatchDto();
+            invalidPatchDto.setLogin("ab");
+
+            @SuppressWarnings("unchecked")
+            ConstraintViolation<UserPatchDto> loginViolation = mock(ConstraintViolation.class);
+            when(loginViolation.getPropertyPath()).thenReturn(mock(jakarta.validation.Path.class));
+            when(loginViolation.getPropertyPath().toString()).thenReturn("login");
+            when(loginViolation.getMessage()).thenReturn("Login must be between 3 and 50 characters");
+
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+            when(userMapper.toUserPatchDto(testUser)).thenReturn(invalidPatchDto);
+            when(validator.validate(invalidPatchDto)).thenReturn(Set.of(loginViolation));
+
+            assertThatThrownBy(() -> userService.patchUser(testUserId, invalidLoginJsonNode))
+                .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
+                .hasMessageContaining("400 BAD_REQUEST")
+                .hasMessageContaining("Validation failed: login: Login must be between 3 and 50 characters");
+
+            verify(userRepository).findById(testUserId);
+            verify(userMapper).toUserPatchDto(testUser);
+            verify(validator).validate(invalidPatchDto);
+            verify(userRepository, never()).existsByLoginAndIdNot(any(), any());
+            verify(userRepository, never()).existsByEmailAndIdNot(any(), any());
+            verify(userMapper, never()).updateUserFromPatchDto(any(), any());
+            verify(userRepository, never()).save(any());
+            verify(userMapper, never()).toUserResponseDto(any());
+        }
+
+        @Test
+        void patchUser_WithInvalidLoginTooLong_ShouldThrowResponseStatusException() throws Exception {
+            String longLogin = "a".repeat(51);
+            JsonNode invalidLoginJsonNode = objectMapper.readTree("{\"login\":\"" + longLogin + "\"}");
+
+            UserPatchDto invalidPatchDto = new UserPatchDto();
+            invalidPatchDto.setLogin(longLogin);
+
+            @SuppressWarnings("unchecked")
+            ConstraintViolation<UserPatchDto> loginViolation = mock(ConstraintViolation.class);
+            when(loginViolation.getPropertyPath()).thenReturn(mock(jakarta.validation.Path.class));
+            when(loginViolation.getPropertyPath().toString()).thenReturn("login");
+            when(loginViolation.getMessage()).thenReturn("Login must be between 3 and 50 characters");
+
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+            when(userMapper.toUserPatchDto(testUser)).thenReturn(invalidPatchDto);
+            when(validator.validate(invalidPatchDto)).thenReturn(Set.of(loginViolation));
+
+            assertThatThrownBy(() -> userService.patchUser(testUserId, invalidLoginJsonNode))
+                .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
+                .hasMessageContaining("400 BAD_REQUEST")
+                .hasMessageContaining("Validation failed: login: Login must be between 3 and 50 characters");
+
+            verify(userRepository).findById(testUserId);
+            verify(userMapper).toUserPatchDto(testUser);
+            verify(validator).validate(invalidPatchDto);
+            verify(userRepository, never()).existsByLoginAndIdNot(any(), any());
+            verify(userRepository, never()).existsByEmailAndIdNot(any(), any());
+            verify(userMapper, never()).updateUserFromPatchDto(any(), any());
+            verify(userRepository, never()).save(any());
+            verify(userMapper, never()).toUserResponseDto(any());
+        }
+
+        @Test
+        void patchUser_WithInvalidEmail_ShouldThrowResponseStatusException() throws Exception {
+            JsonNode invalidEmailJsonNode = objectMapper.readTree("{\"email\":\"invalid-email\"}");
+
+            UserPatchDto invalidPatchDto = new UserPatchDto();
+            invalidPatchDto.setEmail("invalid-email");
+
+            @SuppressWarnings("unchecked")
+            ConstraintViolation<UserPatchDto> emailViolation = mock(ConstraintViolation.class);
+            when(emailViolation.getPropertyPath()).thenReturn(mock(jakarta.validation.Path.class));
+            when(emailViolation.getPropertyPath().toString()).thenReturn("email");
+            when(emailViolation.getMessage()).thenReturn("Invalid email format");
+
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+            when(userMapper.toUserPatchDto(testUser)).thenReturn(invalidPatchDto);
+            when(validator.validate(invalidPatchDto)).thenReturn(Set.of(emailViolation));
+
+            assertThatThrownBy(() -> userService.patchUser(testUserId, invalidEmailJsonNode))
+                .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
+                .hasMessageContaining("400 BAD_REQUEST")
+                .hasMessageContaining("Validation failed: email: Invalid email format");
+
+            verify(userRepository).findById(testUserId);
+            verify(userMapper).toUserPatchDto(testUser);
+            verify(validator).validate(invalidPatchDto);
+            verify(userRepository, never()).existsByLoginAndIdNot(any(), any());
+            verify(userRepository, never()).existsByEmailAndIdNot(any(), any());
+            verify(userMapper, never()).updateUserFromPatchDto(any(), any());
+            verify(userRepository, never()).save(any());
+            verify(userMapper, never()).toUserResponseDto(any());
         }
     }
 
