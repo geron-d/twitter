@@ -917,4 +917,66 @@ public class UserControllerTest {
                 .andExpect(status().isConflict());
         }
     }
+
+    @Nested
+    class InactivateUserIntegrationTest {
+
+        @Test
+        void inactivateUser_WhenUserExistsAndIsRegularUser_ShouldReturn200AndInactivateUser() throws Exception {
+            User user = createTestUser("testuser", "Test", "User", "test@example.com", UserRole.USER, UserStatus.ACTIVE);
+            User savedUser = userRepository.save(user);
+            UUID userId = savedUser.getId();
+
+            mockMvc.perform(patch("/api/v1/users/{id}/inactivate", userId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(userId.toString()))
+                .andExpect(jsonPath("$.login").value("testuser"))
+                .andExpect(jsonPath("$.firstName").value("Test"))
+                .andExpect(jsonPath("$.lastName").value("User"))
+                .andExpect(jsonPath("$.email").value("test@example.com"))
+                .andExpect(jsonPath("$.status").value("INACTIVE"))
+                .andExpect(jsonPath("$.role").value("USER"));
+        }
+
+        @Test
+        void inactivateUser_WhenUserExistsAndIsAdminWithMultipleAdmins_ShouldReturn200AndInactivateUser() throws Exception {
+            User admin1 = createTestUser("admin1", "Admin", "One", "admin1@example.com", UserRole.ADMIN, UserStatus.ACTIVE);
+            User admin2 = createTestUser("admin2", "Admin", "Two", "admin2@example.com", UserRole.ADMIN, UserStatus.ACTIVE);
+            userRepository.saveAll(List.of(admin1, admin2));
+            UUID admin1Id = admin1.getId();
+
+            mockMvc.perform(patch("/api/v1/users/{id}/inactivate", admin1Id))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(admin1Id.toString()))
+                .andExpect(jsonPath("$.login").value("admin1"))
+                .andExpect(jsonPath("$.firstName").value("Admin"))
+                .andExpect(jsonPath("$.lastName").value("One"))
+                .andExpect(jsonPath("$.email").value("admin1@example.com"))
+                .andExpect(jsonPath("$.status").value("INACTIVE"))
+                .andExpect(jsonPath("$.role").value("ADMIN"));
+        }
+
+        @Test
+        void inactivateUser_WhenUserExistsAndIsLastActiveAdmin_ShouldReturn409Conflict() throws Exception {
+            User admin = createTestUser("admin", "Admin", "User", "admin@example.com", UserRole.ADMIN, UserStatus.ACTIVE);
+            User savedAdmin = userRepository.save(admin);
+            UUID adminId = savedAdmin.getId();
+
+            mockMvc.perform(patch("/api/v1/users/{id}/inactivate", adminId))
+                .andExpect(status().isConflict())
+                .andExpect(content().contentType("application/problem+json"))
+                .andExpect(jsonPath("$.title").value("Last Admin Deactivation Error"))
+                .andExpect(jsonPath("$.detail").value("Cannot deactivate the last active administrator"));
+        }
+
+        @Test
+        void inactivateUser_WhenUserNotFound_ShouldReturn404NotFound() throws Exception {
+            UUID nonExistentUserId = UUID.randomUUID();
+
+            mockMvc.perform(patch("/api/v1/users/{id}/inactivate", nonExistentUserId))
+                .andExpect(status().isNotFound());
+        }
+    }
 }
