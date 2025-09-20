@@ -56,3 +56,4 @@ public class Follow {
 - Используем Hadoop HDFS или S3 для хранения архивов твитов, которые не нужны в реальном времени.
 - Используем S3 для хранения архивов твитов, которые не нужны в реальном времени.
 - Мониторинг и логирование: Используем Prometheus/Grafana для метрик и ELK Stack (Elasticsearch, Logstash, Kibana) для агрегации логов.
+- Поэкспериминтировать с настройкой spring.jpa.open0in-view (https://www.youtube.com/watch?v=gBLyiBOc_Cg&t=2225s)
