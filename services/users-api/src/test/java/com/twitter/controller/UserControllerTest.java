@@ -2,6 +2,7 @@ package com.twitter.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.twitter.dto.UserRequestDto;
+import com.twitter.dto.UserRoleUpdateDto;
 import com.twitter.dto.UserUpdateDto;
 import com.twitter.entity.User;
 import com.twitter.enums.UserRole;
@@ -977,6 +978,116 @@ public class UserControllerTest {
 
             mockMvc.perform(patch("/api/v1/users/{id}/inactivate", nonExistentUserId))
                 .andExpect(status().isNotFound());
+        }
+    }
+
+    @Nested
+    class UpdateUserRoleIntegrationTests {
+
+        @Test
+        void shouldUpdateUserRoleFromUserToAdmin_WhenUserExists() throws Exception {
+            User user = createTestUser("testuser", "Test", "User", "test@example.com", UserRole.USER, UserStatus.ACTIVE);
+            User savedUser = userRepository.save(user);
+            UUID userId = savedUser.getId();
+
+            UserRoleUpdateDto roleUpdate = new UserRoleUpdateDto(UserRole.ADMIN);
+            String requestJson = objectMapper.writeValueAsString(roleUpdate);
+
+            mockMvc.perform(patch("/api/v1/users/{id}/role", userId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(requestJson))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(userId.toString()))
+                .andExpect(jsonPath("$.login").value("testuser"))
+                .andExpect(jsonPath("$.firstName").value("Test"))
+                .andExpect(jsonPath("$.lastName").value("User"))
+                .andExpect(jsonPath("$.email").value("test@example.com"))
+                .andExpect(jsonPath("$.status").value("ACTIVE"))
+                .andExpect(jsonPath("$.role").value("ADMIN"));
+        }
+
+        @Test
+        void shouldUpdateAdminRoleToUser_WhenOtherActiveAdminsExist() throws Exception {
+            User admin1 = createTestUser("admin1", "Admin", "One", "admin1@example.com", UserRole.ADMIN, UserStatus.ACTIVE);
+            User admin2 = createTestUser("admin2", "Admin", "Two", "admin2@example.com", UserRole.ADMIN, UserStatus.ACTIVE);
+            userRepository.saveAll(List.of(admin1, admin2));
+            UUID admin1Id = admin1.getId();
+
+            UserRoleUpdateDto roleUpdate = new UserRoleUpdateDto(UserRole.USER);
+            String requestJson = objectMapper.writeValueAsString(roleUpdate);
+
+            mockMvc.perform(patch("/api/v1/users/{id}/role", admin1Id)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(requestJson))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(admin1Id.toString()))
+                .andExpect(jsonPath("$.login").value("admin1"))
+                .andExpect(jsonPath("$.firstName").value("Admin"))
+                .andExpect(jsonPath("$.lastName").value("One"))
+                .andExpect(jsonPath("$.email").value("admin1@example.com"))
+                .andExpect(jsonPath("$.status").value("ACTIVE"))
+                .andExpect(jsonPath("$.role").value("USER"));
+        }
+
+        @Test
+        void shouldReturn404_WhenUserNotFound() throws Exception {
+            UUID nonExistentUserId = UUID.randomUUID();
+
+            UserRoleUpdateDto roleUpdate = new UserRoleUpdateDto(UserRole.ADMIN);
+            String requestJson = objectMapper.writeValueAsString(roleUpdate);
+
+            mockMvc.perform(patch("/api/v1/users/{id}/role", nonExistentUserId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(requestJson))
+                .andExpect(status().isNotFound());
+        }
+
+        @Test
+        void shouldReturn409_WhenTryingToChangeLastActiveAdminRole() throws Exception {
+            User lastAdmin = createTestUser("lastadmin", "Last", "Admin", "lastadmin@example.com", UserRole.ADMIN, UserStatus.ACTIVE);
+            User savedAdmin = userRepository.save(lastAdmin);
+            UUID adminId = savedAdmin.getId();
+
+            UserRoleUpdateDto roleUpdate = new UserRoleUpdateDto(UserRole.USER);
+            String requestJson = objectMapper.writeValueAsString(roleUpdate);
+
+            mockMvc.perform(patch("/api/v1/users/{id}/role", adminId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(requestJson))
+                .andExpect(status().isConflict())
+                .andExpect(content().contentType("application/problem+json"))
+                .andExpect(jsonPath("$.title").value("Last Admin Deactivation Error"))
+                .andExpect(jsonPath("$.detail").value("Cannot change role of the last active administrator"));
+        }
+
+        @Test
+        void shouldReturn400_WhenRoleFieldIsNull() throws Exception {
+            User user = createTestUser("testuser", "Test", "User", "test@example.com", UserRole.USER, UserStatus.ACTIVE);
+            User savedUser = userRepository.save(user);
+            UUID userId = savedUser.getId();
+
+            String requestJson = "{\"role\": null}";
+
+            mockMvc.perform(patch("/api/v1/users/{id}/role", userId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(requestJson))
+                .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        void shouldReturn400_WhenInvalidRoleValue() throws Exception {
+            User user = createTestUser("testuser", "Test", "User", "test@example.com", UserRole.USER, UserStatus.ACTIVE);
+            User savedUser = userRepository.save(user);
+            UUID userId = savedUser.getId();
+
+            String requestJson = "{\"role\": \"INVALID_ROLE\"}";
+
+            mockMvc.perform(patch("/api/v1/users/{id}/role", userId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(requestJson))
+                .andExpect(status().isInternalServerError());
         }
     }
 }
