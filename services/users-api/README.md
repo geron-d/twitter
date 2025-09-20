@@ -127,6 +127,14 @@ GET /api/v1/users?firstNameContains=John&role=USER&page=0&size=10&sort=login,asc
 - `size` (int, default: 20) - размер страницы
 - `sort` (String, optional) - сортировка
 
+**Структура ответа PagedModel:**
+- `content` - массив объектов `UserResponseDto`
+- `page` - метаданные пагинации:
+  - `size` - размер страницы
+  - `number` - номер страницы (начиная с 0)
+  - `totalElements` - общее количество элементов
+  - `totalPages` - общее количество страниц
+
 **Пример ответа:**
 ```json
 {
@@ -141,19 +149,12 @@ GET /api/v1/users?firstNameContains=John&role=USER&page=0&size=10&sort=login,asc
       "role": "USER"
     }
   ],
-  "pageable": {
-    "pageNumber": 0,
-    "pageSize": 10,
-    "sort": {
-      "sorted": true,
-      "unsorted": false
-    }
-  },
-  "totalElements": 1,
-  "totalPages": 1,
-  "first": true,
-  "last": true,
-  "numberOfElements": 1
+  "page": {
+    "size": 10,
+    "number": 0,
+    "totalElements": 1,
+    "totalPages": 1
+  }
 }
 ```
 
