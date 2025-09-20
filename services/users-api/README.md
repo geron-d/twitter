@@ -222,6 +222,12 @@ Content-Type: application/json
 }
 ```
 
+**Ответы:**
+- `200 OK` - пользователь обновлен
+- `404 Not Found` - пользователь не найден
+- `400 Bad Request` - ошибка валидации или некорректный JSON Patch
+- `409 Conflict` - конфликт уникальности логина/email
+
 #### 6. Деактивировать пользователя
 ```http
 PATCH /api/v1/users/{id}/inactivate
