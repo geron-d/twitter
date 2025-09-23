@@ -983,16 +983,17 @@ class UserServiceImplTest {
         }
 
         @Test
-        void patchUser_WithNullJsonNode_ShouldThrowException() {
+        void patchUser_WithNullJsonNode_ShouldThrowFormatValidationException() {
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            when(userMapper.toUserPatchDto(testUser)).thenReturn(testUserPatchDto);
+            doThrow(FormatValidationException.jsonParsingError(new IllegalArgumentException("argument \"content\" is null")))
+                .when(userValidator).validateForPatch(testUserId, null);
 
             assertThatThrownBy(() -> userService.patchUser(testUserId, null))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("argument \"content\" is null");
+                .isInstanceOf(FormatValidationException.class)
+                .hasMessageContaining("Error parsing JSON patch data");
 
             verify(userRepository).findById(testUserId);
-            verify(userMapper).toUserPatchDto(testUser);
+            verify(userValidator).validateForPatch(testUserId, null);
         }
 
         @Test
@@ -1024,7 +1025,7 @@ class UserServiceImplTest {
             );
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            when(userMapper.toUserPatchDto(testUser)).thenReturn(singleFieldPatchDto);
+            when(patchDtoFactory.createPatchDto(singleFieldJsonNode)).thenReturn(singleFieldPatchDto);
             when(userRepository.save(any(User.class))).thenReturn(singleFieldUpdatedUser);
             when(userMapper.toUserResponseDto(singleFieldUpdatedUser)).thenReturn(singleFieldResponseDto);
 
@@ -1037,7 +1038,9 @@ class UserServiceImplTest {
             assertThat(result.get().email()).isEqualTo("test@example.com");
 
             verify(userRepository).findById(testUserId);
-            verify(userMapper).toUserPatchDto(testUser);
+            verify(userValidator).validateForPatch(testUserId, singleFieldJsonNode);
+            verify(patchDtoFactory).createPatchDto(singleFieldJsonNode);
+            verify(userValidator).validateForPatchWithDto(testUserId, singleFieldPatchDto);
             verify(userMapper).updateUserFromPatchDto(singleFieldPatchDto, testUser);
             verify(userRepository).save(testUser);
             verify(userMapper).toUserResponseDto(singleFieldUpdatedUser);
@@ -1171,7 +1174,7 @@ class UserServiceImplTest {
         }
 
         @Test
-        void patchUser_WithInvalidLoginTooLong_ShouldThrowResponseStatusException() throws Exception {
+        void patchUser_WithInvalidLoginTooLong_ShouldThrowFormatValidationException() throws Exception {
             String longLogin = "a".repeat(51);
             JsonNode invalidLoginJsonNode = objectMapper.readTree("{\"login\":\"" + longLogin + "\"}");
 
@@ -1180,24 +1183,25 @@ class UserServiceImplTest {
             invalidPatchDto.setEmail("test@example.com");
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            when(userMapper.toUserPatchDto(testUser)).thenReturn(invalidPatchDto);
+            when(patchDtoFactory.createPatchDto(invalidLoginJsonNode)).thenReturn(invalidPatchDto);
+            doThrow(FormatValidationException.beanValidationError("login", "Size", "Login must be between 3 and 50 characters"))
+                .when(userValidator).validateForPatchWithDto(testUserId, invalidPatchDto);
 
             assertThatThrownBy(() -> userService.patchUser(testUserId, invalidLoginJsonNode))
-                .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
-                .hasMessageContaining("400 BAD_REQUEST")
-                .hasMessageContaining("Validation failed: login: Login must be between 3 and 50 characters");
+                .isInstanceOf(FormatValidationException.class)
+                .hasMessageContaining("Login must be between 3 and 50 characters");
 
             verify(userRepository).findById(testUserId);
-            verify(userMapper).toUserPatchDto(testUser);
-            verify(userRepository, never()).existsByLoginAndIdNot(any(), any());
-            verify(userRepository, never()).existsByEmailAndIdNot(any(), any());
+            verify(userValidator).validateForPatch(testUserId, invalidLoginJsonNode);
+            verify(patchDtoFactory).createPatchDto(invalidLoginJsonNode);
+            verify(userValidator).validateForPatchWithDto(testUserId, invalidPatchDto);
             verify(userMapper, never()).updateUserFromPatchDto(any(), any());
             verify(userRepository, never()).save(any());
             verify(userMapper, never()).toUserResponseDto(any());
         }
 
         @Test
-        void patchUser_WithInvalidEmail_ShouldThrowResponseStatusException() throws Exception {
+        void patchUser_WithInvalidEmail_ShouldThrowFormatValidationException() throws Exception {
             JsonNode invalidEmailJsonNode = objectMapper.readTree("{\"email\":\"invalid-email\"}");
 
             UserPatchDto invalidPatchDto = new UserPatchDto();
@@ -1205,17 +1209,18 @@ class UserServiceImplTest {
             invalidPatchDto.setEmail("invalid-email");
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            when(userMapper.toUserPatchDto(testUser)).thenReturn(invalidPatchDto);
+            when(patchDtoFactory.createPatchDto(invalidEmailJsonNode)).thenReturn(invalidPatchDto);
+            doThrow(FormatValidationException.beanValidationError("email", "Email", "Invalid email format"))
+                .when(userValidator).validateForPatchWithDto(testUserId, invalidPatchDto);
 
             assertThatThrownBy(() -> userService.patchUser(testUserId, invalidEmailJsonNode))
-                .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
-                .hasMessageContaining("400 BAD_REQUEST")
-                .hasMessageContaining("Validation failed: email: Invalid email format");
+                .isInstanceOf(FormatValidationException.class)
+                .hasMessageContaining("Invalid email format");
 
             verify(userRepository).findById(testUserId);
-            verify(userMapper).toUserPatchDto(testUser);
-            verify(userRepository, never()).existsByLoginAndIdNot(any(), any());
-            verify(userRepository, never()).existsByEmailAndIdNot(any(), any());
+            verify(userValidator).validateForPatch(testUserId, invalidEmailJsonNode);
+            verify(patchDtoFactory).createPatchDto(invalidEmailJsonNode);
+            verify(userValidator).validateForPatchWithDto(testUserId, invalidPatchDto);
             verify(userMapper, never()).updateUserFromPatchDto(any(), any());
             verify(userRepository, never()).save(any());
             verify(userMapper, never()).toUserResponseDto(any());
@@ -1319,7 +1324,6 @@ class UserServiceImplTest {
             );
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(adminUser));
-            when(userRepository.countByRoleAndStatus(UserRole.ADMIN, UserStatus.ACTIVE)).thenReturn(2L);
             when(userRepository.save(any(User.class))).thenReturn(inactivatedAdminUser);
             when(userMapper.toUserResponseDto(inactivatedAdminUser)).thenReturn(adminResponseDto);
 
@@ -1557,7 +1561,6 @@ class UserServiceImplTest {
             );
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(adminUser));
-            when(userRepository.countByRoleAndStatus(UserRole.ADMIN, UserStatus.ACTIVE)).thenReturn(2L);
             when(userRepository.save(any(User.class))).thenReturn(updatedAdminUser);
             when(userMapper.toUserResponseDto(updatedAdminUser)).thenReturn(adminResponseDto);
 
