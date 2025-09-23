@@ -18,12 +18,13 @@
   acceptance: "Создать UserValidator интерфейс и его реализацию с четким разделением ответственности"
   note: "Спроектирована упрощенная архитектура с единым UserValidator (объединенный с PatchValidator) и иерархией исключений"
 
+- [x] (P1) [2025-01-21 14:45] #3: Определение типов валидаций — Категоризация всех валидаций по типам (уникальность, бизнес-правила, формат).  
+  acceptance: "Список всех валидаций с их типами и контекстом использования"
+  note: "Проанализированы все валидации в UserServiceImpl и DTO, создана детальная категоризация"
+
 ### To Do
 
 #### Анализ и проектирование
-- [ ] (P1) #3: Определение типов валидаций — Категоризация всех валидаций по типам (уникальность, бизнес-правила, формат).  
-  acceptance: "Список всех валидаций с их типами и контекстом использования"
-
 - [ ] (P1) #4: Создание интерфейса UserValidator — Определение контракта для валидации пользователей.  
   acceptance: "Интерфейс с методами для каждого типа валидации"
 
@@ -132,6 +133,46 @@
     - validateRoleChange(UUID userId, UserRole newRole) - смена роли
     - validatePatchData(JsonNode patchNode) - валидация JSON структуры патча
     - validatePatchConstraints(UserPatchDto dto) - Bean Validation для патча
+
+- Категоризация валидаций (Step #3):
+  
+  **1. ВАЛИДАЦИЯ УНИКАЛЬНОСТИ (UniquenessValidation)**
+  - validateUserUniqueness() - проверка уникальности login/email
+    * Контекст: createUser(), updateUser(), patchUser()
+    * Тип ошибки: ResponseStatusException(HttpStatus.CONFLICT)
+    * Логика: проверка через userRepository.existsByLogin/existsByEmail
+  
+  **2. БИЗНЕС-ПРАВИЛА (BusinessRuleValidation)**
+  - Проверка последнего админа в inactivateUser()
+    * Контекст: деактивация пользователя с ролью ADMIN
+    * Тип ошибки: LastAdminDeactivationException
+    * Логика: countByRoleAndStatus(ADMIN, ACTIVE) <= 1
+  - Проверка последнего админа в updateUserRole()
+    * Контекст: смена роли с ADMIN на другую
+    * Тип ошибки: LastAdminDeactivationException
+    * Логика: countByRoleAndStatus(ADMIN, ACTIVE) <= 1
+  
+  **3. ФОРМАТ ДАННЫХ (FormatValidation)**
+  - Bean Validation в UserRequestDto:
+    * @NotBlank, @Size(min=3,max=50) для login
+    * @NotBlank, @Email для email
+    * @NotBlank, @Size(min=8) для password
+  - Bean Validation в UserUpdateDto:
+    * @NotNull, @Size(min=3,max=50) для login
+    * @Email для email
+    * @Size(min=8) для password
+  - Bean Validation в UserPatchDto:
+    * @Size(min=3,max=50) для login
+    * @Email для email
+  - JSON патч валидация в patchUser():
+    * Проверка структуры JSON через ObjectMapper
+    * Bean Validation через Validator.validate()
+    * Тип ошибки: ResponseStatusException(HttpStatus.BAD_REQUEST)
+  
+  **4. ОБРАБОТКА ОШИБОК (ErrorHandling)**
+  - PasswordUtil ошибки в setPassword():
+    * NoSuchAlgorithmException, InvalidKeySpecException
+    * Тип ошибки: ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR)
 
   ValidationException иерархия:
     - ValidationException (базовый класс)
