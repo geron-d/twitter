@@ -38,13 +38,23 @@ public interface UserValidator {
     
     /**
      * Валидация для PATCH операций.
-     * Включает проверку JSON структуры, Bean Validation и уникальности.
+     * Проверяет только JSON структуру данных.
      * 
      * @param userId ID пользователя для патча
      * @param patchNode JSON данные для патча
      * @throws ValidationException при нарушении валидации
      */
     void validateForPatch(UUID userId, JsonNode patchNode);
+    
+    /**
+     * Валидация PATCH данных с готовым DTO.
+     * Включает проверку Bean Validation и уникальности.
+     * 
+     * @param userId ID пользователя для исключения из проверки уникальности
+     * @param patchDto готовый DTO для валидации
+     * @throws ValidationException при нарушении валидации
+     */
+    void validateForPatchWithDto(UUID userId, UserPatchDto patchDto);
     
     /**
      * Проверка уникальности логина и email пользователя.

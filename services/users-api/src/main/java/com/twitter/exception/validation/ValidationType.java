@@ -1,4 +1,4 @@
-package com.twitter.validation;
+package com.twitter.exception.validation;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -33,5 +33,4 @@ public enum ValidationType {
     FORMAT("Format validation");
     
     private final String description;
-
 }

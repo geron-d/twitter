@@ -32,18 +32,13 @@
 
 ### To Do
 
-#### Анализ и проектирование
-- [ ] (P1) #6: Создание UserValidatorImpl — Реализация основного класса валидации.  
+- [x] (P1) [2025-01-21 15:30] #6: Создание UserValidatorImpl — Реализация основного класса валидации.  
   acceptance: "Класс с методами validateForCreate, validateForUpdate, validateForPatch, validateBusinessRules"
+  note: "Создан UserValidatorImpl с полной реализацией всех методов интерфейса UserValidator. Перенесена логика валидации из UserServiceImpl с использованием новых исключений. Рефакторинг: разделен validateForPatch на два метода, создан PatchDtoFactory в пакете util. Перемещены исключения в пакет exception.validation"
 
-- [ ] (P1) #7: Вынос валидации уникальности — Перенос логики validateUserUniqueness в отдельный метод.  
-  acceptance: "Метод validateUniqueness в UserValidatorImpl"
-
-- [ ] (P1) #8: Вынос бизнес-валидаций — Перенос проверок последнего админа в валидатор.  
-  acceptance: "Методы validateAdminDeactivation, validateRoleChange в UserValidatorImpl"
-
-- [ ] (P2) #9: Создание валидатора для JSON патчей — Интеграция PATCH валидации в UserValidator.  
+- [x] (P2) [2025-01-21 15:30] #9: Создание валидатора для JSON патчей — Интеграция PATCH валидации в UserValidator.  
   acceptance: "Методы validateForPatch, validatePatchData, validatePatchConstraints в UserValidator"
+  note: "Реализовано в UserValidatorImpl: validateForPatch(), validatePatchData(), validatePatchConstraints()"
 
 - [ ] (P2) #10: Интеграция с существующими DTO — Обеспечение совместимости с текущими аннотациями валидации.  
   acceptance: "Сохранение работы @Valid аннотаций в контроллерах"
