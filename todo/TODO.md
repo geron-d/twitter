@@ -22,16 +22,17 @@
   acceptance: "Список всех валидаций с их типами и контекстом использования"
   note: "Проанализированы все валидации в UserServiceImpl и DTO, создана детальная категоризация"
 
+- [x] (P1) [2025-01-21 15:00] #4: Создание интерфейса UserValidator — Определение контракта для валидации пользователей.  
+  acceptance: "Интерфейс с методами для каждого типа валидации"
+  note: "Создан полный интерфейс UserValidator с методами для всех типов валидаций и детальной документацией"
+
+- [x] (P1) [2025-01-21 15:15] #5: Проектирование исключений валидации — Создание специализированных исключений для разных типов ошибок.  
+  acceptance: "Иерархия исключений: ValidationException -> UniquenessValidationException, BusinessRuleValidationException"
+  note: "Создана полная иерархия исключений с ValidationException, UniquenessValidationException, BusinessRuleValidationException, FormatValidationException. Обновлено с использованием Lombok @Getter. ValidationType вынесен в отдельный enum класс. Исправлен конфликт @AllArgsConstructor в enum"
+
 ### To Do
 
 #### Анализ и проектирование
-- [ ] (P1) #4: Создание интерфейса UserValidator — Определение контракта для валидации пользователей.  
-  acceptance: "Интерфейс с методами для каждого типа валидации"
-
-- [ ] (P1) #5: Проектирование исключений валидации — Создание специализированных исключений для разных типов ошибок.  
-  acceptance: "Иерархия исключений: ValidationException -> UniquenessValidationException, BusinessRuleValidationException"
-
-#### Реализация
 - [ ] (P1) #6: Создание UserValidatorImpl — Реализация основного класса валидации.  
   acceptance: "Класс с методами validateForCreate, validateForUpdate, validateForPatch, validateBusinessRules"
 
@@ -173,6 +174,88 @@
   - PasswordUtil ошибки в setPassword():
     * NoSuchAlgorithmException, InvalidKeySpecException
     * Тип ошибки: ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR)
+
+- Определение интерфейса UserValidator (Step #4):
+```java
+public interface UserValidator {
+    
+    // === ОСНОВНЫЕ МЕТОДЫ ВАЛИДАЦИИ ===
+    
+    /**
+     * Полная валидация для создания пользователя
+     * @param userRequest DTO с данными для создания
+     * @throws ValidationException при нарушении валидации
+     */
+    void validateForCreate(UserRequestDto userRequest);
+    
+    /**
+     * Валидация для обновления пользователя
+     * @param userId ID пользователя для обновления
+     * @param userUpdate DTO с данными для обновления
+     * @throws ValidationException при нарушении валидации
+     */
+    void validateForUpdate(UUID userId, UserUpdateDto userUpdate);
+    
+    /**
+     * Валидация для PATCH операций
+     * @param userId ID пользователя для патча
+     * @param patchNode JSON данные для патча
+     * @throws ValidationException при нарушении валидации
+     */
+    void validateForPatch(UUID userId, JsonNode patchNode);
+    
+    // === ВАЛИДАЦИЯ УНИКАЛЬНОСТИ ===
+    
+    /**
+     * Проверка уникальности логина и email
+     * @param login логин для проверки
+     * @param email email для проверки
+     * @param excludeUserId ID пользователя для исключения (при обновлении)
+     * @throws UniquenessValidationException при конфликте уникальности
+     */
+    void validateUniqueness(String login, String email, UUID excludeUserId);
+    
+    // === БИЗНЕС-ПРАВИЛА ===
+    
+    /**
+     * Проверка возможности деактивации пользователя
+     * @param userId ID пользователя для деактивации
+     * @throws BusinessRuleValidationException при нарушении бизнес-правил
+     */
+    void validateAdminDeactivation(UUID userId);
+    
+    /**
+     * Проверка возможности смены роли пользователя
+     * @param userId ID пользователя
+     * @param newRole новая роль
+     * @throws BusinessRuleValidationException при нарушении бизнес-правил
+     */
+    void validateRoleChange(UUID userId, UserRole newRole);
+    
+    // === ВАЛИДАЦИЯ ФОРМАТА ДАННЫХ ===
+    
+    /**
+     * Валидация JSON структуры патча
+     * @param patchNode JSON данные
+     * @throws FormatValidationException при ошибке формата
+     */
+    void validatePatchData(JsonNode patchNode);
+    
+    /**
+     * Bean Validation для DTO патча
+     * @param patchDto DTO для валидации
+     * @throws FormatValidationException при нарушении ограничений
+     */
+    void validatePatchConstraints(UserPatchDto patchDto);
+}
+```
+
+- Схема вызовов методов UserValidator:
+  createUser() -> validateForCreate() -> validateUniqueness()
+  updateUser() -> validateForUpdate() -> validateUniqueness()
+  patchUser() -> validateForPatch() -> validatePatchData() + validatePatchConstraints() + validateUniqueness()
+  inactivateUser() -> validateAdminDeactivation()
+  updateUserRole() -> validateRoleChange()
 
   ValidationException иерархия:
     - ValidationException (базовый класс)
