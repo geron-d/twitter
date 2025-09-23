@@ -2,14 +2,18 @@ package com.twitter.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.twitter.common.exception.LastAdminDeactivationException;
 import com.twitter.dto.*;
 import com.twitter.dto.filter.UserFilter;
 import com.twitter.entity.User;
 import com.twitter.enums.UserRole;
 import com.twitter.enums.UserStatus;
+import com.twitter.exception.validation.BusinessRuleValidationException;
+import com.twitter.exception.validation.FormatValidationException;
+import com.twitter.exception.validation.UniquenessValidationException;
 import com.twitter.mapper.UserMapper;
 import com.twitter.repository.UserRepository;
+import com.twitter.util.PatchDtoFactory;
+import com.twitter.validation.UserValidator;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,6 +55,12 @@ class UserServiceImplTest {
 
     @Spy
     private Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+
+    @Mock
+    private UserValidator userValidator;
+
+    @Mock
+    private PatchDtoFactory patchDtoFactory;
 
     @InjectMocks
     private UserServiceImpl userService;
@@ -360,8 +370,6 @@ class UserServiceImplTest {
 
         @Test
         void createUser_WithValidData_ShouldCreateAndReturnUser() {
-            when(userRepository.existsByLogin("testuser")).thenReturn(false);
-            when(userRepository.existsByEmail("test@example.com")).thenReturn(false);
             when(userMapper.toUser(testUserRequestDto)).thenReturn(testUser);
             when(userRepository.save(any(User.class))).thenReturn(savedUser);
             when(userMapper.toUserResponseDto(savedUser)).thenReturn(testUserResponseDto);
@@ -378,8 +386,7 @@ class UserServiceImplTest {
             assertThat(result.status()).isEqualTo(UserStatus.ACTIVE);
             assertThat(result.role()).isEqualTo(UserRole.USER);
 
-            verify(userRepository).existsByLogin("testuser");
-            verify(userRepository).existsByEmail("test@example.com");
+            verify(userValidator).validateForCreate(testUserRequestDto);
             verify(userMapper).toUser(testUserRequestDto);
             verify(userRepository).save(any(User.class));
             verify(userMapper).toUserResponseDto(savedUser);
@@ -387,8 +394,6 @@ class UserServiceImplTest {
 
         @Test
         void createUser_ShouldSetStatusToActive() {
-            when(userRepository.existsByLogin("testuser")).thenReturn(false);
-            when(userRepository.existsByEmail("test@example.com")).thenReturn(false);
             when(userMapper.toUser(testUserRequestDto)).thenReturn(testUser);
             when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
                 User user = invocation.getArgument(0);
@@ -399,15 +404,14 @@ class UserServiceImplTest {
 
             userService.createUser(testUserRequestDto);
 
-            verify(userRepository).existsByLogin("testuser");
-            verify(userRepository).existsByEmail("test@example.com");
+            verify(userValidator).validateForCreate(testUserRequestDto);
+            verify(userMapper).toUser(testUserRequestDto);
             verify(userRepository).save(any(User.class));
+            verify(userMapper).toUserResponseDto(savedUser);
         }
 
         @Test
         void createUser_ShouldSetRoleToUser() {
-            when(userRepository.existsByLogin("testuser")).thenReturn(false);
-            when(userRepository.existsByEmail("test@example.com")).thenReturn(false);
             when(userMapper.toUser(testUserRequestDto)).thenReturn(testUser);
             when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
                 User user = invocation.getArgument(0);
@@ -418,15 +422,14 @@ class UserServiceImplTest {
 
             userService.createUser(testUserRequestDto);
 
-            verify(userRepository).existsByLogin("testuser");
-            verify(userRepository).existsByEmail("test@example.com");
+            verify(userValidator).validateForCreate(testUserRequestDto);
+            verify(userMapper).toUser(testUserRequestDto);
             verify(userRepository).save(any(User.class));
+            verify(userMapper).toUserResponseDto(savedUser);
         }
 
         @Test
         void createUser_ShouldHashPassword() {
-            when(userRepository.existsByLogin("testuser")).thenReturn(false);
-            when(userRepository.existsByEmail("test@example.com")).thenReturn(false);
             when(userMapper.toUser(testUserRequestDto)).thenReturn(testUser);
             when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
                 User user = invocation.getArgument(0);
@@ -439,9 +442,10 @@ class UserServiceImplTest {
 
             userService.createUser(testUserRequestDto);
 
-            verify(userRepository).existsByLogin("testuser");
-            verify(userRepository).existsByEmail("test@example.com");
+            verify(userValidator).validateForCreate(testUserRequestDto);
+            verify(userMapper).toUser(testUserRequestDto);
             verify(userRepository).save(any(User.class));
+            verify(userMapper).toUserResponseDto(savedUser);
         }
 
         @Test
@@ -477,8 +481,6 @@ class UserServiceImplTest {
                 UserRole.USER
             );
 
-            when(userRepository.existsByLogin("minuser")).thenReturn(false);
-            when(userRepository.existsByEmail("min@example.com")).thenReturn(false);
             when(userMapper.toUser(minimalRequest)).thenReturn(minimalUser);
             when(userRepository.save(any(User.class))).thenReturn(savedMinimalUser);
             when(userMapper.toUserResponseDto(savedMinimalUser)).thenReturn(minimalResponse);
@@ -493,41 +495,37 @@ class UserServiceImplTest {
             assertThat(result.status()).isEqualTo(UserStatus.ACTIVE);
             assertThat(result.role()).isEqualTo(UserRole.USER);
 
-            verify(userRepository).existsByLogin("minuser");
-            verify(userRepository).existsByEmail("min@example.com");
+            verify(userValidator).validateForCreate(minimalRequest);
             verify(userMapper).toUser(minimalRequest);
             verify(userRepository).save(any(User.class));
             verify(userMapper).toUserResponseDto(savedMinimalUser);
         }
 
         @Test
-        void createUser_WhenLoginExists_ShouldThrowResponseStatusException() {
-            when(userRepository.existsByLogin("testuser")).thenReturn(true);
+        void createUser_WhenLoginExists_ShouldThrowUniquenessValidationException() {
+            doThrow(new UniquenessValidationException("login", "testuser"))
+                .when(userValidator).validateForCreate(testUserRequestDto);
 
             assertThatThrownBy(() -> userService.createUser(testUserRequestDto))
-                .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
-                .hasMessageContaining("409 CONFLICT")
+                .isInstanceOf(UniquenessValidationException.class)
                 .hasMessageContaining("User with login 'testuser' already exists");
 
-            verify(userRepository).existsByLogin("testuser");
-            verify(userRepository, never()).existsByEmail(any());
+            verify(userValidator).validateForCreate(testUserRequestDto);
             verify(userMapper, never()).toUser(any());
             verify(userRepository, never()).save(any());
             verify(userMapper, never()).toUserResponseDto(any());
         }
 
         @Test
-        void createUser_WhenEmailExists_ShouldThrowResponseStatusException() {
-            when(userRepository.existsByLogin("testuser")).thenReturn(false);
-            when(userRepository.existsByEmail("test@example.com")).thenReturn(true);
+        void createUser_WhenEmailExists_ShouldThrowUniquenessValidationException() {
+            doThrow(new UniquenessValidationException("email", "test@example.com"))
+                .when(userValidator).validateForCreate(testUserRequestDto);
 
             assertThatThrownBy(() -> userService.createUser(testUserRequestDto))
-                .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
-                .hasMessageContaining("409 CONFLICT")
+                .isInstanceOf(UniquenessValidationException.class)
                 .hasMessageContaining("User with email 'test@example.com' already exists");
 
-            verify(userRepository).existsByLogin("testuser");
-            verify(userRepository).existsByEmail("test@example.com");
+            verify(userValidator).validateForCreate(testUserRequestDto);
             verify(userMapper, never()).toUser(any());
             verify(userRepository, never()).save(any());
             verify(userMapper, never()).toUserResponseDto(any());
@@ -708,7 +706,7 @@ class UserServiceImplTest {
         }
 
         @Test
-        void updateUser_WithExistingLogin_ShouldThrowResponseStatusException() {
+        void updateUser_WithExistingLogin_ShouldThrowUniquenessValidationException() {
             UserUpdateDto updateDtoWithExistingLogin = new UserUpdateDto(
                 "existinguser", // логин, который уже существует
                 "Updated",
@@ -718,22 +716,22 @@ class UserServiceImplTest {
             );
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            when(userRepository.existsByLoginAndIdNot("existinguser", testUserId)).thenReturn(true);
+            doThrow(new UniquenessValidationException("login", "existinguser"))
+                .when(userValidator).validateForUpdate(testUserId, updateDtoWithExistingLogin);
 
             assertThatThrownBy(() -> userService.updateUser(testUserId, updateDtoWithExistingLogin))
-                .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
-                .hasMessageContaining("409 CONFLICT")
+                .isInstanceOf(UniquenessValidationException.class)
                 .hasMessageContaining("User with login 'existinguser' already exists");
 
             verify(userRepository).findById(testUserId);
-            verify(userRepository).existsByLoginAndIdNot("existinguser", testUserId);
+            verify(userValidator).validateForUpdate(testUserId, updateDtoWithExistingLogin);
             verify(userMapper, never()).updateUserFromUpdateDto(any(), any());
             verify(userRepository, never()).save(any());
             verify(userMapper, never()).toUserResponseDto(any());
         }
 
         @Test
-        void updateUser_WithExistingEmail_ShouldThrowResponseStatusException() {
+        void updateUser_WithExistingEmail_ShouldThrowUniquenessValidationException() {
             UserUpdateDto updateDtoWithExistingEmail = new UserUpdateDto(
                 "updateduser",
                 "Updated",
@@ -743,17 +741,15 @@ class UserServiceImplTest {
             );
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            when(userRepository.existsByLoginAndIdNot("updateduser", testUserId)).thenReturn(false);
-            when(userRepository.existsByEmailAndIdNot("existing@example.com", testUserId)).thenReturn(true);
+            doThrow(new UniquenessValidationException("email", "existing@example.com"))
+                .when(userValidator).validateForUpdate(testUserId, updateDtoWithExistingEmail);
 
             assertThatThrownBy(() -> userService.updateUser(testUserId, updateDtoWithExistingEmail))
-                .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
-                .hasMessageContaining("409 CONFLICT")
+                .isInstanceOf(UniquenessValidationException.class)
                 .hasMessageContaining("User with email 'existing@example.com' already exists");
 
             verify(userRepository).findById(testUserId);
-            verify(userRepository).existsByLoginAndIdNot("updateduser", testUserId);
-            verify(userRepository).existsByEmailAndIdNot("existing@example.com", testUserId);
+            verify(userValidator).validateForUpdate(testUserId, updateDtoWithExistingEmail);
             verify(userMapper, never()).updateUserFromUpdateDto(any(), any());
             verify(userRepository, never()).save(any());
             verify(userMapper, never()).toUserResponseDto(any());
@@ -791,8 +787,6 @@ class UserServiceImplTest {
             );
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            when(userRepository.existsByLoginAndIdNot("testuser", testUserId)).thenReturn(false);
-            when(userRepository.existsByEmailAndIdNot("test@example.com", testUserId)).thenReturn(false);
             when(userRepository.save(any(User.class))).thenReturn(updatedUserWithSameData);
             when(userMapper.toUserResponseDto(updatedUserWithSameData)).thenReturn(responseDtoWithSameData);
 
@@ -805,8 +799,7 @@ class UserServiceImplTest {
             assertThat(result.get().firstName()).isEqualTo("Updated");
 
             verify(userRepository).findById(testUserId);
-            verify(userRepository).existsByLoginAndIdNot("testuser", testUserId);
-            verify(userRepository).existsByEmailAndIdNot("test@example.com", testUserId);
+            verify(userValidator).validateForUpdate(testUserId, updateDtoWithSameData);
             verify(userMapper).updateUserFromUpdateDto(updateDtoWithSameData, testUser);
             verify(userRepository).save(testUser);
             verify(userMapper).toUserResponseDto(updatedUserWithSameData);
@@ -872,7 +865,7 @@ class UserServiceImplTest {
         @Test
         void patchUser_WhenUserExists_ShouldPatchAndReturnUser() {
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            when(userMapper.toUserPatchDto(testUser)).thenReturn(testUserPatchDto);
+            when(patchDtoFactory.createPatchDto(testJsonNode)).thenReturn(testUserPatchDto);
             when(userRepository.save(any(User.class))).thenReturn(updatedUser);
             when(userMapper.toUserResponseDto(updatedUser)).thenReturn(testUserResponseDto);
 
@@ -887,7 +880,9 @@ class UserServiceImplTest {
             assertThat(result.get().email()).isEqualTo("patched@example.com");
 
             verify(userRepository).findById(testUserId);
-            verify(userMapper).toUserPatchDto(testUser);
+            verify(userValidator).validateForPatch(testUserId, testJsonNode);
+            verify(patchDtoFactory).createPatchDto(testJsonNode);
+            verify(userValidator).validateForPatchWithDto(testUserId, testUserPatchDto);
             verify(userMapper).updateUserFromPatchDto(testUserPatchDto, testUser);
             verify(userRepository).save(testUser);
             verify(userMapper).toUserResponseDto(updatedUser);
@@ -941,7 +936,7 @@ class UserServiceImplTest {
             );
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            when(userMapper.toUserPatchDto(testUser)).thenReturn(partialPatchDto);
+            when(patchDtoFactory.createPatchDto(partialJsonNode)).thenReturn(partialPatchDto);
             when(userRepository.save(any(User.class))).thenReturn(partiallyUpdatedUser);
             when(userMapper.toUserResponseDto(partiallyUpdatedUser)).thenReturn(partialResponseDto);
 
@@ -954,7 +949,9 @@ class UserServiceImplTest {
             assertThat(result.get().email()).isEqualTo("newemail@example.com");
 
             verify(userRepository).findById(testUserId);
-            verify(userMapper).toUserPatchDto(testUser);
+            verify(userValidator).validateForPatch(testUserId, partialJsonNode);
+            verify(patchDtoFactory).createPatchDto(partialJsonNode);
+            verify(userValidator).validateForPatchWithDto(testUserId, partialPatchDto);
             verify(userMapper).updateUserFromPatchDto(partialPatchDto, testUser);
             verify(userRepository).save(testUser);
             verify(userMapper).toUserResponseDto(partiallyUpdatedUser);
@@ -967,7 +964,7 @@ class UserServiceImplTest {
             UserPatchDto emptyPatchDto = new UserPatchDto();
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            when(userMapper.toUserPatchDto(testUser)).thenReturn(emptyPatchDto);
+            when(patchDtoFactory.createPatchDto(emptyJsonNode)).thenReturn(emptyPatchDto);
             when(userRepository.save(any(User.class))).thenReturn(testUser);
             when(userMapper.toUserResponseDto(testUser)).thenReturn(testUserResponseDto);
 
@@ -977,7 +974,9 @@ class UserServiceImplTest {
             assertThat(result.get()).isEqualTo(testUserResponseDto);
 
             verify(userRepository).findById(testUserId);
-            verify(userMapper).toUserPatchDto(testUser);
+            verify(userValidator).validateForPatch(testUserId, emptyJsonNode);
+            verify(patchDtoFactory).createPatchDto(emptyJsonNode);
+            verify(userValidator).validateForPatchWithDto(testUserId, emptyPatchDto);
             verify(userMapper).updateUserFromPatchDto(emptyPatchDto, testUser);
             verify(userRepository).save(testUser);
             verify(userMapper).toUserResponseDto(testUser);
@@ -1045,31 +1044,32 @@ class UserServiceImplTest {
         }
 
         @Test
-        void patchUser_WithExistingLogin_ShouldThrowResponseStatusException() throws Exception {
+        void patchUser_WithExistingLogin_ShouldThrowUniquenessValidationException() throws Exception {
             JsonNode jsonNodeWithExistingLogin = objectMapper.readTree("{\"login\":\"existinguser\"}");
 
             UserPatchDto patchDtoWithExistingLogin = new UserPatchDto();
             patchDtoWithExistingLogin.setLogin("existinguser");
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            when(userMapper.toUserPatchDto(testUser)).thenReturn(patchDtoWithExistingLogin);
-            when(userRepository.existsByLoginAndIdNot("existinguser", testUserId)).thenReturn(true);
+            when(patchDtoFactory.createPatchDto(jsonNodeWithExistingLogin)).thenReturn(patchDtoWithExistingLogin);
+            doThrow(new UniquenessValidationException("login", "existinguser"))
+                .when(userValidator).validateForPatchWithDto(testUserId, patchDtoWithExistingLogin);
 
             assertThatThrownBy(() -> userService.patchUser(testUserId, jsonNodeWithExistingLogin))
-                .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
-                .hasMessageContaining("409 CONFLICT")
+                .isInstanceOf(UniquenessValidationException.class)
                 .hasMessageContaining("User with login 'existinguser' already exists");
 
             verify(userRepository).findById(testUserId);
-            verify(userMapper).toUserPatchDto(testUser);
-            verify(userRepository).existsByLoginAndIdNot("existinguser", testUserId);
+            verify(userValidator).validateForPatch(testUserId, jsonNodeWithExistingLogin);
+            verify(patchDtoFactory).createPatchDto(jsonNodeWithExistingLogin);
+            verify(userValidator).validateForPatchWithDto(testUserId, patchDtoWithExistingLogin);
             verify(userMapper, never()).updateUserFromPatchDto(any(), any());
             verify(userRepository, never()).save(any());
             verify(userMapper, never()).toUserResponseDto(any());
         }
 
         @Test
-        void patchUser_WithExistingEmail_ShouldThrowResponseStatusException() throws Exception {
+        void patchUser_WithExistingEmail_ShouldThrowUniquenessValidationException() throws Exception {
             JsonNode jsonNodeWithExistingEmail = objectMapper.readTree("{\"email\":\"existing@example.com\"}");
 
             UserPatchDto patchDtoWithExistingEmail = new UserPatchDto();
@@ -1077,19 +1077,18 @@ class UserServiceImplTest {
             patchDtoWithExistingEmail.setEmail("existing@example.com");
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            when(userMapper.toUserPatchDto(testUser)).thenReturn(patchDtoWithExistingEmail);
-            when(userRepository.existsByLoginAndIdNot("testuser", testUserId)).thenReturn(false);
-            when(userRepository.existsByEmailAndIdNot("existing@example.com", testUserId)).thenReturn(true);
+            when(patchDtoFactory.createPatchDto(jsonNodeWithExistingEmail)).thenReturn(patchDtoWithExistingEmail);
+            doThrow(new UniquenessValidationException("email", "existing@example.com"))
+                .when(userValidator).validateForPatchWithDto(testUserId, patchDtoWithExistingEmail);
 
             assertThatThrownBy(() -> userService.patchUser(testUserId, jsonNodeWithExistingEmail))
-                .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
-                .hasMessageContaining("409 CONFLICT")
+                .isInstanceOf(UniquenessValidationException.class)
                 .hasMessageContaining("User with email 'existing@example.com' already exists");
 
             verify(userRepository).findById(testUserId);
-            verify(userMapper).toUserPatchDto(testUser);
-            verify(userRepository).existsByLoginAndIdNot("testuser", testUserId);
-            verify(userRepository).existsByEmailAndIdNot("existing@example.com", testUserId);
+            verify(userValidator).validateForPatch(testUserId, jsonNodeWithExistingEmail);
+            verify(patchDtoFactory).createPatchDto(jsonNodeWithExistingEmail);
+            verify(userValidator).validateForPatchWithDto(testUserId, patchDtoWithExistingEmail);
             verify(userMapper, never()).updateUserFromPatchDto(any(), any());
             verify(userRepository, never()).save(any());
             verify(userMapper, never()).toUserResponseDto(any());
@@ -1125,9 +1124,7 @@ class UserServiceImplTest {
             );
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            when(userMapper.toUserPatchDto(testUser)).thenReturn(patchDtoWithSameData);
-            when(userRepository.existsByLoginAndIdNot("testuser", testUserId)).thenReturn(false);
-            when(userRepository.existsByEmailAndIdNot("test@example.com", testUserId)).thenReturn(false);
+            when(patchDtoFactory.createPatchDto(jsonNodeWithSameData)).thenReturn(patchDtoWithSameData);
             when(userRepository.save(any(User.class))).thenReturn(patchedUserWithSameData);
             when(userMapper.toUserResponseDto(patchedUserWithSameData)).thenReturn(responseDtoWithSameData);
 
@@ -1139,16 +1136,16 @@ class UserServiceImplTest {
             assertThat(result.get().email()).isEqualTo("test@example.com");
 
             verify(userRepository).findById(testUserId);
-            verify(userMapper).toUserPatchDto(testUser);
-            verify(userRepository).existsByLoginAndIdNot("testuser", testUserId);
-            verify(userRepository).existsByEmailAndIdNot("test@example.com", testUserId);
+            verify(userValidator).validateForPatch(testUserId, jsonNodeWithSameData);
+            verify(patchDtoFactory).createPatchDto(jsonNodeWithSameData);
+            verify(userValidator).validateForPatchWithDto(testUserId, patchDtoWithSameData);
             verify(userMapper).updateUserFromPatchDto(patchDtoWithSameData, testUser);
             verify(userRepository).save(testUser);
             verify(userMapper).toUserResponseDto(patchedUserWithSameData);
         }
 
         @Test
-        void patchUser_WithInvalidLoginTooShort_ShouldThrowResponseStatusException() throws Exception {
+        void patchUser_WithInvalidLoginTooShort_ShouldThrowFormatValidationException() throws Exception {
             JsonNode invalidLoginJsonNode = objectMapper.readTree("{\"login\":\"ab\"}");
 
             UserPatchDto invalidPatchDto = new UserPatchDto();
@@ -1156,17 +1153,18 @@ class UserServiceImplTest {
             invalidPatchDto.setEmail("test@example.com");
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            when(userMapper.toUserPatchDto(testUser)).thenReturn(invalidPatchDto);
+            when(patchDtoFactory.createPatchDto(invalidLoginJsonNode)).thenReturn(invalidPatchDto);
+            doThrow(FormatValidationException.beanValidationError("login", "Size", "Login must be between 3 and 50 characters"))
+                .when(userValidator).validateForPatchWithDto(testUserId, invalidPatchDto);
 
             assertThatThrownBy(() -> userService.patchUser(testUserId, invalidLoginJsonNode))
-                .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
-                .hasMessageContaining("400 BAD_REQUEST")
-                .hasMessageContaining("Validation failed: login: Login must be between 3 and 50 characters");
+                .isInstanceOf(FormatValidationException.class)
+                .hasMessageContaining("Login must be between 3 and 50 characters");
 
             verify(userRepository).findById(testUserId);
-            verify(userMapper).toUserPatchDto(testUser);
-            verify(userRepository, never()).existsByLoginAndIdNot(any(), any());
-            verify(userRepository, never()).existsByEmailAndIdNot(any(), any());
+            verify(userValidator).validateForPatch(testUserId, invalidLoginJsonNode);
+            verify(patchDtoFactory).createPatchDto(invalidLoginJsonNode);
+            verify(userValidator).validateForPatchWithDto(testUserId, invalidPatchDto);
             verify(userMapper, never()).updateUserFromPatchDto(any(), any());
             verify(userRepository, never()).save(any());
             verify(userMapper, never()).toUserResponseDto(any());
@@ -1332,7 +1330,7 @@ class UserServiceImplTest {
             assertThat(result.get().status()).isEqualTo(UserStatus.INACTIVE);
 
             verify(userRepository).findById(testUserId);
-            verify(userRepository).countByRoleAndStatus(UserRole.ADMIN, UserStatus.ACTIVE);
+            verify(userValidator).validateAdminDeactivation(testUserId);
             verify(userRepository).save(adminUser);
             verify(userMapper).toUserResponseDto(inactivatedAdminUser);
         }
@@ -1354,7 +1352,7 @@ class UserServiceImplTest {
         }
 
         @Test
-        void inactivateUser_WhenUserIsLastActiveAdmin_ShouldThrowLastAdminDeactivationException() {
+        void inactivateUser_WhenUserIsLastActiveAdmin_ShouldThrowBusinessRuleValidationException() {
             User adminUser = new User()
                 .setId(testUserId)
                 .setLogin("adminuser")
@@ -1367,14 +1365,15 @@ class UserServiceImplTest {
                 .setRole(UserRole.ADMIN);
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(adminUser));
-            when(userRepository.countByRoleAndStatus(UserRole.ADMIN, UserStatus.ACTIVE)).thenReturn(1L);
+            doThrow(BusinessRuleValidationException.lastAdminDeactivation(testUserId))
+                .when(userValidator).validateAdminDeactivation(testUserId);
 
             assertThatThrownBy(() -> userService.inactivateUser(testUserId))
-                .isInstanceOf(LastAdminDeactivationException.class)
-                .hasMessage("409 CONFLICT \"Cannot deactivate the last active administrator\"");
+                .isInstanceOf(BusinessRuleValidationException.class)
+                .hasMessageContaining("Business rule 'LAST_ADMIN_DEACTIVATION' violated");
 
             verify(userRepository).findById(testUserId);
-            verify(userRepository).countByRoleAndStatus(UserRole.ADMIN, UserStatus.ACTIVE);
+            verify(userValidator).validateAdminDeactivation(testUserId);
             verify(userRepository, never()).save(any());
             verify(userMapper, never()).toUserResponseDto(any());
         }
@@ -1569,7 +1568,7 @@ class UserServiceImplTest {
             assertThat(result.get().role()).isEqualTo(UserRole.MODERATOR);
 
             verify(userRepository).findById(testUserId);
-            verify(userRepository).countByRoleAndStatus(UserRole.ADMIN, UserStatus.ACTIVE);
+            verify(userValidator).validateRoleChange(testUserId, UserRole.MODERATOR);
             verify(userRepository).save(adminUser);
             verify(userMapper).toUserResponseDto(updatedAdminUser);
         }
@@ -1591,7 +1590,7 @@ class UserServiceImplTest {
         }
 
         @Test
-        void updateUserRole_WhenUserIsLastActiveAdmin_ShouldThrowLastAdminDeactivationException() {
+        void updateUserRole_WhenUserIsLastActiveAdmin_ShouldThrowBusinessRuleValidationException() {
             User adminUser = new User()
                 .setId(testUserId)
                 .setLogin("adminuser")
@@ -1604,14 +1603,15 @@ class UserServiceImplTest {
                 .setRole(UserRole.ADMIN);
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(adminUser));
-            when(userRepository.countByRoleAndStatus(UserRole.ADMIN, UserStatus.ACTIVE)).thenReturn(1L);
+            doThrow(BusinessRuleValidationException.lastAdminRoleChange(testUserId, UserRole.MODERATOR))
+                .when(userValidator).validateRoleChange(testUserId, UserRole.MODERATOR);
 
             assertThatThrownBy(() -> userService.updateUserRole(testUserId, testRoleUpdateDto))
-                .isInstanceOf(LastAdminDeactivationException.class)
-                .hasMessage("409 CONFLICT \"Cannot change role of the last active administrator\"");
+                .isInstanceOf(BusinessRuleValidationException.class)
+                .hasMessageContaining("Business rule 'LAST_ADMIN_ROLE_CHANGE' violated");
 
             verify(userRepository).findById(testUserId);
-            verify(userRepository).countByRoleAndStatus(UserRole.ADMIN, UserStatus.ACTIVE);
+            verify(userValidator).validateRoleChange(testUserId, UserRole.MODERATOR);
             verify(userRepository, never()).save(any());
             verify(userMapper, never()).toUserResponseDto(any());
         }
