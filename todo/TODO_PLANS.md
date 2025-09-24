@@ -1,3 +1,6 @@
+- валидация логина в PatchDto
+- objectMapper удалить из UserServiceImplTest
+- validator удалить из UserServiceImplTest
 - проверить все валидации 
 - PatchDtoFactory разобраться насколько нужен
 - проверить что после ревью стало с проверкой последнего админа в 2 методах, объединить самому

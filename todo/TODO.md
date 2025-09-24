@@ -53,8 +53,9 @@
   note: "Добавлен импорт ValidationException и обработчик для базового класса. Все исключения валидации теперь корректно обрабатываются в GlobalExceptionHandler. Тесты UserServiceImplTest прошли успешно."
 
 #### Тестирование
-- [ ] (P1) #13: Создание unit-тестов для UserValidator — Покрытие всех сценариев валидации.  
+- [x] (P1) [2025-01-21 18:30] #13: Создание unit-тестов для UserValidator — Покрытие всех сценариев валидации.  
   acceptance: "Тесты для всех методов валидации с позитивными и негативными сценариями"
+  note: "Создан comprehensive набор unit-тестов UserValidatorImplTest с 8 вложенными классами тестов, покрывающими все методы валидации. Включены позитивные и негативные сценарии для всех методов: validateForCreate, validateForUpdate, validateForPatch, validateForPatchWithDto, validateUniqueness, validateAdminDeactivation, validateRoleChange, validatePatchData, validatePatchConstraints. Все тесты прошли успешно."
 
 - [ ] (P2) #14: Обновление существующих тестов — Адаптация тестов UserServiceImpl под новую архитектуру.  
   acceptance: "Все существующие тесты проходят с новой реализацией"

@@ -13,3 +13,4 @@
 - 15:40 — step 6 refactored — Рефакторинг validateForPatch: разделение на два метода, создание PatchDtoFactory — автор: assistant
 - 17:30 — Исправление тестов CreateUserTest после рефакторинга — автор: assistant
 - 18:00 — step 12 done — Обновление обработки ошибок — автор: assistant
+- 18:30 — step 13 done — Создание unit-тестов для UserValidator — автор: assistant
