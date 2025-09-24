@@ -3,6 +3,7 @@ package com.twitter.common.exception;
 import com.twitter.exception.validation.BusinessRuleValidationException;
 import com.twitter.exception.validation.FormatValidationException;
 import com.twitter.exception.validation.UniquenessValidationException;
+import com.twitter.exception.validation.ValidationException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -122,6 +123,22 @@ public class GlobalExceptionHandler {
         problemDetail.setTitle("Last Admin Deactivation Error");
         problemDetail.setType(URI.create("https://example.com/errors/last-admin-deactivation"));
         problemDetail.setProperty("timestamp", Instant.now());
+        return problemDetail;
+    }
+
+    /**
+     * Обработка базовых исключений валидации (fallback для необработанных ValidationException)
+     */
+    @ExceptionHandler(ValidationException.class)
+    public ProblemDetail handleValidationException(ValidationException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+            HttpStatus.BAD_REQUEST,
+            ex.getMessage()
+        );
+        problemDetail.setTitle("Validation Error");
+        problemDetail.setType(URI.create("https://example.com/errors/validation-error"));
+        problemDetail.setProperty("timestamp", Instant.now());
+        problemDetail.setProperty("validationType", ex.getValidationType().name());
         return problemDetail;
     }
 }
