@@ -31,11 +31,10 @@ public class PatchDtoFactory {
      * @return UserPatchDto для валидации
      * @throws FormatValidationException при ошибке парсинга JSON
      */
-    public UserPatchDto createPatchDto(JsonNode patchNode) {
+    public UserPatchDto createPatchDto(UserPatchDto userPatchDto, JsonNode patchNode) {
         try {
-            UserPatchDto patchDto = new UserPatchDto();
-            objectMapper.readerForUpdating(patchDto).readValue(patchNode);
-            return patchDto;
+            objectMapper.readerForUpdating(userPatchDto).readValue(patchNode);
+            return userPatchDto;
         } catch (IOException e) {
             log.error("Error creating patch DTO from JSON node", e);
             throw FormatValidationException.jsonParsingError(e);

@@ -50,15 +50,9 @@ public class UserValidatorImpl implements UserValidator {
     @Override
     public void validateForPatch(UUID userId, JsonNode patchNode) {
         validatePatchData(patchNode);
-        // Валидация уникальности будет выполнена после создания DTO в вызывающем коде
     }
     
-    /**
-     * Валидация PATCH данных с готовым DTO.
-     * 
-     * @param userId ID пользователя для исключения из проверки уникальности
-     * @param patchDto готовый DTO для валидации
-     */
+    @Override
     public void validateForPatchWithDto(UUID userId, UserPatchDto patchDto) {
         validatePatchConstraints(patchDto);
         validateUniqueness(patchDto.getLogin(), patchDto.getEmail(), userId);

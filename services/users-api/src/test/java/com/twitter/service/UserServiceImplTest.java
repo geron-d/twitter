@@ -865,7 +865,8 @@ class UserServiceImplTest {
         @Test
         void patchUser_WhenUserExists_ShouldPatchAndReturnUser() {
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            when(patchDtoFactory.createPatchDto(testJsonNode)).thenReturn(testUserPatchDto);
+            when(userMapper.toUserPatchDto(testUser)).thenReturn(testUserPatchDto);
+            when(patchDtoFactory.createPatchDto(any(UserPatchDto.class), eq(testJsonNode))).thenReturn(testUserPatchDto);
             when(userRepository.save(any(User.class))).thenReturn(updatedUser);
             when(userMapper.toUserResponseDto(updatedUser)).thenReturn(testUserResponseDto);
 
@@ -881,7 +882,8 @@ class UserServiceImplTest {
 
             verify(userRepository).findById(testUserId);
             verify(userValidator).validateForPatch(testUserId, testJsonNode);
-            verify(patchDtoFactory).createPatchDto(testJsonNode);
+            verify(userMapper).toUserPatchDto(testUser);
+            verify(patchDtoFactory).createPatchDto(any(UserPatchDto.class), eq(testJsonNode));
             verify(userValidator).validateForPatchWithDto(testUserId, testUserPatchDto);
             verify(userMapper).updateUserFromPatchDto(testUserPatchDto, testUser);
             verify(userRepository).save(testUser);
@@ -936,7 +938,8 @@ class UserServiceImplTest {
             );
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            when(patchDtoFactory.createPatchDto(partialJsonNode)).thenReturn(partialPatchDto);
+            when(userMapper.toUserPatchDto(testUser)).thenReturn(partialPatchDto);
+            when(patchDtoFactory.createPatchDto(any(UserPatchDto.class), eq(partialJsonNode))).thenReturn(partialPatchDto);
             when(userRepository.save(any(User.class))).thenReturn(partiallyUpdatedUser);
             when(userMapper.toUserResponseDto(partiallyUpdatedUser)).thenReturn(partialResponseDto);
 
@@ -950,7 +953,8 @@ class UserServiceImplTest {
 
             verify(userRepository).findById(testUserId);
             verify(userValidator).validateForPatch(testUserId, partialJsonNode);
-            verify(patchDtoFactory).createPatchDto(partialJsonNode);
+            verify(userMapper).toUserPatchDto(testUser);
+            verify(patchDtoFactory).createPatchDto(any(UserPatchDto.class), eq(partialJsonNode));
             verify(userValidator).validateForPatchWithDto(testUserId, partialPatchDto);
             verify(userMapper).updateUserFromPatchDto(partialPatchDto, testUser);
             verify(userRepository).save(testUser);
@@ -964,7 +968,8 @@ class UserServiceImplTest {
             UserPatchDto emptyPatchDto = new UserPatchDto();
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            when(patchDtoFactory.createPatchDto(emptyJsonNode)).thenReturn(emptyPatchDto);
+            when(userMapper.toUserPatchDto(testUser)).thenReturn(emptyPatchDto);
+            when(patchDtoFactory.createPatchDto(any(UserPatchDto.class), eq(emptyJsonNode))).thenReturn(emptyPatchDto);
             when(userRepository.save(any(User.class))).thenReturn(testUser);
             when(userMapper.toUserResponseDto(testUser)).thenReturn(testUserResponseDto);
 
@@ -975,7 +980,8 @@ class UserServiceImplTest {
 
             verify(userRepository).findById(testUserId);
             verify(userValidator).validateForPatch(testUserId, emptyJsonNode);
-            verify(patchDtoFactory).createPatchDto(emptyJsonNode);
+            verify(userMapper).toUserPatchDto(testUser);
+            verify(patchDtoFactory).createPatchDto(any(UserPatchDto.class), eq(emptyJsonNode));
             verify(userValidator).validateForPatchWithDto(testUserId, emptyPatchDto);
             verify(userMapper).updateUserFromPatchDto(emptyPatchDto, testUser);
             verify(userRepository).save(testUser);
@@ -1025,7 +1031,8 @@ class UserServiceImplTest {
             );
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            when(patchDtoFactory.createPatchDto(singleFieldJsonNode)).thenReturn(singleFieldPatchDto);
+            when(userMapper.toUserPatchDto(testUser)).thenReturn(singleFieldPatchDto);
+            when(patchDtoFactory.createPatchDto(any(UserPatchDto.class), eq(singleFieldJsonNode))).thenReturn(singleFieldPatchDto);
             when(userRepository.save(any(User.class))).thenReturn(singleFieldUpdatedUser);
             when(userMapper.toUserResponseDto(singleFieldUpdatedUser)).thenReturn(singleFieldResponseDto);
 
@@ -1039,7 +1046,8 @@ class UserServiceImplTest {
 
             verify(userRepository).findById(testUserId);
             verify(userValidator).validateForPatch(testUserId, singleFieldJsonNode);
-            verify(patchDtoFactory).createPatchDto(singleFieldJsonNode);
+            verify(userMapper).toUserPatchDto(testUser);
+            verify(patchDtoFactory).createPatchDto(any(UserPatchDto.class), eq(singleFieldJsonNode));
             verify(userValidator).validateForPatchWithDto(testUserId, singleFieldPatchDto);
             verify(userMapper).updateUserFromPatchDto(singleFieldPatchDto, testUser);
             verify(userRepository).save(testUser);
@@ -1054,7 +1062,8 @@ class UserServiceImplTest {
             patchDtoWithExistingLogin.setLogin("existinguser");
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            when(patchDtoFactory.createPatchDto(jsonNodeWithExistingLogin)).thenReturn(patchDtoWithExistingLogin);
+            when(userMapper.toUserPatchDto(testUser)).thenReturn(patchDtoWithExistingLogin);
+            when(patchDtoFactory.createPatchDto(any(UserPatchDto.class), eq(jsonNodeWithExistingLogin))).thenReturn(patchDtoWithExistingLogin);
             doThrow(new UniquenessValidationException("login", "existinguser"))
                 .when(userValidator).validateForPatchWithDto(testUserId, patchDtoWithExistingLogin);
 
@@ -1064,7 +1073,8 @@ class UserServiceImplTest {
 
             verify(userRepository).findById(testUserId);
             verify(userValidator).validateForPatch(testUserId, jsonNodeWithExistingLogin);
-            verify(patchDtoFactory).createPatchDto(jsonNodeWithExistingLogin);
+            verify(userMapper).toUserPatchDto(testUser);
+            verify(patchDtoFactory).createPatchDto(any(UserPatchDto.class), eq(jsonNodeWithExistingLogin));
             verify(userValidator).validateForPatchWithDto(testUserId, patchDtoWithExistingLogin);
             verify(userMapper, never()).updateUserFromPatchDto(any(), any());
             verify(userRepository, never()).save(any());
@@ -1080,7 +1090,8 @@ class UserServiceImplTest {
             patchDtoWithExistingEmail.setEmail("existing@example.com");
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            when(patchDtoFactory.createPatchDto(jsonNodeWithExistingEmail)).thenReturn(patchDtoWithExistingEmail);
+            when(userMapper.toUserPatchDto(testUser)).thenReturn(patchDtoWithExistingEmail);
+            when(patchDtoFactory.createPatchDto(any(UserPatchDto.class), eq(jsonNodeWithExistingEmail))).thenReturn(patchDtoWithExistingEmail);
             doThrow(new UniquenessValidationException("email", "existing@example.com"))
                 .when(userValidator).validateForPatchWithDto(testUserId, patchDtoWithExistingEmail);
 
@@ -1090,7 +1101,8 @@ class UserServiceImplTest {
 
             verify(userRepository).findById(testUserId);
             verify(userValidator).validateForPatch(testUserId, jsonNodeWithExistingEmail);
-            verify(patchDtoFactory).createPatchDto(jsonNodeWithExistingEmail);
+            verify(userMapper).toUserPatchDto(testUser);
+            verify(patchDtoFactory).createPatchDto(any(UserPatchDto.class), eq(jsonNodeWithExistingEmail));
             verify(userValidator).validateForPatchWithDto(testUserId, patchDtoWithExistingEmail);
             verify(userMapper, never()).updateUserFromPatchDto(any(), any());
             verify(userRepository, never()).save(any());
@@ -1127,7 +1139,8 @@ class UserServiceImplTest {
             );
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            when(patchDtoFactory.createPatchDto(jsonNodeWithSameData)).thenReturn(patchDtoWithSameData);
+            when(userMapper.toUserPatchDto(testUser)).thenReturn(patchDtoWithSameData);
+            when(patchDtoFactory.createPatchDto(any(UserPatchDto.class), eq(jsonNodeWithSameData))).thenReturn(patchDtoWithSameData);
             when(userRepository.save(any(User.class))).thenReturn(patchedUserWithSameData);
             when(userMapper.toUserResponseDto(patchedUserWithSameData)).thenReturn(responseDtoWithSameData);
 
@@ -1140,7 +1153,8 @@ class UserServiceImplTest {
 
             verify(userRepository).findById(testUserId);
             verify(userValidator).validateForPatch(testUserId, jsonNodeWithSameData);
-            verify(patchDtoFactory).createPatchDto(jsonNodeWithSameData);
+            verify(userMapper).toUserPatchDto(testUser);
+            verify(patchDtoFactory).createPatchDto(any(UserPatchDto.class), eq(jsonNodeWithSameData));
             verify(userValidator).validateForPatchWithDto(testUserId, patchDtoWithSameData);
             verify(userMapper).updateUserFromPatchDto(patchDtoWithSameData, testUser);
             verify(userRepository).save(testUser);
@@ -1156,7 +1170,8 @@ class UserServiceImplTest {
             invalidPatchDto.setEmail("test@example.com");
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            when(patchDtoFactory.createPatchDto(invalidLoginJsonNode)).thenReturn(invalidPatchDto);
+            when(userMapper.toUserPatchDto(testUser)).thenReturn(invalidPatchDto);
+            when(patchDtoFactory.createPatchDto(any(UserPatchDto.class), eq(invalidLoginJsonNode))).thenReturn(invalidPatchDto);
             doThrow(FormatValidationException.beanValidationError("login", "Size", "Login must be between 3 and 50 characters"))
                 .when(userValidator).validateForPatchWithDto(testUserId, invalidPatchDto);
 
@@ -1166,7 +1181,8 @@ class UserServiceImplTest {
 
             verify(userRepository).findById(testUserId);
             verify(userValidator).validateForPatch(testUserId, invalidLoginJsonNode);
-            verify(patchDtoFactory).createPatchDto(invalidLoginJsonNode);
+            verify(userMapper).toUserPatchDto(testUser);
+            verify(patchDtoFactory).createPatchDto(any(UserPatchDto.class), eq(invalidLoginJsonNode));
             verify(userValidator).validateForPatchWithDto(testUserId, invalidPatchDto);
             verify(userMapper, never()).updateUserFromPatchDto(any(), any());
             verify(userRepository, never()).save(any());
@@ -1183,7 +1199,8 @@ class UserServiceImplTest {
             invalidPatchDto.setEmail("test@example.com");
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            when(patchDtoFactory.createPatchDto(invalidLoginJsonNode)).thenReturn(invalidPatchDto);
+            when(userMapper.toUserPatchDto(testUser)).thenReturn(invalidPatchDto);
+            when(patchDtoFactory.createPatchDto(any(UserPatchDto.class), eq(invalidLoginJsonNode))).thenReturn(invalidPatchDto);
             doThrow(FormatValidationException.beanValidationError("login", "Size", "Login must be between 3 and 50 characters"))
                 .when(userValidator).validateForPatchWithDto(testUserId, invalidPatchDto);
 
@@ -1193,7 +1210,8 @@ class UserServiceImplTest {
 
             verify(userRepository).findById(testUserId);
             verify(userValidator).validateForPatch(testUserId, invalidLoginJsonNode);
-            verify(patchDtoFactory).createPatchDto(invalidLoginJsonNode);
+            verify(userMapper).toUserPatchDto(testUser);
+            verify(patchDtoFactory).createPatchDto(any(UserPatchDto.class), eq(invalidLoginJsonNode));
             verify(userValidator).validateForPatchWithDto(testUserId, invalidPatchDto);
             verify(userMapper, never()).updateUserFromPatchDto(any(), any());
             verify(userRepository, never()).save(any());
@@ -1209,7 +1227,8 @@ class UserServiceImplTest {
             invalidPatchDto.setEmail("invalid-email");
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            when(patchDtoFactory.createPatchDto(invalidEmailJsonNode)).thenReturn(invalidPatchDto);
+            when(userMapper.toUserPatchDto(testUser)).thenReturn(invalidPatchDto);
+            when(patchDtoFactory.createPatchDto(any(UserPatchDto.class), eq(invalidEmailJsonNode))).thenReturn(invalidPatchDto);
             doThrow(FormatValidationException.beanValidationError("email", "Email", "Invalid email format"))
                 .when(userValidator).validateForPatchWithDto(testUserId, invalidPatchDto);
 
@@ -1219,7 +1238,8 @@ class UserServiceImplTest {
 
             verify(userRepository).findById(testUserId);
             verify(userValidator).validateForPatch(testUserId, invalidEmailJsonNode);
-            verify(patchDtoFactory).createPatchDto(invalidEmailJsonNode);
+            verify(userMapper).toUserPatchDto(testUser);
+            verify(patchDtoFactory).createPatchDto(any(UserPatchDto.class), eq(invalidEmailJsonNode));
             verify(userValidator).validateForPatchWithDto(testUserId, invalidPatchDto);
             verify(userMapper, never()).updateUserFromPatchDto(any(), any());
             verify(userRepository, never()).save(any());

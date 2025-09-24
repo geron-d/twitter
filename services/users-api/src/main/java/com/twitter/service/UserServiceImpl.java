@@ -81,7 +81,9 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(id).map(user -> {
             userValidator.validateForPatch(id, patchNode);
 
-            UserPatchDto userPatchDto = patchDtoFactory.createPatchDto(patchNode);
+            UserPatchDto userPatchDto = userMapper.toUserPatchDto(user);
+            userPatchDto = patchDtoFactory.createPatchDto(userPatchDto, patchNode);
+
             userValidator.validateForPatchWithDto(id, userPatchDto);
 
             userMapper.updateUserFromPatchDto(userPatchDto, user);

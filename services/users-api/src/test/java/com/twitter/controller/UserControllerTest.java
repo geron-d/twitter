@@ -968,8 +968,8 @@ public class UserControllerTest {
             mockMvc.perform(patch("/api/v1/users/{id}/inactivate", adminId))
                 .andExpect(status().isConflict())
                 .andExpect(content().contentType("application/problem+json"))
-                .andExpect(jsonPath("$.title").value("Last Admin Deactivation Error"))
-                .andExpect(jsonPath("$.detail").value("Cannot deactivate the last active administrator"));
+                .andExpect(jsonPath("$.title").value("Business Rule Validation Error"))
+                .andExpect(jsonPath("$.detail").value("Business rule 'LAST_ADMIN_DEACTIVATION' violated for context: " + admin.getId()));
         }
 
         @Test
@@ -1058,8 +1058,8 @@ public class UserControllerTest {
                     .content(requestJson))
                 .andExpect(status().isConflict())
                 .andExpect(content().contentType("application/problem+json"))
-                .andExpect(jsonPath("$.title").value("Last Admin Deactivation Error"))
-                .andExpect(jsonPath("$.detail").value("Cannot change role of the last active administrator"));
+                .andExpect(jsonPath("$.title").value("Business Rule Validation Error"))
+                .andExpect(jsonPath("$.detail").value("Business rule 'LAST_ADMIN_ROLE_CHANGE' violated for context: userId=" + lastAdmin.getId() +", newRole=" + roleUpdate.role()));
         }
 
         @Test
