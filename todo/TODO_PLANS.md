@@ -1,4 +1,3 @@
-- валидация логина в PatchDto тесты
 - objectMapper удалить из UserServiceImplTest
 - validator удалить из UserServiceImplTest
 - проверить все валидации 

@@ -408,5 +408,28 @@ class UserValidatorImplTest {
                 .isInstanceOf(FormatValidationException.class)
                 .hasMessageContaining("Validation failed");
         }
+
+        @Test
+        void validatePatchConstraints_WithLoginTooShort_ShouldThrowFormatValidationException() {
+            UserPatchDto invalidPatchDto = new UserPatchDto();
+            invalidPatchDto.setLogin("ab"); // 2 символа - меньше минимального значения 3
+
+            assertThatThrownBy(() -> userValidator.validatePatchConstraints(invalidPatchDto))
+                .isInstanceOf(FormatValidationException.class)
+                .hasMessageContaining("Validation failed")
+                .hasMessageContaining("login: Login must be between 3 and 50 characters");
+        }
+
+        @Test
+        void validatePatchConstraints_WithLoginTooLong_ShouldThrowFormatValidationException() {
+            UserPatchDto invalidPatchDto = new UserPatchDto();
+            String longLogin = "a".repeat(51); // 51 символ - больше максимального значения 50
+            invalidPatchDto.setLogin(longLogin);
+
+            assertThatThrownBy(() -> userValidator.validatePatchConstraints(invalidPatchDto))
+                .isInstanceOf(FormatValidationException.class)
+                .hasMessageContaining("Validation failed")
+                .hasMessageContaining("login: Login must be between 3 and 50 characters");
+        }
     }
 }
