@@ -14,3 +14,4 @@
 - 17:30 — Исправление тестов CreateUserTest после рефакторинга — автор: assistant
 - 18:00 — step 12 done — Обновление обработки ошибок — автор: assistant
 - 18:30 — step 13 done — Создание unit-тестов для UserValidator — автор: assistant
+- 19:00 — step 14 done — Обновление существующих тестов — автор: assistant

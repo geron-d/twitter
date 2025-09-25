@@ -602,6 +602,7 @@ class UserServiceImplTest {
             assertThat(result.get().lastName()).isEqualTo("User");
             assertThat(result.get().email()).isEqualTo("updated@example.com");
 
+            verify(userValidator).validateForUpdate(testUserId, testUserUpdateDto);
             verify(userRepository).findById(testUserId);
             verify(userMapper).updateUserFromUpdateDto(testUserUpdateDto, testUser);
             verify(userRepository).save(testUser);
@@ -1426,6 +1427,7 @@ class UserServiceImplTest {
             assertThat(result.get().status()).isEqualTo(UserStatus.INACTIVE);
 
             verify(userRepository).findById(testUserId);
+            verify(userValidator).validateAdminDeactivation(testUserId);
             verify(userRepository).save(inactiveUser);
             verify(userMapper).toUserResponseDto(inactiveUser);
         }
@@ -1475,6 +1477,7 @@ class UserServiceImplTest {
             assertThat(result.get().status()).isEqualTo(UserStatus.INACTIVE);
 
             verify(userRepository).findById(testUserId);
+            verify(userValidator).validateAdminDeactivation(testUserId);
             verify(userRepository, never()).countByRoleAndStatus(any(), any());
             verify(userRepository).save(moderatorUser);
             verify(userMapper).toUserResponseDto(inactivatedModeratorUser);
@@ -1542,6 +1545,7 @@ class UserServiceImplTest {
             assertThat(result.get().role()).isEqualTo(UserRole.MODERATOR);
 
             verify(userRepository).findById(testUserId);
+            verify(userValidator).validateRoleChange(testUserId, UserRole.MODERATOR);
             verify(userRepository).save(testUser);
             verify(userMapper).toUserResponseDto(updatedUser);
         }
