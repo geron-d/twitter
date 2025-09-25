@@ -15,3 +15,4 @@
 - 18:00 — step 12 done — Обновление обработки ошибок — автор: assistant
 - 18:30 — step 13 done — Создание unit-тестов для UserValidator — автор: assistant
 - 19:00 — step 14 done — Обновление существующих тестов — автор: assistant
+- 19:30 — step 15 done — Интеграционные тесты — автор: assistant

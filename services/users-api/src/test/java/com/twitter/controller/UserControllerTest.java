@@ -29,6 +29,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.util.List;
 import java.util.UUID;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -455,7 +456,12 @@ public class UserControllerTest {
             mockMvc.perform(post("/api/v1/users")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(requestJson))
-                .andExpect(status().isConflict());
+                .andExpect(status().isConflict())
+                .andExpect(content().contentType("application/problem+json"))
+                .andExpect(jsonPath("$.title").value("Uniqueness Validation Error"))
+                .andExpect(jsonPath("$.detail").value("User with login 'duplicateuser' already exists"))
+                .andExpect(jsonPath("$.fieldName").value("login"))
+                .andExpect(jsonPath("$.fieldValue").value("duplicateuser"));
         }
 
         @Test
@@ -475,7 +481,12 @@ public class UserControllerTest {
             mockMvc.perform(post("/api/v1/users")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(requestJson))
-                .andExpect(status().isConflict());
+                .andExpect(status().isConflict())
+                .andExpect(content().contentType("application/problem+json"))
+                .andExpect(jsonPath("$.title").value("Uniqueness Validation Error"))
+                .andExpect(jsonPath("$.detail").value("User with email 'duplicate@example.com' already exists"))
+                .andExpect(jsonPath("$.fieldName").value("email"))
+                .andExpect(jsonPath("$.fieldValue").value("duplicate@example.com"));
         }
     }
 
@@ -856,7 +867,10 @@ public class UserControllerTest {
             mockMvc.perform(patch("/api/v1/users/{id}", userId)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(patchJson))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType("application/problem+json"))
+                .andExpect(jsonPath("$.title").value("Format Validation Error"))
+                .andExpect(jsonPath("$.detail").value(containsString("Validation failed")));
         }
 
         @Test
@@ -969,7 +983,8 @@ public class UserControllerTest {
                 .andExpect(status().isConflict())
                 .andExpect(content().contentType("application/problem+json"))
                 .andExpect(jsonPath("$.title").value("Business Rule Validation Error"))
-                .andExpect(jsonPath("$.detail").value("Business rule 'LAST_ADMIN_DEACTIVATION' violated for context: " + admin.getId()));
+                .andExpect(jsonPath("$.detail").value("Business rule 'LAST_ADMIN_DEACTIVATION' violated for context: " + admin.getId()))
+                .andExpect(jsonPath("$.ruleName").value("LAST_ADMIN_DEACTIVATION"));
         }
 
         @Test
