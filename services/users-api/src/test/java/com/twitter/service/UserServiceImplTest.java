@@ -14,15 +14,12 @@ import com.twitter.mapper.UserMapper;
 import com.twitter.repository.UserRepository;
 import com.twitter.util.PatchDtoFactory;
 import com.twitter.validation.UserValidator;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -49,9 +46,6 @@ class UserServiceImplTest {
 
     @Mock
     private UserMapper userMapper;
-
-    @Spy
-    private Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
     @Mock
     private UserValidator userValidator;

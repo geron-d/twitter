@@ -1,37 +1,6 @@
 ## ⚠️ Замечания и потенциальные проблемы
 
-### 1. Архитектура и дизайн
-
-#### Проблема: Отсутствие слоя валидации бизнес-правил
-```java
-// В UserServiceImpl.java - валидация разбросана по методам
-private void validateUserUniqueness(String login, String email, UUID excludeUserId) {
-    // Бизнес-логика валидации смешана с сервисной логикой
-}
-```
-
-**Рекомендация:** Создать отдельный слой валидации или использовать Bean Validation groups.
-
-#### Проблема: Смешение ответственности в UserServiceImpl
-```java
-// Метод patchUser содержит слишком много логики
-public Optional<UserResponseDto> patchUser(UUID id, JsonNode patchNode) {
-    // JSON Patch + валидация + маппинг + сохранение в одном методе
-}
-```
-
 ### 4. Код-стайл и читаемость
-
-#### Проблема: Длинные методы
-```java
-// UserServiceImpl.patchUser() - 24 строки
-public Optional<UserResponseDto> patchUser(UUID id, JsonNode patchNode) {
-    return userRepository.findById(id).map(user -> {
-        UserPatchDto userPatchDto = userMapper.toUserPatchDto(user);
-        // ... много логики
-    });
-}
-```
 
 #### Проблема: Отсутствие JavaDoc для публичных методов
 ```java
