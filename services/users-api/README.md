@@ -35,6 +35,12 @@ com.twitter/
 ├── enums/
 │   ├── UserRole.java             # Роли пользователей
 │   └── UserStatus.java           # Статусы пользователей
+├── exception/
+│   └── validation/               # Исключения валидации
+│       ├── ValidationException.java           # Базовое исключение
+│       ├── UniquenessValidationException.java # Ошибки уникальности
+│       ├── BusinessRuleValidationException.java # Бизнес-правила
+│       └── FormatValidationException.java     # Формат данных
 ├── mapper/
 │   └── UserMapper.java           # MapStruct маппер
 ├── repository/
@@ -42,8 +48,12 @@ com.twitter/
 ├── service/
 │   ├── UserService.java          # Интерфейс сервиса
 │   └── UserServiceImpl.java      # Реализация сервиса
-└── util/
-    └── PasswordUtil.java         # Утилиты для работы с паролями
+├── util/
+│   ├── PasswordUtil.java         # Утилиты для работы с паролями
+│   └── PatchDtoFactory.java      # Фабрика для PATCH операций
+└── validation/
+    ├── UserValidator.java         # Интерфейс валидатора
+    └── UserValidatorImpl.java     # Реализация валидатора
 ```
 
 ### Диаграмма компонентов
@@ -53,17 +63,29 @@ com.twitter/
 │   UserController│────│   UserService   │────│  UserRepository │
 │                 │    │                 │    │                 │
 │ - REST Endpoints│    │ - Business Logic│    │ - Data Access   │
-│ - Validation    │    │ - Validation    │    │ - Queries       │
+│ - Error Handling│    │ - Orchestration │    │ - Queries       │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         │                       │                       │
-         ▼                       ▼                       ▼
+                                │                       │
+         │──────────────────────│                       │
+         ▼                      ▼                       ▼
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│      DTOs       │    │   UserMapper    │    │   PostgreSQL    │
+│   UserValidator │    │   UserMapper    │    │   PostgreSQL    │
 │                 │    │                 │    │                 │
-│ - Request/Response│   │ - Entity Mapping│   │ - Database      │
-│ - Validation    │    │ - DTO Conversion│    │ - Tables        │
+│ - Data Validation│   │ - Entity Mapping│    │ - Database      │
+│ - Business Rules│    │ - DTO Conversion│    │ - Tables        │
+│ - Uniqueness    │    │                 │    │                 │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │
+         │                       │
+         ▼                       ▼
+┌─────────────────┐    ┌─────────────────┐
+│   Validation    │    │      DTOs       │
+│   Exceptions    │    │                 │
+│                 │    │ - Request/Response│
+│ - Uniqueness    │    │ - Validation    │
+│ - Business Rules│    │ - Constraints   │
+│ - Format Errors │    │                 │
+└─────────────────┘    └─────────────────┘
 ```
 
 ## REST API
@@ -341,6 +363,152 @@ Content-Type: application/json
    - Используется Jakarta Validation
    - Кастомная валидация для бизнес-правил
 
+## Слой валидации
+
+### Архитектура валидации
+
+Сервис использует централизованный слой валидации через `UserValidator`, который обеспечивает:
+
+- **Единообразную валидацию** для всех операций с пользователями
+- **Разделение ответственности** между бизнес-логикой и валидацией
+- **Типизированные исключения** для различных видов ошибок
+- **Интеграцию с Jakarta Validation** для проверки формата данных
+
+### UserValidator
+
+Интерфейс `UserValidator` определяет методы валидации для всех операций с пользователями. Он включает методы для валидации создания, обновления, частичного обновления, проверки уникальности, деактивации администраторов и смены ролей.
+
+### Типы исключений валидации
+
+#### 1. ValidationException (базовое исключение)
+Базовое абстрактное исключение для всех типов ошибок валидации. Содержит информацию о типе валидации и контексте ошибки.
+
+#### 2. UniquenessValidationException
+Используется для ошибок уникальности логина и email. Содержит информацию о поле, которое нарушает уникальность, и его значении.
+
+**HTTP статус:** `409 Conflict`  
+**Content-Type:** `application/problem+json`
+
+**Пример ответа:**
+```json
+{
+  "title": "Uniqueness Validation Error",
+  "detail": "User with login 'testuser' already exists",
+  "fieldName": "login",
+  "fieldValue": "testuser",
+  "validationType": "UNIQUENESS",
+  "timestamp": "2025-01-21T19:30:00Z"
+}
+```
+
+#### 3. BusinessRuleValidationException
+Используется для нарушений бизнес-правил, таких как попытка деактивировать последнего администратора или изменить его роль. Содержит название нарушенного правила.
+
+**HTTP статус:** `409 Conflict`  
+**Content-Type:** `application/problem+json`
+
+**Пример ответа:**
+```json
+{
+  "title": "Business Rule Validation Error",
+  "detail": "Business rule 'LAST_ADMIN_DEACTIVATION' violated for context: userId=123e4567-e89b-12d3-a456-426614174000",
+  "ruleName": "LAST_ADMIN_DEACTIVATION",
+  "validationType": "BUSINESS_RULE",
+  "timestamp": "2025-01-21T19:30:00Z"
+}
+```
+
+#### 4. FormatValidationException
+Используется для ошибок формата данных, таких как некорректная длина логина, невалидный email или другие нарушения ограничений Jakarta Validation.
+
+**HTTP статус:** `400 Bad Request`  
+**Content-Type:** `application/problem+json`
+
+**Пример ответа:**
+```json
+{
+  "title": "Format Validation Error",
+  "detail": "Validation failed for field 'login': size must be between 3 and 50",
+  "validationType": "FORMAT",
+  "timestamp": "2025-01-21T19:30:00Z"
+}
+```
+
+### Валидация по операциям
+
+#### Создание пользователя (CREATE)
+Проверяется уникальность логина и email среди всех существующих пользователей. При обнаружении дублирования выбрасывается `UniquenessValidationException`.
+
+#### Обновление пользователя (UPDATE)
+Проверяется уникальность логина и email среди всех пользователей, исключая текущего обновляемого пользователя. Это позволяет пользователю сохранить свои текущие данные при обновлении других полей.
+
+#### Частичное обновление (PATCH)
+Выполняется двухэтапная валидация: сначала проверяется структура JSON Patch, затем применяется Bean Validation к результирующему DTO. Дополнительно проверяется уникальность только тех полей, которые изменяются.
+
+#### Деактивация пользователя (INACTIVATE)
+Проверяется бизнес-правило: нельзя деактивировать последнего активного администратора в системе. При попытке деактивации последнего админа выбрасывается `BusinessRuleValidationException`.
+
+#### Смена роли (ROLE_CHANGE)
+Проверяется бизнес-правило: нельзя изменить роль последнего активного администратора на любую другую роль. Это гарантирует наличие хотя бы одного администратора в системе.
+
+### Примеры использования
+
+#### Создание пользователя с дублирующимся логином
+```bash
+curl -X POST http://localhost:8080/api/v1/users \
+  -H "Content-Type: application/json" \
+  -d '{
+    "login": "existinguser",
+    "email": "new@example.com",
+    "password": "password123"
+  }'
+```
+
+**Ответ (409 Conflict):**
+```json
+{
+  "title": "Uniqueness Validation Error",
+  "detail": "User with login 'existinguser' already exists",
+  "fieldName": "login",
+  "fieldValue": "existinguser",
+  "validationType": "UNIQUENESS",
+  "timestamp": "2025-01-21T19:30:00Z"
+}
+```
+
+#### Попытка деактивировать последнего админа
+```bash
+curl -X PATCH http://localhost:8080/api/v1/users/123e4567-e89b-12d3-a456-426614174000/inactivate
+```
+
+**Ответ (409 Conflict):**
+```json
+{
+  "title": "Business Rule Validation Error",
+  "detail": "Business rule 'LAST_ADMIN_DEACTIVATION' violated for context: userId=123e4567-e89b-12d3-a456-426614174000",
+  "ruleName": "LAST_ADMIN_DEACTIVATION",
+  "validationType": "BUSINESS_RULE",
+  "timestamp": "2025-01-21T19:30:00Z"
+}
+```
+
+#### PATCH с некорректным форматом данных
+```bash
+curl -X PATCH http://localhost:8080/api/v1/users/123e4567-e89b-12d3-a456-426614174000 \
+  -H "Content-Type: application/json" \
+  -d '{"login": "ab"}'
+```
+
+**Ответ (400 Bad Request):**
+```json
+{
+  "title": "Format Validation Error",
+  "detail": "Validation failed for field 'login': size must be between 3 and 50",
+  "validationType": "FORMAT",
+  "timestamp": "2025-01-21T19:30:00Z"
+}
+```
+
 ## Работа с базой данных
 
 ### Сущность User
@@ -534,12 +702,13 @@ curl -X PATCH http://localhost:8080/api/v1/users/123e4567-e89b-12d3-a456-4266141
 │ - objectMapper: ObjectMapper                                │
 │ - userMapper: UserMapper                                    │
 │ - userRepository: UserRepository                            │
-│ - validator: Validator                                      │
+│ - userValidator: UserValidator                             │
+│ - patchDtoFactory: PatchDtoFactory                         │
 ├─────────────────────────────────────────────────────────────┤
 │ + getUserById(id: UUID): Optional<UserResponseDto>         │
 │ + findAll(filter: UserFilter, pageable: Pageable):         │
 │   Page<UserResponseDto>                                     │
-│ + createUser(request: UserRequestDto): UserResponseDto     │
+│ + createUser(request: UserRequestDto): UserResponseDto      │
 │ + updateUser(id: UUID, details: UserUpdateDto):            │
 │   Optional<UserResponseDto>                                │
 │ + patchUser(id: UUID, patch: JsonNode):                    │
@@ -547,9 +716,25 @@ curl -X PATCH http://localhost:8080/api/v1/users/123e4567-e89b-12d3-a456-4266141
 │ + inactivateUser(id: UUID): Optional<UserResponseDto>      │
 │ + updateUserRole(id: UUID, role: UserRoleUpdateDto):       │
 │   Optional<UserResponseDto>                                │
-│ - validateUserUniqueness(login: String, email: String,     │
-│   excludeUserId: UUID): void                               │
 │ - setPassword(user: User, password: String): void          │
+└─────────────────────────────────────────────────────────────┘
+                                │
+                                │ uses
+                                ▼
+┌─────────────────────────────────────────────────────────────┐
+│                      UserValidator                           │
+├─────────────────────────────────────────────────────────────┤
+│ + validateForCreate(request: UserRequestDto): void         │
+│ + validateForUpdate(id: UUID, update: UserUpdateDto): void │
+│ + validateForPatch(id: UUID, patch: JsonNode): void         │
+│ + validateForPatchWithDto(id: UUID, patch: UserPatchDto):   │
+│   void                                                      │
+│ + validateUniqueness(login: String, email: String,         │
+│   excludeUserId: UUID): void                               │
+│ + validateAdminDeactivation(id: UUID): void                │
+│ + validateRoleChange(id: UUID, newRole: UserRole): void    │
+│ + validatePatchData(patch: JsonNode): void                 │
+│ + validatePatchConstraints(patch: UserPatchDto): void       │
 └─────────────────────────────────────────────────────────────┘
                                 │
                                 │ uses
@@ -641,10 +826,11 @@ docker run -p 8080:8080 users-api
 
 Проект включает:
 
-- Unit тесты для всех компонентов
-- Integration тесты с TestContainers
-- Тесты валидации
-- Тесты безопасности паролей
+- **Unit тесты** для всех компонентов
+- **Integration тесты** с TestContainers
+- **Тесты валидации** с покрытием всех сценариев
+- **Тесты безопасности** паролей
+- **Тесты исключений** валидации
 
 Запуск тестов:
 

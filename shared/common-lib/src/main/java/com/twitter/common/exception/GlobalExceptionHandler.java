@@ -1,5 +1,9 @@
 package com.twitter.common.exception;
 
+import com.twitter.exception.validation.BusinessRuleValidationException;
+import com.twitter.exception.validation.FormatValidationException;
+import com.twitter.exception.validation.UniquenessValidationException;
+import com.twitter.exception.validation.ValidationException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -57,6 +61,57 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Обработка ошибок уникальности (дублирование логина/email)
+     */
+    @ExceptionHandler(UniquenessValidationException.class)
+    public ProblemDetail handleUniquenessValidationException(UniquenessValidationException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+            HttpStatus.CONFLICT,
+            ex.getMessage()
+        );
+        problemDetail.setTitle("Uniqueness Validation Error");
+        problemDetail.setType(URI.create("https://example.com/errors/uniqueness-validation"));
+        problemDetail.setProperty("timestamp", Instant.now());
+        problemDetail.setProperty("fieldName", ex.getFieldName());
+        problemDetail.setProperty("fieldValue", ex.getFieldValue());
+        return problemDetail;
+    }
+
+    /**
+     * Обработка ошибок бизнес-правил (деактивация последнего админа, смена роли)
+     */
+    @ExceptionHandler(BusinessRuleValidationException.class)
+    public ProblemDetail handleBusinessRuleValidationException(BusinessRuleValidationException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+            HttpStatus.CONFLICT,
+            ex.getMessage()
+        );
+        problemDetail.setTitle("Business Rule Validation Error");
+        problemDetail.setType(URI.create("https://example.com/errors/business-rule-validation"));
+        problemDetail.setProperty("timestamp", Instant.now());
+        problemDetail.setProperty("ruleName", ex.getRuleName());
+        problemDetail.setProperty("context", ex.getContext());
+        return problemDetail;
+    }
+
+    /**
+     * Обработка ошибок формата данных (Bean Validation, JSON parsing)
+     */
+    @ExceptionHandler(FormatValidationException.class)
+    public ProblemDetail handleFormatValidationException(FormatValidationException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+            HttpStatus.BAD_REQUEST,
+            ex.getMessage()
+        );
+        problemDetail.setTitle("Format Validation Error");
+        problemDetail.setType(URI.create("https://example.com/errors/format-validation"));
+        problemDetail.setProperty("timestamp", Instant.now());
+        problemDetail.setProperty("fieldName", ex.getFieldName());
+        problemDetail.setProperty("constraintName", ex.getConstraintName());
+        return problemDetail;
+    }
+
+    /**
      * Обработка попытки деактивации последнего администратора
      */
     @ExceptionHandler(LastAdminDeactivationException.class)
@@ -68,6 +123,22 @@ public class GlobalExceptionHandler {
         problemDetail.setTitle("Last Admin Deactivation Error");
         problemDetail.setType(URI.create("https://example.com/errors/last-admin-deactivation"));
         problemDetail.setProperty("timestamp", Instant.now());
+        return problemDetail;
+    }
+
+    /**
+     * Обработка базовых исключений валидации (fallback для необработанных ValidationException)
+     */
+    @ExceptionHandler(ValidationException.class)
+    public ProblemDetail handleValidationException(ValidationException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+            HttpStatus.BAD_REQUEST,
+            ex.getMessage()
+        );
+        problemDetail.setTitle("Validation Error");
+        problemDetail.setType(URI.create("https://example.com/errors/validation-error"));
+        problemDetail.setProperty("timestamp", Instant.now());
+        problemDetail.setProperty("validationType", ex.getValidationType().name());
         return problemDetail;
     }
 }

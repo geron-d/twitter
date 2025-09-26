@@ -1,8 +1,6 @@
 package com.twitter.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.twitter.common.exception.LastAdminDeactivationException;
 import com.twitter.dto.*;
 import com.twitter.dto.filter.UserFilter;
 import com.twitter.entity.User;
@@ -11,35 +9,31 @@ import com.twitter.enums.UserStatus;
 import com.twitter.mapper.UserMapper;
 import com.twitter.repository.UserRepository;
 import com.twitter.util.PasswordUtil;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validator;
+import com.twitter.util.PatchDtoFactory;
+import com.twitter.validation.UserValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private final ObjectMapper objectMapper;
     private final UserMapper userMapper;
     private final UserRepository userRepository;
-    private final Validator validator;
+    private final UserValidator userValidator;
+    private final PatchDtoFactory patchDtoFactory;
 
     @Override
     public Optional<UserResponseDto> getUserById(UUID id) {
@@ -54,7 +48,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto createUser(UserRequestDto userRequest) {
-        validateUserUniqueness(userRequest.login(), userRequest.email(), null);
+        userValidator.validateForCreate(userRequest);
 
         User user = userMapper.toUser(userRequest);
         user.setStatus(UserStatus.ACTIVE);
@@ -69,7 +63,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Optional<UserResponseDto> updateUser(UUID id, UserUpdateDto userDetails) {
         return userRepository.findById(id).map(user -> {
-            validateUserUniqueness(userDetails.login(), userDetails.email(), id);
+            userValidator.validateForUpdate(id, userDetails);
 
             userMapper.updateUserFromUpdateDto(userDetails, user);
 
@@ -85,23 +79,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public Optional<UserResponseDto> patchUser(UUID id, JsonNode patchNode) {
         return userRepository.findById(id).map(user -> {
+            userValidator.validateForPatch(id, patchNode);
+
             UserPatchDto userPatchDto = userMapper.toUserPatchDto(user);
+            userPatchDto = patchDtoFactory.createPatchDto(userPatchDto, patchNode);
 
-            try {
-                objectMapper.readerForUpdating(userPatchDto).readValue(patchNode);
-            } catch (IOException e) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error patching user: " + e.getMessage(), e);
-            }
+            userValidator.validateForPatchWithDto(id, userPatchDto);
 
-            Set<ConstraintViolation<UserPatchDto>> violations = validator.validate(userPatchDto);
-            if (!violations.isEmpty()) {
-                String errorMessage = violations.stream()
-                    .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
-                    .collect(Collectors.joining(", "));
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Validation failed: " + errorMessage);
-            }
-
-            validateUserUniqueness(userPatchDto.getLogin(), userPatchDto.getEmail(), id);
             userMapper.updateUserFromPatchDto(userPatchDto, user);
 
             User updatedUser = userRepository.save(user);
@@ -112,13 +96,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Optional<UserResponseDto> inactivateUser(UUID id) {
         return userRepository.findById(id).map(user -> {
-            if (user.getRole() == UserRole.ADMIN) {
-                long activeAdminCount = userRepository.countByRoleAndStatus(UserRole.ADMIN, UserStatus.ACTIVE);
-                if (activeAdminCount <= 1) {
-                    log.warn("Attempt to deactivate the last active administrator with ID: {}", id);
-                    throw new LastAdminDeactivationException("Cannot deactivate the last active administrator");
-                }
-            }
+            userValidator.validateAdminDeactivation(id);
 
             user.setStatus(UserStatus.INACTIVE);
             User updatedUser = userRepository.save(user);
@@ -133,15 +111,7 @@ public class UserServiceImpl implements UserService {
             UserRole oldRole = user.getRole();
             UserRole newRole = roleUpdate.role();
 
-            // Проверяем, что нельзя удалить последнего активного админа
-            if (oldRole == UserRole.ADMIN && newRole != UserRole.ADMIN) {
-                long activeAdminCount = userRepository.countByRoleAndStatus(UserRole.ADMIN, UserStatus.ACTIVE);
-                if (activeAdminCount <= 1) {
-                    log.warn("Attempt to change role of the last active administrator with ID: {} from {} to {}",
-                        id, oldRole, newRole);
-                    throw new LastAdminDeactivationException("Cannot change role of the last active administrator");
-                }
-            }
+            userValidator.validateRoleChange(id, newRole);
 
             user.setRole(newRole);
             User updatedUser = userRepository.save(user);
@@ -149,35 +119,6 @@ public class UserServiceImpl implements UserService {
             log.info("User role updated for ID {}: {} -> {}", id, oldRole, newRole);
             return userMapper.toUserResponseDto(updatedUser);
         });
-    }
-
-    /**
-     * Проверяет уникальность логина и email пользователя
-     *
-     * @param login         логин для проверки
-     * @param email         email для проверки
-     * @param excludeUserId ID пользователя, который исключается из проверки (для случаев обновления)
-     */
-    private void validateUserUniqueness(String login, String email, UUID excludeUserId) {
-        if (!ObjectUtils.isEmpty(login)) {
-            boolean loginExists = excludeUserId != null
-                ? userRepository.existsByLoginAndIdNot(login, excludeUserId)
-                : userRepository.existsByLogin(login);
-
-            if (loginExists) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "User with login '" + login + "' already exists");
-            }
-        }
-
-        if (!ObjectUtils.isEmpty(email)) {
-            boolean emailExists = excludeUserId != null
-                ? userRepository.existsByEmailAndIdNot(email, excludeUserId)
-                : userRepository.existsByEmail(email);
-
-            if (emailExists) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "User with email '" + email + "' already exists");
-            }
-        }
     }
 
     /**
