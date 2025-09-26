@@ -1,7 +1,7 @@
 package com.twitter.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.twitter.dto.*;
 import com.twitter.dto.filter.UserFilter;
 import com.twitter.entity.User;
@@ -49,9 +49,6 @@ class UserServiceImplTest {
 
     @Mock
     private UserMapper userMapper;
-
-    @Spy
-    private ObjectMapper objectMapper;
 
     @Spy
     private Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
@@ -818,7 +815,7 @@ class UserServiceImplTest {
         private UUID testUserId;
 
         @BeforeEach
-        void setUp() throws Exception {
+        void setUp() {
             testUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
 
             testUser = new User()
@@ -859,8 +856,11 @@ class UserServiceImplTest {
                 UserRole.USER
             );
 
-            testJsonNode = objectMapper.readTree("{\"login\":\"patcheduser\",\"firstName\":\"Patched\"," +
-                "\"lastName\":\"User\",\"email\":\"patched@example.com\"}");
+            testJsonNode = JsonNodeFactory.instance.objectNode()
+                .put("login", "patcheduser")
+                .put("firstName", "Patched")
+                .put("lastName", "User")
+                .put("email", "patched@example.com");
         }
 
         @Test
@@ -909,9 +909,10 @@ class UserServiceImplTest {
         }
 
         @Test
-        void patchUser_WithPartialData_ShouldPatchOnlyProvidedFields() throws Exception {
-            JsonNode partialJsonNode = objectMapper.readTree("{\"firstName\":\"NewName\"," +
-                "\"email\":\"newemail@example.com\"}");
+        void patchUser_WithPartialData_ShouldPatchOnlyProvidedFields() {
+            JsonNode partialJsonNode = JsonNodeFactory.instance.objectNode()
+                .put("firstName", "NewName")
+                .put("email", "newemail@example.com");
 
             UserPatchDto partialPatchDto = new UserPatchDto();
             partialPatchDto.setFirstName("NewName");
@@ -963,8 +964,8 @@ class UserServiceImplTest {
         }
 
         @Test
-        void patchUser_WithEmptyJson_ShouldNotChangeUser() throws Exception {
-            JsonNode emptyJsonNode = objectMapper.readTree("{}");
+        void patchUser_WithEmptyJson_ShouldNotChangeUser() {
+            JsonNode emptyJsonNode = JsonNodeFactory.instance.objectNode();
 
             UserPatchDto emptyPatchDto = new UserPatchDto();
 
@@ -1004,8 +1005,9 @@ class UserServiceImplTest {
         }
 
         @Test
-        void patchUser_WithSingleFieldUpdate_ShouldUpdateOnlyThatField() throws Exception {
-            JsonNode singleFieldJsonNode = objectMapper.readTree("{\"login\":\"newlogin\"}");
+        void patchUser_WithSingleFieldUpdate_ShouldUpdateOnlyThatField() {
+            JsonNode singleFieldJsonNode = JsonNodeFactory.instance.objectNode()
+                .put("login", "newlogin");
 
             UserPatchDto singleFieldPatchDto = new UserPatchDto();
             singleFieldPatchDto.setLogin("newlogin");
@@ -1056,8 +1058,9 @@ class UserServiceImplTest {
         }
 
         @Test
-        void patchUser_WithExistingLogin_ShouldThrowUniquenessValidationException() throws Exception {
-            JsonNode jsonNodeWithExistingLogin = objectMapper.readTree("{\"login\":\"existinguser\"}");
+        void patchUser_WithExistingLogin_ShouldThrowUniquenessValidationException() {
+            JsonNode jsonNodeWithExistingLogin = JsonNodeFactory.instance.objectNode()
+                .put("login", "existinguser");
 
             UserPatchDto patchDtoWithExistingLogin = new UserPatchDto();
             patchDtoWithExistingLogin.setLogin("existinguser");
@@ -1083,8 +1086,9 @@ class UserServiceImplTest {
         }
 
         @Test
-        void patchUser_WithExistingEmail_ShouldThrowUniquenessValidationException() throws Exception {
-            JsonNode jsonNodeWithExistingEmail = objectMapper.readTree("{\"email\":\"existing@example.com\"}");
+        void patchUser_WithExistingEmail_ShouldThrowUniquenessValidationException() {
+            JsonNode jsonNodeWithExistingEmail = JsonNodeFactory.instance.objectNode()
+                .put("email", "existing@example.com");
 
             UserPatchDto patchDtoWithExistingEmail = new UserPatchDto();
             patchDtoWithExistingEmail.setLogin("testuser"); // устанавливаем логин из текущего пользователя
@@ -1111,8 +1115,10 @@ class UserServiceImplTest {
         }
 
         @Test
-        void patchUser_WithSameLoginAndEmail_ShouldPatchUser() throws Exception {
-            JsonNode jsonNodeWithSameData = objectMapper.readTree("{\"login\":\"testuser\",\"email\":\"test@example.com\"}");
+        void patchUser_WithSameLoginAndEmail_ShouldPatchUser() {
+            JsonNode jsonNodeWithSameData = JsonNodeFactory.instance.objectNode()
+                .put("login", "testuser")
+                .put("email", "test@example.com");
 
             UserPatchDto patchDtoWithSameData = new UserPatchDto();
             patchDtoWithSameData.setLogin("testuser");
@@ -1163,8 +1169,9 @@ class UserServiceImplTest {
         }
 
         @Test
-        void patchUser_WithInvalidLoginTooShort_ShouldThrowFormatValidationException() throws Exception {
-            JsonNode invalidLoginJsonNode = objectMapper.readTree("{\"login\":\"ab\"}");
+        void patchUser_WithInvalidLoginTooShort_ShouldThrowFormatValidationException() {
+            JsonNode invalidLoginJsonNode = JsonNodeFactory.instance.objectNode()
+                .put("login", "ab");
 
             UserPatchDto invalidPatchDto = new UserPatchDto();
             invalidPatchDto.setLogin("ab");
@@ -1191,9 +1198,10 @@ class UserServiceImplTest {
         }
 
         @Test
-        void patchUser_WithInvalidLoginTooLong_ShouldThrowFormatValidationException() throws Exception {
+        void patchUser_WithInvalidLoginTooLong_ShouldThrowFormatValidationException() {
             String longLogin = "a".repeat(51);
-            JsonNode invalidLoginJsonNode = objectMapper.readTree("{\"login\":\"" + longLogin + "\"}");
+            JsonNode invalidLoginJsonNode = JsonNodeFactory.instance.objectNode()
+                .put("login", longLogin);
 
             UserPatchDto invalidPatchDto = new UserPatchDto();
             invalidPatchDto.setLogin(longLogin);
@@ -1220,8 +1228,9 @@ class UserServiceImplTest {
         }
 
         @Test
-        void patchUser_WithInvalidEmail_ShouldThrowFormatValidationException() throws Exception {
-            JsonNode invalidEmailJsonNode = objectMapper.readTree("{\"email\":\"invalid-email\"}");
+        void patchUser_WithInvalidEmail_ShouldThrowFormatValidationException() {
+            JsonNode invalidEmailJsonNode = JsonNodeFactory.instance.objectNode()
+                .put("email", "invalid-email");
 
             UserPatchDto invalidPatchDto = new UserPatchDto();
             invalidPatchDto.setLogin("testuser");
