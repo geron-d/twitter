@@ -5,6 +5,10 @@ import com.twitter.dto.UserPatchDto;
 import com.twitter.dto.UserRequestDto;
 import com.twitter.dto.UserUpdateDto;
 import com.twitter.enums.UserRole;
+import com.twitter.exception.validation.BusinessRuleValidationException;
+import com.twitter.exception.validation.FormatValidationException;
+import com.twitter.exception.validation.UniquenessValidationException;
+import com.twitter.exception.validation.ValidationException;
 
 import java.util.UUID;
 
