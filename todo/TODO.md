@@ -36,9 +36,10 @@
   metadata: priority=P2, done=2025-01-27T15:30, note="Добавлена полная JavaDoc документация с описанием алгоритмов"
 
 ### Phase 3: Exception Layer Documentation  
-- [ ] (P2) #6: Документирование GlobalExceptionHandler
+- [x] (P2) #6: Документирование GlobalExceptionHandler
   acceptance: "JavaDoc для всех @ExceptionHandler методов с описанием HTTP статусов и ProblemDetail"
   estimated: 2 hours
+  metadata: priority=P2, done=2025-01-27T15:45, note="Добавлена полная JavaDoc документация с примерами ответов"
   
 - [ ] (P2) #7: Документирование LastAdminDeactivationException
   acceptance: "Полная документация исключения с примерами использования"
