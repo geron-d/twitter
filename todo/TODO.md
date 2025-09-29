@@ -17,12 +17,12 @@
 - [x] (P1) #2: Определение стандартов JavaDoc документации
   acceptance: "Создан стандарт документации с примерами для всех типов элементов"
   estimated: 1 hour
-  metadata: priority=P1, done=2025-01-27T14:45, note="Создан файл JAVADOC_STANDARDS.md с полными стандартами"
+  metadata: priority=P1, done=2025-01-27T14:45, note="Создан файл standards/JAVADOC_STANDARDS.md с полными стандартами"
   
 - [x] (P1) #3: Создание шаблонов JavaDoc для различных типов элементов
   acceptance: "Шаблоны для классов, методов, аннотаций, enum'ов и исключений"
   estimated: 1 hour
-  metadata: priority=P1, done=2025-01-27T15:00, note="Создан файл JAVADOC_TEMPLATES.md с готовыми шаблонами"
+  metadata: priority=P1, done=2025-01-27T15:00, note="Создан файл standards/JAVADOC_TEMPLATES.md с готовыми шаблонами"
 
 ### Phase 2: Aspect Layer Documentation
 - [x] (P2) #4: Документирование аннотации @LoggableRequest
