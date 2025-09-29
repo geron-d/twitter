@@ -62,9 +62,10 @@
   estimated: 1 hour
   metadata: priority=P2, done=2025-01-27T16:45, note="Добавлена полная JavaDoc документация с описанием полей и конструкторов"
   
-- [ ] (P2) #11: Документирование FormatValidationException
+- [x] (P2) #11: Документирование FormatValidationException
   acceptance: "Исключение формата с factory методами и примерами"
   estimated: 1.5 hours
+  metadata: priority=P2, done=2025-01-27T17:00, note="Добавлена полная JavaDoc документация с factory методами и примерами"
   
 - [ ] (P2) #12: Документирование BusinessRuleValidationException
   acceptance: "Исключение бизнес-правил с factory методами для типичных случаев"

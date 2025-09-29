@@ -71,3 +71,9 @@
   - Документированы все конструкторы с примерами использования
   - Включены примеры проверки уникальности email и username
 
+- **2025-01-27 17:00** — step 11 done — Документирование FormatValidationException — автор: assistant
+  - Добавлена полная JavaDoc документация к классу FormatValidationException
+  - Документированы все поля: fieldName и constraintName с описанием назначения
+  - Документированы все конструкторы и factory методы с примерами использования
+  - Включены примеры для Bean Validation и JSON parsing ошибок
+
