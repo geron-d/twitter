@@ -30,9 +30,10 @@
   estimated: 1 hour
   metadata: priority=P2, done=2025-01-27T15:15, note="Добавлена полная JavaDoc документация с примерами и best practices"
   
-- [ ] (P2) #5: Документирование класса LoggableRequestAspect
+- [x] (P2) #5: Документирование класса LoggableRequestAspect
   acceptance: "Документация всех методов, включая приватные утилиты, с описанием алгоритмов"
   estimated: 2 hours
+  metadata: priority=P2, done=2025-01-27T15:30, note="Добавлена полная JavaDoc документация с описанием алгоритмов"
 
 ### Phase 3: Exception Layer Documentation  
 - [ ] (P2) #6: Документирование GlobalExceptionHandler
