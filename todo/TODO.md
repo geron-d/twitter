@@ -73,9 +73,10 @@
   metadata: priority=P2, done=2025-01-27T17:15, note="Добавлена полная JavaDoc документация с factory методами для типичных случаев"
 
 ### Phase 5: Enums Documentation
-- [ ] (P3) #13: Документирование UserRole enum
+- [x] (P3) #13: Документирование UserRole enum
   acceptance: "Описание всех ролей пользователей с их назначением"
   estimated: 0.5 hours
+  metadata: priority=P3, done=2025-01-27T17:30, note="Добавлена полная JavaDoc документация с описанием всех ролей и их назначения"
   
 - [ ] (P3) #14: Документирование UserStatus enum
   acceptance: "Описание статусов пользователей с контекстом использования"
