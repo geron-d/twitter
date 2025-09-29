@@ -41,9 +41,10 @@
   estimated: 2 hours
   metadata: priority=P2, done=2025-01-27T15:45, note="Добавлена полная JavaDoc документация с примерами ответов"
   
-- [ ] (P2) #7: Документирование LastAdminDeactivationException
+- [x] (P2) #7: Документирование LastAdminDeactivationException
   acceptance: "Полная документация исключения с примерами использования"
   estimated: 1 hour
+  metadata: priority=P2, done=2025-01-27T16:00, note="Добавлена полная JavaDoc документация с примерами использования"
 
 ### Phase 4: Validation Layer Documentation
 - [ ] (P2) #8: Документирование базового класса ValidationException
