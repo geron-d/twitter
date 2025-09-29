@@ -25,9 +25,10 @@
   metadata: priority=P1, done=2025-01-27T15:00, note="Создан файл JAVADOC_TEMPLATES.md с готовыми шаблонами"
 
 ### Phase 2: Aspect Layer Documentation
-- [ ] (P2) #4: Документирование аннотации @LoggableRequest
+- [x] (P2) #4: Документирование аннотации @LoggableRequest
   acceptance: "Полная JavaDoc с описанием параметров, примеров использования и best practices"
   estimated: 1 hour
+  metadata: priority=P2, done=2025-01-27T15:15, note="Добавлена полная JavaDoc документация с примерами и best practices"
   
 - [ ] (P2) #5: Документирование класса LoggableRequestAspect
   acceptance: "Документация всех методов, включая приватные утилиты, с описанием алгоритмов"

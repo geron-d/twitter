@@ -1,3 +1,4 @@
+- добавить PROJECT_OVERVIEW и README на английском
 - добавить поле createdAt
 - сделать класс userDataValidator - для валидации данных
 - swagger
