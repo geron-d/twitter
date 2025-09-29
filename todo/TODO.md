@@ -47,9 +47,10 @@
   metadata: priority=P2, done=2025-01-27T16:00, note="Добавлена полная JavaDoc документация с примерами использования"
 
 ### Phase 4: Validation Layer Documentation
-- [ ] (P2) #8: Документирование базового класса ValidationException
+- [x] (P2) #8: Документирование базового класса ValidationException
   acceptance: "Абстрактный класс с описанием архитектуры валидации"
   estimated: 1 hour
+  metadata: priority=P2, done=2025-01-27T16:15, note="Добавлена полная JavaDoc документация с описанием архитектуры"
   
 - [ ] (P2) #9: Документирование enum ValidationType
   acceptance: "Описание всех типов валидации с примерами использования"
