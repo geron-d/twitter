@@ -52,9 +52,10 @@
   estimated: 1 hour
   metadata: priority=P2, done=2025-01-27T16:15, note="Добавлена полная JavaDoc документация с описанием архитектуры"
   
-- [ ] (P2) #9: Документирование enum ValidationType
+- [x] (P2) #9: Документирование enum ValidationType
   acceptance: "Описание всех типов валидации с примерами использования"
   estimated: 1 hour
+  metadata: priority=P2, done=2025-01-27T16:30, note="Добавлена полная JavaDoc документация с примерами использования"
   
 - [ ] (P2) #10: Документирование UniquenessValidationException
   acceptance: "Исключение уникальности с описанием полей и конструкторов"

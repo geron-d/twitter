@@ -5,13 +5,13 @@ import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Exception thrown when attempting to deactivate the last active administrator.
- * 
+ *
  * <p>
  * This exception prevents the system from being left without any active
  * administrators, which could lead to system lockout scenarios. It is thrown
  * when a user management operation attempts to deactivate an administrator
  * account, but that account is the only remaining active administrator in the system.
- * 
+ *
  * <p>The exception provides the following functionality:</p>
  * <ul>
  *   <li>Prevents system lockout by blocking last admin deactivation</li>
@@ -19,7 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
  *   <li>Provides customizable error messages</li>
  *   <li>Supports cause chaining for debugging</li>
  * </ul>
- * 
+ *
  * <p>Example usage:</p>
  * <pre>{@code
  * // Check if user is the last admin before deactivation
@@ -28,7 +28,7 @@ import org.springframework.web.server.ResponseStatusException;
  *         "Cannot deactivate user " + userId + " - they are the last active administrator"
  *     );
  * }
- * 
+ *
  * // With cause chaining
  * try {
  *     userService.deactivateUser(userId);
@@ -38,12 +38,12 @@ import org.springframework.web.server.ResponseStatusException;
  *     );
  * }
  * }</pre>
- * 
+ *
  * @author Twitter Team
  * @version 1.0
- * @since 2025-01-27
  * @see GlobalExceptionHandler#handleLastAdminDeactivationException(LastAdminDeactivationException)
  * @see ResponseStatusException for base functionality
+ * @since 2025-01-27
  */
 public class LastAdminDeactivationException extends ResponseStatusException {
 
@@ -55,12 +55,12 @@ public class LastAdminDeactivationException extends ResponseStatusException {
 
     /**
      * Constructs a new LastAdminDeactivationException with the default message.
-     * 
+     *
      * <p>
      * This constructor creates an exception with a standard message indicating
      * that the last active administrator cannot be deactivated. It sets the
      * HTTP status to 409 Conflict.
-     * 
+     *
      * <p>Example:</p>
      * <pre>{@code
      * if (isLastAdmin(userId)) {
@@ -74,19 +74,19 @@ public class LastAdminDeactivationException extends ResponseStatusException {
 
     /**
      * Constructs a new LastAdminDeactivationException with a custom reason.
-     * 
+     *
      * <p>
      * This constructor allows specifying a custom error message that provides
      * more context about why the deactivation was blocked. The message should
      * clearly explain the business rule violation.
-     * 
+     *
      * <p>Example:</p>
      * <pre>{@code
      * throw new LastAdminDeactivationException(
      *     "User " + userId + " cannot be deactivated as they are the only remaining administrator"
      * );
      * }</pre>
-     * 
+     *
      * @param reason the detailed reason why the deactivation was blocked
      */
     public LastAdminDeactivationException(String reason) {
@@ -95,12 +95,12 @@ public class LastAdminDeactivationException extends ResponseStatusException {
 
     /**
      * Constructs a new LastAdminDeactivationException with a custom reason and cause.
-     * 
+     *
      * <p>
      * This constructor allows specifying both a custom error message and the
      * underlying cause that led to the exception. This is useful for wrapping
      * other exceptions while providing context about the admin deactivation rule.
-     * 
+     *
      * <p>Example:</p>
      * <pre>{@code
      * try {
@@ -111,7 +111,7 @@ public class LastAdminDeactivationException extends ResponseStatusException {
      *     );
      * }
      * }</pre>
-     * 
+     *
      * @param reason the detailed reason why the deactivation was blocked
      * @param cause  the underlying cause that led to this exception
      */
