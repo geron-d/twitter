@@ -47,6 +47,19 @@ import java.time.Instant;
 public class GlobalExceptionHandler {
 
     /**
+     * Default constructor for GlobalExceptionHandler.
+     *
+     * <p>
+     * This constructor creates a new instance of GlobalExceptionHandler.
+     * The handler is automatically registered with Spring's exception handling
+     * mechanism through the @RestControllerAdvice annotation.
+     * </p>
+     */
+    public GlobalExceptionHandler() {
+        // Default constructor - Spring will handle initialization
+    }
+
+    /**
      * Handles Spring's ResponseStatusException and converts it to ProblemDetail.
      *
      * <p>

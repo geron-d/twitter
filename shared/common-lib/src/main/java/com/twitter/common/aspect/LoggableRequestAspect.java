@@ -57,6 +57,19 @@ import java.util.stream.Collectors;
 public class LoggableRequestAspect {
 
     /**
+     * Default constructor for LoggableRequestAspect.
+     *
+     * <p>
+     * This constructor creates a new instance of LoggableRequestAspect.
+     * The aspect is automatically registered with Spring's AOP mechanism
+     * through the @Aspect and @Component annotations.
+     * </p>
+     */
+    public LoggableRequestAspect() {
+        // Default constructor - Spring will handle initialization
+    }
+
+    /**
      * Jackson ObjectMapper for JSON serialization/deserialization.
      * Used for converting request bodies to JSON and hiding sensitive fields.
      */
