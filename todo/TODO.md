@@ -57,9 +57,10 @@
   estimated: 1 hour
   metadata: priority=P2, done=2025-01-27T16:30, note="Добавлена полная JavaDoc документация с примерами использования"
   
-- [ ] (P2) #10: Документирование UniquenessValidationException
+- [x] (P2) #10: Документирование UniquenessValidationException
   acceptance: "Исключение уникальности с описанием полей и конструкторов"
   estimated: 1 hour
+  metadata: priority=P2, done=2025-01-27T16:45, note="Добавлена полная JavaDoc документация с описанием полей и конструкторов"
   
 - [ ] (P2) #11: Документирование FormatValidationException
   acceptance: "Исключение формата с factory методами и примерами"
