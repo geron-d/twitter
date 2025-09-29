@@ -67,9 +67,10 @@
   estimated: 1.5 hours
   metadata: priority=P2, done=2025-01-27T17:00, note="Добавлена полная JavaDoc документация с factory методами и примерами"
   
-- [ ] (P2) #12: Документирование BusinessRuleValidationException
+- [x] (P2) #12: Документирование BusinessRuleValidationException
   acceptance: "Исключение бизнес-правил с factory методами для типичных случаев"
   estimated: 1.5 hours
+  metadata: priority=P2, done=2025-01-27T17:15, note="Добавлена полная JavaDoc документация с factory методами для типичных случаев"
 
 ### Phase 5: Enums Documentation
 - [ ] (P3) #13: Документирование UserRole enum
