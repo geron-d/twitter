@@ -78,9 +78,10 @@
   estimated: 0.5 hours
   metadata: priority=P3, done=2025-01-27T17:30, note="Добавлена полная JavaDoc документация с описанием всех ролей и их назначения"
   
-- [ ] (P3) #14: Документирование UserStatus enum
+- [x] (P3) #14: Документирование UserStatus enum
   acceptance: "Описание статусов пользователей с контекстом использования"
   estimated: 0.5 hours
+  metadata: priority=P3, done=2025-01-27T17:45, note="Добавлена полная JavaDoc документация с описанием статусов и контекста использования"
 
 ### Phase 6: Verification and Testing
 - [ ] (P1) #15: Проверка корректности JavaDoc синтаксиса
