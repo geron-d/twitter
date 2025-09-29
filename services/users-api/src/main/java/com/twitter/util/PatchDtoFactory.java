@@ -26,10 +26,13 @@ public class PatchDtoFactory {
     
     /**
      * Создает UserPatchDto из JsonNode для валидации.
+     * Применяет JSON патч к существующему DTO объекту, обновляя только указанные поля.
+     * Использует Jackson ObjectMapper для безопасного парсинга и обновления полей.
      *
-     * @param patchNode JSON данные патча
-     * @return UserPatchDto для валидации
-     * @throws FormatValidationException при ошибке парсинга JSON
+     * @param userPatchDto базовый DTO объект для обновления
+     * @param patchNode JSON данные патча с полями для обновления
+     * @return обновленный UserPatchDto с примененными изменениями
+     * @throws FormatValidationException при ошибке парсинга JSON или неверном формате данных
      */
     public UserPatchDto createPatchDto(UserPatchDto userPatchDto, JsonNode patchNode) {
         try {
