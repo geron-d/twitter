@@ -1,4 +1,3 @@
-- GlobalExceptionHandler проверить что в правильном пакете ну или пакеты enums и exception перенести в common
 - переписать javadoc в users-api в соответствии со стандартами
 - добавить PROJECT_OVERVIEW и README на английском
 - добавить поле createdAt

@@ -3,7 +3,7 @@ package com.twitter.util;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.twitter.dto.UserPatchDto;
-import com.twitter.exception.validation.FormatValidationException;
+import com.twitter.common.exception.validation.FormatValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

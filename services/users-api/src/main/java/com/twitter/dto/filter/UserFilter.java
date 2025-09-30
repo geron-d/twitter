@@ -1,7 +1,7 @@
 package com.twitter.dto.filter;
 
 import com.twitter.entity.User;
-import com.twitter.enums.UserRole;
+import com.twitter.common.enums.UserRole;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
 

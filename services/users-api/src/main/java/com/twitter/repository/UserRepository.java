@@ -1,8 +1,8 @@
 package com.twitter.repository;
 
 import com.twitter.entity.User;
-import com.twitter.enums.UserRole;
-import com.twitter.enums.UserStatus;
+import com.twitter.common.enums.UserRole;
+import com.twitter.common.enums.UserStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 

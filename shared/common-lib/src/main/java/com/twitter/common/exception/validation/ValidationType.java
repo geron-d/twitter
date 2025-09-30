@@ -1,4 +1,4 @@
-package com.twitter.exception.validation;
+package com.twitter.common.exception.validation;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

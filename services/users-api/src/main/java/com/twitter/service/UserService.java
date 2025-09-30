@@ -6,8 +6,8 @@ import com.twitter.dto.UserResponseDto;
 import com.twitter.dto.UserRoleUpdateDto;
 import com.twitter.dto.UserUpdateDto;
 import com.twitter.dto.filter.UserFilter;
-import com.twitter.exception.validation.BusinessRuleValidationException;
-import com.twitter.exception.validation.ValidationException;
+import com.twitter.common.exception.validation.BusinessRuleValidationException;
+import com.twitter.common.exception.validation.ValidationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

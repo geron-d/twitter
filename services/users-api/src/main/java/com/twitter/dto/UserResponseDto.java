@@ -1,7 +1,7 @@
 package com.twitter.dto;
 
-import com.twitter.enums.UserRole;
-import com.twitter.enums.UserStatus;
+import com.twitter.common.enums.UserRole;
+import com.twitter.common.enums.UserStatus;
 import java.util.UUID;
 
 public record UserResponseDto(

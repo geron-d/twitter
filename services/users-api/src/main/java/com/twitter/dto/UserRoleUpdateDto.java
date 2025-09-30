@@ -1,6 +1,6 @@
 package com.twitter.dto;
 
-import com.twitter.enums.UserRole;
+import com.twitter.common.enums.UserRole;
 import jakarta.validation.constraints.NotNull;
 
 /**

@@ -1,6 +1,4 @@
-package com.twitter.enums;
-
-import com.twitter.exception.validation.BusinessRuleValidationException;
+package com.twitter.common.enums;
 
 /**
  * Enumeration of user roles in the Twitter system.
@@ -28,7 +26,6 @@ import com.twitter.exception.validation.BusinessRuleValidationException;
  *
  * @author Twitter Team
  * @version 1.0
- * @see BusinessRuleValidationException for business rule validation using roles
  * @since 2025-01-27
  */
 public enum UserRole {
@@ -95,4 +92,3 @@ public enum UserRole {
      */
     USER
 }
-

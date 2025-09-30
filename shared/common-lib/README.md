@@ -20,11 +20,18 @@ com.twitter.common/
 ├── aspect/                    # Аспекты для AOP
 │   ├── LoggableRequest.java      # Аннотация для логирования
 │   └── LoggableRequestAspect.java # Аспект логирования
+├── enums/                     # Перечисления
+│   ├── UserRole.java             # Роли пользователей (ADMIN, MODERATOR, USER)
+│   └── UserStatus.java           # Статусы пользователей (ACTIVE, INACTIVE)
 ├── exception/                 # Обработка исключений
-│   └── GlobalExceptionHandler.java      # Глобальный обработчик
+│   ├── GlobalExceptionHandler.java      # Глобальный обработчик
+│   └── validation/             # Исключения валидации
+│       ├── ValidationException.java         # Базовое исключение валидации
+│       ├── BusinessRuleValidationException.java # Бизнес-правила
+│       ├── FormatValidationException.java      # Формат данных
+│       ├── UniquenessValidationException.java  # Уникальность
+│       └── ValidationType.java                 # Типы валидации
 ├── config/                    # Конфигурации (пустой)
-├── constants/                 # Константы (пустой)
-├── dto/                       # DTO объекты (пустой)
 └── util/                      # Утилиты (пустой)
 ```
 
@@ -38,17 +45,26 @@ com.twitter.common/
 │  │   Aspect Layer  │    │      Exception Layer            │ │
 │  │                 │    │                                 │ │
 │  │ @LoggableRequest│    │ GlobalExceptionHandler          │ │
-│  │ LoggableRequest │    │                                 │ │
-│  │ Aspect          │    │                                 │ │
-│  └─────────────────┘    └─────────────────────────────────┘ │
-│           │                           │                     │
+│  │ LoggableRequest │    │ ValidationException             │ │
+│  │ Aspect          │    │ BusinessRuleValidation         │ │
+│  └─────────────────┘    │ FormatValidation               │ │
+│           │              │ UniquenessValidation            │ │
+│           │              └─────────────────────────────────┘ │
 │           │                           │                     │
 │  ┌─────────────────┐    ┌─────────────────────────────────┐ │
-│  │   HTTP Layer    │    │        Business Logic           │ │
+│  │   Domain Layer  │    │        Business Logic           │ │
 │  │                 │    │                                 │ │
-│  │ Request/Response│    │ Admin Management                │ │
-│  │ Logging         │    │ Validation                      │ │
-│  │ Sensitive Data  │    │ Error Handling                  │ │
+│  │ UserRole        │    │ Admin Management                │ │
+│  │ UserStatus      │    │ Validation                      │ │
+│  │ ValidationType  │    │ Error Handling                  │ │
+│  └─────────────────┘    └─────────────────────────────────┘ │
+│           │                           │                     │
+│  ┌─────────────────┐    ┌─────────────────────────────────┐ │
+│  │   HTTP Layer    │    │        Integration              │ │
+│  │                 │    │                                 │ │
+│  │ Request/Response│    │ Spring Boot Integration         │ │
+│  │ Logging         │    │ AOP Integration                 │ │
+│  │ Sensitive Data  │    │ Validation Integration          │ │
 │  │ Hiding          │    │                                 │ │
 │  └─────────────────┘    └─────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────┘
@@ -94,6 +110,10 @@ public class UserController {
 | `ResponseStatusException` | Из исключения | Стандартные Spring исключения |
 | `RuntimeException` | 500 | Неожиданные ошибки сервера |
 | `ConstraintViolationException` | 400 | Ошибки валидации |
+| `ValidationException` | 400 | Базовые ошибки валидации |
+| `BusinessRuleValidationException` | 400 | Нарушение бизнес-правил |
+| `FormatValidationException` | 400 | Ошибки формата данных |
+| `UniquenessValidationException` | 409 | Нарушение уникальности |
 
 **Формат ответа** (ProblemDetail):
 ```json
@@ -108,7 +128,58 @@ public class UserController {
 
 ### Специализированные исключения
 
+### Специализированные исключения
+
+**Базовый класс**: `ValidationException`
+
+**Иерархия исключений**:
+
+```
+ValidationException (abstract)
+├── BusinessRuleValidationException
+├── FormatValidationException
+└── UniquenessValidationException
+```
+
+**BusinessRuleValidationException**:
+- **Назначение**: Нарушение бизнес-правил системы
+- **Примеры**: Попытка деактивации последнего админа, изменение роли последнего админа
+- **Factory методы**: `lastAdminDeactivation()`, `lastAdminRoleChange()`
+
+**FormatValidationException**:
+- **Назначение**: Ошибки формата данных
+- **Примеры**: Некорректный формат email, неверный формат даты
+- **Factory методы**: `invalidFormat()`, `invalidEmailFormat()`
+
+**UniquenessValidationException**:
+- **Назначение**: Нарушение уникальности данных
+- **Примеры**: Дублирование email, дублирование логина
+- **Factory методы**: `duplicateEmail()`, `duplicateLogin()`
+
+**ValidationType enum**:
+- `BUSINESS_RULE` - Бизнес-правила
+- `FORMAT` - Формат данных
+- `UNIQUENESS` - Уникальность
+- `CUSTOM` - Пользовательские правила
+
 ## Бизнес-логика
+
+### Перечисления (Enums)
+
+**UserRole** - Роли пользователей:
+- `ADMIN` - Администратор системы
+- `MODERATOR` - Модератор контента  
+- `USER` - Обычный пользователь
+
+**UserStatus** - Статусы пользователей:
+- `ACTIVE` - Активный пользователь
+- `INACTIVE` - Неактивный пользователь
+
+**ValidationType** - Типы валидации:
+- `BUSINESS_RULE` - Бизнес-правила
+- `FORMAT` - Формат данных
+- `UNIQUENESS` - Уникальность
+- `CUSTOM` - Пользовательские правила
 
 ### Логирование запросов
 

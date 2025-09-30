@@ -1,9 +1,9 @@
 package com.twitter.common.exception;
 
-import com.twitter.exception.validation.BusinessRuleValidationException;
-import com.twitter.exception.validation.FormatValidationException;
-import com.twitter.exception.validation.UniquenessValidationException;
-import com.twitter.exception.validation.ValidationException;
+import com.twitter.common.exception.validation.BusinessRuleValidationException;
+import com.twitter.common.exception.validation.FormatValidationException;
+import com.twitter.common.exception.validation.UniquenessValidationException;
+import com.twitter.common.exception.validation.ValidationException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;

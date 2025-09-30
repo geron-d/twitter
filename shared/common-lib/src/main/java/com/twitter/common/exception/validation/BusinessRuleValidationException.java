@@ -1,7 +1,6 @@
-package com.twitter.exception.validation;
+package com.twitter.common.exception.validation;
 
-import com.twitter.common.exception.GlobalExceptionHandler;
-import com.twitter.enums.UserRole;
+import com.twitter.common.enums.UserRole;
 import lombok.Getter;
 
 /**
@@ -52,7 +51,6 @@ import lombok.Getter;
  * @version 1.0
  * @see ValidationException for the base validation exception class
  * @see ValidationType#BUSINESS_RULE for the validation type
- * @see GlobalExceptionHandler#handleBusinessRuleValidationException(BusinessRuleValidationException)
  * @since 2025-01-27
  */
 @Getter

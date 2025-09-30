@@ -1,7 +1,7 @@
 package com.twitter.entity;
 
-import com.twitter.enums.UserRole;
-import com.twitter.enums.UserStatus;
+import com.twitter.common.enums.UserRole;
+import com.twitter.common.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,6 +1,5 @@
-package com.twitter.exception.validation;
+package com.twitter.common.exception.validation;
 
-import com.twitter.common.exception.GlobalExceptionHandler;
 import lombok.Getter;
 
 /**
@@ -52,7 +51,6 @@ import lombok.Getter;
  * @version 1.0
  * @see ValidationException for the base validation exception class
  * @see ValidationType#UNIQUENESS for the validation type
- * @see GlobalExceptionHandler#handleUniquenessValidationException(UniquenessValidationException)
  * @since 2025-01-27
  */
 @Getter

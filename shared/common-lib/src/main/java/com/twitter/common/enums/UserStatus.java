@@ -1,4 +1,4 @@
-package com.twitter.enums;
+package com.twitter.common.enums;
 
 /**
  * Enumeration of user account statuses in the Twitter system.
