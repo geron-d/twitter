@@ -256,9 +256,8 @@ public class ExampleException extends RuntimeException {
  * 
  * @author Twitter Team
  * @since 2025-01-27
- * @see GlobalExceptionHandler#handleLastAdminDeactivationException(LastAdminDeactivationException)
  */
-public class LastAdminDeactivationException extends RuntimeException {
+public class BusinessRuleValidationException extends RuntimeException {
     // implementation
 }
 ```

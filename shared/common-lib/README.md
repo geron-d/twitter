@@ -21,8 +21,7 @@ com.twitter.common/
 │   ├── LoggableRequest.java      # Аннотация для логирования
 │   └── LoggableRequestAspect.java # Аспект логирования
 ├── exception/                 # Обработка исключений
-│   ├── GlobalExceptionHandler.java      # Глобальный обработчик
-│   └── LastAdminDeactivationException.java # Специфичное исключение
+│   └── GlobalExceptionHandler.java      # Глобальный обработчик
 ├── config/                    # Конфигурации (пустой)
 ├── constants/                 # Константы (пустой)
 ├── dto/                       # DTO объекты (пустой)
@@ -39,7 +38,7 @@ com.twitter.common/
 │  │   Aspect Layer  │    │      Exception Layer            │ │
 │  │                 │    │                                 │ │
 │  │ @LoggableRequest│    │ GlobalExceptionHandler          │ │
-│  │ LoggableRequest │    │ LastAdminDeactivationException  │ │
+│  │ LoggableRequest │    │                                 │ │
 │  │ Aspect          │    │                                 │ │
 │  └─────────────────┘    └─────────────────────────────────┘ │
 │           │                           │                     │
@@ -95,7 +94,6 @@ public class UserController {
 | `ResponseStatusException` | Из исключения | Стандартные Spring исключения |
 | `RuntimeException` | 500 | Неожиданные ошибки сервера |
 | `ConstraintViolationException` | 400 | Ошибки валидации |
-| `LastAdminDeactivationException` | 409 | Попытка деактивации последнего админа |
 
 **Формат ответа** (ProblemDetail):
 ```json
@@ -109,34 +107,6 @@ public class UserController {
 ```
 
 ### Специализированные исключения
-
-#### LastAdminDeactivationException
-
-**Назначение**: Исключение для предотвращения деактивации последнего активного администратора в системе.
-
-**Конструкторы**:
-- `LastAdminDeactivationException()` - с сообщением по умолчанию
-- `LastAdminDeactivationException(String reason)` - с кастомным сообщением
-- `LastAdminDeactivationException(String reason, Throwable cause)` - с причиной
-
-**Пример использования**:
-```java
-@Service
-public class UserService {
-    
-    public void deactivateUser(Long userId) {
-        User user = userRepository.findById(userId);
-        
-        if (user.getRole() == UserRole.ADMIN && isLastActiveAdmin(user)) {
-            throw new LastAdminDeactivationException(
-                "Cannot deactivate the last active administrator"
-            );
-        }
-        
-        // логика деактивации
-    }
-}
-```
 
 ## Бизнес-логика
 
@@ -237,7 +207,7 @@ public class AdminService {
         long activeAdminCount = userRepository.countByRoleAndStatus(UserRole.ADMIN, UserStatus.ACTIVE);
         
         if (activeAdminCount <= 1) {
-            throw new LastAdminDeactivationException(
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
                 "Cannot deactivate the last active administrator. System requires at least one active admin."
             );
         }
@@ -321,7 +291,7 @@ public class UserController {
 **Шаги**:
 1. Клиент запрашивает деактивацию администратора
 2. Сервис проверяет количество активных админов
-3. Если админ последний, выбрасывается `LastAdminDeactivationException`
+3. Если админ последний, выбрасывается `ResponseStatusException` с HTTP 409
 4. `GlobalExceptionHandler` обрабатывает исключение
 5. Возвращается HTTP 409 с описанием конфликта
 
@@ -400,7 +370,7 @@ logging:
 ### 2. Обработка исключений
 
 - Используйте `ResponseStatusException` для стандартных HTTP ошибок
-- Применяйте `LastAdminDeactivationException` для бизнес-логики админов
+- Применяйте `BusinessRuleValidationException` для бизнес-логики админов
 - Добавляйте кастомные исключения, расширяющие `ResponseStatusException`
 
 ### 3. Безопасность

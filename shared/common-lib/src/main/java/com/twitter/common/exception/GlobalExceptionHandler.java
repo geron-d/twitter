@@ -31,7 +31,6 @@ import java.time.Instant;
  *   <li>UniquenessValidationException - Duplicate data errors</li>
  *   <li>BusinessRuleValidationException - Business logic violations</li>
  *   <li>FormatValidationException - Data format errors</li>
- *   <li>LastAdminDeactivationException - Admin deactivation errors</li>
  *   <li>ValidationException - General validation errors</li>
  * </ul>
  *
@@ -281,40 +280,6 @@ public class GlobalExceptionHandler {
         problemDetail.setProperty("timestamp", Instant.now());
         problemDetail.setProperty("fieldName", ex.getFieldName());
         problemDetail.setProperty("constraintName", ex.getConstraintName());
-        return problemDetail;
-    }
-
-    /**
-     * Handles last administrator deactivation exceptions and converts them to ProblemDetail.
-     *
-     * <p>
-     * This method processes LastAdminDeactivationException instances that are thrown
-     * when attempting to deactivate the last active administrator in the system.
-     * This prevents the system from being left without any administrative access.
-     *
-     * <p>Response format:</p>
-     * <pre>
-     * {
-     *   "type": "https://example.com/errors/last-admin-deactivation",
-     *   "title": "Last Admin Deactivation Error",
-     *   "status": 409,
-     *   "detail": "Cannot deactivate the last active administrator",
-     *   "timestamp": "2025-01-27T15:30:00Z"
-     * }
-     * </pre>
-     *
-     * @param ex the LastAdminDeactivationException that was thrown
-     * @return ProblemDetail containing admin deactivation error information
-     */
-    @ExceptionHandler(LastAdminDeactivationException.class)
-    public ProblemDetail handleLastAdminDeactivationException(LastAdminDeactivationException ex) {
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
-            HttpStatus.CONFLICT,
-            ex.getReason() != null ? ex.getReason() : "Cannot deactivate the last active administrator"
-        );
-        problemDetail.setTitle("Last Admin Deactivation Error");
-        problemDetail.setType(URI.create("https://example.com/errors/last-admin-deactivation"));
-        problemDetail.setProperty("timestamp", Instant.now());
         return problemDetail;
     }
 
