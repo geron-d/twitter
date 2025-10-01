@@ -1,16 +1,16 @@
 package com.twitter.validation;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.twitter.dto.UserPatchDto;
-import com.twitter.dto.UserRequestDto;
-import com.twitter.dto.UserUpdateDto;
-import com.twitter.entity.User;
 import com.twitter.common.enums.UserRole;
 import com.twitter.common.enums.UserStatus;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.FormatValidationException;
 import com.twitter.common.exception.validation.UniquenessValidationException;
 import com.twitter.common.exception.validation.ValidationException;
+import com.twitter.dto.UserPatchDto;
+import com.twitter.dto.UserRequestDto;
+import com.twitter.dto.UserUpdateDto;
+import com.twitter.entity.User;
 import com.twitter.repository.UserRepository;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
@@ -24,11 +24,18 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
- * Реализация валидатора пользователей для системы Twitter.
- * Централизует всю логику валидации, вынесенную из UserServiceImpl.
+ * Implementation of the user validator for Twitter system.
+ * <p>
+ * This validator centralizes all validation logic extracted from UserServiceImpl.
+ * It provides comprehensive validation for user data including uniqueness checks,
+ * business rule validation, and format validation for JSON Patch operations.
  *
  * @author Twitter Team
  * @version 1.0
+ * @see UserValidator for the validator interface
+ * @see UserRepository for data access operations
+ * @see ValidationException for validation error handling
+ * @since 2025-01-27
  */
 @Slf4j
 @Component
@@ -39,11 +46,15 @@ public class UserValidatorImpl implements UserValidator {
     private final Validator validator;
 
     /**
-     * Полная валидация для создания пользователя.
-     * Включает проверку уникальности login/email и формат данных.
-     * 
-     * @param userRequest DTO с данными для создания пользователя
-     * @throws ValidationException при нарушении валидации
+     * Performs complete validation for user creation.
+     * <p>
+     * This method validates user data for creation including uniqueness checks
+     * for login and email fields. It ensures no duplicate users exist in the system.
+     *
+     * @param userRequest DTO containing user data for creation
+     * @throws ValidationException if validation fails
+     * @see #validateUniqueness(String, String, UUID) for uniqueness validation
+     * @since 2025-01-27
      */
     @Override
     public void validateForCreate(UserRequestDto userRequest) {
@@ -51,12 +62,17 @@ public class UserValidatorImpl implements UserValidator {
     }
 
     /**
-     * Валидация для обновления пользователя.
-     * Включает проверку уникальности login/email с исключением текущего пользователя.
-     * 
-     * @param userId ID пользователя для обновления
-     * @param userUpdate DTO с данными для обновления
-     * @throws ValidationException при нарушении валидации
+     * Performs validation for user update operations.
+     * <p>
+     * This method validates user data for updates including uniqueness checks
+     * with exclusion of the current user from uniqueness validation to allow
+     * updates without changing login or email.
+     *
+     * @param userId     the ID of the user being updated
+     * @param userUpdate DTO containing updated user data
+     * @throws ValidationException if validation fails
+     * @see #validateUniqueness(String, String, UUID) for uniqueness validation
+     * @since 2025-01-27
      */
     @Override
     public void validateForUpdate(UUID userId, UserUpdateDto userUpdate) {
@@ -64,25 +80,36 @@ public class UserValidatorImpl implements UserValidator {
     }
 
     /**
-     * Валидация для PATCH операций.
-     * Проверяет только JSON структуру данных.
-     * 
-     * @param userId ID пользователя для патча
-     * @param patchNode JSON данные для патча
-     * @throws ValidationException при нарушении валидации
+     * Performs validation for JSON Patch operations.
+     * <p>
+     * This method validates only the JSON structure of patch data to ensure
+     * it can be properly applied to the target DTO. Business rule validation
+     * is performed separately after patch application.
+     *
+     * @param userId    the ID of the user being patched
+     * @param patchNode JSON data for the patch operation
+     * @throws ValidationException if JSON structure validation fails
+     * @see #validatePatchData(JsonNode) for JSON structure validation
+     * @since 2025-01-27
      */
     @Override
     public void validateForPatch(UUID userId, JsonNode patchNode) {
         validatePatchData(patchNode);
     }
-    
+
     /**
-     * Валидация PATCH данных с готовым DTO.
-     * Включает проверку Bean Validation и уникальности.
-     * 
-     * @param userId ID пользователя для исключения из проверки уникальности
-     * @param patchDto готовый DTO для валидации
-     * @throws ValidationException при нарушении валидации
+     * Performs validation for PATCH data with a prepared DTO.
+     * <p>
+     * This method validates the patched DTO using Bean Validation annotations
+     * and performs uniqueness checks with exclusion of the current user.
+     * It ensures data integrity after patch application.
+     *
+     * @param userId   the ID of the user being patched
+     * @param patchDto prepared DTO for validation
+     * @throws ValidationException if validation fails
+     * @see #validatePatchConstraints(UserPatchDto) for Bean Validation
+     * @see #validateUniqueness(String, String, UUID) for uniqueness validation
+     * @since 2025-01-27
      */
     @Override
     public void validateForPatchWithDto(UUID userId, UserPatchDto patchDto) {
@@ -91,12 +118,19 @@ public class UserValidatorImpl implements UserValidator {
     }
 
     /**
-     * Проверка уникальности логина и email пользователя.
-     * 
-     * @param login логин для проверки (может быть null)
-     * @param email email для проверки (может быть null)
-     * @param excludeUserId ID пользователя для исключения из проверки (при обновлении)
-     * @throws UniquenessValidationException при конфликте уникальности
+     * Validates uniqueness of user login and email.
+     * <p>
+     * This method checks if the provided login or email already exists in the system.
+     * It supports exclusion of a specific user ID for update operations to allow
+     * users to keep their existing login or email unchanged.
+     *
+     * @param login         the login to validate (can be null)
+     * @param email         the email to validate (can be null)
+     * @param excludeUserId the user ID to exclude from uniqueness check (for updates)
+     * @throws UniquenessValidationException if uniqueness conflict is detected
+     * @see UserRepository#existsByLogin(String) for login existence check
+     * @see UserRepository#existsByEmail(String) for email existence check
+     * @since 2025-01-27
      */
     @Override
     public void validateUniqueness(String login, String email, UUID excludeUserId) {
@@ -124,11 +158,17 @@ public class UserValidatorImpl implements UserValidator {
     }
 
     /**
-     * Проверка возможности деактивации пользователя.
-     * Предотвращает деактивацию последнего активного администратора.
-     * 
-     * @param userId ID пользователя для деактивации
-     * @throws BusinessRuleValidationException при нарушении бизнес-правил
+     * Validates the possibility of user deactivation.
+     * <p>
+     * This method enforces business rules to prevent deactivation of the last
+     * active administrator in the system. It ensures system maintainability
+     * by keeping at least one active administrator available.
+     *
+     * @param userId the ID of the user to be deactivated
+     * @throws BusinessRuleValidationException if business rules are violated
+     * @see UserRepository#countByRoleAndStatus(UserRole, UserStatus) for admin count check
+     * @see BusinessRuleValidationException#lastAdminDeactivation(UUID) for exception creation
+     * @since 2025-01-27
      */
     @Override
     public void validateAdminDeactivation(UUID userId) {
@@ -145,12 +185,17 @@ public class UserValidatorImpl implements UserValidator {
     }
 
     /**
-     * Проверка возможности смены роли пользователя.
-     * Предотвращает смену роли последнего активного администратора.
-     * 
-     * @param userId ID пользователя
-     * @param newRole новая роль пользователя
-     * @throws BusinessRuleValidationException при нарушении бизнес-правил
+     * Validates the possibility of user role change.
+     * <p>
+     * This method enforces business rules to prevent role changes for the last
+     * active administrator. It ensures system maintainability by preventing
+     * scenarios where no active administrators remain in the system.
+     *
+     * @param userId  the ID of the user
+     * @param newRole the new role for the user
+     * @throws BusinessRuleValidationException if business rules are violated
+     * @see UserRepository#countByRoleAndStatus(UserRole, UserStatus) for admin count check
+     * @since 2025-01-27
      */
     @Override
     public void validateRoleChange(UUID userId, UserRole newRole) {
@@ -170,11 +215,16 @@ public class UserValidatorImpl implements UserValidator {
     }
 
     /**
-     * Валидация JSON структуры патча.
-     * Проверяет корректность JSON и возможность применения к DTO.
-     * 
-     * @param patchNode JSON данные для патча
-     * @throws FormatValidationException при ошибке формата JSON
+     * Validates JSON structure of patch data.
+     * <p>
+     * This method validates the JSON structure to ensure it can be properly
+     * applied to the target DTO. It checks for null values and ensures the
+     * patch data is a valid JSON object.
+     *
+     * @param patchNode JSON data for the patch operation
+     * @throws FormatValidationException if JSON format is invalid
+     * @see JsonNode for JSON structure validation
+     * @since 2025-01-27
      */
     @Override
     public void validatePatchData(JsonNode patchNode) {
@@ -188,11 +238,16 @@ public class UserValidatorImpl implements UserValidator {
     }
 
     /**
-     * Bean Validation для DTO патча.
-     * Применяет аннотации валидации к объекту UserPatchDto.
-     * 
-     * @param patchDto DTO для валидации
-     * @throws FormatValidationException при нарушении ограничений валидации
+     * Performs Bean Validation on patch DTO.
+     * <p>
+     * This method applies Bean Validation annotations to the UserPatchDto object
+     * and collects all constraint violations. It provides detailed error messages
+     * for validation failures to help with debugging.
+     *
+     * @param patchDto DTO to validate
+     * @throws FormatValidationException if validation constraints are violated
+     * @see ConstraintViolation for validation violation details
+     * @since 2025-01-27
      */
     @Override
     public void validatePatchConstraints(UserPatchDto patchDto) {
