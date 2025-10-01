@@ -1,13 +1,13 @@
 package com.twitter.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.twitter.common.exception.validation.BusinessRuleValidationException;
+import com.twitter.common.exception.validation.ValidationException;
 import com.twitter.dto.UserRequestDto;
 import com.twitter.dto.UserResponseDto;
 import com.twitter.dto.UserRoleUpdateDto;
 import com.twitter.dto.UserUpdateDto;
 import com.twitter.dto.filter.UserFilter;
-import com.twitter.common.exception.validation.BusinessRuleValidationException;
-import com.twitter.common.exception.validation.ValidationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -15,87 +15,129 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Интерфейс сервиса для управления пользователями в системе Twitter.
- * Предоставляет бизнес-логику для CRUD операций с пользователями, включая валидацию,
- * хеширование паролей и соблюдение бизнес-правил.
- * 
+ * Service interface for user management in Twitter microservices.
+ * <p>
+ * This interface defines the contract for user management services, providing
+ * business logic for CRUD operations with users, including validation,
+ * password hashing, and business rule enforcement.
+ *
  * @author Twitter Team
  * @version 1.0
+ * @see UserServiceImpl for the default implementation
+ * @see UserRequestDto for request data transfer objects
+ * @see UserResponseDto for response data transfer objects
+ * @since 2025-01-27
  */
 public interface UserService {
 
     /**
-     * Получает пользователя по идентификатору.
-     * Выполняет поиск в базе данных и возвращает данные пользователя.
+     * Retrieves a user by their unique identifier.
+     * <p>
+     * This method performs a database lookup and returns the user data
+     * if found. Returns an empty Optional if the user does not exist
+     * or has been deactivated.
      *
-     * @param id UUID идентификатор пользователя
-     * @return Optional с данными пользователя или пустой Optional если пользователь не найден
+     * @param id the unique identifier of the user
+     * @return Optional containing user data or empty if not found
+     * @see UserServiceImpl#getUserById(UUID) for implementation details
+     * @since 2025-01-27
      */
     Optional<UserResponseDto> getUserById(UUID id);
 
     /**
-     * Получает список пользователей с фильтрацией и пагинацией.
-     * Поддерживает фильтрацию по различным критериям и сортировку результатов.
+     * Retrieves a paginated list of users with applied filters.
+     * <p>
+     * This method supports filtering by various criteria including name,
+     * role, and status. It provides full pagination support with sorting
+     * capabilities for efficient data retrieval.
      *
-     * @param userFilter фильтр для поиска пользователей (имя, фамилия, роль, статус)
-     * @param pageable параметры пагинации (страница, размер, сортировка)
-     * @return Page с отфильтрованным списком пользователей
+     * @param userFilter filter criteria for user search (name, role, status)
+     * @param pageable   pagination parameters (page, size, sorting)
+     * @return Page containing filtered list of users with pagination metadata
+     * @see UserServiceImpl#findAll(UserFilter, Pageable) for implementation details
+     * @see UserFilter for available filter options
+     * @since 2025-01-27
      */
     Page<UserResponseDto> findAll(UserFilter userFilter, Pageable pageable);
 
     /**
-     * Создает нового пользователя в системе.
-     * Автоматически устанавливает статус ACTIVE и роль USER.
-     * Пароль хешируется с использованием PBKDF2 с солью.
+     * Creates a new user in the system.
+     * <p>
+     * This method creates a new user with the provided data. The system
+     * automatically sets the status to ACTIVE and role to USER. The password
+     * is securely hashed using PBKDF2 algorithm with a random salt.
      *
-     * @param userRequest данные для создания пользователя
-     * @return данные созданного пользователя
-     * @throws ValidationException при нарушении валидации или конфликте уникальности
+     * @param userRequest user data for creation
+     * @return the created user data
+     * @throws ValidationException if validation fails or uniqueness conflict occurs
+     * @see UserServiceImpl#createUser(UserRequestDto) for implementation details
+     * @see UserRequestDto for required fields
+     * @since 2025-01-27
      */
     UserResponseDto createUser(UserRequestDto userRequest);
 
     /**
-     * Полностью обновляет данные существующего пользователя.
-     * Заменяет все поля пользователя на новые значения из DTO.
-     * Включает валидацию уникальности и бизнес-правил.
+     * Performs a complete update of an existing user.
+     * <p>
+     * This method replaces all user fields with new values from the provided DTO.
+     * It includes validation for uniqueness and business rules to ensure
+     * data integrity throughout the update process.
      *
-     * @param id UUID идентификатор пользователя для обновления
-     * @param userDetails новые данные пользователя
-     * @return Optional с обновленными данными пользователя или пустой Optional если пользователь не найден
-     * @throws ValidationException при нарушении валидации или конфликте уникальности
+     * @param id          the unique identifier of the user to update
+     * @param userDetails new user data for the update
+     * @return Optional containing updated user data or empty if user not found
+     * @throws ValidationException if validation fails or uniqueness conflict occurs
+     * @see UserServiceImpl#updateUser(UUID, UserUpdateDto) for implementation details
+     * @see UserUpdateDto for updatable fields
+     * @since 2025-01-27
      */
     Optional<UserResponseDto> updateUser(UUID id, UserUpdateDto userDetails);
 
     /**
-     * Частично обновляет данные пользователя с использованием JSON Patch.
-     * Позволяет обновлять только указанные поля без изменения остальных.
-     * Включает валидацию JSON структуры и бизнес-правил.
+     * Performs a partial update of user data using JSON Patch.
+     * <p>
+     * This method allows updating only specified fields without modifying
+     * other user data. It includes validation for JSON structure and business
+     * rules to ensure data integrity during partial updates.
      *
-     * @param id UUID идентификатор пользователя для обновления
-     * @param patchNode JSON данные для частичного обновления
-     * @return обновленный пользователь или пустой Optional если пользователь не найден
+     * @param id        the unique identifier of the user to update
+     * @param patchNode JSON data for partial update
+     * @return Optional containing updated user data or empty if user not found
+     * @throws ValidationException if JSON structure or business rule validation fails
+     * @see UserServiceImpl#patchUser(UUID, JsonNode) for implementation details
+     * @since 2025-01-27
      */
     Optional<UserResponseDto> patchUser(UUID id, JsonNode patchNode);
 
     /**
-     * Деактивирует пользователя, устанавливая статус INACTIVE.
-     * Предотвращает деактивацию последнего активного администратора в системе.
+     * Deactivates a user by setting their status to INACTIVE.
+     * <p>
+     * This method deactivates a user account while enforcing business rules
+     * to prevent deactivation of the last active administrator in the system.
+     * It ensures system maintainability by keeping at least one active administrator.
      *
-     * @param id UUID идентификатор пользователя для деактивации
-     * @return Optional с обновленными данными пользователя или пустой Optional если пользователь не найден
-     * @throws BusinessRuleValidationException при попытке деактивации последнего администратора
+     * @param id the unique identifier of the user to deactivate
+     * @return Optional containing updated user data or empty if user not found
+     * @throws BusinessRuleValidationException if attempting to deactivate the last administrator
+     * @see UserServiceImpl#inactivateUser(UUID) for implementation details
+     * @since 2025-01-27
      */
     Optional<UserResponseDto> inactivateUser(UUID id);
 
     /**
-     * Обновляет роль пользователя в системе.
-     * Предотвращает изменение роли последнего активного администратора.
-     * Поддерживает роли: USER, ADMIN, MODERATOR.
+     * Updates the role of a user in the system.
+     * <p>
+     * This method changes the user's role while enforcing business rules
+     * to prevent modification of the last active administrator's role.
+     * It supports various roles including USER, ADMIN, and MODERATOR.
      *
-     * @param id UUID идентификатор пользователя
-     * @param roleUpdate данные для обновления роли пользователя
-     * @return Optional с обновленными данными пользователя или пустой Optional если пользователь не найден
-     * @throws BusinessRuleValidationException при попытке изменения роли последнего администратора
+     * @param id         the unique identifier of the user
+     * @param roleUpdate data containing the new user role
+     * @return Optional containing updated user data or empty if user not found
+     * @throws BusinessRuleValidationException if attempting to change the last administrator's role
+     * @see UserServiceImpl#updateUserRole(UUID, UserRoleUpdateDto) for implementation details
+     * @see UserRoleUpdateDto for role update data
+     * @since 2025-01-27
      */
     Optional<UserResponseDto> updateUserRole(UUID id, UserRoleUpdateDto roleUpdate);
 }
