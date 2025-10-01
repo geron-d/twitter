@@ -28,12 +28,19 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Реализация сервиса управления пользователями.
- * Предоставляет бизнес-логику для CRUD операций с пользователями,
- * включая создание, обновление, деактивацию и управление ролями.
- * 
+ * Implementation of the user management service.
+ * <p>
+ * This service provides business logic for CRUD operations with users,
+ * including creation, updating, deactivation, and role management. It handles
+ * data validation, password hashing, and business rule enforcement.
+ *
  * @author Twitter Team
  * @version 1.0
+ * @see UserService for the service interface
+ * @see UserValidator for validation logic
+ * @see UserMapper for data transformation
+ * @see UserRepository for data access
+ * @since 2025-01-27
  */
 @Slf4j
 @Service
@@ -46,11 +53,17 @@ public class UserServiceImpl implements UserService {
     private final PatchDtoFactory patchDtoFactory;
 
     /**
-     * Получает пользователя по уникальному идентификатору.
-     * Возвращает Optional.empty() если пользователь не найден.
-     * 
-     * @param id уникальный идентификатор пользователя
-     * @return Optional с данными пользователя или пустой Optional
+     * Retrieves a user by their unique identifier.
+     * <p>
+     * This method performs a database lookup and returns the user data
+     * if found. Returns an empty Optional if the user does not exist
+     * or has been deactivated.
+     *
+     * @param id the unique identifier of the user
+     * @return Optional containing user data or empty if not found
+     * @see UserRepository#findById(Object) for data access
+     * @see UserMapper#toUserResponseDto(User) for data transformation
+     * @since 2025-01-27
      */
     @Override
     public Optional<UserResponseDto> getUserById(UUID id) {
@@ -58,12 +71,18 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * Получает список пользователей с применением фильтров и пагинации.
-     * Использует спецификации для динамической фильтрации по критериям.
-     * 
-     * @param userFilter фильтры для поиска пользователей
-     * @param pageable параметры пагинации (размер страницы, номер страницы, сортировка)
-     * @return страница с отфильтрованными пользователями
+     * Retrieves a paginated list of users with applied filters.
+     * <p>
+     * This method uses JPA specifications for dynamic filtering based on
+     * the provided criteria. It supports filtering by name, role, and status
+     * with full pagination support.
+     *
+     * @param userFilter filter criteria for user search
+     * @param pageable   pagination parameters (page size, page number, sorting)
+     * @return Page containing filtered users with pagination metadata
+     * @see UserRepository#findAll(org.springframework.data.jpa.domain.Specification, Pageable) for data access
+     * @see UserFilter#toSpecification() for filter specification
+     * @since 2025-01-27
      */
     @Override
     public Page<UserResponseDto> findAll(UserFilter userFilter, Pageable pageable) {
@@ -72,14 +91,19 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * Создает нового пользователя в системе.
-     * Выполняет валидацию данных, устанавливает статус ACTIVE и роль USER,
-     * хеширует пароль с использованием соли.
-     * 
-     * @param userRequest DTO с данными для создания пользователя
-     * @return данные созданного пользователя
-     * @throws ValidationException при нарушении валидации данных
-     * @throws ResponseStatusException при ошибке хеширования пароля
+     * Creates a new user in the system.
+     * <p>
+     * This method performs comprehensive data validation, sets the default
+     * status to ACTIVE and role to USER, and securely hashes the password
+     * using PBKDF2 with a random salt.
+     *
+     * @param userRequest DTO containing user data for creation
+     * @return the created user data
+     * @throws ValidationException        if data validation fails
+     * @throws ResponseStatusException    if password hashing fails
+     * @see UserValidator#validateForCreate(UserRequestDto) for validation logic
+     * @see PasswordUtil for password hashing
+     * @since 2025-01-27
      */
     @Override
     public UserResponseDto createUser(UserRequestDto userRequest) {
@@ -96,15 +120,20 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * Обновляет данные существующего пользователя.
-     * Выполняет валидацию данных с исключением текущего пользователя из проверки уникальности.
-     * Обновляет пароль только если он указан в запросе.
-     * 
-     * @param id уникальный идентификатор пользователя
-     * @param userDetails DTO с новыми данными пользователя
-     * @return Optional с обновленными данными пользователя или пустой Optional если пользователь не найден
-     * @throws ValidationException при нарушении валидации данных
-     * @throws ResponseStatusException при ошибке хеширования пароля
+     * Updates an existing user's data.
+     * <p>
+     * This method performs data validation excluding the current user from
+     * uniqueness checks. It updates the password only if provided in the
+     * request and maintains data integrity throughout the process.
+     *
+     * @param id          the unique identifier of the user
+     * @param userDetails DTO containing new user data
+     * @return Optional containing updated user data or empty if user not found
+     * @throws ValidationException     if data validation fails
+     * @throws ResponseStatusException if password hashing fails
+     * @see UserValidator#validateForUpdate(UUID, UserUpdateDto) for validation logic
+     * @see UserMapper#updateUserFromUpdateDto(UserUpdateDto, User) for data mapping
+     * @since 2025-01-27
      */
     @Override
     public Optional<UserResponseDto> updateUser(UUID id, UserUpdateDto userDetails) {
@@ -123,14 +152,19 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * Частично обновляет данные пользователя с использованием JSON Patch.
-     * Выполняет двухэтапную валидацию: структуры JSON и бизнес-правил.
-     * Применяет изменения только к указанным полям.
-     * 
-     * @param id уникальный идентификатор пользователя
-     * @param patchNode JSON данные для частичного обновления
-     * @return Optional с обновленными данными пользователя или пустой Optional если пользователь не найден
-     * @throws ValidationException при нарушении валидации JSON структуры или бизнес-правил
+     * Performs a partial update of user data using JSON Patch.
+     * <p>
+     * This method performs two-stage validation: JSON structure validation
+     * and business rule validation. It applies changes only to specified
+     * fields while preserving other user data.
+     *
+     * @param id        the unique identifier of the user
+     * @param patchNode JSON data for partial update
+     * @return Optional containing updated user data or empty if user not found
+     * @throws ValidationException if JSON structure or business rule validation fails
+     * @see UserValidator#validateForPatch(UUID, JsonNode) for JSON validation
+     * @see UserValidator#validateForPatchWithDto(UUID, UserPatchDto) for business validation
+     * @since 2025-01-27
      */
     @Override
     public Optional<UserResponseDto> patchUser(UUID id, JsonNode patchNode) {
@@ -150,13 +184,17 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * Деактивирует пользователя, устанавливая статус INACTIVE.
-     * Выполняет проверку бизнес-правил для предотвращения деактивации последнего администратора.
-     * Логирует успешную деактивацию.
-     * 
-     * @param id уникальный идентификатор пользователя
-     * @return Optional с данными деактивированного пользователя или пустой Optional если пользователь не найден
-     * @throws BusinessRuleValidationException при попытке деактивации последнего активного администратора
+     * Deactivates a user by setting their status to INACTIVE.
+     * <p>
+     * This method performs business rule validation to prevent deactivation
+     * of the last active administrator. It logs successful deactivation
+     * for audit purposes.
+     *
+     * @param id the unique identifier of the user
+     * @return Optional containing deactivated user data or empty if user not found
+     * @throws BusinessRuleValidationException if attempting to deactivate the last active administrator
+     * @see UserValidator#validateAdminDeactivation(UUID) for business rule validation
+     * @since 2025-01-27
      */
     @Override
     public Optional<UserResponseDto> inactivateUser(UUID id) {
@@ -171,14 +209,18 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * Обновляет роль пользователя в системе.
-     * Выполняет проверку бизнес-правил для предотвращения смены роли последнего администратора.
-     * Логирует изменение роли с указанием старой и новой роли.
-     * 
-     * @param id уникальный идентификатор пользователя
-     * @param roleUpdate DTO с новой ролью пользователя
-     * @return Optional с обновленными данными пользователя или пустой Optional если пользователь не найден
-     * @throws BusinessRuleValidationException при попытке смены роли последнего активного администратора
+     * Updates the role of a user in the system.
+     * <p>
+     * This method performs business rule validation to prevent role changes
+     * for the last active administrator. It logs role changes with both
+     * old and new role information for audit purposes.
+     *
+     * @param id         the unique identifier of the user
+     * @param roleUpdate DTO containing the new user role
+     * @return Optional containing updated user data or empty if user not found
+     * @throws BusinessRuleValidationException if attempting to change the last active administrator's role
+     * @see UserValidator#validateRoleChange(UUID, UserRole) for business rule validation
+     * @since 2025-01-27
      */
     @Override
     public Optional<UserResponseDto> updateUserRole(UUID id, UserRoleUpdateDto roleUpdate) {
@@ -197,13 +239,18 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * Устанавливает хешированный пароль для пользователя.
-     * Генерирует случайную соль и хеширует пароль с использованием PBKDF2.
-     * Сохраняет хеш пароля и соль в Base64 кодировке.
-     * 
-     * @param user пользователь для установки пароля
-     * @param password пароль в открытом виде
-     * @throws ResponseStatusException при ошибке генерации соли или хеширования пароля
+     * Sets a hashed password for a user.
+     * <p>
+     * This private method generates a random salt and hashes the password
+     * using PBKDF2 algorithm. It stores both the password hash and salt
+     * in Base64 encoding for secure storage.
+     *
+     * @param user     the user to set the password for
+     * @param password the password in plain text
+     * @throws ResponseStatusException if salt generation or password hashing fails
+     * @see PasswordUtil#getSalt() for salt generation
+     * @see PasswordUtil#hashPassword(String, byte[]) for password hashing
+     * @since 2025-01-27
      */
     private void setPassword(User user, String password) {
         try {
