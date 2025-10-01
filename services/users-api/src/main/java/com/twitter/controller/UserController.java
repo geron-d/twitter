@@ -2,13 +2,13 @@ package com.twitter.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.twitter.common.aspect.LoggableRequest;
+import com.twitter.common.exception.validation.BusinessRuleValidationException;
+import com.twitter.common.exception.validation.ValidationException;
 import com.twitter.dto.UserRequestDto;
 import com.twitter.dto.UserResponseDto;
 import com.twitter.dto.UserRoleUpdateDto;
 import com.twitter.dto.UserUpdateDto;
 import com.twitter.dto.filter.UserFilter;
-import com.twitter.common.exception.validation.BusinessRuleValidationException;
-import com.twitter.common.exception.validation.ValidationException;
 import com.twitter.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,11 +22,18 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 /**
- * REST контроллер для управления пользователями в системе Twitter.
- * Предоставляет полный набор CRUD операций с поддержкой фильтрации, пагинации и ролевой модели.
- * 
+ * REST controller for user management in Twitter microservices.
+ * <p>
+ * This controller provides a complete set of CRUD operations for user management
+ * with support for filtering, pagination, and role-based access control. It handles
+ * HTTP requests and delegates business logic to the UserService layer.
+ *
  * @author Twitter Team
  * @version 1.0
+ * @see UserService for business logic implementation
+ * @see UserRequestDto for request data transfer objects
+ * @see UserResponseDto for response data transfer objects
+ * @since 2025-01-27
  */
 @Slf4j
 @RestController
@@ -37,10 +44,16 @@ public class UserController {
     private final UserService userService;
 
     /**
-     * Получает пользователя по идентификатору.
-     * 
-     * @param id UUID идентификатор пользователя
-     * @return ResponseEntity с данными пользователя или 404 если не найден
+     * Retrieves a user by their unique identifier.
+     * <p>
+     * This endpoint performs a database lookup and returns the user data
+     * if found. Returns HTTP 404 if the user does not exist or has been
+     * deactivated.
+     *
+     * @param id the unique identifier of the user
+     * @return ResponseEntity containing user data or 404 if not found
+     * @see UserService#getUserById(UUID) for business logic
+     * @since 2025-01-27
      */
     @LoggableRequest
     @GetMapping("/{id}")
@@ -51,12 +64,18 @@ public class UserController {
     }
 
     /**
-     * Получает список пользователей с фильтрацией и пагинацией.
-     * Поддерживает фильтрацию по имени, фамилии, роли и статусу.
-     * 
-     * @param userFilter фильтр для поиска пользователей
-     * @param pageable параметры пагинации (страница, размер, сортировка)
-     * @return PagedModel с отфильтрованным списком пользователей
+     * Retrieves a paginated list of users with optional filtering.
+     * <p>
+     * This endpoint supports filtering by first name, last name, role, and status.
+     * It returns a paginated response with metadata about the total number of
+     * records and pagination information.
+     *
+     * @param userFilter filter criteria for user search (name, role, status)
+     * @param pageable   pagination parameters (page, size, sorting)
+     * @return PagedModel containing filtered list of users with pagination metadata
+     * @see UserService#findAll(UserFilter, Pageable) for business logic
+     * @see UserFilter for available filter options
+     * @since 2025-01-27
      */
     @LoggableRequest
     @GetMapping
@@ -66,13 +85,18 @@ public class UserController {
     }
 
     /**
-     * Создает нового пользователя в системе.
-     * Автоматически устанавливает статус ACTIVE и роль USER.
-     * Пароль хешируется с использованием PBKDF2.
-     * 
-     * @param userRequest данные для создания пользователя
-     * @return данные созданного пользователя
-     * @throws ValidationException при нарушении валидации или конфликте уникальности
+     * Creates a new user in the system.
+     * <p>
+     * This endpoint creates a new user with the provided data. The system
+     * automatically sets the status to ACTIVE and role to USER. The password
+     * is securely hashed using PBKDF2 algorithm with a random salt.
+     *
+     * @param userRequest user data for creation
+     * @return the created user data
+     * @throws ValidationException if validation fails or uniqueness conflict occurs
+     * @see UserService#createUser(UserRequestDto) for business logic
+     * @see UserRequestDto for required fields
+     * @since 2025-01-27
      */
     @LoggableRequest(hideFields = {"password"})
     @PostMapping
@@ -81,13 +105,19 @@ public class UserController {
     }
 
     /**
-     * Полностью обновляет данные существующего пользователя.
-     * Заменяет все поля пользователя на новые значения.
-     * 
-     * @param id UUID идентификатор пользователя для обновления
-     * @param userDetails новые данные пользователя
-     * @return ResponseEntity с обновленными данными или 404 если пользователь не найден
-     * @throws ValidationException при нарушении валидации или конфликте уникальности
+     * Performs a complete update of an existing user.
+     * <p>
+     * This endpoint replaces all user fields with the new values provided
+     * in the request body. It performs validation and uniqueness checks
+     * before updating the user record.
+     *
+     * @param id          the unique identifier of the user to update
+     * @param userDetails new user data for the update
+     * @return ResponseEntity containing updated user data or 404 if user not found
+     * @throws ValidationException if validation fails or uniqueness conflict occurs
+     * @see UserService#updateUser(UUID, UserUpdateDto) for business logic
+     * @see UserUpdateDto for updatable fields
+     * @since 2025-01-27
      */
     @LoggableRequest(hideFields = {"password"})
     @PutMapping("/{id}")
@@ -98,13 +128,18 @@ public class UserController {
     }
 
     /**
-     * Частично обновляет данные пользователя с использованием JSON Patch.
-     * Позволяет обновлять только указанные поля без изменения остальных.
-     * 
-     * @param id UUID идентификатор пользователя для обновления
-     * @param patchNode JSON данные для частичного обновления
-     * @return ResponseEntity с обновленными данными или 404 если пользователь не найден
-     * @throws ValidationException при нарушении валидации или некорректном JSON
+     * Performs a partial update of user data using JSON Patch.
+     * <p>
+     * This endpoint allows updating only specified fields without modifying
+     * other user data. It uses JSON Patch format to apply changes selectively
+     * and performs validation on the patched data.
+     *
+     * @param id        the unique identifier of the user to update
+     * @param patchNode JSON patch data for partial update
+     * @return ResponseEntity containing updated user data or 404 if user not found
+     * @throws ValidationException if validation fails or JSON format is invalid
+     * @see UserService#patchUser(UUID, JsonNode) for business logic
+     * @since 2025-01-27
      */
     @LoggableRequest
     @PatchMapping("/{id}")
@@ -115,12 +150,17 @@ public class UserController {
     }
 
     /**
-     * Деактивирует пользователя, устанавливая статус INACTIVE.
-     * Предотвращает деактивацию последнего активного администратора.
-     * 
-     * @param id UUID идентификатор пользователя для деактивации
-     * @return ResponseEntity с обновленными данными или 404 если пользователь не найден
-     * @throws BusinessRuleValidationException при попытке деактивации последнего администратора
+     * Deactivates a user by setting their status to INACTIVE.
+     * <p>
+     * This endpoint deactivates a user account, preventing them from
+     * accessing the system. It includes business rule validation to
+     * prevent deactivation of the last active administrator.
+     *
+     * @param id the unique identifier of the user to deactivate
+     * @return ResponseEntity containing updated user data or 404 if user not found
+     * @throws BusinessRuleValidationException if attempting to deactivate the last administrator
+     * @see UserService#inactivateUser(UUID) for business logic
+     * @since 2025-01-27
      */
     @LoggableRequest
     @PatchMapping("/{id}/inactivate")
@@ -131,18 +171,24 @@ public class UserController {
     }
 
     /**
-     * Обновляет роль пользователя.
-     * Предотвращает изменение роли последнего активного администратора.
-     * 
-     * @param id UUID идентификатор пользователя
-     * @param roleUpdate данные для обновления роли
-     * @return ResponseEntity с обновленными данными или 404 если пользователь не найден
-     * @throws BusinessRuleValidationException при попытке изменения роли последнего администратора
+     * Updates the role of a user.
+     * <p>
+     * This endpoint changes the user's role while enforcing business rules
+     * to prevent modification of the last active administrator's role.
+     * It validates the new role and applies appropriate permissions.
+     *
+     * @param id         the unique identifier of the user
+     * @param roleUpdate data containing the new role information
+     * @return ResponseEntity containing updated user data or 404 if user not found
+     * @throws BusinessRuleValidationException if attempting to change the last administrator's role
+     * @see UserService#updateUserRole(UUID, UserRoleUpdateDto) for business logic
+     * @see UserRoleUpdateDto for role update data
+     * @since 2025-01-27
      */
     @LoggableRequest
     @PatchMapping("/{id}/role")
-    public ResponseEntity<UserResponseDto> updateUserRole(@PathVariable("id") UUID id, 
-                                                         @RequestBody @Valid UserRoleUpdateDto roleUpdate) {
+    public ResponseEntity<UserResponseDto> updateUserRole(@PathVariable("id") UUID id,
+                                                          @RequestBody @Valid UserRoleUpdateDto roleUpdate) {
         return userService.updateUserRole(id, roleUpdate)
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());

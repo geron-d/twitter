@@ -1,5 +1,16 @@
 # Changelog - JavaDoc Documentation Enhancement
 
+## 2025-01-27 10:25 — step 7 done — Enhance UserController.java JavaDoc — автор: assistant
+
+Enhanced UserController.java with comprehensive JavaDoc documentation:
+- Translated all Russian JavaDoc to professional English
+- Added detailed class-level documentation explaining REST controller purpose
+- Documented all 7 REST endpoints with complete parameter and return descriptions
+- Added cross-references to related services and DTOs
+- Included business rule explanations and security considerations
+- Applied all required JavaDoc tags: @author, @version, @since, @param, @return, @throws, @see
+- Followed Oracle JavaDoc conventions and REST API documentation standards
+
 ## 2025-01-27 10:20 — step 6 done — Enhance Application.java JavaDoc — автор: assistant
 
 Enhanced Application.java with comprehensive JavaDoc documentation:

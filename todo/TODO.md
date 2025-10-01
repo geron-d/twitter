@@ -29,8 +29,10 @@
   acceptance: "Complete class-level documentation following standards"
   note: "Added comprehensive JavaDoc for Application class and main method"
   artifact: "services/users-api/src/main/java/com/twitter/Application.java"
-- [ ] (P1) #7: Enhance UserController.java JavaDoc
+- [x] (P1) [2025-01-27 10:25] #7: Enhance UserController.java JavaDoc
   acceptance: "Complete documentation for all public methods and class"
+  note: "Translated and enhanced JavaDoc for all REST endpoints with detailed descriptions"
+  artifact: "services/users-api/src/main/java/com/twitter/controller/UserController.java"
 - [ ] (P1) #8: Enhance UserServiceImpl.java JavaDoc
   acceptance: "Complete documentation for all methods and class"
 - [ ] (P1) #9: Enhance UserValidatorImpl.java JavaDoc
