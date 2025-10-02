@@ -1,5 +1,15 @@
 # Changelog - JavaDoc Documentation Enhancement
 
+## 2025-01-27 10:50 — step 12 done — Enhance UserRepository.java JavaDoc — автор: assistant
+
+Enhanced UserRepository.java with comprehensive JavaDoc documentation:
+- Added detailed interface-level documentation explaining repository purpose
+- Documented all 5 custom query methods with complete descriptions
+- Added cross-references to related components (User entity, UserRole, UserStatus)
+- Included business rule explanations and data access method purposes
+- Applied all required JavaDoc tags: @author, @version, @since, @param, @return, @see
+- Followed Oracle JavaDoc conventions with improved formatting using <p> tags
+
 ## 2025-01-27 10:45 — step 11 done — Enhance UserValidator.java JavaDoc — автор: assistant
 
 Enhanced UserValidator.java with comprehensive JavaDoc documentation:
