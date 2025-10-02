@@ -1,6 +1,5 @@
 package com.twitter.mapper;
 
-
 import com.twitter.dto.UserPatchDto;
 import com.twitter.dto.UserRequestDto;
 import com.twitter.dto.UserResponseDto;
@@ -11,10 +10,11 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 /**
- * MapStruct маппер для преобразования между сущностями User и DTO объектами.
- * Обеспечивает автоматическое преобразование данных между слоями приложения
- * с настройкой игнорирования служебных полей.
- * 
+ * MapStruct mapper for data transformation between User entities and DTO objects.
+ * <p>
+ * This mapper provides automatic data transformation between application layers
+ * with configuration for ignoring service fields and ensuring data security.
+ *
  * @author Twitter Team
  * @version 1.0
  */
@@ -22,53 +22,61 @@ import org.mapstruct.MappingTarget;
 public interface UserMapper {
 
     /**
-     * Преобразует DTO запроса в сущность User.
-     * Игнорирует поле passwordHash, так как пароль обрабатывается отдельно
-     * с хешированием и генерацией соли.
-     * 
-     * @param userRequestDto DTO с данными для создания пользователя
-     * @return сущность User без хеша пароля
+     * Converts UserRequestDto to User entity.
+     * <p>
+     * This method transforms request DTO data into a User entity, ignoring
+     * the passwordHash field as password processing is handled separately
+     * with hashing and salt generation.
+     *
+     * @param userRequestDto DTO containing user data for creation
+     * @return User entity without password hash
      */
     @Mapping(target = "passwordHash", ignore = true)
     User toUser(UserRequestDto userRequestDto);
 
     /**
-     * Преобразует сущность User в DTO ответа.
-     * Автоматически исключает чувствительные поля (passwordHash, passwordSalt)
-     * для безопасности при передаче данных клиенту.
-     * 
-     * @param user сущность пользователя из базы данных
-     * @return DTO с данными пользователя для ответа клиенту
+     * Converts User entity to UserResponseDto.
+     * <p>
+     * This method transforms User entity data into a response DTO, automatically
+     * excluding sensitive fields (passwordHash, passwordSalt) for security
+     * when transmitting data to clients.
+     *
+     * @param user User entity from database
+     * @return DTO containing user data for client response
      */
     UserResponseDto toUserResponseDto(User user);
 
     /**
-     * Преобразует сущность User в DTO для PATCH операций.
-     * Создает промежуточный объект для применения JSON Patch изменений
-     * с сохранением текущих значений полей пользователя.
-     * 
-     * @param user сущность пользователя из базы данных
-     * @return DTO для применения PATCH изменений
+     * Converts User entity to UserPatchDto for PATCH operations.
+     * <p>
+     * This method creates an intermediate object for applying JSON Patch changes
+     * while preserving current user field values for partial updates.
+     *
+     * @param user User entity from database
+     * @return DTO for applying PATCH changes
      */
     UserPatchDto toUserPatchDto(User user);
 
     /**
-     * Обновляет сущность User данными из DTO PATCH операций.
-     * Применяет только измененные поля к существующей сущности,
-     * сохраняя неизменные поля без модификации.
-     * 
-     * @param userPatchDto DTO с данными для частичного обновления
-     * @param user целевая сущность User для обновления
+     * Updates User entity with data from UserPatchDto.
+     * <p>
+     * This method applies only changed fields to the existing entity,
+     * preserving unchanged fields without modification for partial updates.
+     *
+     * @param userPatchDto DTO containing data for partial update
+     * @param user         target User entity to update
      */
     void updateUserFromPatchDto(UserPatchDto userPatchDto, @MappingTarget User user);
 
     /**
-     * Обновляет сущность User данными из DTO полного обновления.
-     * Игнорирует служебные поля: id, passwordHash, passwordSalt, status, role.
-     * Эти поля управляются отдельно через бизнес-логику сервиса.
-     * 
-     * @param userUpdateDto DTO с данными для полного обновления
-     * @param user целевая сущность User для обновления
+     * Updates User entity with data from UserUpdateDto.
+     * <p>
+     * This method performs complete entity updates while ignoring service fields:
+     * id, passwordHash, passwordSalt, status, role. These fields are managed
+     * separately through service business logic.
+     *
+     * @param userUpdateDto DTO containing data for complete update
+     * @param user           target User entity to update
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "passwordHash", ignore = true)

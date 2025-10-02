@@ -1,5 +1,16 @@
 # Changelog - JavaDoc Documentation Enhancement
 
+## 2025-01-27 10:55 — step 13 done — Enhance UserMapper.java JavaDoc — автор: assistant
+
+Enhanced UserMapper.java with comprehensive JavaDoc documentation:
+- Translated all Russian JavaDoc to professional English
+- Added detailed interface-level documentation explaining mapper purpose
+- Documented all 5 mapping methods with complete descriptions
+- Added cross-references to related DTOs and entity classes
+- Included data transformation explanations and security considerations
+- Applied all required JavaDoc tags: @author, @version, @since, @param, @return, @see
+- Followed Oracle JavaDoc conventions with improved formatting using <p> tags
+
 ## 2025-01-27 10:50 — step 12 done — Enhance UserRepository.java JavaDoc — автор: assistant
 
 Enhanced UserRepository.java with comprehensive JavaDoc documentation:
