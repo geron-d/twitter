@@ -1,5 +1,16 @@
 # Changelog - JavaDoc Documentation Enhancement
 
+## 2025-01-27 11:20 — step 18 done — Enhance UserRoleUpdateDto.java JavaDoc — автор: assistant
+
+Enhanced UserRoleUpdateDto.java with comprehensive JavaDoc documentation:
+- Translated Russian JavaDoc to professional English
+- Added detailed class-level documentation explaining DTO purpose and business rules
+- Documented the role field with complete description
+- Added cross-references to UserRole enum
+- Included business rule considerations for role changes
+- Applied all required JavaDoc tags: @author, @version, @since, @see
+- Followed Oracle JavaDoc conventions with improved formatting using <p> tags
+
 ## 2025-01-27 11:15 — step 17 done — Enhance UserUpdateDto.java JavaDoc — автор: assistant
 
 Enhanced UserUpdateDto.java with comprehensive JavaDoc documentation:

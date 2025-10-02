@@ -77,8 +77,10 @@
   acceptance: "Complete update DTO documentation"
   note: "Added comprehensive JavaDoc for UserUpdateDto with detailed field descriptions and validation constraints"
   artifact: "services/users-api/src/main/java/com/twitter/dto/UserUpdateDto.java"
-- [ ] (P1) #18: Enhance UserRoleUpdateDto.java JavaDoc
+- [x] (P1) [2025-01-27 11:20] #18: Enhance UserRoleUpdateDto.java JavaDoc
   acceptance: "Complete role update DTO documentation"
+  note: "Translated and enhanced JavaDoc for UserRoleUpdateDto with detailed field descriptions and business rule considerations"
+  artifact: "services/users-api/src/main/java/com/twitter/dto/UserRoleUpdateDto.java"
 - [ ] (P1) #19: Enhance UserPatchDto.java JavaDoc
   acceptance: "Complete patch DTO documentation"
 - [ ] (P1) #20: Enhance UserFilter.java JavaDoc
