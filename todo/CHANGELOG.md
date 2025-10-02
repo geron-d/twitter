@@ -1,5 +1,15 @@
 # Changelog - JavaDoc Documentation Enhancement
 
+## 2025-01-27 11:00 — step 14 done — Enhance User.java entity JavaDoc — автор: assistant
+
+Enhanced User.java with comprehensive JavaDoc documentation:
+- Added detailed class-level documentation explaining entity purpose and mapping
+- Documented all 8 entity fields with complete descriptions
+- Added cross-references to related enums (UserRole, UserStatus)
+- Included security considerations for password fields
+- Applied all required JavaDoc tags: @author, @version, @since, @see
+- Followed Oracle JavaDoc conventions with improved formatting using <p> tags
+
 ## 2025-01-27 10:55 — step 13 done — Enhance UserMapper.java JavaDoc — автор: assistant
 
 Enhanced UserMapper.java with comprehensive JavaDoc documentation:
