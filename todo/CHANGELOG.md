@@ -1,5 +1,16 @@
 # Changelog - JavaDoc Documentation Enhancement
 
+## 2025-01-27 10:45 — step 11 done — Enhance UserValidator.java JavaDoc — автор: assistant
+
+Enhanced UserValidator.java with comprehensive JavaDoc documentation:
+- Translated all Russian JavaDoc to professional English
+- Added detailed interface-level documentation explaining validator contract
+- Documented all 9 validation methods with complete descriptions
+- Added cross-references to implementation class (UserValidatorImpl) and exception types
+- Included business rule explanations and validation contract specifications
+- Applied all required JavaDoc tags: @author, @version, @since, @param, @return, @throws, @see
+- Followed Oracle JavaDoc conventions with improved formatting using <p> tags
+
 ## 2025-01-27 10:40 — step 10 done — Enhance UserService.java JavaDoc — автор: assistant
 
 Enhanced UserService.java with comprehensive JavaDoc documentation:

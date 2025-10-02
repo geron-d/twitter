@@ -1,5 +1,5 @@
 - переписать javadoc в users-api в соответствии со стандартами
-- удалить @since из всех javadoc
+- удалить @since и @see из всех javadoc
 - добавить PROJECT_OVERVIEW и README на английском
 - добавить поле createdAt
 - swagger
