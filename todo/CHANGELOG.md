@@ -1,5 +1,14 @@
 # Changelog - JavaDoc Documentation Enhancement
 
+## 2025-01-27 11:25 — step 19 done — Enhance UserPatchDto.java JavaDoc — автор: assistant
+
+Enhanced UserPatchDto.java with comprehensive JavaDoc documentation:
+- Added detailed class-level documentation explaining DTO purpose and PATCH operations
+- Documented all 4 DTO fields with complete descriptions
+- Included validation constraints and optional field considerations
+- Applied all required JavaDoc tags: @author, @version, @since
+- Followed Oracle JavaDoc conventions with improved formatting using <p> tags
+
 ## 2025-01-27 11:20 — step 18 done — Enhance UserRoleUpdateDto.java JavaDoc — автор: assistant
 
 Enhanced UserRoleUpdateDto.java with comprehensive JavaDoc documentation:
