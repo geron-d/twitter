@@ -65,8 +65,10 @@
   acceptance: "Complete entity documentation with field descriptions"
   note: "Added comprehensive JavaDoc for User entity with detailed field descriptions and security considerations"
   artifact: "services/users-api/src/main/java/com/twitter/entity/User.java"
-- [ ] (P1) #15: Enhance UserRequestDto.java JavaDoc
+- [x] (P1) [2025-01-27 11:05] #15: Enhance UserRequestDto.java JavaDoc
   acceptance: "Complete DTO documentation with field descriptions"
+  note: "Added comprehensive JavaDoc for UserRequestDto with detailed field descriptions and validation constraints"
+  artifact: "services/users-api/src/main/java/com/twitter/dto/UserRequestDto.java"
 - [ ] (P1) #16: Enhance UserResponseDto.java JavaDoc
   acceptance: "Complete response DTO documentation"
 - [ ] (P1) #17: Enhance UserUpdateDto.java JavaDoc
