@@ -17,7 +17,7 @@ import java.util.UUID;
  * user-related data including authentication credentials, personal information,
  * and system status.
  *
- * @author Twitter Team
+ * @author geron
  * @version 1.0
  */
 @Entity

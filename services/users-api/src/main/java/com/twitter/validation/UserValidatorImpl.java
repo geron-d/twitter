@@ -30,12 +30,8 @@ import java.util.stream.Collectors;
  * It provides comprehensive validation for user data including uniqueness checks,
  * business rule validation, and format validation for JSON Patch operations.
  *
- * @author Twitter Team
+ * @author geron
  * @version 1.0
- * @see UserValidator for the validator interface
- * @see UserRepository for data access operations
- * @see ValidationException for validation error handling
- * @since 2025-01-27
  */
 @Slf4j
 @Component
@@ -53,8 +49,6 @@ public class UserValidatorImpl implements UserValidator {
      *
      * @param userRequest DTO containing user data for creation
      * @throws ValidationException if validation fails
-     * @see #validateUniqueness(String, String, UUID) for uniqueness validation
-     * @since 2025-01-27
      */
     @Override
     public void validateForCreate(UserRequestDto userRequest) {
@@ -71,8 +65,6 @@ public class UserValidatorImpl implements UserValidator {
      * @param userId     the ID of the user being updated
      * @param userUpdate DTO containing updated user data
      * @throws ValidationException if validation fails
-     * @see #validateUniqueness(String, String, UUID) for uniqueness validation
-     * @since 2025-01-27
      */
     @Override
     public void validateForUpdate(UUID userId, UserUpdateDto userUpdate) {
@@ -89,8 +81,6 @@ public class UserValidatorImpl implements UserValidator {
      * @param userId    the ID of the user being patched
      * @param patchNode JSON data for the patch operation
      * @throws ValidationException if JSON structure validation fails
-     * @see #validatePatchData(JsonNode) for JSON structure validation
-     * @since 2025-01-27
      */
     @Override
     public void validateForPatch(UUID userId, JsonNode patchNode) {
@@ -107,9 +97,6 @@ public class UserValidatorImpl implements UserValidator {
      * @param userId   the ID of the user being patched
      * @param patchDto prepared DTO for validation
      * @throws ValidationException if validation fails
-     * @see #validatePatchConstraints(UserPatchDto) for Bean Validation
-     * @see #validateUniqueness(String, String, UUID) for uniqueness validation
-     * @since 2025-01-27
      */
     @Override
     public void validateForPatchWithDto(UUID userId, UserPatchDto patchDto) {
@@ -128,9 +115,6 @@ public class UserValidatorImpl implements UserValidator {
      * @param email         the email to validate (can be null)
      * @param excludeUserId the user ID to exclude from uniqueness check (for updates)
      * @throws UniquenessValidationException if uniqueness conflict is detected
-     * @see UserRepository#existsByLogin(String) for login existence check
-     * @see UserRepository#existsByEmail(String) for email existence check
-     * @since 2025-01-27
      */
     @Override
     public void validateUniqueness(String login, String email, UUID excludeUserId) {
@@ -166,9 +150,6 @@ public class UserValidatorImpl implements UserValidator {
      *
      * @param userId the ID of the user to be deactivated
      * @throws BusinessRuleValidationException if business rules are violated
-     * @see UserRepository#countByRoleAndStatus(UserRole, UserStatus) for admin count check
-     * @see BusinessRuleValidationException#lastAdminDeactivation(UUID) for exception creation
-     * @since 2025-01-27
      */
     @Override
     public void validateAdminDeactivation(UUID userId) {
@@ -194,8 +175,6 @@ public class UserValidatorImpl implements UserValidator {
      * @param userId  the ID of the user
      * @param newRole the new role for the user
      * @throws BusinessRuleValidationException if business rules are violated
-     * @see UserRepository#countByRoleAndStatus(UserRole, UserStatus) for admin count check
-     * @since 2025-01-27
      */
     @Override
     public void validateRoleChange(UUID userId, UserRole newRole) {
@@ -223,8 +202,6 @@ public class UserValidatorImpl implements UserValidator {
      *
      * @param patchNode JSON data for the patch operation
      * @throws FormatValidationException if JSON format is invalid
-     * @see JsonNode for JSON structure validation
-     * @since 2025-01-27
      */
     @Override
     public void validatePatchData(JsonNode patchNode) {
@@ -246,8 +223,6 @@ public class UserValidatorImpl implements UserValidator {
      *
      * @param patchDto DTO to validate
      * @throws FormatValidationException if validation constraints are violated
-     * @see ConstraintViolation for validation violation details
-     * @since 2025-01-27
      */
     @Override
     public void validatePatchConstraints(UserPatchDto patchDto) {

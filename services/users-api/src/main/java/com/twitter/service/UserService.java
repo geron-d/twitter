@@ -21,12 +21,8 @@ import java.util.UUID;
  * business logic for CRUD operations with users, including validation,
  * password hashing, and business rule enforcement.
  *
- * @author Twitter Team
+ * @author geron
  * @version 1.0
- * @see UserServiceImpl for the default implementation
- * @see UserRequestDto for request data transfer objects
- * @see UserResponseDto for response data transfer objects
- * @since 2025-01-27
  */
 public interface UserService {
 
@@ -39,8 +35,6 @@ public interface UserService {
      *
      * @param id the unique identifier of the user
      * @return Optional containing user data or empty if not found
-     * @see UserServiceImpl#getUserById(UUID) for implementation details
-     * @since 2025-01-27
      */
     Optional<UserResponseDto> getUserById(UUID id);
 
@@ -54,9 +48,6 @@ public interface UserService {
      * @param userFilter filter criteria for user search (name, role, status)
      * @param pageable   pagination parameters (page, size, sorting)
      * @return Page containing filtered list of users with pagination metadata
-     * @see UserServiceImpl#findAll(UserFilter, Pageable) for implementation details
-     * @see UserFilter for available filter options
-     * @since 2025-01-27
      */
     Page<UserResponseDto> findAll(UserFilter userFilter, Pageable pageable);
 
@@ -70,9 +61,6 @@ public interface UserService {
      * @param userRequest user data for creation
      * @return the created user data
      * @throws ValidationException if validation fails or uniqueness conflict occurs
-     * @see UserServiceImpl#createUser(UserRequestDto) for implementation details
-     * @see UserRequestDto for required fields
-     * @since 2025-01-27
      */
     UserResponseDto createUser(UserRequestDto userRequest);
 
@@ -87,9 +75,6 @@ public interface UserService {
      * @param userDetails new user data for the update
      * @return Optional containing updated user data or empty if user not found
      * @throws ValidationException if validation fails or uniqueness conflict occurs
-     * @see UserServiceImpl#updateUser(UUID, UserUpdateDto) for implementation details
-     * @see UserUpdateDto for updatable fields
-     * @since 2025-01-27
      */
     Optional<UserResponseDto> updateUser(UUID id, UserUpdateDto userDetails);
 
@@ -104,8 +89,6 @@ public interface UserService {
      * @param patchNode JSON data for partial update
      * @return Optional containing updated user data or empty if user not found
      * @throws ValidationException if JSON structure or business rule validation fails
-     * @see UserServiceImpl#patchUser(UUID, JsonNode) for implementation details
-     * @since 2025-01-27
      */
     Optional<UserResponseDto> patchUser(UUID id, JsonNode patchNode);
 
@@ -119,8 +102,6 @@ public interface UserService {
      * @param id the unique identifier of the user to deactivate
      * @return Optional containing updated user data or empty if user not found
      * @throws BusinessRuleValidationException if attempting to deactivate the last administrator
-     * @see UserServiceImpl#inactivateUser(UUID) for implementation details
-     * @since 2025-01-27
      */
     Optional<UserResponseDto> inactivateUser(UUID id);
 
@@ -135,9 +116,6 @@ public interface UserService {
      * @param roleUpdate data containing the new user role
      * @return Optional containing updated user data or empty if user not found
      * @throws BusinessRuleValidationException if attempting to change the last administrator's role
-     * @see UserServiceImpl#updateUserRole(UUID, UserRoleUpdateDto) for implementation details
-     * @see UserRoleUpdateDto for role update data
-     * @since 2025-01-27
      */
     Optional<UserResponseDto> updateUserRole(UUID id, UserRoleUpdateDto roleUpdate);
 }

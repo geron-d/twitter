@@ -21,7 +21,7 @@ import java.io.IOException;
  * The factory was extracted from UserValidator to improve separation of concerns
  * and provide reusable patch functionality across the application.
  *
- * @author Twitter Team
+ * @author geron
  * @version 1.0
  */
 @Slf4j

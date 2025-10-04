@@ -23,7 +23,7 @@ import java.util.Base64;
  *   <li>Generates 16-byte salts to prevent rainbow table attacks</li>
  * </ul>
  *
- * @author Twitter Team
+ * @author geron
  * @version 1.0
  */
 public class PasswordUtil {

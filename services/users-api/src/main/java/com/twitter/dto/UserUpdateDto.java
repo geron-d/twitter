@@ -11,7 +11,7 @@ import jakarta.validation.constraints.Size;
  * in the system. It includes validation constraints to ensure data
  * integrity and security requirements are met during updates.
  *
- * @author Twitter Team
+ * @author geron
  * @version 1.0
  */
 public record UserUpdateDto(

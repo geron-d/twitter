@@ -20,7 +20,7 @@ import org.springframework.util.StringUtils;
  * List<User> users = userRepository.findAll(spec);
  * }</pre>
  *
- * @author Twitter Team
+ * @author geron
  * @version 1.0
  */
 public record UserFilter(String firstNameContains, String lastNameContains, String email, String login, UserRole role) {

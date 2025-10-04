@@ -10,7 +10,7 @@ import jakarta.validation.constraints.NotNull;
  * in the system. It includes validation constraints to ensure data
  * integrity and business rule compliance during role changes.
  *
- * @author Twitter Team
+ * @author geron
  * @version 1.0
  */
 public record UserRoleUpdateDto(

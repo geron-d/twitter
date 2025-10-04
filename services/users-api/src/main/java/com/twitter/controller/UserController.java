@@ -28,12 +28,8 @@ import java.util.UUID;
  * with support for filtering, pagination, and role-based access control. It handles
  * HTTP requests and delegates business logic to the UserService layer.
  *
- * @author Twitter Team
+ * @author geron
  * @version 1.0
- * @see UserService for business logic implementation
- * @see UserRequestDto for request data transfer objects
- * @see UserResponseDto for response data transfer objects
- * @since 2025-01-27
  */
 @Slf4j
 @RestController
@@ -52,8 +48,6 @@ public class UserController {
      *
      * @param id the unique identifier of the user
      * @return ResponseEntity containing user data or 404 if not found
-     * @see UserService#getUserById(UUID) for business logic
-     * @since 2025-01-27
      */
     @LoggableRequest
     @GetMapping("/{id}")
@@ -73,9 +67,6 @@ public class UserController {
      * @param userFilter filter criteria for user search (name, role, status)
      * @param pageable   pagination parameters (page, size, sorting)
      * @return PagedModel containing filtered list of users with pagination metadata
-     * @see UserService#findAll(UserFilter, Pageable) for business logic
-     * @see UserFilter for available filter options
-     * @since 2025-01-27
      */
     @LoggableRequest
     @GetMapping
@@ -94,9 +85,6 @@ public class UserController {
      * @param userRequest user data for creation
      * @return the created user data
      * @throws ValidationException if validation fails or uniqueness conflict occurs
-     * @see UserService#createUser(UserRequestDto) for business logic
-     * @see UserRequestDto for required fields
-     * @since 2025-01-27
      */
     @LoggableRequest(hideFields = {"password"})
     @PostMapping
@@ -115,9 +103,6 @@ public class UserController {
      * @param userDetails new user data for the update
      * @return ResponseEntity containing updated user data or 404 if user not found
      * @throws ValidationException if validation fails or uniqueness conflict occurs
-     * @see UserService#updateUser(UUID, UserUpdateDto) for business logic
-     * @see UserUpdateDto for updatable fields
-     * @since 2025-01-27
      */
     @LoggableRequest(hideFields = {"password"})
     @PutMapping("/{id}")
@@ -138,8 +123,6 @@ public class UserController {
      * @param patchNode JSON patch data for partial update
      * @return ResponseEntity containing updated user data or 404 if user not found
      * @throws ValidationException if validation fails or JSON format is invalid
-     * @see UserService#patchUser(UUID, JsonNode) for business logic
-     * @since 2025-01-27
      */
     @LoggableRequest
     @PatchMapping("/{id}")
@@ -159,8 +142,6 @@ public class UserController {
      * @param id the unique identifier of the user to deactivate
      * @return ResponseEntity containing updated user data or 404 if user not found
      * @throws BusinessRuleValidationException if attempting to deactivate the last administrator
-     * @see UserService#inactivateUser(UUID) for business logic
-     * @since 2025-01-27
      */
     @LoggableRequest
     @PatchMapping("/{id}/inactivate")
@@ -181,9 +162,6 @@ public class UserController {
      * @param roleUpdate data containing the new role information
      * @return ResponseEntity containing updated user data or 404 if user not found
      * @throws BusinessRuleValidationException if attempting to change the last administrator's role
-     * @see UserService#updateUserRole(UUID, UserRoleUpdateDto) for business logic
-     * @see UserRoleUpdateDto for role update data
-     * @since 2025-01-27
      */
     @LoggableRequest
     @PatchMapping("/{id}/role")

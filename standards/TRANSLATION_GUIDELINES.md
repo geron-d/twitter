@@ -111,7 +111,7 @@ This document defines the translation guidelines and terminology standards for c
 ## JavaDoc Tag Guidelines
 
 ### Required Tags
-- `@author Twitter Team` - Always use "Twitter Team" as author
+- `@author geron` - Always use "geron" as author
 - `@version 1.0` - Use version 1.0 for initial documentation
 - `@since 2025-01-27` - Use current date for new documentation
 - `@param` - Describe each parameter clearly and concisely
@@ -196,11 +196,8 @@ This document defines the translation guidelines and terminology standards for c
  * It integrates with the user repository and follows Twitter's security
  * standards for user data handling.
  * 
- * @author Twitter Team
+ * @author geron
  * @version 1.0
- * @since 2025-01-27
- * @see UserRepository for data access operations
- * @see UserValidator for validation logic
  */
 ```
 
@@ -230,11 +227,8 @@ This document defines the translation guidelines and terminology standards for c
  * or validation constraints. It provides detailed information about
  * the validation failure to help with error resolution.
  * 
- * @author Twitter Team
+ * @author geron
  * @version 1.0
- * @since 2025-01-27
- * @see UserValidator for validation logic
- * @see GlobalExceptionHandler for error handling
  */
 ```
 

@@ -19,12 +19,8 @@ import java.util.UUID;
  * It provides comprehensive validation for user data including uniqueness checks,
  * business rule validation, and format validation for JSON Patch operations.
  *
- * @author Twitter Team
+ * @author geron
  * @version 1.0
- * @see UserValidatorImpl for the default implementation
- * @see ValidationException for validation error handling
- * @see BusinessRuleValidationException for business rule violations
- * @since 2025-01-27
  */
 public interface UserValidator {
     
@@ -36,8 +32,6 @@ public interface UserValidator {
      *
      * @param userRequest DTO containing user data for creation
      * @throws ValidationException if validation fails
-     * @see UserValidatorImpl#validateForCreate(UserRequestDto) for implementation details
-     * @since 2025-01-27
      */
     void validateForCreate(UserRequestDto userRequest);
     
@@ -51,8 +45,6 @@ public interface UserValidator {
      * @param userId     the ID of the user being updated
      * @param userUpdate DTO containing updated user data
      * @throws ValidationException if validation fails
-     * @see UserValidatorImpl#validateForUpdate(UUID, UserUpdateDto) for implementation details
-     * @since 2025-01-27
      */
     void validateForUpdate(UUID userId, UserUpdateDto userUpdate);
     
@@ -66,8 +58,6 @@ public interface UserValidator {
      * @param userId    the ID of the user being patched
      * @param patchNode JSON data for the patch operation
      * @throws ValidationException if JSON structure validation fails
-     * @see UserValidatorImpl#validateForPatch(UUID, JsonNode) for implementation details
-     * @since 2025-01-27
      */
     void validateForPatch(UUID userId, JsonNode patchNode);
     
@@ -81,8 +71,6 @@ public interface UserValidator {
      * @param userId   the ID of the user being patched
      * @param patchDto prepared DTO for validation
      * @throws ValidationException if validation fails
-     * @see UserValidatorImpl#validateForPatchWithDto(UUID, UserPatchDto) for implementation details
-     * @since 2025-01-27
      */
     void validateForPatchWithDto(UUID userId, UserPatchDto patchDto);
     
@@ -97,8 +85,6 @@ public interface UserValidator {
      * @param email         the email to validate (can be null)
      * @param excludeUserId the user ID to exclude from uniqueness check (for updates)
      * @throws UniquenessValidationException if uniqueness conflict is detected
-     * @see UserValidatorImpl#validateUniqueness(String, String, UUID) for implementation details
-     * @since 2025-01-27
      */
     void validateUniqueness(String login, String email, UUID excludeUserId);
     
@@ -111,8 +97,6 @@ public interface UserValidator {
      *
      * @param userId the ID of the user to be deactivated
      * @throws BusinessRuleValidationException if business rules are violated
-     * @see UserValidatorImpl#validateAdminDeactivation(UUID) for implementation details
-     * @since 2025-01-27
      */
     void validateAdminDeactivation(UUID userId);
     
@@ -126,8 +110,6 @@ public interface UserValidator {
      * @param userId  the ID of the user
      * @param newRole the new role for the user
      * @throws BusinessRuleValidationException if business rules are violated
-     * @see UserValidatorImpl#validateRoleChange(UUID, UserRole) for implementation details
-     * @since 2025-01-27
      */
     void validateRoleChange(UUID userId, UserRole newRole);
     
@@ -140,8 +122,6 @@ public interface UserValidator {
      *
      * @param patchNode JSON data for the patch operation
      * @throws FormatValidationException if JSON format is invalid
-     * @see UserValidatorImpl#validatePatchData(JsonNode) for implementation details
-     * @since 2025-01-27
      */
     void validatePatchData(JsonNode patchNode);
     
@@ -154,8 +134,6 @@ public interface UserValidator {
      *
      * @param patchDto DTO to validate
      * @throws FormatValidationException if validation constraints are violated
-     * @see UserValidatorImpl#validatePatchConstraints(UserPatchDto) for implementation details
-     * @since 2025-01-27
      */
     void validatePatchConstraints(UserPatchDto patchDto);
 }

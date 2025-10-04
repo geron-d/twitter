@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
  * via JSON Patch operations. It includes validation constraints to ensure
  * data integrity while allowing selective field updates.
  *
- * @author Twitter Team
+ * @author geron
  * @version 1.0
  */
 @Data

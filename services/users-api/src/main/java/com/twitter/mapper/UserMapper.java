@@ -15,7 +15,7 @@ import org.mapstruct.MappingTarget;
  * This mapper provides automatic data transformation between application layers
  * with configuration for ignoring service fields and ensuring data security.
  *
- * @author Twitter Team
+ * @author geron
  * @version 1.0
  */
 @Mapper

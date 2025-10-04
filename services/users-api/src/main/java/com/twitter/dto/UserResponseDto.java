@@ -12,7 +12,7 @@ import java.util.UUID;
  * to clients. It excludes sensitive fields like password hash and salt for
  * security purposes while providing all necessary user data for display.
  *
- * @author Twitter Team
+ * @author geron
  * @version 1.0
  */
 public record UserResponseDto(
