@@ -1,5 +1,3 @@
-- доработать стандарты: не писать аннотации @since и @see, для репозиториев не писать доки для Derived Query Methods, в тэге @author писать geron
-- удалить @since и @see из всех javadoc, в тэге @author писать geron
 - добавить PROJECT_OVERVIEW и README на английском
 - добавить поле createdAt
 - swagger
