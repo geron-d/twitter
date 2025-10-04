@@ -247,15 +247,36 @@ public class BusinessRuleValidationException extends RuntimeException {
 
 Spring Data JPA automatically generates implementation for Derived Query Methods based on method names. These methods have obvious functionality from their names and do not require JavaDoc documentation.
 
+**Key Principles:**
+- Derived Query Methods are self-documenting through their naming convention
+- Adding JavaDoc to these methods creates redundancy and maintenance overhead
+- Focus documentation efforts on custom methods and complex business logic
+- Use clear, descriptive method names instead of relying on documentation
+
 #### Methods That Do NOT Require Documentation
 
 The following method patterns are considered Derived Query Methods and should NOT be documented:
 
-- `findBy*` - Find entities by property
-- `countBy*` - Count entities by property  
-- `existsBy*` - Check if entities exist by property
-- `deleteBy*` - Delete entities by property
-- `*By*And*` - Methods with multiple conditions
+- `findBy*` - Find entities by property (e.g., `findByLogin`, `findByEmail`)
+- `countBy*` - Count entities by property (e.g., `countByRole`, `countByStatus`)
+- `existsBy*` - Check if entities exist by property (e.g., `existsByLogin`, `existsByEmail`)
+- `deleteBy*` - Delete entities by property (e.g., `deleteByStatus`, `deleteByRole`)
+- `*By*And*` - Methods with multiple conditions (e.g., `existsByLoginAndIdNot`)
+- `*By*Or*` - Methods with OR conditions (e.g., `findByLoginOrEmail`)
+- `*By*In*` - Methods with IN conditions (e.g., `findByIdIn`)
+- `*By*Between*` - Methods with BETWEEN conditions (e.g., `findByCreatedAtBetween`)
+- `*By*LessThan*` - Methods with comparison conditions (e.g., `findByAgeLessThan`)
+- `*By*GreaterThan*` - Methods with comparison conditions (e.g., `findByAgeGreaterThan`)
+
+#### Methods That DO Require Documentation
+
+The following methods should always be documented:
+
+- Custom query methods using `@Query` annotation
+- Methods with complex business logic
+- Methods that perform non-standard operations
+- Methods that have side effects beyond simple CRUD operations
+- Methods that require specific parameter validation or constraints
 
 #### Template for Repository Interface
 
@@ -309,6 +330,84 @@ public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificat
     boolean existsByLoginAndIdNot(String login, UUID id);
     boolean existsByEmailAndIdNot(String email, UUID id);
 }
+```
+
+#### Best Practices for Repository Documentation
+
+1. **Repository Interface Documentation:**
+   - Always document the repository interface itself
+   - Explain the entity type and primary key type
+   - Mention extended interfaces (JpaRepository, JpaSpecificationExecutor)
+   - Describe any special capabilities or constraints
+
+2. **Method Naming Conventions:**
+   - Use clear, descriptive method names
+   - Follow Spring Data JPA naming conventions
+   - Avoid abbreviations that might be unclear
+   - Use consistent terminology across the project
+
+3. **Custom Method Documentation:**
+   - Document all custom methods with `@Query` annotations
+   - Explain complex business logic
+   - Document parameter constraints and validation rules
+   - Describe return value semantics and possible states
+
+4. **Exception Handling:**
+   - Document methods that can throw specific exceptions
+   - Explain when and why exceptions are thrown
+   - Provide guidance on exception handling
+
+#### Common Patterns and Examples
+
+**Good Repository Interface:**
+```java
+/**
+ * Repository interface for user data access operations.
+ * 
+ * This repository provides data access methods for User entities.
+ * It extends JpaRepository and JpaSpecificationExecutor for standard
+ * CRUD operations and dynamic query capabilities.
+ * 
+ * @author geron
+ * @version 1.0
+ */
+public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificationExecutor<User> {
+
+    // Derived Query Methods - NO JavaDoc required
+    long countByRoleAndStatus(UserRole role, UserStatus status);
+    boolean existsByLogin(String login);
+    boolean existsByEmail(String email);
+    boolean existsByLoginAndIdNot(String login, UUID id);
+    boolean existsByEmailAndIdNot(String email, UUID id);
+    
+    // Custom methods - JavaDoc required
+    /**
+     * Finds users by complex criteria with custom query.
+     * 
+     * This method performs a complex search using multiple criteria
+     * and returns users matching all specified conditions.
+     * 
+     * @param criteria the search criteria
+     * @return list of users matching the criteria
+     * @throws IllegalArgumentException if criteria is null
+     */
+    @Query("SELECT u FROM User u WHERE u.role = :role AND u.status = :status AND u.createdAt > :date")
+    List<User> findUsersByComplexCriteria(@Param("role") UserRole role, 
+                                         @Param("status") UserStatus status, 
+                                         @Param("date") LocalDateTime date);
+}
+```
+
+**Anti-pattern - Over-documentation:**
+```java
+// DON'T DO THIS - Derived Query Methods don't need documentation
+/**
+ * Checks if a user exists by login.
+ * 
+ * @param login the login to check
+ * @return true if user exists, false otherwise
+ */
+boolean existsByLogin(String login);
 ```
 
 ## Standard JavaDoc Tags
