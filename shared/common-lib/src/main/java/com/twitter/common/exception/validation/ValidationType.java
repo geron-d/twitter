@@ -43,13 +43,8 @@ import lombok.RequiredArgsConstructor;
  *     exception.getValidationType(), exception.getMessage());
  * }</pre>
  *
- * @author Twitter Team
+ * @author geron
  * @version 1.0
- * @see ValidationException for the base validation exception class
- * @see UniquenessValidationException for uniqueness validation errors
- * @see BusinessRuleValidationException for business rule violations
- * @see FormatValidationException for data format errors
- * @since 2025-01-27
  */
 @Getter
 @RequiredArgsConstructor

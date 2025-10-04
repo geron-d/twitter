@@ -46,10 +46,8 @@ import java.util.stream.Collectors;
  * }
  * }</pre>
  *
- * @author Twitter Team
+ * @author geron
  * @version 1.0
- * @see LoggableRequest for the annotation that triggers this aspect
- * @since 2025-01-27
  */
 @Slf4j
 @Aspect
@@ -94,7 +92,6 @@ public class LoggableRequestAspect {
      * @param proceedingJoinPoint the AOP join point containing method information
      * @return the result of the original method execution
      * @throws Throwable if the original method throws an exception
-     * @see LoggableRequest for configuration options
      */
     @Around("@annotation(com.twitter.common.aspect.LoggableRequest))")
     public Object log(final ProceedingJoinPoint proceedingJoinPoint) throws Throwable {

@@ -36,11 +36,8 @@ import java.time.Instant;
  *
  * <p>All responses follow RFC 7807 Problem Details for HTTP APIs standard.</p>
  *
- * @author Twitter Team
+ * @author geron
  * @version 1.0
- * @see ProblemDetail for response format details
- * @see ValidationException for validation exception hierarchy
- * @since 2025-01-27
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {

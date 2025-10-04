@@ -47,11 +47,8 @@ import lombok.Getter;
  * }
  * }</pre>
  *
- * @author Twitter Team
+ * @author geron
  * @version 1.0
- * @see ValidationException for the base validation exception class
- * @see ValidationType#UNIQUENESS for the validation type
- * @since 2025-01-27
  */
 @Getter
 public class UniquenessValidationException extends ValidationException {

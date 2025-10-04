@@ -51,13 +51,8 @@ import lombok.Getter;
  * }
  * }</pre>
  *
- * @author Twitter Team
+ * @author geron
  * @version 1.0
- * @see ValidationType for validation type enumeration
- * @see UniquenessValidationException for uniqueness validation errors
- * @see BusinessRuleValidationException for business rule violations
- * @see FormatValidationException for data format errors
- * @since 2025-01-27
  */
 @Getter
 public abstract class ValidationException extends RuntimeException {
@@ -132,7 +127,6 @@ public abstract class ValidationException extends RuntimeException {
      * }</pre>
      *
      * @return the ValidationType that categorizes this validation error
-     * @see ValidationType for available validation types
      */
     public abstract ValidationType getValidationType();
 }

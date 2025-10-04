@@ -24,9 +24,8 @@ package com.twitter.common.enums;
  *   <li>Business rule validation (e.g., last admin protection)</li>
  * </ul>
  *
- * @author Twitter Team
+ * @author geron
  * @version 1.0
- * @since 2025-01-27
  */
 public enum UserRole {
 

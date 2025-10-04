@@ -28,10 +28,8 @@ import java.lang.annotation.Target;
  * }
  * }</pre>
  *
- * @author Twitter Team
+ * @author geron
  * @version 1.0
- * @see LoggableRequestAspect for the implementation that handles the logging
- * @since 2025-01-27
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

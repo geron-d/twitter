@@ -184,6 +184,40 @@
 
 ### Следующий шаг: #11 - Обновление остальных классов в common-lib
 
+## 2025-01-27 17:45 — step 11 done — Обновление остальных классов в common-lib — автор: assistant
+
+### Выполненные задачи:
+- Обновлены все классы в common-lib согласно новым стандартам JavaDoc
+- Изменен @author с "Twitter Team" на "geron" во всех файлах
+- Удалены все теги @since и @see из всех классов
+- Сохранена вся функциональная документация методов и классов
+
+### Детальные изменения по файлам:
+1. **ValidationType.java**: Изменен @author, удалены @see (4) и @since (1)
+2. **ValidationException.java**: Изменен @author, удалены @see (4) и @since (1), удален @see из метода
+3. **GlobalExceptionHandler.java**: Изменен @author, удалены @see (2) и @since (1)
+4. **UniquenessValidationException.java**: Изменен @author, удалены @see (2) и @since (1)
+5. **BusinessRuleValidationException.java**: Изменен @author, удалены @see (2) и @since (1)
+6. **FormatValidationException.java**: Изменен @author, удалены @see (2) и @since (1)
+7. **UserStatus.java**: Изменен @author, удален @since (1)
+8. **UserRole.java**: Изменен @author, удален @since (1)
+9. **LoggableRequest.java**: Изменен @author, удалены @see (1) и @since (1)
+10. **LoggableRequestAspect.java**: Изменен @author, удалены @see (2) и @since (1), удален @see из метода
+
+### Статистика изменений:
+- **@author**: 10 изменений (Twitter Team → geron)
+- **@see**: 20 удалений
+- **@since**: 10 удалений
+- **Всего**: 40 изменений
+
+### Проверка соответствия:
+- ✅ **@author**: Изменен на "geron" во всех файлах
+- ✅ **@since/@see**: Полностью удалены из всех файлов
+- ✅ **Функциональная документация**: Сохранена без изменений
+- ✅ **Структура JavaDoc**: Сохранена и соответствует новым стандартам
+
+### Следующий шаг: #12 - Обновление остальных классов в users-api
+
 ## 2025-01-27 17:00 — step 8 done — Добавление специальных правил для JPA репозиториев — автор: assistant
 
 ### Выполненные задачи:
