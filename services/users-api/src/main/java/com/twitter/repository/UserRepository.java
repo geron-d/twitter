@@ -12,8 +12,10 @@ import java.util.UUID;
  * Repository interface for user data access operations.
  * <p>
  * This repository provides data access methods for User entities.
+ * It extends JpaRepository and JpaSpecificationExecutor for standard
+ * CRUD operations and dynamic query capabilities.
  *
- * @author Twitter Team
+ * @author geron
  * @version 1.0
  */
 public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificationExecutor<User> {

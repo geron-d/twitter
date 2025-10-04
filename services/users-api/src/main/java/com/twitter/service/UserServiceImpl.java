@@ -34,13 +34,8 @@ import java.util.UUID;
  * including creation, updating, deactivation, and role management. It handles
  * data validation, password hashing, and business rule enforcement.
  *
- * @author Twitter Team
+ * @author geron
  * @version 1.0
- * @see UserService for the service interface
- * @see UserValidator for validation logic
- * @see UserMapper for data transformation
- * @see UserRepository for data access
- * @since 2025-01-27
  */
 @Slf4j
 @Service
@@ -61,9 +56,6 @@ public class UserServiceImpl implements UserService {
      *
      * @param id the unique identifier of the user
      * @return Optional containing user data or empty if not found
-     * @see UserRepository#findById(Object) for data access
-     * @see UserMapper#toUserResponseDto(User) for data transformation
-     * @since 2025-01-27
      */
     @Override
     public Optional<UserResponseDto> getUserById(UUID id) {
@@ -80,9 +72,6 @@ public class UserServiceImpl implements UserService {
      * @param userFilter filter criteria for user search
      * @param pageable   pagination parameters (page size, page number, sorting)
      * @return Page containing filtered users with pagination metadata
-     * @see UserRepository#findAll(org.springframework.data.jpa.domain.Specification, Pageable) for data access
-     * @see UserFilter#toSpecification() for filter specification
-     * @since 2025-01-27
      */
     @Override
     public Page<UserResponseDto> findAll(UserFilter userFilter, Pageable pageable) {
@@ -101,9 +90,6 @@ public class UserServiceImpl implements UserService {
      * @return the created user data
      * @throws ValidationException        if data validation fails
      * @throws ResponseStatusException    if password hashing fails
-     * @see UserValidator#validateForCreate(UserRequestDto) for validation logic
-     * @see PasswordUtil for password hashing
-     * @since 2025-01-27
      */
     @Override
     public UserResponseDto createUser(UserRequestDto userRequest) {
@@ -131,9 +117,6 @@ public class UserServiceImpl implements UserService {
      * @return Optional containing updated user data or empty if user not found
      * @throws ValidationException     if data validation fails
      * @throws ResponseStatusException if password hashing fails
-     * @see UserValidator#validateForUpdate(UUID, UserUpdateDto) for validation logic
-     * @see UserMapper#updateUserFromUpdateDto(UserUpdateDto, User) for data mapping
-     * @since 2025-01-27
      */
     @Override
     public Optional<UserResponseDto> updateUser(UUID id, UserUpdateDto userDetails) {
@@ -162,9 +145,6 @@ public class UserServiceImpl implements UserService {
      * @param patchNode JSON data for partial update
      * @return Optional containing updated user data or empty if user not found
      * @throws ValidationException if JSON structure or business rule validation fails
-     * @see UserValidator#validateForPatch(UUID, JsonNode) for JSON validation
-     * @see UserValidator#validateForPatchWithDto(UUID, UserPatchDto) for business validation
-     * @since 2025-01-27
      */
     @Override
     public Optional<UserResponseDto> patchUser(UUID id, JsonNode patchNode) {
@@ -193,8 +173,6 @@ public class UserServiceImpl implements UserService {
      * @param id the unique identifier of the user
      * @return Optional containing deactivated user data or empty if user not found
      * @throws BusinessRuleValidationException if attempting to deactivate the last active administrator
-     * @see UserValidator#validateAdminDeactivation(UUID) for business rule validation
-     * @since 2025-01-27
      */
     @Override
     public Optional<UserResponseDto> inactivateUser(UUID id) {
@@ -219,8 +197,6 @@ public class UserServiceImpl implements UserService {
      * @param roleUpdate DTO containing the new user role
      * @return Optional containing updated user data or empty if user not found
      * @throws BusinessRuleValidationException if attempting to change the last active administrator's role
-     * @see UserValidator#validateRoleChange(UUID, UserRole) for business rule validation
-     * @since 2025-01-27
      */
     @Override
     public Optional<UserResponseDto> updateUserRole(UUID id, UserRoleUpdateDto roleUpdate) {
@@ -248,9 +224,6 @@ public class UserServiceImpl implements UserService {
      * @param user     the user to set the password for
      * @param password the password in plain text
      * @throws ResponseStatusException if salt generation or password hashing fails
-     * @see PasswordUtil#getSalt() for salt generation
-     * @see PasswordUtil#hashPassword(String, byte[]) for password hashing
-     * @since 2025-01-27
      */
     private void setPassword(User user, String password) {
         try {
