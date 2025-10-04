@@ -22,6 +22,11 @@ import org.springframework.util.StringUtils;
  *
  * @author geron
  * @version 1.0
+ * @param firstNameContains partial match for first name (can be null)
+ * @param lastNameContains partial match for last name (can be null)
+ * @param email exact match for email address (can be null)
+ * @param login exact match for login name (can be null)
+ * @param role exact match for user role (can be null)
  */
 public record UserFilter(String firstNameContains, String lastNameContains, String email, String login, UserRole role) {
     /**

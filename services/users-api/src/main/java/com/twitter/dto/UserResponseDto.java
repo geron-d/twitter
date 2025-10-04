@@ -14,6 +14,13 @@ import java.util.UUID;
  *
  * @author geron
  * @version 1.0
+ * @param id unique identifier for the user
+ * @param login user's login name
+ * @param firstName user's first name
+ * @param lastName user's last name
+ * @param email user's email address
+ * @param status current status of the user account
+ * @param role user's role in the system
  */
 public record UserResponseDto(
     /**

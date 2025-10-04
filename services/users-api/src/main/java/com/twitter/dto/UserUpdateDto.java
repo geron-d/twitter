@@ -13,6 +13,11 @@ import jakarta.validation.constraints.Size;
  *
  * @author geron
  * @version 1.0
+ * @param login unique login name for user authentication
+ * @param firstName user's first name
+ * @param lastName user's last name
+ * @param email user's email address
+ * @param password user's password (will be hashed)
  */
 public record UserUpdateDto(
     /**

@@ -12,6 +12,7 @@ import jakarta.validation.constraints.NotNull;
  *
  * @author geron
  * @version 1.0
+ * @param role new role to assign to the user
  */
 public record UserRoleUpdateDto(
     /**
