@@ -20,12 +20,18 @@ com.twitter.common/
 ├── aspect/                    # Аспекты для AOP
 │   ├── LoggableRequest.java      # Аннотация для логирования
 │   └── LoggableRequestAspect.java # Аспект логирования
+├── enums/                     # Перечисления
+│   ├── UserRole.java             # Роли пользователей (ADMIN, MODERATOR, USER)
+│   └── UserStatus.java           # Статусы пользователей (ACTIVE, INACTIVE)
 ├── exception/                 # Обработка исключений
 │   ├── GlobalExceptionHandler.java      # Глобальный обработчик
-│   └── LastAdminDeactivationException.java # Специфичное исключение
+│   └── validation/             # Исключения валидации
+│       ├── ValidationException.java         # Базовое исключение валидации
+│       ├── BusinessRuleValidationException.java # Бизнес-правила
+│       ├── FormatValidationException.java      # Формат данных
+│       ├── UniquenessValidationException.java  # Уникальность
+│       └── ValidationType.java                 # Типы валидации
 ├── config/                    # Конфигурации (пустой)
-├── constants/                 # Константы (пустой)
-├── dto/                       # DTO объекты (пустой)
 └── util/                      # Утилиты (пустой)
 ```
 
@@ -39,17 +45,26 @@ com.twitter.common/
 │  │   Aspect Layer  │    │      Exception Layer            │ │
 │  │                 │    │                                 │ │
 │  │ @LoggableRequest│    │ GlobalExceptionHandler          │ │
-│  │ LoggableRequest │    │ LastAdminDeactivationException  │ │
-│  │ Aspect          │    │                                 │ │
-│  └─────────────────┘    └─────────────────────────────────┘ │
-│           │                           │                     │
+│  │ LoggableRequest │    │ ValidationException             │ │
+│  │ Aspect          │    │ BusinessRuleValidation         │ │
+│  └─────────────────┘    │ FormatValidation               │ │
+│           │              │ UniquenessValidation            │ │
+│           │              └─────────────────────────────────┘ │
 │           │                           │                     │
 │  ┌─────────────────┐    ┌─────────────────────────────────┐ │
-│  │   HTTP Layer    │    │        Business Logic           │ │
+│  │   Domain Layer  │    │        Business Logic           │ │
 │  │                 │    │                                 │ │
-│  │ Request/Response│    │ Admin Management                │ │
-│  │ Logging         │    │ Validation                      │ │
-│  │ Sensitive Data  │    │ Error Handling                  │ │
+│  │ UserRole        │    │ Admin Management                │ │
+│  │ UserStatus      │    │ Validation                      │ │
+│  │ ValidationType  │    │ Error Handling                  │ │
+│  └─────────────────┘    └─────────────────────────────────┘ │
+│           │                           │                     │
+│  ┌─────────────────┐    ┌─────────────────────────────────┐ │
+│  │   HTTP Layer    │    │        Integration              │ │
+│  │                 │    │                                 │ │
+│  │ Request/Response│    │ Spring Boot Integration         │ │
+│  │ Logging         │    │ AOP Integration                 │ │
+│  │ Sensitive Data  │    │ Validation Integration          │ │
 │  │ Hiding          │    │                                 │ │
 │  └─────────────────┘    └─────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────┘
@@ -95,7 +110,10 @@ public class UserController {
 | `ResponseStatusException` | Из исключения | Стандартные Spring исключения |
 | `RuntimeException` | 500 | Неожиданные ошибки сервера |
 | `ConstraintViolationException` | 400 | Ошибки валидации |
-| `LastAdminDeactivationException` | 409 | Попытка деактивации последнего админа |
+| `ValidationException` | 400 | Базовые ошибки валидации |
+| `BusinessRuleValidationException` | 400 | Нарушение бизнес-правил |
+| `FormatValidationException` | 400 | Ошибки формата данных |
+| `UniquenessValidationException` | 409 | Нарушение уникальности |
 
 **Формат ответа** (ProblemDetail):
 ```json
@@ -110,35 +128,58 @@ public class UserController {
 
 ### Специализированные исключения
 
-#### LastAdminDeactivationException
+### Специализированные исключения
 
-**Назначение**: Исключение для предотвращения деактивации последнего активного администратора в системе.
+**Базовый класс**: `ValidationException`
 
-**Конструкторы**:
-- `LastAdminDeactivationException()` - с сообщением по умолчанию
-- `LastAdminDeactivationException(String reason)` - с кастомным сообщением
-- `LastAdminDeactivationException(String reason, Throwable cause)` - с причиной
+**Иерархия исключений**:
 
-**Пример использования**:
-```java
-@Service
-public class UserService {
-    
-    public void deactivateUser(Long userId) {
-        User user = userRepository.findById(userId);
-        
-        if (user.getRole() == UserRole.ADMIN && isLastActiveAdmin(user)) {
-            throw new LastAdminDeactivationException(
-                "Cannot deactivate the last active administrator"
-            );
-        }
-        
-        // логика деактивации
-    }
-}
+```
+ValidationException (abstract)
+├── BusinessRuleValidationException
+├── FormatValidationException
+└── UniquenessValidationException
 ```
 
+**BusinessRuleValidationException**:
+- **Назначение**: Нарушение бизнес-правил системы
+- **Примеры**: Попытка деактивации последнего админа, изменение роли последнего админа
+- **Factory методы**: `lastAdminDeactivation()`, `lastAdminRoleChange()`
+
+**FormatValidationException**:
+- **Назначение**: Ошибки формата данных
+- **Примеры**: Некорректный формат email, неверный формат даты
+- **Factory методы**: `invalidFormat()`, `invalidEmailFormat()`
+
+**UniquenessValidationException**:
+- **Назначение**: Нарушение уникальности данных
+- **Примеры**: Дублирование email, дублирование логина
+- **Factory методы**: `duplicateEmail()`, `duplicateLogin()`
+
+**ValidationType enum**:
+- `BUSINESS_RULE` - Бизнес-правила
+- `FORMAT` - Формат данных
+- `UNIQUENESS` - Уникальность
+- `CUSTOM` - Пользовательские правила
+
 ## Бизнес-логика
+
+### Перечисления (Enums)
+
+**UserRole** - Роли пользователей:
+- `ADMIN` - Администратор системы
+- `MODERATOR` - Модератор контента  
+- `USER` - Обычный пользователь
+
+**UserStatus** - Статусы пользователей:
+- `ACTIVE` - Активный пользователь
+- `INACTIVE` - Неактивный пользователь
+
+**ValidationType** - Типы валидации:
+- `BUSINESS_RULE` - Бизнес-правила
+- `FORMAT` - Формат данных
+- `UNIQUENESS` - Уникальность
+- `CUSTOM` - Пользовательские правила
 
 ### Логирование запросов
 
@@ -237,7 +278,7 @@ public class AdminService {
         long activeAdminCount = userRepository.countByRoleAndStatus(UserRole.ADMIN, UserStatus.ACTIVE);
         
         if (activeAdminCount <= 1) {
-            throw new LastAdminDeactivationException(
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
                 "Cannot deactivate the last active administrator. System requires at least one active admin."
             );
         }
@@ -321,7 +362,7 @@ public class UserController {
 **Шаги**:
 1. Клиент запрашивает деактивацию администратора
 2. Сервис проверяет количество активных админов
-3. Если админ последний, выбрасывается `LastAdminDeactivationException`
+3. Если админ последний, выбрасывается `ResponseStatusException` с HTTP 409
 4. `GlobalExceptionHandler` обрабатывает исключение
 5. Возвращается HTTP 409 с описанием конфликта
 
@@ -400,7 +441,7 @@ logging:
 ### 2. Обработка исключений
 
 - Используйте `ResponseStatusException` для стандартных HTTP ошибок
-- Применяйте `LastAdminDeactivationException` для бизнес-логики админов
+- Применяйте `BusinessRuleValidationException` для бизнес-логики админов
 - Добавляйте кастомные исключения, расширяющие `ResponseStatusException`
 
 ### 3. Безопасность

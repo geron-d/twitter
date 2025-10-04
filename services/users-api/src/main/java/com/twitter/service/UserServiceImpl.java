@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.twitter.dto.*;
 import com.twitter.dto.filter.UserFilter;
 import com.twitter.entity.User;
-import com.twitter.enums.UserRole;
-import com.twitter.enums.UserStatus;
+import com.twitter.common.enums.UserRole;
+import com.twitter.common.enums.UserStatus;
+import com.twitter.common.exception.validation.BusinessRuleValidationException;
+import com.twitter.common.exception.validation.ValidationException;
 import com.twitter.mapper.UserMapper;
 import com.twitter.repository.UserRepository;
 import com.twitter.util.PasswordUtil;
@@ -25,6 +27,16 @@ import java.util.Base64;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Implementation of the user management service.
+ * <p>
+ * This service provides business logic for CRUD operations with users,
+ * including creation, updating, deactivation, and role management. It handles
+ * data validation, password hashing, and business rule enforcement.
+ *
+ * @author geron
+ * @version 1.0
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -35,17 +47,50 @@ public class UserServiceImpl implements UserService {
     private final UserValidator userValidator;
     private final PatchDtoFactory patchDtoFactory;
 
+    /**
+     * Retrieves a user by their unique identifier.
+     * <p>
+     * This method performs a database lookup and returns the user data
+     * if found. Returns an empty Optional if the user does not exist
+     * or has been deactivated.
+     *
+     * @param id the unique identifier of the user
+     * @return Optional containing user data or empty if not found
+     */
     @Override
     public Optional<UserResponseDto> getUserById(UUID id) {
         return userRepository.findById(id).map(userMapper::toUserResponseDto);
     }
 
+    /**
+     * Retrieves a paginated list of users with applied filters.
+     * <p>
+     * This method uses JPA specifications for dynamic filtering based on
+     * the provided criteria. It supports filtering by name, role, and status
+     * with full pagination support.
+     *
+     * @param userFilter filter criteria for user search
+     * @param pageable   pagination parameters (page size, page number, sorting)
+     * @return Page containing filtered users with pagination metadata
+     */
     @Override
     public Page<UserResponseDto> findAll(UserFilter userFilter, Pageable pageable) {
         return userRepository.findAll(userFilter.toSpecification(), pageable)
             .map(userMapper::toUserResponseDto);
     }
 
+    /**
+     * Creates a new user in the system.
+     * <p>
+     * This method performs comprehensive data validation, sets the default
+     * status to ACTIVE and role to USER, and securely hashes the password
+     * using PBKDF2 with a random salt.
+     *
+     * @param userRequest DTO containing user data for creation
+     * @return the created user data
+     * @throws ValidationException        if data validation fails
+     * @throws ResponseStatusException    if password hashing fails
+     */
     @Override
     public UserResponseDto createUser(UserRequestDto userRequest) {
         userValidator.validateForCreate(userRequest);
@@ -60,6 +105,19 @@ public class UserServiceImpl implements UserService {
         return userMapper.toUserResponseDto(savedUser);
     }
 
+    /**
+     * Updates an existing user's data.
+     * <p>
+     * This method performs data validation excluding the current user from
+     * uniqueness checks. It updates the password only if provided in the
+     * request and maintains data integrity throughout the process.
+     *
+     * @param id          the unique identifier of the user
+     * @param userDetails DTO containing new user data
+     * @return Optional containing updated user data or empty if user not found
+     * @throws ValidationException     if data validation fails
+     * @throws ResponseStatusException if password hashing fails
+     */
     @Override
     public Optional<UserResponseDto> updateUser(UUID id, UserUpdateDto userDetails) {
         return userRepository.findById(id).map(user -> {
@@ -76,6 +134,18 @@ public class UserServiceImpl implements UserService {
         });
     }
 
+    /**
+     * Performs a partial update of user data using JSON Patch.
+     * <p>
+     * This method performs two-stage validation: JSON structure validation
+     * and business rule validation. It applies changes only to specified
+     * fields while preserving other user data.
+     *
+     * @param id        the unique identifier of the user
+     * @param patchNode JSON data for partial update
+     * @return Optional containing updated user data or empty if user not found
+     * @throws ValidationException if JSON structure or business rule validation fails
+     */
     @Override
     public Optional<UserResponseDto> patchUser(UUID id, JsonNode patchNode) {
         return userRepository.findById(id).map(user -> {
@@ -93,6 +163,17 @@ public class UserServiceImpl implements UserService {
         });
     }
 
+    /**
+     * Deactivates a user by setting their status to INACTIVE.
+     * <p>
+     * This method performs business rule validation to prevent deactivation
+     * of the last active administrator. It logs successful deactivation
+     * for audit purposes.
+     *
+     * @param id the unique identifier of the user
+     * @return Optional containing deactivated user data or empty if user not found
+     * @throws BusinessRuleValidationException if attempting to deactivate the last active administrator
+     */
     @Override
     public Optional<UserResponseDto> inactivateUser(UUID id) {
         return userRepository.findById(id).map(user -> {
@@ -105,6 +186,18 @@ public class UserServiceImpl implements UserService {
         });
     }
 
+    /**
+     * Updates the role of a user in the system.
+     * <p>
+     * This method performs business rule validation to prevent role changes
+     * for the last active administrator. It logs role changes with both
+     * old and new role information for audit purposes.
+     *
+     * @param id         the unique identifier of the user
+     * @param roleUpdate DTO containing the new user role
+     * @return Optional containing updated user data or empty if user not found
+     * @throws BusinessRuleValidationException if attempting to change the last active administrator's role
+     */
     @Override
     public Optional<UserResponseDto> updateUserRole(UUID id, UserRoleUpdateDto roleUpdate) {
         return userRepository.findById(id).map(user -> {
@@ -122,10 +215,15 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * Устанавливает хешированный пароль для пользователя
+     * Sets a hashed password for a user.
+     * <p>
+     * This private method generates a random salt and hashes the password
+     * using PBKDF2 algorithm. It stores both the password hash and salt
+     * in Base64 encoding for secure storage.
      *
-     * @param user     пользователь
-     * @param password пароль в открытом виде
+     * @param user     the user to set the password for
+     * @param password the password in plain text
+     * @throws ResponseStatusException if salt generation or password hashing fails
      */
     private void setPassword(User user, String password) {
         try {
