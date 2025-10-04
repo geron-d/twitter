@@ -1,5 +1,16 @@
 # Changelog - JavaDoc Documentation Enhancement
 
+## 2025-01-27 11:30 — step 20 done — Enhance UserFilter.java JavaDoc — автор: assistant
+
+Enhanced UserFilter.java with comprehensive JavaDoc documentation:
+- Added detailed class-level documentation explaining filter DTO purpose and functionality
+- Documented the toSpecification() method with complete description of JPA Specification conversion
+- Added JavaDoc for all 5 private specification methods with detailed descriptions
+- Included practical usage example with code snippet
+- Applied all required JavaDoc tags: @author, @version, @since, @param, @return, @see
+- Followed Oracle JavaDoc conventions with improved formatting using <p> tags
+- Added cross-references to related components (User entity, UserRole enum, Specification)
+
 ## 2025-01-27 11:25 — step 19 done — Enhance UserPatchDto.java JavaDoc — автор: assistant
 
 Enhanced UserPatchDto.java with comprehensive JavaDoc documentation:
