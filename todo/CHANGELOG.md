@@ -1,5 +1,17 @@
 # Changelog - JavaDoc Documentation Enhancement
 
+## 2025-01-27 11:40 — step 22 done — Enhance PatchDtoFactory.java JavaDoc — автор: assistant
+
+Enhanced PatchDtoFactory.java with comprehensive JavaDoc documentation:
+- Translated all Russian JavaDoc to professional English
+- Added detailed class-level documentation explaining factory pattern and JSON processing
+- Documented the objectMapper field with dependency injection explanation
+- Enhanced method documentation for createPatchDto() with detailed JSON patch operation description
+- Added comprehensive explanation of data integrity and field update mechanisms
+- Applied all required JavaDoc tags: @author, @version, @since, @param, @return, @throws, @see
+- Followed Oracle JavaDoc conventions with improved formatting using <p> tags
+- Added cross-references to Jackson ObjectMapper and FormatValidationException classes
+
 ## 2025-01-27 11:35 — step 21 done — Enhance PasswordUtil.java JavaDoc — автор: assistant
 
 Enhanced PasswordUtil.java with comprehensive JavaDoc documentation:
