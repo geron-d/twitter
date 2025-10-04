@@ -8,25 +8,53 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
 
 /**
- * Утилитный класс для работы с паролями пользователей.
- * Обеспечивает криптографически безопасное хеширование паролей
- * с использованием алгоритма PBKDF2 и генерацию случайных солей.
- * 
+ * Utility class for secure password handling in Twitter user management.
+ * <p>
+ * This class provides cryptographically secure password hashing using the PBKDF2
+ * algorithm with HMAC-SHA256. It generates secure random salts and implements
+ * industry-standard security practices for password storage. The implementation
+ * uses 10,000 iterations and 256-bit key length for optimal security.
+ * <p>
+ * Security considerations:
+ * <ul>
+ *   <li>Uses cryptographically secure random number generation for salt creation</li>
+ *   <li>Implements PBKDF2 with HMAC-SHA256 for password hashing</li>
+ *   <li>Uses 10,000 iterations to prevent brute force attacks</li>
+ *   <li>Generates 16-byte salts to prevent rainbow table attacks</li>
+ * </ul>
+ *
  * @author Twitter Team
  * @version 1.0
  */
 public class PasswordUtil {
 
+    /**
+     * PBKDF2 algorithm with HMAC-SHA256 for password hashing.
+     * This algorithm provides strong cryptographic security for password storage.
+     */
     private static final String ALGORITHM = "PBKDF2WithHmacSHA256";
+    
+    /**
+     * Number of iterations for PBKDF2 password hashing.
+     * Higher values increase security but also computation time.
+     * 10,000 iterations provide a good balance between security and performance.
+     */
     private static final int ITERATIONS = 10000;
+    
+    /**
+     * Key length in bits for PBKDF2 password hashing.
+     * 256 bits provide strong cryptographic security for password storage.
+     */
     private static final int KEY_LENGTH = 256;
 
     /**
-     * Генерирует криптографически безопасную соль для хеширования пароля.
-     * Использует SecureRandom для генерации 16-байтовой случайной соли.
-     * Соль необходима для предотвращения атак по словарю и радужным таблицам.
-     * 
-     * @return массив байтов с криптографически безопасной солью
+     * Generates a cryptographically secure salt for password hashing.
+     * <p>
+     * This method creates a 16-byte random salt using SecureRandom, which is
+     * essential for preventing dictionary attacks and rainbow table attacks.
+     * Each salt should be unique for each password to ensure maximum security.
+     *
+     * @return 16-byte array containing cryptographically secure random salt
      */
     public static byte[] getSalt() {
         SecureRandom random = new SecureRandom();
@@ -36,15 +64,17 @@ public class PasswordUtil {
     }
 
     /**
-     * Хеширует пароль с использованием соли и алгоритма PBKDF2.
-     * Использует PBKDF2WithHmacSHA256 с 10000 итераций и длиной ключа 256 бит.
-     * Результат возвращается в Base64 кодировке для безопасного хранения.
-     * 
-     * @param password пароль в открытом виде для хеширования
-     * @param salt соль для хеширования (16 байт)
-     * @return хеш пароля в Base64 кодировке
-     * @throws NoSuchAlgorithmException если алгоритм PBKDF2 недоступен
-     * @throws InvalidKeySpecException если параметры ключа некорректны
+     * Hashes a password using PBKDF2 with the provided salt.
+     * <p>
+     * This method implements PBKDF2WithHmacSHA256 with 10,000 iterations and
+     * 256-bit key length. The resulting hash is encoded in Base64 for safe storage.
+     * This approach provides strong protection against brute force and rainbow table attacks.
+     *
+     * @param password the plain text password to hash
+     * @param salt the salt to use for hashing (should be 16 bytes)
+     * @return Base64-encoded hash of the password
+     * @throws NoSuchAlgorithmException if PBKDF2 algorithm is not available
+     * @throws InvalidKeySpecException if key specification parameters are invalid
      */
     public static String hashPassword(String password, byte[] salt)
         throws NoSuchAlgorithmException, InvalidKeySpecException {

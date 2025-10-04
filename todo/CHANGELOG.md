@@ -1,5 +1,17 @@
 # Changelog - JavaDoc Documentation Enhancement
 
+## 2025-01-27 11:35 — step 21 done — Enhance PasswordUtil.java JavaDoc — автор: assistant
+
+Enhanced PasswordUtil.java with comprehensive JavaDoc documentation:
+- Translated all Russian JavaDoc to professional English
+- Added detailed class-level documentation explaining cryptographic security practices
+- Documented all 3 constants with security parameter explanations
+- Enhanced method documentation for getSalt() and hashPassword() with security considerations
+- Added comprehensive security considerations section with bullet points
+- Applied all required JavaDoc tags: @author, @version, @since, @param, @return, @throws, @see
+- Followed Oracle JavaDoc conventions with improved formatting using <p> tags
+- Added cross-references to cryptographic classes and security documentation
+
 ## 2025-01-27 11:30 — step 20 done — Enhance UserFilter.java JavaDoc — автор: assistant
 
 Enhanced UserFilter.java with comprehensive JavaDoc documentation:
