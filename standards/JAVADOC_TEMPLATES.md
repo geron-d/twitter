@@ -23,10 +23,8 @@ This document provides ready-to-use JavaDoc templates for all types of elements 
  * Include information about when to use this class and how it
  * integrates with other components.
  * 
- * @author Twitter Team
+ * @author geron
  * @version 1.0
- * @since 2025-01-27
- * @see RelatedClass for related functionality
  */
 public class ExampleClass {
     // implementation
@@ -42,11 +40,8 @@ public class ExampleClass {
  * [specific responsibilities]. It integrates with [related components]
  * and follows Twitter's [specific patterns/standards].
  * 
- * @author Twitter Team
+ * @author geron
  * @version 1.0
- * @since 2025-01-27
- * @see RelatedService for complementary functionality
- * @see ConfigurationClass for configuration options
  */
 @Service
 public class ExampleService {
@@ -63,10 +58,8 @@ public class ExampleService {
  * [specific functionality]. It provides default values and
  * allows customization through application properties.
  * 
- * @author Twitter Team
+ * @author geron
  * @version 1.0
- * @since 2025-01-27
- * @see ApplicationProperties for property definitions
  */
 @Configuration
 public class ExampleConfiguration {
@@ -83,10 +76,8 @@ public class ExampleConfiguration {
  * and why the exception occurs]. It provides additional context
  * through [specific methods/properties] to help with error handling.
  * 
- * @author Twitter Team
+ * @author geron
  * @version 1.0
- * @since 2025-01-27
- * @see GlobalExceptionHandler for centralized error handling
  */
 public class ExampleException extends RuntimeException {
     // implementation
@@ -110,8 +101,6 @@ public class ExampleException extends RuntimeException {
  * @return description of the return value and its possible states
  * @throws ExceptionType description of when this exception is thrown
  * @throws AnotherException description of another possible exception
- * @see RelatedClass#relatedMethod() for related functionality
- * @since 2025-01-27
  */
 public ReturnType methodName(ParamType paramName, AnotherType anotherParam) 
         throws ExceptionType, AnotherException {
@@ -149,8 +138,6 @@ private ReturnType helperMethod(ParamType paramName) throws ExceptionType {
  * @param paramName description of the parameter
  * @return description of the return value
  * @throws ExceptionType description of when this exception is thrown
- * @see RelatedClass for related utility methods
- * @since 2025-01-27
  */
 public static ReturnType utilityMethod(ParamType paramName) throws ExceptionType {
     // implementation
@@ -192,7 +179,6 @@ public ClassName(ParamType paramName, AnotherType anotherParam)
  * @param paramName description of the parameter
  * @return description of the return value
  * @throws ExceptionType description of when this exception is thrown
- * @since 2025-01-27
  */
 public ReturnType methodName(ParamType paramName) throws ExceptionType {
     // implementation
@@ -210,10 +196,8 @@ public ReturnType methodName(ParamType paramName) throws ExceptionType {
  * It provides configuration options for [specific behavior] and can be
  * applied to [target elements].
  * 
- * @author Twitter Team
+ * @author geron
  * @version 1.0
- * @since 2025-01-27
- * @see RelatedClass for implementation details
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
@@ -236,10 +220,8 @@ public @interface ExampleAnnotation {
  * This annotation provides comprehensive configuration for [specific behavior].
  * It allows fine-tuning of [specific aspects] and supports [specific features].
  * 
- * @author Twitter Team
+ * @author geron
  * @version 1.0
- * @since 2025-01-27
- * @see RelatedClass for implementation details
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
@@ -279,10 +261,8 @@ public @interface ComplexAnnotation {
  * provides a type-safe way to represent [specific states/options].
  * It is used throughout the Twitter system for [specific purposes].
  * 
- * @author Twitter Team
+ * @author geron
  * @version 1.0
- * @since 2025-01-27
- * @see RelatedClass for usage examples
  */
 public enum ExampleEnum {
     
@@ -315,9 +295,8 @@ public enum ExampleEnum {
  * associated [specific data]. Each value provides [specific functionality]
  * through its associated fields and methods.
  * 
- * @author Twitter Team
+ * @author geron
  * @version 1.0
- * @since 2025-01-27
  */
 @Getter
 @RequiredArgsConstructor
@@ -389,10 +368,8 @@ private String configProperty;
  * by classes providing [specific functionality]. It ensures
  * consistent behavior across different implementations.
  * 
- * @author Twitter Team
+ * @author geron
  * @version 1.0
- * @since 2025-01-27
- * @see ImplementationClass for a concrete implementation
  */
 public interface ExampleInterface {
     
@@ -416,10 +393,8 @@ public interface ExampleInterface {
  * [specific business operations]. Implementations should provide
  * [specific guarantees] and follow [specific patterns].
  * 
- * @author Twitter Team
+ * @author geron
  * @version 1.0
- * @since 2025-01-27
- * @see ServiceImplementation for the default implementation
  */
 public interface ExampleService {
     
@@ -445,10 +420,8 @@ public interface ExampleService {
  * methods and classes. It uses [specific AOP technique] to
  * [specific behavior description].
  * 
- * @author Twitter Team
+ * @author geron
  * @version 1.0
- * @since 2025-01-27
- * @see RelatedAnnotation for the annotation that triggers this aspect
  */
 @Aspect
 @Component
@@ -483,7 +456,6 @@ public class ExampleAspect {
  * 
  * @param ex the exception that was thrown
  * @return ProblemDetail containing error information
- * @see GlobalExceptionHandler for the main exception handling class
  */
 @ExceptionHandler(SpecificException.class)
 public ProblemDetail handleSpecificException(SpecificException ex) {
@@ -500,11 +472,8 @@ public ProblemDetail handleSpecificException(SpecificException ex) {
  * failure]. It provides additional context through [specific methods]
  * to help with error resolution.
  * 
- * @author Twitter Team
+ * @author geron
  * @version 1.0
- * @since 2025-01-27
- * @see ValidationType for validation categories
- * @see GlobalExceptionHandler for error handling
  */
 public class SpecificValidationException extends ValidationException {
     
@@ -597,6 +566,68 @@ public class SpecificValidationException extends ValidationException {
 6. **Stay Consistent**: Use the same style and format throughout
 7. **Update Regularly**: Keep documentation in sync with code changes
 
+```
+
+## 8. JPA Repository Templates
+
+### Basic Repository Template
+
+```java
+/**
+ * Repository interface for [entity] data access operations.
+ * 
+ * This repository provides data access methods for [Entity] entities.
+ * It extends JpaRepository and JpaSpecificationExecutor for standard
+ * CRUD operations and dynamic query capabilities.
+ * 
+ * @author geron
+ * @version 1.0
+ */
+public interface [Entity]Repository extends JpaRepository<[Entity], [ID]>, JpaSpecificationExecutor<[Entity]> {
+
+    // Derived Query Methods - NO JavaDoc required
+    long countByRoleAndStatus(UserRole role, UserStatus status);
+    boolean existsByLogin(String login);
+    boolean existsByEmail(String email);
+    boolean existsByLoginAndIdNot(String login, UUID id);
+    boolean existsByEmailAndIdNot(String email, UUID id);
+    
+    // Custom methods - JavaDoc required
+    /**
+     * Custom method description.
+     * 
+     * @param param description of the parameter
+     * @return description of the return value
+     * @throws ExceptionType description of when this exception is thrown
+     */
+    CustomType customMethod(ParamType param);
+}
+```
+
+### User Repository Template
+
+```java
+/**
+ * Repository interface for user data access operations.
+ * 
+ * This repository provides data access methods for User entities.
+ * It extends JpaRepository and JpaSpecificationExecutor for standard
+ * CRUD operations and dynamic query capabilities.
+ * 
+ * @author geron
+ * @version 1.0
+ */
+public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificationExecutor<User> {
+
+    long countByRoleAndStatus(UserRole role, UserStatus status);
+    boolean existsByLogin(String login);
+    boolean existsByEmail(String email);
+    boolean existsByLoginAndIdNot(String login, UUID id);
+    boolean existsByEmailAndIdNot(String email, UUID id);
+}
+```
+
 ## Version History
 
+- **v2.0** (2025-01-27): Updated templates - removed @since and @see tags, changed @author to "geron", added JPA repository templates
 - **v1.0** (2025-01-27): Initial version with comprehensive templates for all element types

@@ -111,3 +111,30 @@
 - Пример UserRepository без документации для Derived Query Methods
 
 ### Следующий шаг: #7 - Обновление JAVADOC_TEMPLATES.md
+
+## 2025-01-27 16:45 — step 7 done — Обновление JAVADOC_TEMPLATES.md — автор: assistant
+
+### Выполненные задачи:
+- Удалены все теги @since и @see из всех шаблонов
+- Изменен @author с "Twitter Team" на "geron" во всех шаблонах
+- Добавлен новый раздел "8. JPA Repository Templates" с шаблонами для репозиториев
+- Обновлены все существующие шаблоны без @since и @see
+- Обновлена версия документа до v2.0
+
+### Детальные изменения:
+1. **Class Templates**: Basic, Service, Configuration, Exception - удалены @since/@see, изменен @author
+2. **Method Templates**: Public, Private, Static, Constructor, Method with Code Example - удалены @since/@see
+3. **Annotation Templates**: Basic, Multiple Parameters - удалены @since/@see, изменен @author
+4. **Enum Templates**: Basic, With Fields - удалены @since/@see, изменен @author
+5. **Field Templates**: Public, Private, Configuration - без изменений (не содержали @since/@see)
+6. **Interface Templates**: Basic, Service - удалены @since/@see, изменен @author
+7. **Specialized Templates**: Aspect, Exception Handler, Validation Exception - удалены @since/@see, изменен @author
+8. **JPA Repository Templates**: Добавлены новые шаблоны для репозиториев
+
+### Новый раздел JPA Repository Templates включает:
+- Basic Repository Template с примером Derived Query Methods
+- User Repository Template как конкретный пример
+- Комментарии о том, что Derived Query Methods не требуют документации
+- Примеры custom методов с обязательной документацией
+
+### Следующий шаг: #8 - Добавление специальных правил для JPA репозиториев
