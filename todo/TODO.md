@@ -22,10 +22,11 @@
 - [x] (P1) [2025-01-21 16:15] #5: Добавить конфигурацию пагинации в application.yml — Настроены дефолтные значения пагинации через Spring Data Web
   acceptance: "Добавлены настройки: default-page-size=10, max-page-size=100, page-parameter=page, size-parameter=size"
   note: "Добавлена секция spring.data.web.pageable в application.yml с оптимальными значениями. Синтаксис YAML проверен и корректен"
+- [x] (P1) [2025-01-21 16:30] #6: Добавить @PageableDefault аннотацию в контроллер — Установлены явные дефолтные значения в методе findAll
+  acceptance: "Добавлена аннотация @PageableDefault(size = 10)"
+  note: "Добавлен импорт PageableDefault и аннотация к параметру Pageable. Синтаксис Java проверен, ошибок компиляции нет"
 
 ### In Progress
-- [ ] (P1) #6: Добавить @PageableDefault аннотацию в контроллер — Установить явные дефолтные значения в методе findAll
-  acceptance: "Добавлена аннотация @PageableDefault(size = 10)"
 - [ ] (P2) #7: Создать конфигурационный класс для пагинации — Создать @Configuration класс для централизованного управления настройками
   acceptance: "Создан PaginationConfig с настройками WebMvcConfigurer"
 
