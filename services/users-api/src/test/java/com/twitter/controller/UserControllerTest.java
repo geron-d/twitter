@@ -114,7 +114,7 @@ public class UserControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content.length()").value(10))
-                .andExpect(jsonPath("$.page.size").value(20))
+                .andExpect(jsonPath("$.page.size").value(10))
                 .andExpect(jsonPath("$.page.totalPages").value(1))
                 .andExpect(jsonPath("$.page.number").value(0))
                 .andExpect(jsonPath("$.page.totalElements").value(10));
@@ -227,7 +227,7 @@ public class UserControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content.length()").value(0))
-                .andExpect(jsonPath("$.page.size").value(20))
+                .andExpect(jsonPath("$.page.size").value(10))
                 .andExpect(jsonPath("$.page.totalPages").value(0))
                 .andExpect(jsonPath("$.page.number").value(0))
                 .andExpect(jsonPath("$.page.totalElements").value(0));
@@ -261,6 +261,30 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.content.length()").value(3))
                 .andExpect(jsonPath("$.page.size").value(3))
                 .andExpect(jsonPath("$.page.totalPages").value(4))
+                .andExpect(jsonPath("$.page.number").value(0))
+                .andExpect(jsonPath("$.page.totalElements").value(10));
+        }
+
+        @Test
+        void findAll_WithDefaultPagination_ShouldUseDefaultPageSize() throws Exception {
+            createTestUsers();
+            mockMvc.perform(get("/api/v1/users"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.page.size").value(10))
+                .andExpect(jsonPath("$.page.number").value(0))
+                .andExpect(jsonPath("$.page.totalElements").value(10));
+        }
+
+        @Test
+        void findAll_WithMaxPageSizeExceeded_ShouldLimitToMaxPageSize() throws Exception {
+            createTestUsers();
+            mockMvc.perform(get("/api/v1/users?size=150"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.page.size").value(100))
                 .andExpect(jsonPath("$.page.number").value(0))
                 .andExpect(jsonPath("$.page.totalElements").value(10));
         }

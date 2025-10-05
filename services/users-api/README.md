@@ -146,8 +146,13 @@ GET /api/v1/users?firstNameContains=John&role=USER&page=0&size=10&sort=login,asc
 - `login` (String, optional) - фильтр по логину
 - `role` (UserRole, optional) - фильтр по роли
 - `page` (int, default: 0) - номер страницы
-- `size` (int, default: 20) - размер страницы
+- `size` (int, default: 10) - размер страницы (максимум: 100)
 - `sort` (String, optional) - сортировка
+
+**Ограничения пагинации:**
+- Дефолтный размер страницы: 10 элементов
+- Максимальный размер страницы: 100 элементов
+- При превышении максимального размера автоматически применяется лимит
 
 **Структура ответа PagedModel:**
 - `content` - массив объектов `UserResponseDto`
