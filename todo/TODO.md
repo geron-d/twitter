@@ -17,8 +17,9 @@
 - [x] (P1) [2025-01-27 15:30] #3: Настройка SpringDoc OpenAPI конфигурации — Добавление зависимостей и базовой конфигурации  
   acceptance: "SpringDoc OpenAPI работает, доступен Swagger UI"
   note: "Добавлена зависимость SpringDoc OpenAPI 2.2.0, создан OpenApiConfig, настроен application.yml"
-- [ ] (P1) #4: Добавление OpenAPI аннотаций к UserController — Описание всех эндпоинтов с деталями  
+- [x] (P1) [2025-01-27 16:00] #4: Добавление OpenAPI аннотаций к UserController — Описание всех эндпоинтов с деталями  
   acceptance: "Все 7 эндпоинтов описаны с параметрами, ответами и примерами"
+  note: "Создан интерфейс UserApi с OpenAPI аннотациями, UserController реализует интерфейс"
 - [ ] (P1) #5: Создание схем для DTO классов — Описание UserRequestDto, UserResponseDto, UserUpdateDto и др.  
   acceptance: "Все DTO имеют полные схемы с валидацией и примерами"
 - [ ] (P1) #6: Создание схем для обработки ошибок — Описание ValidationException и других исключений  

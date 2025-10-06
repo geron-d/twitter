@@ -36,7 +36,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
-public class UserController {
+public class UserController implements UserApi {
 
     private final UserService userService;
 
@@ -52,6 +52,7 @@ public class UserController {
      */
     @LoggableRequest
     @GetMapping("/{id}")
+    @Override
     public ResponseEntity<UserResponseDto> getUserById(@PathVariable("id") UUID id) {
         return userService.getUserById(id)
             .map(ResponseEntity::ok)
@@ -71,6 +72,7 @@ public class UserController {
      */
     @LoggableRequest
     @GetMapping
+    @Override
     public PagedModel<UserResponseDto> findAll(@ModelAttribute UserFilter userFilter, 
                                                @PageableDefault(size = 10) Pageable pageable) {
         Page<UserResponseDto> users = userService.findAll(userFilter, pageable);
@@ -90,6 +92,7 @@ public class UserController {
      */
     @LoggableRequest(hideFields = {"password"})
     @PostMapping
+    @Override
     public UserResponseDto createUser(@RequestBody @Valid UserRequestDto userRequest) {
         return userService.createUser(userRequest);
     }
@@ -108,6 +111,7 @@ public class UserController {
      */
     @LoggableRequest(hideFields = {"password"})
     @PutMapping("/{id}")
+    @Override
     public ResponseEntity<UserResponseDto> updateUser(@PathVariable("id") UUID id, @RequestBody @Valid UserUpdateDto userDetails) {
         return userService.updateUser(id, userDetails)
             .map(ResponseEntity::ok)
@@ -128,6 +132,7 @@ public class UserController {
      */
     @LoggableRequest
     @PatchMapping("/{id}")
+    @Override
     public ResponseEntity<UserResponseDto> patchUser(@PathVariable("id") UUID id, @RequestBody JsonNode patchNode) {
         return userService.patchUser(id, patchNode)
             .map(ResponseEntity::ok)
@@ -147,6 +152,7 @@ public class UserController {
      */
     @LoggableRequest
     @PatchMapping("/{id}/inactivate")
+    @Override
     public ResponseEntity<UserResponseDto> inactivateUser(@PathVariable("id") UUID id) {
         return userService.inactivateUser(id)
             .map(ResponseEntity::ok)
@@ -167,6 +173,7 @@ public class UserController {
      */
     @LoggableRequest
     @PatchMapping("/{id}/role")
+    @Override
     public ResponseEntity<UserResponseDto> updateUserRole(@PathVariable("id") UUID id,
                                                           @RequestBody @Valid UserRoleUpdateDto roleUpdate) {
         return userService.updateUserRole(id, roleUpdate)
