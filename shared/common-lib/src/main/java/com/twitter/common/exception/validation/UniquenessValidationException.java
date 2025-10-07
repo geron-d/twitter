@@ -1,5 +1,6 @@
 package com.twitter.common.exception.validation;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
 /**
@@ -50,6 +51,21 @@ import lombok.Getter;
  * @author geron
  * @version 1.0
  */
+@Schema(
+    name = "UniquenessValidationException",
+    description = "Exception thrown when uniqueness validation fails due to duplicate data",
+    example = """
+        {
+          "type": "https://example.com/errors/uniqueness-validation",
+          "title": "Uniqueness Validation Error",
+          "status": 409,
+          "detail": "User with login 'jane_smith' already exists",
+          "fieldName": "login",
+          "fieldValue": "jane_smith",
+          "timestamp": "2025-01-27T16:30:00Z"
+        }
+        """
+)
 @Getter
 public class UniquenessValidationException extends ValidationException {
 
@@ -61,6 +77,11 @@ public class UniquenessValidationException extends ValidationException {
      * contains the duplicate value. It is used by the GlobalExceptionHandler to
      * provide detailed error information in the ProblemDetail response.
      */
+    @Schema(
+        description = "The name of the field that caused the uniqueness violation",
+        example = "login",
+        nullable = true
+    )
     private final String fieldName;
 
     /**
@@ -71,6 +92,11 @@ public class UniquenessValidationException extends ValidationException {
      * in the system. It helps with debugging and provides context for
      * the validation failure.
      */
+    @Schema(
+        description = "The duplicate value that caused the uniqueness violation",
+        example = "jane_smith",
+        nullable = true
+    )
     private final String fieldValue;
 
     /**

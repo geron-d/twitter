@@ -2,6 +2,66 @@
 
 ## 2025-01-27
 
+### 16:45 — step 6 done — Создание схем для обработки ошибок (исправлено) — автор: assistant
+
+**Изменения:**
+- Добавлена зависимость SpringDoc OpenAPI в common-lib модуль
+- Добавлены аннотации @Schema к классам исключений в shared модуле
+- Удалены временные DTO файлы из users-api модуля
+- Схемы соответствуют RFC 7807 Problem Details for HTTP APIs
+
+**Артефакты:**
+- `shared/common-lib/build.gradle` - добавлена зависимость SpringDoc OpenAPI
+- `shared/common-lib/src/main/java/com/twitter/common/exception/validation/ValidationException.java` - обновлен
+- `shared/common-lib/src/main/java/com/twitter/common/exception/validation/UniquenessValidationException.java` - обновлен
+- `shared/common-lib/src/main/java/com/twitter/common/exception/validation/BusinessRuleValidationException.java` - обновлен
+- `shared/common-lib/src/main/java/com/twitter/common/exception/validation/FormatValidationException.java` - обновлен
+
+**Покрытие ошибок:**
+- ValidationException - базовая схема для всех ошибок валидации
+- UniquenessValidationException - ошибки дублирования данных (409)
+- BusinessRuleValidationException - ошибки бизнес-правил (400)
+- FormatValidationException - ошибки формата данных (400)
+
+**Особенности:**
+- Схемы соответствуют RFC 7807 стандарту
+- Все поля имеют описания и примеры
+- Поддержка дополнительных полей для специфичных ошибок
+- Timestamp для отслеживания времени ошибок
+- Nullable поля для опциональных данных
+- Централизованное расположение в shared модуле
+
+**Статус:** Готово к тестированию в Swagger UI после сборки проекта
+
+### 16:30 — step 6 done — Создание схем для обработки ошибок — автор: assistant
+
+**Изменения:**
+- Созданы DTO схемы для ошибок в users-api модуле
+- Схемы соответствуют RFC 7807 Problem Details for HTTP APIs
+- Добавлены детальные примеры для всех типов ошибок
+- Схемы интегрированы с GlobalExceptionHandler
+
+**Артефакты:**
+- `services/users-api/src/main/java/com/twitter/dto/error/ProblemDetailDto.java` - создан
+- `services/users-api/src/main/java/com/twitter/dto/error/UniquenessValidationErrorDto.java` - создан
+- `services/users-api/src/main/java/com/twitter/dto/error/BusinessRuleValidationErrorDto.java` - создан
+- `services/users-api/src/main/java/com/twitter/dto/error/FormatValidationErrorDto.java` - создан
+
+**Покрытие ошибок:**
+- ProblemDetailDto - базовая схема для всех ошибок
+- UniquenessValidationErrorDto - ошибки дублирования данных (409)
+- BusinessRuleValidationErrorDto - ошибки бизнес-правил (400)
+- FormatValidationErrorDto - ошибки формата данных (400)
+
+**Особенности:**
+- Схемы соответствуют RFC 7807 стандарту
+- Все поля имеют описания и примеры
+- Поддержка дополнительных полей для специфичных ошибок
+- Timestamp для отслеживания времени ошибок
+- Nullable поля для опциональных данных
+
+**Статус:** Готово к тестированию в Swagger UI
+
 ### 16:15 — step 5 done — Создание схем для DTO классов — автор: assistant
 
 **Изменения:**
