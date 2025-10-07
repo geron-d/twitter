@@ -2,6 +2,7 @@ package com.twitter.dto.filter;
 
 import com.twitter.common.enums.UserRole;
 import com.twitter.entity.User;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
 
@@ -28,6 +29,19 @@ import org.springframework.util.StringUtils;
  * @param login exact match for login name (can be null)
  * @param role exact match for user role (can be null)
  */
+@Schema(
+    name = "UserFilter",
+    description = "Filter criteria for user search and filtering operations",
+    example = """
+        {
+          "firstNameContains": "John",
+          "lastNameContains": "Doe",
+          "email": "john.doe@example.com",
+          "login": "john_doe",
+          "role": "USER"
+        }
+        """
+)
 public record UserFilter(String firstNameContains, String lastNameContains, String email, String login, UserRole role) {
     /**
      * Converts this filter to a JPA Specification for database queries.
