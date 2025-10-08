@@ -2,6 +2,31 @@
 
 ## 2025-01-27
 
+### 17:00 — step 7 done — Добавление аннотаций к перечислениям — автор: assistant
+
+**Изменения:**
+- Добавлены аннотации @Schema к enum классам UserRole и UserStatus
+- Добавлены описания для каждого значения enum
+- Добавлены примеры использования в Swagger UI
+- Сохранена существующая документация JavaDoc
+
+**Артефакты:**
+- `shared/common-lib/src/main/java/com/twitter/common/enums/UserRole.java` - обновлен
+- `shared/common-lib/src/main/java/com/twitter/common/enums/UserStatus.java` - обновлен
+
+**Покрытие enum значений:**
+- **UserRole**: ADMIN, MODERATOR, USER
+- **UserStatus**: ACTIVE, INACTIVE
+
+**Особенности:**
+- Каждое значение enum имеет детальное описание
+- Примеры использования для каждого значения
+- Сохранена иерархия ролей (USER → MODERATOR → ADMIN)
+- Описаны права доступа для каждой роли
+- Описаны ограничения для каждого статуса
+
+**Статус:** Готово к тестированию в Swagger UI
+
 ### 16:45 — step 6 done — Создание схем для обработки ошибок (исправлено) — автор: assistant
 
 **Изменения:**

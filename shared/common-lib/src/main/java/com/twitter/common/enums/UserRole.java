@@ -1,5 +1,7 @@
 package com.twitter.common.enums;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * Enumeration of user roles in the Twitter system.
  *
@@ -27,6 +29,11 @@ package com.twitter.common.enums;
  * @author geron
  * @version 1.0
  */
+@Schema(
+    name = "UserRole",
+    description = "Enumeration of user roles in the Twitter system with hierarchical access control",
+    example = "USER"
+)
 public enum UserRole {
 
     /**
