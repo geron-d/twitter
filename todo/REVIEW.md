@@ -3,10 +3,6 @@
 
 ### 9. Документация
 
-#### Проблема: Отсутствие OpenAPI/Swagger
-- Нет автоматической генерации API документации
-- Отсутствуют примеры запросов/ответов
-
 #### Проблема: Неполная документация по развертыванию
 - Нет инструкций по Docker Compose
 - Отсутствует описание переменных окружения
@@ -18,21 +14,6 @@
 
 ### 8. Документация
 
-#### Рекомендация: Добавить OpenAPI
-```java
-@Configuration
-public class OpenApiConfig {
-    
-    @Bean
-    public OpenAPI customOpenAPI() {
-        return new OpenAPI()
-            .info(new Info()
-                .title("Users API")
-                .version("1.0.0")
-                .description("API for user management"));
-    }
-}
-```
 
 #### Рекомендация: Создать Docker Compose
 ```yaml
