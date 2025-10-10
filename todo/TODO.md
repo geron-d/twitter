@@ -16,9 +16,11 @@
   acceptance: "Определена оптимальная стратегия централизации через dependencyManagement"
   note: "Проанализированы корневой build.gradle, users-api и common-lib. Выявлены хардкодные версии для Lombok, MapStruct, Swagger, PostgreSQL"
 
-### To Do
-- [ ] (P1) #3: Расширение dependencyManagement в корневом build.gradle — Добавление версий для внешних зависимостей
+- [x] (P1) [2025-01-27 09:30] #3: Расширение dependencyManagement в корневом build.gradle — Добавление версий для внешних зависимостей
   acceptance: "Добавлены версии для Lombok, MapStruct, Swagger, PostgreSQL в dependencyManagement"
+  note: "Добавлены версии для 7 внешних зависимостей в dependencyManagement блок корневого build.gradle"
+
+### To Do
 
 - [ ] (P1) #4: Обновление users-api/build.gradle — Удаление хардкодных версий
   acceptance: "Все хардкодные версии удалены, зависимости управляются через dependencyManagement"

@@ -41,6 +41,23 @@ subprojects {
             mavenBom "org.springframework.boot:spring-boot-dependencies:3.5.5"
             mavenBom "org.testcontainers:testcontainers-bom:1.21.3"
         }
+        
+        dependencies {
+            // Swagger/OpenAPI dependencies
+            dependency 'io.swagger.core.v3:swagger-annotations:2.2.38'
+            dependency 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13'
+            
+            // Lombok dependencies
+            dependency 'org.projectlombok:lombok:1.18.38'
+            dependency 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+            
+            // MapStruct dependencies
+            dependency 'org.mapstruct:mapstruct:1.6.3'
+            dependency 'org.mapstruct:mapstruct-processor:1.6.3'
+            
+            // Database dependencies
+            dependency 'org.postgresql:postgresql:42.7.7'
+        }
     }
 }
 
