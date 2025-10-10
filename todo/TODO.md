@@ -15,12 +15,12 @@
   acceptance: "Все версии зависимостей вынесены в корневой build.gradle"
   note: "Создана стратегия централизации, определены дублирующиеся зависимости, подготовлена структура ext блока"
   artifacts: "todo/STRATEGY_VERSIONS.md"
+- [x] (P1) [2025-01-27 15:45] #3: Рефакторинг корневого build.gradle — Добавление ext блоков для версий
+  acceptance: "Создан ext блок с версиями всех зависимостей"
+  note: "Подготовлен ext блок с централизованными версиями, создан патч и инструкции по применению"
+  artifacts: "todo/patch_step3_build_gradle.diff, todo/build_gradle_updated.gradle, todo/STEP3_INSTRUCTIONS.md"
 
 ### In Progress
-
-### To Do
-- [ ] (P1) #3: Рефакторинг корневого build.gradle — Добавление ext блоков для версий
-  acceptance: "Создан ext блок с версиями всех зависимостей"
   
 - [ ] (P1) #4: Обновление users-api/build.gradle — Замена хардкодных версий на переменные
   acceptance: "Все версии заменены на ссылки на корневые переменные"
