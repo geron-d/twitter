@@ -20,10 +20,11 @@
   acceptance: "Добавлены версии для Lombok, MapStruct, Swagger, PostgreSQL в dependencyManagement"
   note: "Добавлены версии для 7 внешних зависимостей в dependencyManagement блок корневого build.gradle"
 
-### To Do
-
-- [ ] (P1) #4: Обновление users-api/build.gradle — Удаление хардкодных версий
+- [x] (P1) [2025-01-27 09:45] #4: Обновление users-api/build.gradle — Удаление хардкодных версий
   acceptance: "Все хардкодные версии удалены, зависимости управляются через dependencyManagement"
+  note: "Удалены версии для 8 зависимостей, модуль собирается успешно, все зависимости резолвятся корректно"
+
+### To Do
 
 - [ ] (P1) #5: Обновление common-lib/build.gradle — Удаление хардкодных версий
   acceptance: "Все хардкодные версии удалены, зависимости управляются через dependencyManagement"
