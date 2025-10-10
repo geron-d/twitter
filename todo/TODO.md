@@ -12,9 +12,9 @@
 - [x] (P1) #1: Анализ текущей структуры зависимостей — Проанализированы build.gradle файлы корневого проекта, users-api и common-lib
   acceptance: "Выявлены дублирующиеся версии зависимостей в подпроектах"
 
-### In Progress
-- [ ] (P1) #2: Анализ существующего dependencyManagement — Определение стратегии использования Spring Boot BOM
+- [x] (P1) [2025-01-27 09:15] #2: Анализ существующего dependencyManagement — Определение стратегии использования Spring Boot BOM
   acceptance: "Определена оптимальная стратегия централизации через dependencyManagement"
+  note: "Проанализированы корневой build.gradle, users-api и common-lib. Выявлены хардкодные версии для Lombok, MapStruct, Swagger, PostgreSQL"
 
 ### To Do
 - [ ] (P1) #3: Расширение dependencyManagement в корневом build.gradle — Добавление версий для внешних зависимостей
