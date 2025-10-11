@@ -1,5 +1,6 @@
 package com.twitter.common.exception.validation;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
 /**
@@ -47,6 +48,21 @@ import lombok.Getter;
  * @author geron
  * @version 1.0
  */
+@Schema(
+    name = "FormatValidationException",
+    description = "Exception thrown when format validation fails due to data structure or syntax errors",
+    example = """
+        {
+          "type": "https://example.com/errors/format-validation",
+          "title": "Format Validation Error",
+          "status": 400,
+          "detail": "Invalid email format: invalid-email",
+          "fieldName": "email",
+          "constraintName": "EMAIL_FORMAT",
+          "timestamp": "2025-01-27T16:30:00Z"
+        }
+        """
+)
 @Getter
 public class FormatValidationException extends ValidationException {
 
@@ -58,6 +74,11 @@ public class FormatValidationException extends ValidationException {
      * contains the invalid format. It is used by the GlobalExceptionHandler to
      * provide detailed error information in the ProblemDetail response.
      */
+    @Schema(
+        description = "The name of the field that failed format validation",
+        example = "email",
+        nullable = true
+    )
     private final String fieldName;
 
     /**
@@ -68,6 +89,11 @@ public class FormatValidationException extends ValidationException {
      * (e.g., "EMAIL_FORMAT", "PHONE_FORMAT", "DATE_FORMAT"). It helps
      * with debugging and provides context for the validation failure.
      */
+    @Schema(
+        description = "The name of the constraint that was violated",
+        example = "EMAIL_FORMAT",
+        nullable = true
+    )
     private final String constraintName;
 
     /**

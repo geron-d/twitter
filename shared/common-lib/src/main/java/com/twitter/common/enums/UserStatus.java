@@ -1,5 +1,7 @@
 package com.twitter.common.enums;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * Enumeration of user account statuses in the Twitter system.
  *
@@ -26,6 +28,11 @@ package com.twitter.common.enums;
  * @author geron
  * @version 1.0
  */
+@Schema(
+    name = "UserStatus",
+    description = "Enumeration of user account statuses in the Twitter system",
+    example = "ACTIVE"
+)
 public enum UserStatus {
 
     /**

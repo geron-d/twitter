@@ -1,6 +1,7 @@
 package com.twitter.common.exception.validation;
 
 import com.twitter.common.enums.UserRole;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
 /**
@@ -50,6 +51,20 @@ import lombok.Getter;
  * @author geron
  * @version 1.0
  */
+@Schema(
+    name = "BusinessRuleValidationException",
+    description = "Exception thrown when business rule validation fails due to domain-specific constraint violations",
+    example = """
+        {
+          "type": "https://example.com/errors/business-rule-validation",
+          "title": "Business Rule Validation Error",
+          "status": 400,
+          "detail": "Business rule 'LAST_ADMIN_DEACTIVATION' violated for context: userId=123e4567-e89b-12d3-a456-426614174000",
+          "ruleName": "LAST_ADMIN_DEACTIVATION",
+          "timestamp": "2025-01-27T16:30:00Z"
+        }
+        """
+)
 @Getter
 public class BusinessRuleValidationException extends ValidationException {
 
@@ -61,6 +76,11 @@ public class BusinessRuleValidationException extends ValidationException {
      * "ROLE_CHANGE_RESTRICTION") was violated. It is used by the GlobalExceptionHandler
      * to provide detailed error information in the ProblemDetail response.
      */
+    @Schema(
+        description = "The name of the business rule that was violated",
+        example = "LAST_ADMIN_DEACTIVATION",
+        nullable = true
+    )
     private final String ruleName;
 
     /**
@@ -71,6 +91,11 @@ public class BusinessRuleValidationException extends ValidationException {
      * violation (e.g., user ID, entity state, operation details). It helps
      * with debugging and provides context for the validation failure.
      */
+    @Schema(
+        description = "The context in which the business rule violation occurred",
+        example = "userId=123e4567-e89b-12d3-a456-426614174000",
+        nullable = true
+    )
     private final Object context;
 
     /**

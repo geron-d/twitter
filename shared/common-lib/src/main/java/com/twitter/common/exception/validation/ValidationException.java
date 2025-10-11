@@ -1,5 +1,6 @@
 package com.twitter.common.exception.validation;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
 /**
@@ -54,6 +55,19 @@ import lombok.Getter;
  * @author geron
  * @version 1.0
  */
+@Schema(
+    name = "ValidationException",
+    description = "Abstract base class for all validation exceptions in the Twitter system",
+    example = """
+        {
+          "type": "https://example.com/errors/validation-error",
+          "title": "Validation Error",
+          "status": 400,
+          "detail": "Validation failed: email must be a valid email address",
+          "timestamp": "2025-01-27T16:30:00Z"
+        }
+        """
+)
 @Getter
 public abstract class ValidationException extends RuntimeException {
 
