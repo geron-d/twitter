@@ -27,6 +27,15 @@
 | **Micrometer** | Latest | Мониторинг и метрики |
 | **TestContainers** | 1.21.3 | Интеграционное тестирование |
 
+### Управление зависимостями
+
+Проект использует **централизованное управление версиями зависимостей** через `dependencyManagement` в корневом `build.gradle`. 
+
+**Управляемые зависимости:**
+- Spring Boot BOM (автоматически)
+- Lombok, MapStruct, Swagger, PostgreSQL драйвер
+- TestContainers BOM (автоматически)
+
 ## Архитектура проекта
 
 ### Общая архитектура
@@ -172,6 +181,40 @@ twitter/
 
 # Сборка конкретного сервиса
 ./gradlew :services:users-api:build
+```
+
+#### Управление зависимостями
+
+**Обновление версий зависимостей:**
+```bash
+# Обновление версии в корневом build.gradle
+# Измените версию в dependencyManagement блоке
+
+# Проверка зависимостей
+./gradlew dependencies
+
+# Обновление зависимостей
+./gradlew --refresh-dependencies build
+```
+
+**Добавление новой зависимости:**
+1. Добавьте версию в `dependencyManagement` корневого `build.gradle`
+2. Добавьте зависимость без версии в нужный подпроект
+3. Запустите `./gradlew build` для проверки
+
+**Пример добавления зависимости:**
+```gradle
+// В корневом build.gradle (dependencyManagement)
+dependencyManagement {
+    dependencies {
+        dependency 'com.example:new-library:1.2.3'
+    }
+}
+
+// В подпроекте (без версии)
+dependencies {
+    implementation 'com.example:new-library'
+}
 ```
 
 #### Сборка Docker образов
