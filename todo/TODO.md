@@ -23,8 +23,9 @@
   acceptance: "Скрипт для установки created_at для существующих пользователей"
 
 ### Изменения в Entity
-- [ ] (P1) #5: Добавление поля createdAt в User.java — Добавить LocalDateTime createdAt с соответствующими аннотациями
+- [x] (P1) [2025-01-21 20:25] #5: Добавление поля createdAt в User.java — Добавить LocalDateTime createdAt с соответствующими аннотациями
   acceptance: "Поле добавлено с @Column, @CreationTimestamp или @PrePersist"
+  note: "Добавлено поле createdAt с @CreationTimestamp, updatable=false, полная JavaDoc документация"
 - [ ] (P1) #6: Обновление конструкторов и методов User.java — Обновить AllArgsConstructor и другие методы
   acceptance: "Все конструкторы и методы работают корректно с новым полем"
 
