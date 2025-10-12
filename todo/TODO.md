@@ -26,12 +26,14 @@
 - [x] (P1) [2025-01-21 20:25] #5: Добавление поля createdAt в User.java — Добавить LocalDateTime createdAt с соответствующими аннотациями
   acceptance: "Поле добавлено с @Column, @CreationTimestamp или @PrePersist"
   note: "Добавлено поле createdAt с @CreationTimestamp, updatable=false, полная JavaDoc документация"
-- [ ] (P1) #6: Обновление конструкторов и методов User.java — Обновить AllArgsConstructor и другие методы
+- [x] (P1) [2025-01-21 20:28] #6: Обновление конструкторов и методов User.java — Обновить AllArgsConstructor и другие методы
   acceptance: "Все конструкторы и методы работают корректно с новым полем"
+  note: "Lombok автоматически обновил все конструкторы и методы, совместимость подтверждена"
 
 ### Изменения в DTOs
-- [ ] (P1) #7: Обновление UserResponseDto — Добавить поле createdAt в ответный DTO
+- [x] (P1) [2025-01-21 20:32] #7: Обновление UserResponseDto — Добавить поле createdAt в ответный DTO
   acceptance: "Поле createdAt включено в UserResponseDto с правильными аннотациями Swagger"
+  note: "Добавлено поле createdAt с @Schema, обновлён пример, полная JavaDoc документация"
 - [ ] (P2) #8: Проверка других DTOs — Убедиться, что createdAt не попадает в Request/Update DTOs
   acceptance: "createdAt отсутствует в UserRequestDto, UserUpdateDto, UserPatchDto"
 
