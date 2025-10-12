@@ -131,7 +131,8 @@ GET /api/v1/users/{id}
   "lastName": "Doe",
   "email": "john.doe@example.com",
   "status": "ACTIVE",
-  "role": "USER"
+  "role": "USER",
+  "createdAt": "2025-01-21T20:30:00"
 }
 ```
 
@@ -174,7 +175,8 @@ GET /api/v1/users?firstNameContains=John&role=USER&page=0&size=10&sort=login,asc
       "lastName": "Doe",
       "email": "john.doe@example.com",
       "status": "ACTIVE",
-      "role": "USER"
+      "role": "USER",
+      "createdAt": "2025-01-21T20:30:00"
     }
   ],
   "page": {

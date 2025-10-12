@@ -34,32 +34,38 @@
 - [x] (P1) [2025-01-21 20:32] #7: Обновление UserResponseDto — Добавить поле createdAt в ответный DTO
   acceptance: "Поле createdAt включено в UserResponseDto с правильными аннотациями Swagger"
   note: "Добавлено поле createdAt с @Schema, обновлён пример, полная JavaDoc документация"
-- [ ] (P2) #8: Проверка других DTOs — Убедиться, что createdAt не попадает в Request/Update DTOs
+- [x] (P2) [2025-01-21 20:35] #8: Проверка других DTOs — Убедиться, что createdAt не попадает в Request/Update DTOs
   acceptance: "createdAt отсутствует в UserRequestDto, UserUpdateDto, UserPatchDto"
+  note: "Подтверждено отсутствие createdAt во всех Request DTOs - логично исключено как системное поле"
 
 ### Изменения в мапперах
-- [ ] (P1) #9: Обновление UserMapper — Проверить и обновить маппинг для включения createdAt
+- [x] (P1) [2025-01-21 20:38] #9: Обновление UserMapper — Проверить и обновить маппинг для включения createdAt
   acceptance: "MapStruct корректно маппит поле createdAt из Entity в ResponseDto"
+  note: "MapStruct автоматически маппит createdAt, никаких изменений не требуется"
 - [ ] (P2) #10: Обновление тестов маппера — Добавить тесты для проверки маппинга createdAt
   acceptance: "Тесты проверяют корректность маппинга поля createdAt"
 
 ### Изменения в сервисах
-- [ ] (P1) #11: Проверка UserService — Убедиться, что сервис корректно работает с новым полем
+- [x] (P1) [2025-01-21 20:41] #11: Проверка UserService — Убедиться, что сервис корректно работает с новым полем
   acceptance: "Все методы сервиса работают без изменений, createdAt заполняется автоматически"
+  note: "UserService работает корректно, @CreationTimestamp автоматически заполняет createdAt при создании"
 - [ ] (P2) #12: Обновление тестов сервиса — Добавить проверки для createdAt в тестах
   acceptance: "Тесты проверяют, что createdAt устанавливается при создании пользователя"
 
 ### Изменения в контроллерах
-- [ ] (P1) #13: Проверка UserController — Убедиться, что контроллер возвращает createdAt
+- [x] (P1) [2025-01-21 20:44] #13: Проверка UserController — Убедиться, что контроллер возвращает createdAt
   acceptance: "Все эндпоинты возвращают createdAt в ответах"
+  note: "UserController работает корректно, все эндпоинты возвращают UserResponseDto с createdAt"
 - [ ] (P2) #14: Обновление тестов контроллера — Добавить проверки createdAt в интеграционных тестах
   acceptance: "Тесты проверяют наличие createdAt в HTTP ответах"
 
 ### Обновление документации
-- [ ] (P1) #15: Обновление Swagger документации — Добавить createdAt в OpenAPI схемы
+- [x] (P1) [2025-01-21 20:47] #15: Обновление Swagger документации — Добавить createdAt в OpenAPI схемы
   acceptance: "Swagger UI показывает поле createdAt в UserResponse"
-- [ ] (P1) #16: Обновление README.md — Добавить информацию о поле createdAt
+  note: "SpringDoc автоматически обновил OpenAPI схемы, Swagger UI показывает createdAt"
+- [x] (P1) [2025-01-21 20:50] #16: Обновление README.md — Добавить информацию о поле createdAt
   acceptance: "README содержит описание поля createdAt в примерах API"
+  note: "Обновлены 2 примера JSON ответов + добавлен раздел 'Описание полей UserResponseDto' с детальным описанием всех полей"
 - [ ] (P1) #17: Обновление README_eng.md — Добавить информацию о поле createdAt в английской версии
   acceptance: "README_eng содержит описание поля createdAt в примерах API"
 
