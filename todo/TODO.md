@@ -59,8 +59,9 @@
 - [x] (P1) [2025-01-21 20:44] #13: Проверка UserController — Убедиться, что контроллер возвращает createdAt
   acceptance: "Все эндпоинты возвращают createdAt в ответах"
   note: "UserController работает корректно, все эндпоинты возвращают UserResponseDto с createdAt"
-- [ ] (P2) #14: Обновление тестов контроллера — Добавить проверки createdAt в интеграционных тестах
+- [x] (P2) [2025-01-21 22:30] #14: Обновление тестов контроллера — Добавить проверки createdAt в интеграционных тестах
   acceptance: "Тесты проверяют наличие createdAt в HTTP ответах"
+  note: "Добавлены проверки createdAt во все ключевые интеграционные тесты: getUserById, createUser (2 теста), updateUser (2 теста), patchUser (2 теста), inactivateUser, updateUserRole. Добавлен специальный тест updateUser_ShouldPreserveCreatedAtTimestamp для проверки неизменности createdAt при обновлении. Исправлена проблема с @CreationTimestamp - заменён на @PrePersist для корректной работы в тестах. Все 59 тестов проходят успешно."
 
 ### Обновление документации
 - [x] (P1) [2025-01-21 20:47] #15: Обновление Swagger документации — Добавить createdAt в OpenAPI схемы

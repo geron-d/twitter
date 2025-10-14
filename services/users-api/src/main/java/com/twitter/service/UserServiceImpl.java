@@ -101,7 +101,7 @@ public class UserServiceImpl implements UserService {
 
         setPassword(user, userRequest.password());
 
-        User savedUser = userRepository.save(user);
+        User savedUser = userRepository.saveAndFlush(user);
         return userMapper.toUserResponseDto(savedUser);
     }
 

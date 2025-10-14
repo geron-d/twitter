@@ -367,7 +367,7 @@ class UserServiceImplTest {
         @Test
         void createUser_WithValidData_ShouldCreateAndReturnUser() {
             when(userMapper.toUser(testUserRequestDto)).thenReturn(testUser);
-            when(userRepository.save(any(User.class))).thenReturn(savedUser);
+            when(userRepository.saveAndFlush(any(User.class))).thenReturn(savedUser);
             when(userMapper.toUserResponseDto(savedUser)).thenReturn(testUserResponseDto);
 
             UserResponseDto result = userService.createUser(testUserRequestDto);
@@ -384,14 +384,14 @@ class UserServiceImplTest {
 
             verify(userValidator).validateForCreate(testUserRequestDto);
             verify(userMapper).toUser(testUserRequestDto);
-            verify(userRepository).save(any(User.class));
+            verify(userRepository).saveAndFlush(any(User.class));
             verify(userMapper).toUserResponseDto(savedUser);
         }
 
         @Test
         void createUser_ShouldSetStatusToActive() {
             when(userMapper.toUser(testUserRequestDto)).thenReturn(testUser);
-            when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
+            when(userRepository.saveAndFlush(any(User.class))).thenAnswer(invocation -> {
                 User user = invocation.getArgument(0);
                 assertThat(user.getStatus()).isEqualTo(UserStatus.ACTIVE);
                 return savedUser;
@@ -402,14 +402,14 @@ class UserServiceImplTest {
 
             verify(userValidator).validateForCreate(testUserRequestDto);
             verify(userMapper).toUser(testUserRequestDto);
-            verify(userRepository).save(any(User.class));
+            verify(userRepository).saveAndFlush(any(User.class));
             verify(userMapper).toUserResponseDto(savedUser);
         }
 
         @Test
         void createUser_ShouldSetRoleToUser() {
             when(userMapper.toUser(testUserRequestDto)).thenReturn(testUser);
-            when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
+            when(userRepository.saveAndFlush(any(User.class))).thenAnswer(invocation -> {
                 User user = invocation.getArgument(0);
                 assertThat(user.getRole()).isEqualTo(UserRole.USER);
                 return savedUser;
@@ -420,14 +420,14 @@ class UserServiceImplTest {
 
             verify(userValidator).validateForCreate(testUserRequestDto);
             verify(userMapper).toUser(testUserRequestDto);
-            verify(userRepository).save(any(User.class));
+            verify(userRepository).saveAndFlush(any(User.class));
             verify(userMapper).toUserResponseDto(savedUser);
         }
 
         @Test
         void createUser_ShouldHashPassword() {
             when(userMapper.toUser(testUserRequestDto)).thenReturn(testUser);
-            when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
+            when(userRepository.saveAndFlush(any(User.class))).thenAnswer(invocation -> {
                 User user = invocation.getArgument(0);
                 assertThat(user.getPasswordHash()).isNotNull();
                 assertThat(user.getPasswordSalt()).isNotNull();
@@ -440,7 +440,7 @@ class UserServiceImplTest {
 
             verify(userValidator).validateForCreate(testUserRequestDto);
             verify(userMapper).toUser(testUserRequestDto);
-            verify(userRepository).save(any(User.class));
+            verify(userRepository).saveAndFlush(any(User.class));
             verify(userMapper).toUserResponseDto(savedUser);
         }
 
@@ -479,7 +479,7 @@ class UserServiceImplTest {
             );
 
             when(userMapper.toUser(minimalRequest)).thenReturn(minimalUser);
-            when(userRepository.save(any(User.class))).thenReturn(savedMinimalUser);
+            when(userRepository.saveAndFlush(any(User.class))).thenReturn(savedMinimalUser);
             when(userMapper.toUserResponseDto(savedMinimalUser)).thenReturn(minimalResponse);
 
             UserResponseDto result = userService.createUser(minimalRequest);
@@ -494,7 +494,7 @@ class UserServiceImplTest {
 
             verify(userValidator).validateForCreate(minimalRequest);
             verify(userMapper).toUser(minimalRequest);
-            verify(userRepository).save(any(User.class));
+            verify(userRepository).saveAndFlush(any(User.class));
             verify(userMapper).toUserResponseDto(savedMinimalUser);
         }
 
@@ -509,7 +509,7 @@ class UserServiceImplTest {
 
             verify(userValidator).validateForCreate(testUserRequestDto);
             verify(userMapper, never()).toUser(any());
-            verify(userRepository, never()).save(any());
+            verify(userRepository, never()).saveAndFlush(any());
             verify(userMapper, never()).toUserResponseDto(any());
         }
 
@@ -524,7 +524,7 @@ class UserServiceImplTest {
 
             verify(userValidator).validateForCreate(testUserRequestDto);
             verify(userMapper, never()).toUser(any());
-            verify(userRepository, never()).save(any());
+            verify(userRepository, never()).saveAndFlush(any());
             verify(userMapper, never()).toUserResponseDto(any());
         }
 
@@ -544,7 +544,7 @@ class UserServiceImplTest {
             );
             
             when(userMapper.toUser(testUserRequestDto)).thenReturn(testUser);
-            when(userRepository.save(any(User.class))).thenReturn(savedUser);
+            when(userRepository.saveAndFlush(any(User.class))).thenReturn(savedUser);
             when(userMapper.toUserResponseDto(savedUser)).thenReturn(responseWithActualTime);
 
             UserResponseDto result = userService.createUser(testUserRequestDto);
@@ -555,7 +555,7 @@ class UserServiceImplTest {
 
             verify(userValidator).validateForCreate(testUserRequestDto);
             verify(userMapper).toUser(testUserRequestDto);
-            verify(userRepository).save(any(User.class));
+            verify(userRepository).saveAndFlush(any(User.class));
             verify(userMapper).toUserResponseDto(savedUser);
         }
     }
