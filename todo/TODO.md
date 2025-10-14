@@ -51,8 +51,9 @@
 - [x] (P1) [2025-01-21 20:41] #11: Проверка UserService — Убедиться, что сервис корректно работает с новым полем
   acceptance: "Все методы сервиса работают без изменений, createdAt заполняется автоматически"
   note: "UserService работает корректно, @CreationTimestamp автоматически заполняет createdAt при создании"
-- [ ] (P2) #12: Обновление тестов сервиса — Добавить проверки для createdAt в тестах
+- [x] (P2) [2025-01-21 22:15] #12: Обновление тестов сервиса — Добавить проверки для createdAt в тестах
   acceptance: "Тесты проверяют, что createdAt устанавливается при создании пользователя"
+  note: "Добавлены 3 теста: createUser_ShouldSetCreatedAtTimestamp (проверяет установку createdAt при создании), updateUser_ShouldNotChangeCreatedAtTimestamp (проверяет что createdAt не изменяется при обновлении), patchUser_ShouldNotChangeCreatedAtTimestamp (проверяет что createdAt не изменяется при patch). Все тесты проходят успешно."
 
 ### Изменения в контроллерах
 - [x] (P1) [2025-01-21 20:44] #13: Проверка UserController — Убедиться, что контроллер возвращает createdAt

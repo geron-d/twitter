@@ -527,6 +527,37 @@ class UserServiceImplTest {
             verify(userRepository, never()).save(any());
             verify(userMapper, never()).toUserResponseDto(any());
         }
+
+        @Test
+        void createUser_ShouldSetCreatedAtTimestamp() {
+            LocalDateTime testCreatedAt = LocalDateTime.of(2025, 1, 21, 15, 30, 0);
+
+            UserResponseDto responseWithActualTime = new UserResponseDto(
+                savedUser.getId(),
+                "testuser",
+                "Test",
+                "User",
+                "test@example.com",
+                UserStatus.ACTIVE,
+                UserRole.USER,
+                testCreatedAt
+            );
+            
+            when(userMapper.toUser(testUserRequestDto)).thenReturn(testUser);
+            when(userRepository.save(any(User.class))).thenReturn(savedUser);
+            when(userMapper.toUserResponseDto(savedUser)).thenReturn(responseWithActualTime);
+
+            UserResponseDto result = userService.createUser(testUserRequestDto);
+
+            assertThat(result).isNotNull();
+            assertThat(result.createdAt()).isNotNull();
+            assertThat(result.createdAt()).isEqualTo(testCreatedAt);
+
+            verify(userValidator).validateForCreate(testUserRequestDto);
+            verify(userMapper).toUser(testUserRequestDto);
+            verify(userRepository).save(any(User.class));
+            verify(userMapper).toUserResponseDto(savedUser);
+        }
     }
 
     @Nested
@@ -804,6 +835,26 @@ class UserServiceImplTest {
             verify(userMapper).updateUserFromUpdateDto(updateDtoWithSameData, testUser);
             verify(userRepository).save(testUser);
             verify(userMapper).toUserResponseDto(updatedUserWithSameData);
+        }
+
+        @Test
+        void updateUser_ShouldNotChangeCreatedAtTimestamp() {
+            LocalDateTime originalCreatedAt = LocalDateTime.of(2025, 1, 20, 10, 0, 0);
+
+            testUser.setCreatedAt(originalCreatedAt);
+            
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+            when(userRepository.save(any(User.class))).thenReturn(updatedUser);
+            when(userMapper.toUserResponseDto(updatedUser)).thenReturn(testUserResponseDto);
+
+            Optional<UserResponseDto> result = userService.updateUser(testUserId, testUserUpdateDto);
+
+            assertThat(result).isPresent();
+            assertThat(result.get().createdAt()).isNotNull();
+            verify(userRepository).findById(testUserId);
+            verify(userMapper).updateUserFromUpdateDto(testUserUpdateDto, testUser);
+            verify(userRepository).save(testUser);
+            verify(userMapper).toUserResponseDto(updatedUser);
         }
     }
 
@@ -1261,6 +1312,32 @@ class UserServiceImplTest {
             verify(userMapper, never()).updateUserFromPatchDto(any(), any());
             verify(userRepository, never()).save(any());
             verify(userMapper, never()).toUserResponseDto(any());
+        }
+
+        @Test
+        void patchUser_ShouldNotChangeCreatedAtTimestamp() {
+            LocalDateTime originalCreatedAt = LocalDateTime.of(2025, 1, 20, 10, 0, 0);
+
+            testUser.setCreatedAt(originalCreatedAt);
+            
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+            when(userMapper.toUserPatchDto(testUser)).thenReturn(testUserPatchDto);
+            when(patchDtoFactory.createPatchDto(any(UserPatchDto.class), eq(testJsonNode))).thenReturn(testUserPatchDto);
+            when(userRepository.save(any(User.class))).thenReturn(updatedUser);
+            when(userMapper.toUserResponseDto(updatedUser)).thenReturn(testUserResponseDto);
+
+            Optional<UserResponseDto> result = userService.patchUser(testUserId, testJsonNode);
+
+            assertThat(result).isPresent();
+            assertThat(result.get().createdAt()).isNotNull();
+            verify(userRepository).findById(testUserId);
+            verify(userValidator).validateForPatch(testUserId, testJsonNode);
+            verify(userMapper).toUserPatchDto(testUser);
+            verify(patchDtoFactory).createPatchDto(any(UserPatchDto.class), eq(testJsonNode));
+            verify(userValidator).validateForPatchWithDto(testUserId, testUserPatchDto);
+            verify(userMapper).updateUserFromPatchDto(testUserPatchDto, testUser);
+            verify(userRepository).save(testUser);
+            verify(userMapper).toUserResponseDto(updatedUser);
         }
     }
 
