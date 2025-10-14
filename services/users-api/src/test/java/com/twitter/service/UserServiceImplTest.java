@@ -27,6 +27,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -85,7 +86,8 @@ class UserServiceImplTest {
                 "User",
                 "test@example.com",
                 UserStatus.ACTIVE,
-                UserRole.USER
+                UserRole.USER,
+                LocalDateTime.now()
             );
         }
 
@@ -162,7 +164,8 @@ class UserServiceImplTest {
                 "Doe",
                 "john@example.com",
                 UserStatus.ACTIVE,
-                UserRole.USER
+                UserRole.USER,
+                LocalDateTime.now()
             );
 
             testUserResponseDto2 = new UserResponseDto(
@@ -172,7 +175,8 @@ class UserServiceImplTest {
                 "Smith",
                 "jane@example.com",
                 UserStatus.ACTIVE,
-                UserRole.ADMIN
+                UserRole.ADMIN,
+                LocalDateTime.now()
             );
 
             pageable = PageRequest.of(0, 10);
@@ -355,7 +359,8 @@ class UserServiceImplTest {
                 "User",
                 "test@example.com",
                 UserStatus.ACTIVE,
-                UserRole.USER
+                UserRole.USER,
+                LocalDateTime.now()
             );
         }
 
@@ -469,7 +474,8 @@ class UserServiceImplTest {
                 null,
                 "min@example.com",
                 UserStatus.ACTIVE,
-                UserRole.USER
+                UserRole.USER,
+                LocalDateTime.now()
             );
 
             when(userMapper.toUser(minimalRequest)).thenReturn(minimalUser);
@@ -573,7 +579,8 @@ class UserServiceImplTest {
                 "User",
                 "updated@example.com",
                 UserStatus.ACTIVE,
-                UserRole.USER
+                UserRole.USER,
+                LocalDateTime.now()
             );
         }
 
@@ -654,7 +661,8 @@ class UserServiceImplTest {
                 "User",
                 "newemail@example.com",
                 UserStatus.ACTIVE,
-                UserRole.USER
+                UserRole.USER,
+                LocalDateTime.now()
             );
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
@@ -775,7 +783,8 @@ class UserServiceImplTest {
                 "User",
                 "test@example.com",
                 UserStatus.ACTIVE,
-                UserRole.USER
+                UserRole.USER,
+                LocalDateTime.now()
             );
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
@@ -847,7 +856,8 @@ class UserServiceImplTest {
                 "User",
                 "patched@example.com",
                 UserStatus.ACTIVE,
-                UserRole.USER
+                UserRole.USER,
+                LocalDateTime.now()
             );
 
             testJsonNode = JsonNodeFactory.instance.objectNode()
@@ -930,7 +940,8 @@ class UserServiceImplTest {
                 "User",
                 "newemail@example.com",
                 UserStatus.ACTIVE,
-                UserRole.USER
+                UserRole.USER,
+                LocalDateTime.now()
             );
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
@@ -1024,7 +1035,8 @@ class UserServiceImplTest {
                 "User",
                 "test@example.com",
                 UserStatus.ACTIVE,
-                UserRole.USER
+                UserRole.USER,
+                LocalDateTime.now()
             );
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
@@ -1136,7 +1148,8 @@ class UserServiceImplTest {
                 "User",
                 "test@example.com",
                 UserStatus.ACTIVE,
-                UserRole.USER
+                UserRole.USER,
+                LocalDateTime.now()
             );
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
@@ -1292,7 +1305,8 @@ class UserServiceImplTest {
                 "User",
                 "test@example.com",
                 UserStatus.INACTIVE,
-                UserRole.USER
+                UserRole.USER,
+                LocalDateTime.now()
             );
         }
 
@@ -1344,7 +1358,8 @@ class UserServiceImplTest {
                 "User",
                 "admin@example.com",
                 UserStatus.INACTIVE,
-                UserRole.ADMIN
+                UserRole.ADMIN,
+                LocalDateTime.now()
             );
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(adminUser));
@@ -1466,7 +1481,8 @@ class UserServiceImplTest {
                 "User",
                 "mod@example.com",
                 UserStatus.INACTIVE,
-                UserRole.MODERATOR
+                UserRole.MODERATOR,
+                LocalDateTime.now()
             );
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(moderatorUser));
@@ -1531,7 +1547,8 @@ class UserServiceImplTest {
                 "User",
                 "test@example.com",
                 UserStatus.ACTIVE,
-                UserRole.MODERATOR
+                UserRole.MODERATOR,
+                LocalDateTime.now()
             );
         }
 
@@ -1584,7 +1601,8 @@ class UserServiceImplTest {
                 "User",
                 "admin@example.com",
                 UserStatus.ACTIVE,
-                UserRole.MODERATOR
+                UserRole.MODERATOR,
+                LocalDateTime.now()
             );
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(adminUser));
@@ -1668,7 +1686,8 @@ class UserServiceImplTest {
                 "User",
                 "test@example.com",
                 UserStatus.ACTIVE,
-                UserRole.ADMIN
+                UserRole.ADMIN,
+                LocalDateTime.now()
             );
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
@@ -1720,7 +1739,8 @@ class UserServiceImplTest {
                 "User",
                 "mod@example.com",
                 UserStatus.ACTIVE,
-                UserRole.USER
+                UserRole.USER,
+                LocalDateTime.now()
             );
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(moderatorUser));

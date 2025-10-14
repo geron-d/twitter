@@ -14,3 +14,4 @@
 - 20:47 — step #15 done — Обновление Swagger документации — автор: assistant
 - 20:50 — step #16 done — Обновление README.md — автор: assistant
 - 20:55 — step #17 done — Обновление README_eng.md — автор: assistant
+- 21:15 — step #18 done — Запуск всех тестов — автор: assistant
