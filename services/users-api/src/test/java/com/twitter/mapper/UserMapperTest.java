@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -167,6 +168,7 @@ class UserMapperTest {
         @Test
         void toUserResponseDto_WithValidData_ShouldMapCorrectly() {
             UUID userId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+            LocalDateTime createdAt = LocalDateTime.of(2025, 1, 21, 15, 30, 0);
             User user = new User()
                 .setId(userId)
                 .setLogin("testuser")
@@ -176,7 +178,8 @@ class UserMapperTest {
                 .setPasswordHash("hashedPassword")
                 .setPasswordSalt("salt")
                 .setStatus(UserStatus.ACTIVE)
-                .setRole(UserRole.USER);
+                .setRole(UserRole.USER)
+                .setCreatedAt(createdAt);
 
             UserResponseDto result = userMapper.toUserResponseDto(user);
 
@@ -188,17 +191,20 @@ class UserMapperTest {
             assertThat(result.email()).isEqualTo("john.doe@example.com");
             assertThat(result.status()).isEqualTo(UserStatus.ACTIVE);
             assertThat(result.role()).isEqualTo(UserRole.USER);
+            assertThat(result.createdAt()).isEqualTo(createdAt);
         }
 
         @Test
         void toUserResponseDto_WithMinimalData_ShouldMapCorrectly() {
             UUID userId = UUID.fromString("223e4567-e89b-12d3-a456-426614174001");
+            LocalDateTime createdAt = LocalDateTime.of(2025, 1, 21, 16, 45, 30);
             User user = new User()
                 .setId(userId)
                 .setLogin("minuser")
                 .setEmail("min@example.com")
                 .setStatus(UserStatus.INACTIVE)
-                .setRole(UserRole.MODERATOR);
+                .setRole(UserRole.MODERATOR)
+                .setCreatedAt(createdAt);
 
             UserResponseDto result = userMapper.toUserResponseDto(user);
 
@@ -210,6 +216,7 @@ class UserMapperTest {
             assertThat(result.email()).isEqualTo("min@example.com");
             assertThat(result.status()).isEqualTo(UserStatus.INACTIVE);
             assertThat(result.role()).isEqualTo(UserRole.MODERATOR);
+            assertThat(result.createdAt()).isEqualTo(createdAt);
         }
 
         @Test
@@ -286,6 +293,7 @@ class UserMapperTest {
             userPatchDto.setLastName("NewLast");
             userPatchDto.setEmail("new@example.com");
 
+            LocalDateTime originalCreatedAt = LocalDateTime.of(2025, 1, 21, 15, 30, 0);
             User user = new User()
                 .setId(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"))
                 .setLogin("oldlogin")
@@ -295,7 +303,8 @@ class UserMapperTest {
                 .setPasswordHash("hashedPassword")
                 .setPasswordSalt("salt")
                 .setStatus(UserStatus.ACTIVE)
-                .setRole(UserRole.USER);
+                .setRole(UserRole.USER)
+                .setCreatedAt(originalCreatedAt);
 
             userMapper.updateUserFromPatchDto(userPatchDto, user);
 
@@ -308,6 +317,7 @@ class UserMapperTest {
             assertThat(user.getPasswordSalt()).isEqualTo("salt");
             assertThat(user.getStatus()).isEqualTo(UserStatus.ACTIVE);
             assertThat(user.getRole()).isEqualTo(UserRole.USER);
+            assertThat(user.getCreatedAt()).isEqualTo(originalCreatedAt); // createdAt не должно изменяться
         }
 
         @Test
@@ -351,6 +361,7 @@ class UserMapperTest {
                 "newPassword123"
             );
 
+            LocalDateTime originalCreatedAt = LocalDateTime.of(2025, 1, 21, 15, 30, 0);
             User user = new User()
                 .setId(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"))
                 .setLogin("oldlogin")
@@ -360,7 +371,8 @@ class UserMapperTest {
                 .setPasswordHash("oldHashedPassword")
                 .setPasswordSalt("oldSalt")
                 .setStatus(UserStatus.ACTIVE)
-                .setRole(UserRole.USER);
+                .setRole(UserRole.USER)
+                .setCreatedAt(originalCreatedAt);
 
             userMapper.updateUserFromUpdateDto(userUpdateDto, user);
 
@@ -373,6 +385,7 @@ class UserMapperTest {
             assertThat(user.getPasswordSalt()).isEqualTo("oldSalt");
             assertThat(user.getStatus()).isEqualTo(UserStatus.ACTIVE);
             assertThat(user.getRole()).isEqualTo(UserRole.USER);
+            assertThat(user.getCreatedAt()).isEqualTo(originalCreatedAt); // createdAt не должно изменяться
         }
 
         @Test

@@ -15,3 +15,6 @@
 - 20:50 — step #16 done — Обновление README.md — автор: assistant
 - 20:55 — step #17 done — Обновление README_eng.md — автор: assistant
 - 21:15 — step #18 done — Запуск всех тестов — автор: assistant
+- 21:25 — step #4 done — Создание миграции для существующих данных — автор: assistant
+- 21:35 — step #19 done — Ручное тестирование API — автор: assistant
+- 21:40 — step #10 done — Обновление тестов маппера — автор: assistant
