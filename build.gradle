@@ -1,30 +1,67 @@
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '3.5.5-SNAPSHOT'
-	id 'io.spring.dependency-management' version '1.1.7'
+    id 'java-library'
+    id 'org.springframework.boot' version '3.5.5' apply false
+    id 'io.spring.dependency-management' version '1.1.7' apply false
 }
 
 group = 'com.twitter'
 version = '0.0.1-SNAPSHOT'
-description = 'Twitter'
+description = 'Twitter Microservices Monorepo'
 
-java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
-	}
+allprojects {
+    apply plugin: 'java'
+
+    group = rootProject.group
+    version = rootProject.version
+
+    java {
+        sourceCompatibility = '24'
+        targetCompatibility = '24'
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(24)
+        }
+    }
+
+    repositories {
+        mavenCentral()
+        maven { url 'https://repo.spring.io/milestone' }
+        maven { url 'https://repo.spring.io/snapshot' }
+    }
+
+    tasks.named('test') {
+        useJUnitPlatform()
+    }
 }
 
-repositories {
-	mavenCentral()
-	maven { url = 'https://repo.spring.io/snapshot' }
+subprojects {
+    apply plugin: 'io.spring.dependency-management'
+
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.boot:spring-boot-dependencies:3.5.5"
+            mavenBom "org.testcontainers:testcontainers-bom:1.21.3"
+        }
+        
+        dependencies {
+            // Swagger/OpenAPI dependencies
+            dependency 'io.swagger.core.v3:swagger-annotations:2.2.38'
+            dependency 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13'
+            
+            // Lombok dependencies
+            dependency 'org.projectlombok:lombok:1.18.38'
+            dependency 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+            
+            // MapStruct dependencies
+            dependency 'org.mapstruct:mapstruct:1.6.3'
+            dependency 'org.mapstruct:mapstruct-processor:1.6.3'
+            
+            // Database dependencies
+            dependency 'org.postgresql:postgresql:42.7.7'
+        }
+    }
 }
+
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
-
-tasks.named('test') {
-	useJUnitPlatform()
+    // Корневой проект не имеет собственных зависимостей
 }

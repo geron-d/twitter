@@ -1,7 +1,14 @@
 pluginManagement {
 	repositories {
-		maven { url = 'https://repo.spring.io/snapshot' }
 		gradlePluginPortal()
+		mavenCentral()
 	}
 }
 rootProject.name = 'twitter'
+
+include 'shared:common-lib'
+include 'shared:database'
+
+include 'services:users-api'
+
+
