@@ -55,7 +55,7 @@
 │  ┌─────────────────────────────────────────────────────────────┐ │
 │  │                    Services Layer                           │ │
 │  │  ┌─────────────────────────────────────────────────────────┐ │ │
-│  │  │              Users API (Port 8080)                     │ │ │
+│  │  │              Users API (Port 8081)                     │ │ │
 │  │  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐    │ │ │
 │  │  │  │ Controller  │  │  Service    │  │ Repository  │    │ │ │
 │  │  │  │   Layer     │  │   Layer     │  │   Layer     │    │ │ │
@@ -309,12 +309,12 @@ docker-compose up -d postgres
 
 3. **Проверка работы**
    ```bash
-   curl http://localhost:8080/actuator/health
+   curl http://localhost:8081/actuator/health
    ```
 
 4. **Документация API**
-   - Swagger UI: `http://localhost:8080/swagger-ui.html` (планируется)
-   - OpenAPI Spec: `http://localhost:8080/v3/api-docs` (планируется)
+   - Swagger UI: `http://localhost:8081/swagger-ui.html` (планируется)
+   - OpenAPI Spec: `http://localhost:8081/v3/api-docs` (планируется)
 
 ---
 

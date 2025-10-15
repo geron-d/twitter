@@ -38,7 +38,7 @@ This guide explains how to use the Twitter Users API Postman collection for API 
 
 | Variable | Default Value | Description |
 |----------|---------------|-------------|
-| `baseUrl` | `http://localhost:8080` | API base URL |
+| `baseUrl` | `http://localhost:8081` | API base URL |
 | `userId` | `123e4567-e89b-12d3-a456-426614174000` | Sample user ID |
 | `userFilter` | `{}` | Empty user filter |
 | `pageable` | `{"page":0,"size":10}` | Default pagination |
@@ -48,7 +48,7 @@ This guide explains how to use the Twitter Users API Postman collection for API 
 #### Development Environment
 ```json
 {
-  "baseUrl": "http://localhost:8080"
+  "baseUrl": "http://localhost:8081"
 }
 ```
 
@@ -66,7 +66,7 @@ This guide explains how to use the Twitter Users API Postman collection for API 
 ### Switching Environments
 
 1. **Local Development**
-   - Set `baseUrl` to `http://localhost:8080`
+   - Set `baseUrl` to `http://localhost:8081`
    - Ensure API server is running locally
 
 ## Collection Structure

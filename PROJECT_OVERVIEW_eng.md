@@ -55,7 +55,7 @@ The project is built on **microservices architecture** principles with separatio
 │  ┌─────────────────────────────────────────────────────────────┐ │
 │  │                    Services Layer                           │ │
 │  │  ┌─────────────────────────────────────────────────────────┐ │ │
-│  │  │              Users API (Port 8080)                     │ │ │
+│  │  │              Users API (Port 8081)                     │ │ │
 │  │  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐    │ │ │
 │  │  │  │ Controller  │  │  Service    │  │ Repository  │    │ │ │
 │  │  │  │   Layer     │  │   Layer     │  │   Layer     │    │ │ │
@@ -309,12 +309,12 @@ docker-compose up -d postgres
 
 3. **Verify Operation**
    ```bash
-   curl http://localhost:8080/actuator/health
+   curl http://localhost:8081/actuator/health
    ```
 
 4. **API Documentation**
-   - Swagger UI: `http://localhost:8080/swagger-ui.html` (planned)
-   - OpenAPI Spec: `http://localhost:8080/v3/api-docs` (planned)
+   - Swagger UI: `http://localhost:8081/swagger-ui.html` (planned)
+   - OpenAPI Spec: `http://localhost:8081/v3/api-docs` (planned)
 
 ---
 

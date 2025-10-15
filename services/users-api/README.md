@@ -93,7 +93,7 @@ com.twitter/
 
 ### Базовый URL
 ```
-http://localhost:8080/api/v1/users
+http://localhost:8081/api/v1/users
 ```
 
 ### Эндпоинты
@@ -295,7 +295,7 @@ Content-Type: application/json
 ### Доступ к документации
 
 #### Swagger UI
-- **URL**: `http://localhost:8080/swagger-ui.html`
+- **URL**: `http://localhost:8081/swagger-ui.html`
 - **Описание**: Интерактивный интерфейс для изучения и тестирования API
 - **Возможности**:
   - Просмотр всех эндпоинтов с детальным описанием
@@ -305,7 +305,7 @@ Content-Type: application/json
   - Автогенерация клиентского кода
 
 #### OpenAPI Спецификация
-- **URL**: `http://localhost:8080/v3/api-docs`
+- **URL**: `http://localhost:8081/v3/api-docs`
 - **Описание**: JSON спецификация OpenAPI 3.0
 - **Использование**:
   - Генерация клиентских SDK
@@ -314,7 +314,7 @@ Content-Type: application/json
   - Валидация API контрактов
 
 #### Конфигурация Swagger
-- **URL**: `http://localhost:8080/v3/api-docs/swagger-config`
+- **URL**: `http://localhost:8081/v3/api-docs/swagger-config`
 - **Описание**: Конфигурация Swagger UI
 
 ### Особенности документации
@@ -354,20 +354,20 @@ Content-Type: application/json
 ./gradlew bootRun
 
 # Открытие Swagger UI в браузере
-open http://localhost:8080/swagger-ui.html
+open http://localhost:8081/swagger-ui.html
 ```
 
 #### Генерация клиентского кода
 ```bash
 # Использование OpenAPI Generator
 openapi-generator-cli generate \
-  -i http://localhost:8080/v3/api-docs \
+  -i http://localhost:8081/v3/api-docs \
   -g java \
   -o ./generated-client
 
 # Генерация TypeScript клиента
 openapi-generator-cli generate \
-  -i http://localhost:8080/v3/api-docs \
+  -i http://localhost:8081/v3/api-docs \
   -g typescript-axios \
   -o ./generated-client-ts
 ```
@@ -607,7 +607,7 @@ logging:
 
 #### Создание пользователя с дублирующимся логином
 ```bash
-curl -X POST http://localhost:8080/api/v1/users \
+curl -X POST http://localhost:8081/api/v1/users \
   -H "Content-Type: application/json" \
   -d '{
     "login": "existinguser",
@@ -630,7 +630,7 @@ curl -X POST http://localhost:8080/api/v1/users \
 
 #### Попытка деактивировать последнего админа
 ```bash
-curl -X PATCH http://localhost:8080/api/v1/users/123e4567-e89b-12d3-a456-426614174000/inactivate
+curl -X PATCH http://localhost:8081/api/v1/users/123e4567-e89b-12d3-a456-426614174000/inactivate
 ```
 
 **Ответ (409 Conflict):**
@@ -646,7 +646,7 @@ curl -X PATCH http://localhost:8080/api/v1/users/123e4567-e89b-12d3-a456-4266141
 
 #### PATCH с некорректным форматом данных
 ```bash
-curl -X PATCH http://localhost:8080/api/v1/users/123e4567-e89b-12d3-a456-426614174000 \
+curl -X PATCH http://localhost:8081/api/v1/users/123e4567-e89b-12d3-a456-426614174000 \
   -H "Content-Type: application/json" \
   -d '{"login": "ab"}'
 ```
@@ -748,7 +748,7 @@ public record UserFilter(String firstNameContains, String lastNameContains,
 ### Создание пользователя
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/users \
+curl -X POST http://localhost:8081/api/v1/users \
   -H "Content-Type: application/json" \
   -d '{
     "login": "newuser",
@@ -762,13 +762,13 @@ curl -X POST http://localhost:8080/api/v1/users \
 ### Получение пользователей с фильтрацией
 
 ```bash
-curl "http://localhost:8080/api/v1/users?firstNameContains=John&role=USER&page=0&size=10"
+curl "http://localhost:8081/api/v1/users?firstNameContains=John&role=USER&page=0&size=10"
 ```
 
 ### Обновление пользователя
 
 ```bash
-curl -X PUT http://localhost:8080/api/v1/users/123e4567-e89b-12d3-a456-426614174000 \
+curl -X PUT http://localhost:8081/api/v1/users/123e4567-e89b-12d3-a456-426614174000 \
   -H "Content-Type: application/json" \
   -d '{
     "login": "updateduser",
@@ -782,7 +782,7 @@ curl -X PUT http://localhost:8080/api/v1/users/123e4567-e89b-12d3-a456-426614174
 ### Частичное обновление
 
 ```bash
-curl -X PATCH http://localhost:8080/api/v1/users/123e4567-e89b-12d3-a456-426614174000 \
+curl -X PATCH http://localhost:8081/api/v1/users/123e4567-e89b-12d3-a456-426614174000 \
   -H "Content-Type: application/json" \
   -d '{
     "firstName": "New Name"
@@ -792,13 +792,13 @@ curl -X PATCH http://localhost:8080/api/v1/users/123e4567-e89b-12d3-a456-4266141
 ### Деактивация пользователя
 
 ```bash
-curl -X PATCH http://localhost:8080/api/v1/users/123e4567-e89b-12d3-a456-426614174000/inactivate
+curl -X PATCH http://localhost:8081/api/v1/users/123e4567-e89b-12d3-a456-426614174000/inactivate
 ```
 
 ### Обновление роли
 
 ```bash
-curl -X PATCH http://localhost:8080/api/v1/users/123e4567-e89b-12d3-a456-426614174000/role \
+curl -X PATCH http://localhost:8081/api/v1/users/123e4567-e89b-12d3-a456-426614174000/role \
   -H "Content-Type: application/json" \
   -d '{
     "role": "ADMIN"
@@ -948,7 +948,7 @@ curl -X PATCH http://localhost:8080/api/v1/users/123e4567-e89b-12d3-a456-4266141
 
 ```bash
 docker build -t users-api .
-docker run -p 8080:8080 users-api
+docker run -p 8081:8081 users-api
 ```
 
 ### Мониторинг

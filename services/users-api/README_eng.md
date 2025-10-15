@@ -93,7 +93,7 @@ com.twitter/
 
 ### Base URL
 ```
-http://localhost:8080/api/v1/users
+http://localhost:8081/api/v1/users
 ```
 
 ### Endpoints
@@ -295,7 +295,7 @@ The service includes complete OpenAPI 3.0 documentation provided through SpringD
 ### Documentation Access
 
 #### Swagger UI
-- **URL**: `http://localhost:8080/swagger-ui.html`
+- **URL**: `http://localhost:8081/swagger-ui.html`
 - **Description**: Interactive interface for exploring and testing the API
 - **Features**:
   - View all endpoints with detailed descriptions
@@ -305,7 +305,7 @@ The service includes complete OpenAPI 3.0 documentation provided through SpringD
   - Client code auto-generation
 
 #### OpenAPI Specification
-- **URL**: `http://localhost:8080/v3/api-docs`
+- **URL**: `http://localhost:8081/v3/api-docs`
 - **Description**: OpenAPI 3.0 JSON specification
 - **Usage**:
   - Generate client SDKs
@@ -314,7 +314,7 @@ The service includes complete OpenAPI 3.0 documentation provided through SpringD
   - Validate API contracts
 
 #### Swagger Configuration
-- **URL**: `http://localhost:8080/v3/api-docs/swagger-config`
+- **URL**: `http://localhost:8081/v3/api-docs/swagger-config`
 - **Description**: Swagger UI configuration
 
 ### Documentation Features
@@ -354,20 +354,20 @@ OpenAPI documentation is configured through:
 ./gradlew bootRun
 
 # Open Swagger UI in browser
-open http://localhost:8080/swagger-ui.html
+open http://localhost:8081/swagger-ui.html
 ```
 
 #### Generating Client Code
 ```bash
 # Using OpenAPI Generator
 openapi-generator-cli generate \
-  -i http://localhost:8080/v3/api-docs \
+  -i http://localhost:8081/v3/api-docs \
   -g java \
   -o ./generated-client
 
 # Generate TypeScript client
 openapi-generator-cli generate \
-  -i http://localhost:8080/v3/api-docs \
+  -i http://localhost:8081/v3/api-docs \
   -g typescript-axios \
   -o ./generated-client-ts
 ```
@@ -607,7 +607,7 @@ Business rule is checked: the last active administrator's role cannot be changed
 
 #### Creating User with Duplicate Login
 ```bash
-curl -X POST http://localhost:8080/api/v1/users \
+curl -X POST http://localhost:8081/api/v1/users \
   -H "Content-Type: application/json" \
   -d '{
     "login": "existinguser",
@@ -630,7 +630,7 @@ curl -X POST http://localhost:8080/api/v1/users \
 
 #### Attempting to Deactivate Last Admin
 ```bash
-curl -X PATCH http://localhost:8080/api/v1/users/123e4567-e89b-12d3-a456-426614174000/inactivate
+curl -X PATCH http://localhost:8081/api/v1/users/123e4567-e89b-12d3-a456-426614174000/inactivate
 ```
 
 **Response (409 Conflict):**
@@ -646,7 +646,7 @@ curl -X PATCH http://localhost:8080/api/v1/users/123e4567-e89b-12d3-a456-4266141
 
 #### PATCH with Incorrect Data Format
 ```bash
-curl -X PATCH http://localhost:8080/api/v1/users/123e4567-e89b-12d3-a456-426614174000 \
+curl -X PATCH http://localhost:8081/api/v1/users/123e4567-e89b-12d3-a456-426614174000 \
   -H "Content-Type: application/json" \
   -d '{"login": "ab"}'
 ```
@@ -753,7 +753,7 @@ public record UserFilter(String firstNameContains, String lastNameContains,
 ### Creating User
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/users \
+curl -X POST http://localhost:8081/api/v1/users \
   -H "Content-Type: application/json" \
   -d '{
     "login": "newuser",
@@ -767,13 +767,13 @@ curl -X POST http://localhost:8080/api/v1/users \
 ### Getting Users with Filtering
 
 ```bash
-curl "http://localhost:8080/api/v1/users?firstNameContains=John&role=USER&page=0&size=10"
+curl "http://localhost:8081/api/v1/users?firstNameContains=John&role=USER&page=0&size=10"
 ```
 
 ### Updating User
 
 ```bash
-curl -X PUT http://localhost:8080/api/v1/users/123e4567-e89b-12d3-a456-426614174000 \
+curl -X PUT http://localhost:8081/api/v1/users/123e4567-e89b-12d3-a456-426614174000 \
   -H "Content-Type: application/json" \
   -d '{
     "login": "updateduser",
@@ -787,7 +787,7 @@ curl -X PUT http://localhost:8080/api/v1/users/123e4567-e89b-12d3-a456-426614174
 ### Partial Update
 
 ```bash
-curl -X PATCH http://localhost:8080/api/v1/users/123e4567-e89b-12d3-a456-426614174000 \
+curl -X PATCH http://localhost:8081/api/v1/users/123e4567-e89b-12d3-a456-426614174000 \
   -H "Content-Type: application/json" \
   -d '{
     "firstName": "New Name"
@@ -797,13 +797,13 @@ curl -X PATCH http://localhost:8080/api/v1/users/123e4567-e89b-12d3-a456-4266141
 ### Deactivating User
 
 ```bash
-curl -X PATCH http://localhost:8080/api/v1/users/123e4567-e89b-12d3-a456-426614174000/inactivate
+curl -X PATCH http://localhost:8081/api/v1/users/123e4567-e89b-12d3-a456-426614174000/inactivate
 ```
 
 ### Updating Role
 
 ```bash
-curl -X PATCH http://localhost:8080/api/v1/users/123e4567-e89b-12d3-a456-426614174000/role \
+curl -X PATCH http://localhost:8081/api/v1/users/123e4567-e89b-12d3-a456-426614174000/role \
   -H "Content-Type: application/json" \
   -d '{
     "role": "ADMIN"
@@ -953,7 +953,7 @@ The service uses **centralized version management** through `dependencyManagemen
 
 ```bash
 docker build -t users-api .
-docker run -p 8080:8080 users-api
+docker run -p 8081:8081 users-api
 ```
 
 ### Monitoring
