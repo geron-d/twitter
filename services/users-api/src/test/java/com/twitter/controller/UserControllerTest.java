@@ -222,6 +222,30 @@ public class UserControllerTest {
         }
 
         @Test
+        void findAll_WithCreatedAtSorting_ShouldReturnSortedUsers() throws Exception {
+            createTestUsers();
+            mockMvc.perform(get("/api/v1/users?sort=createdAt,asc&size=5"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(5))
+                .andExpect(jsonPath("$.content[0].createdAt").exists())
+                .andExpect(jsonPath("$.content[1].createdAt").exists());
+        }
+
+        @Test
+        void findAll_WithCreatedAtDescSorting_ShouldReturnSortedUsers() throws Exception {
+            createTestUsers();
+            mockMvc.perform(get("/api/v1/users?sort=createdAt,desc&size=5"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(5))
+                .andExpect(jsonPath("$.content[0].createdAt").exists())
+                .andExpect(jsonPath("$.content[1].createdAt").exists());
+        }
+
+        @Test
         void findAll_WithNonExistentFilter_ShouldReturnEmptyResult() throws Exception {
             createTestUsers();
             mockMvc.perform(get("/api/v1/users?firstNameContains=NonExistentName"))
