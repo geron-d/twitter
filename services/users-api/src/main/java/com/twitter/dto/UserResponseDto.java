@@ -4,6 +4,7 @@ import com.twitter.common.enums.UserRole;
 import com.twitter.common.enums.UserStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
@@ -22,6 +23,7 @@ import java.util.UUID;
  * @param email user's email address
  * @param status current status of the user account
  * @param role user's role in the system
+ * @param createdAt date and time when the user account was created
  */
 @Schema(
     name = "UserResponse",
@@ -34,7 +36,8 @@ import java.util.UUID;
           "lastName": "Smith",
           "email": "jane.smith@example.com",
           "status": "ACTIVE",
-          "role": "USER"
+          "role": "USER",
+          "createdAt": "2025-01-21T20:30:00"
         }
         """
 )
@@ -130,6 +133,20 @@ public record UserResponseDto(
         example = "USER",
         implementation = UserRole.class
     )
-    UserRole role
+    UserRole role,
+
+    /**
+     * Date and time when the user account was created.
+     * <p>
+     * This field contains the timestamp when the user account was originally
+     * created in the system. It is automatically set during user creation
+     * and cannot be modified afterwards.
+     */
+    @Schema(
+        description = "Date and time when the user account was created",
+        example = "2025-01-21T20:30:00",
+        format = "date-time"
+    )
+    LocalDateTime createdAt
 ) {
 }

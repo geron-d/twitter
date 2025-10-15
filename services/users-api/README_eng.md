@@ -131,7 +131,8 @@ GET /api/v1/users/{id}
   "lastName": "Doe",
   "email": "john.doe@example.com",
   "status": "ACTIVE",
-  "role": "USER"
+  "role": "USER",
+  "createdAt": "2025-01-21T20:30:00"
 }
 ```
 
@@ -174,7 +175,8 @@ GET /api/v1/users?firstNameContains=John&role=USER&page=0&size=10&sort=login,asc
       "lastName": "Doe",
       "email": "john.doe@example.com",
       "status": "ACTIVE",
-      "role": "USER"
+      "role": "USER",
+      "createdAt": "2025-01-21T20:30:00"
     }
   ],
   "page": {
@@ -693,6 +695,10 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserRole role;
+    
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 }
 ```
 
@@ -709,6 +715,7 @@ public class User {
 | `password_salt` | VARCHAR | NOT NULL | Salt for hashing |
 | `status` | VARCHAR | NOT NULL | Status (ACTIVE/INACTIVE) |
 | `role` | VARCHAR | NOT NULL | Role (USER/ADMIN/MODERATOR) |
+| `created_at` | TIMESTAMP | NOT NULL, DEFAULT CURRENT_TIMESTAMP | User creation timestamp |
 
 ### UserRepository
 

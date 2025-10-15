@@ -27,6 +27,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -85,7 +86,8 @@ class UserServiceImplTest {
                 "User",
                 "test@example.com",
                 UserStatus.ACTIVE,
-                UserRole.USER
+                UserRole.USER,
+                LocalDateTime.now()
             );
         }
 
@@ -162,7 +164,8 @@ class UserServiceImplTest {
                 "Doe",
                 "john@example.com",
                 UserStatus.ACTIVE,
-                UserRole.USER
+                UserRole.USER,
+                LocalDateTime.now()
             );
 
             testUserResponseDto2 = new UserResponseDto(
@@ -172,7 +175,8 @@ class UserServiceImplTest {
                 "Smith",
                 "jane@example.com",
                 UserStatus.ACTIVE,
-                UserRole.ADMIN
+                UserRole.ADMIN,
+                LocalDateTime.now()
             );
 
             pageable = PageRequest.of(0, 10);
@@ -355,14 +359,15 @@ class UserServiceImplTest {
                 "User",
                 "test@example.com",
                 UserStatus.ACTIVE,
-                UserRole.USER
+                UserRole.USER,
+                LocalDateTime.now()
             );
         }
 
         @Test
         void createUser_WithValidData_ShouldCreateAndReturnUser() {
             when(userMapper.toUser(testUserRequestDto)).thenReturn(testUser);
-            when(userRepository.save(any(User.class))).thenReturn(savedUser);
+            when(userRepository.saveAndFlush(any(User.class))).thenReturn(savedUser);
             when(userMapper.toUserResponseDto(savedUser)).thenReturn(testUserResponseDto);
 
             UserResponseDto result = userService.createUser(testUserRequestDto);
@@ -379,14 +384,14 @@ class UserServiceImplTest {
 
             verify(userValidator).validateForCreate(testUserRequestDto);
             verify(userMapper).toUser(testUserRequestDto);
-            verify(userRepository).save(any(User.class));
+            verify(userRepository).saveAndFlush(any(User.class));
             verify(userMapper).toUserResponseDto(savedUser);
         }
 
         @Test
         void createUser_ShouldSetStatusToActive() {
             when(userMapper.toUser(testUserRequestDto)).thenReturn(testUser);
-            when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
+            when(userRepository.saveAndFlush(any(User.class))).thenAnswer(invocation -> {
                 User user = invocation.getArgument(0);
                 assertThat(user.getStatus()).isEqualTo(UserStatus.ACTIVE);
                 return savedUser;
@@ -397,14 +402,14 @@ class UserServiceImplTest {
 
             verify(userValidator).validateForCreate(testUserRequestDto);
             verify(userMapper).toUser(testUserRequestDto);
-            verify(userRepository).save(any(User.class));
+            verify(userRepository).saveAndFlush(any(User.class));
             verify(userMapper).toUserResponseDto(savedUser);
         }
 
         @Test
         void createUser_ShouldSetRoleToUser() {
             when(userMapper.toUser(testUserRequestDto)).thenReturn(testUser);
-            when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
+            when(userRepository.saveAndFlush(any(User.class))).thenAnswer(invocation -> {
                 User user = invocation.getArgument(0);
                 assertThat(user.getRole()).isEqualTo(UserRole.USER);
                 return savedUser;
@@ -415,14 +420,14 @@ class UserServiceImplTest {
 
             verify(userValidator).validateForCreate(testUserRequestDto);
             verify(userMapper).toUser(testUserRequestDto);
-            verify(userRepository).save(any(User.class));
+            verify(userRepository).saveAndFlush(any(User.class));
             verify(userMapper).toUserResponseDto(savedUser);
         }
 
         @Test
         void createUser_ShouldHashPassword() {
             when(userMapper.toUser(testUserRequestDto)).thenReturn(testUser);
-            when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
+            when(userRepository.saveAndFlush(any(User.class))).thenAnswer(invocation -> {
                 User user = invocation.getArgument(0);
                 assertThat(user.getPasswordHash()).isNotNull();
                 assertThat(user.getPasswordSalt()).isNotNull();
@@ -435,7 +440,7 @@ class UserServiceImplTest {
 
             verify(userValidator).validateForCreate(testUserRequestDto);
             verify(userMapper).toUser(testUserRequestDto);
-            verify(userRepository).save(any(User.class));
+            verify(userRepository).saveAndFlush(any(User.class));
             verify(userMapper).toUserResponseDto(savedUser);
         }
 
@@ -469,11 +474,12 @@ class UserServiceImplTest {
                 null,
                 "min@example.com",
                 UserStatus.ACTIVE,
-                UserRole.USER
+                UserRole.USER,
+                LocalDateTime.now()
             );
 
             when(userMapper.toUser(minimalRequest)).thenReturn(minimalUser);
-            when(userRepository.save(any(User.class))).thenReturn(savedMinimalUser);
+            when(userRepository.saveAndFlush(any(User.class))).thenReturn(savedMinimalUser);
             when(userMapper.toUserResponseDto(savedMinimalUser)).thenReturn(minimalResponse);
 
             UserResponseDto result = userService.createUser(minimalRequest);
@@ -488,7 +494,7 @@ class UserServiceImplTest {
 
             verify(userValidator).validateForCreate(minimalRequest);
             verify(userMapper).toUser(minimalRequest);
-            verify(userRepository).save(any(User.class));
+            verify(userRepository).saveAndFlush(any(User.class));
             verify(userMapper).toUserResponseDto(savedMinimalUser);
         }
 
@@ -503,7 +509,7 @@ class UserServiceImplTest {
 
             verify(userValidator).validateForCreate(testUserRequestDto);
             verify(userMapper, never()).toUser(any());
-            verify(userRepository, never()).save(any());
+            verify(userRepository, never()).saveAndFlush(any());
             verify(userMapper, never()).toUserResponseDto(any());
         }
 
@@ -518,8 +524,39 @@ class UserServiceImplTest {
 
             verify(userValidator).validateForCreate(testUserRequestDto);
             verify(userMapper, never()).toUser(any());
-            verify(userRepository, never()).save(any());
+            verify(userRepository, never()).saveAndFlush(any());
             verify(userMapper, never()).toUserResponseDto(any());
+        }
+
+        @Test
+        void createUser_ShouldSetCreatedAtTimestamp() {
+            LocalDateTime testCreatedAt = LocalDateTime.of(2025, 1, 21, 15, 30, 0);
+
+            UserResponseDto responseWithActualTime = new UserResponseDto(
+                savedUser.getId(),
+                "testuser",
+                "Test",
+                "User",
+                "test@example.com",
+                UserStatus.ACTIVE,
+                UserRole.USER,
+                testCreatedAt
+            );
+            
+            when(userMapper.toUser(testUserRequestDto)).thenReturn(testUser);
+            when(userRepository.saveAndFlush(any(User.class))).thenReturn(savedUser);
+            when(userMapper.toUserResponseDto(savedUser)).thenReturn(responseWithActualTime);
+
+            UserResponseDto result = userService.createUser(testUserRequestDto);
+
+            assertThat(result).isNotNull();
+            assertThat(result.createdAt()).isNotNull();
+            assertThat(result.createdAt()).isEqualTo(testCreatedAt);
+
+            verify(userValidator).validateForCreate(testUserRequestDto);
+            verify(userMapper).toUser(testUserRequestDto);
+            verify(userRepository).saveAndFlush(any(User.class));
+            verify(userMapper).toUserResponseDto(savedUser);
         }
     }
 
@@ -573,7 +610,8 @@ class UserServiceImplTest {
                 "User",
                 "updated@example.com",
                 UserStatus.ACTIVE,
-                UserRole.USER
+                UserRole.USER,
+                LocalDateTime.now()
             );
         }
 
@@ -654,7 +692,8 @@ class UserServiceImplTest {
                 "User",
                 "newemail@example.com",
                 UserStatus.ACTIVE,
-                UserRole.USER
+                UserRole.USER,
+                LocalDateTime.now()
             );
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
@@ -775,7 +814,8 @@ class UserServiceImplTest {
                 "User",
                 "test@example.com",
                 UserStatus.ACTIVE,
-                UserRole.USER
+                UserRole.USER,
+                LocalDateTime.now()
             );
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
@@ -795,6 +835,26 @@ class UserServiceImplTest {
             verify(userMapper).updateUserFromUpdateDto(updateDtoWithSameData, testUser);
             verify(userRepository).save(testUser);
             verify(userMapper).toUserResponseDto(updatedUserWithSameData);
+        }
+
+        @Test
+        void updateUser_ShouldNotChangeCreatedAtTimestamp() {
+            LocalDateTime originalCreatedAt = LocalDateTime.of(2025, 1, 20, 10, 0, 0);
+
+            testUser.setCreatedAt(originalCreatedAt);
+            
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+            when(userRepository.save(any(User.class))).thenReturn(updatedUser);
+            when(userMapper.toUserResponseDto(updatedUser)).thenReturn(testUserResponseDto);
+
+            Optional<UserResponseDto> result = userService.updateUser(testUserId, testUserUpdateDto);
+
+            assertThat(result).isPresent();
+            assertThat(result.get().createdAt()).isNotNull();
+            verify(userRepository).findById(testUserId);
+            verify(userMapper).updateUserFromUpdateDto(testUserUpdateDto, testUser);
+            verify(userRepository).save(testUser);
+            verify(userMapper).toUserResponseDto(updatedUser);
         }
     }
 
@@ -847,7 +907,8 @@ class UserServiceImplTest {
                 "User",
                 "patched@example.com",
                 UserStatus.ACTIVE,
-                UserRole.USER
+                UserRole.USER,
+                LocalDateTime.now()
             );
 
             testJsonNode = JsonNodeFactory.instance.objectNode()
@@ -930,7 +991,8 @@ class UserServiceImplTest {
                 "User",
                 "newemail@example.com",
                 UserStatus.ACTIVE,
-                UserRole.USER
+                UserRole.USER,
+                LocalDateTime.now()
             );
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
@@ -1024,7 +1086,8 @@ class UserServiceImplTest {
                 "User",
                 "test@example.com",
                 UserStatus.ACTIVE,
-                UserRole.USER
+                UserRole.USER,
+                LocalDateTime.now()
             );
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
@@ -1136,7 +1199,8 @@ class UserServiceImplTest {
                 "User",
                 "test@example.com",
                 UserStatus.ACTIVE,
-                UserRole.USER
+                UserRole.USER,
+                LocalDateTime.now()
             );
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
@@ -1249,6 +1313,32 @@ class UserServiceImplTest {
             verify(userRepository, never()).save(any());
             verify(userMapper, never()).toUserResponseDto(any());
         }
+
+        @Test
+        void patchUser_ShouldNotChangeCreatedAtTimestamp() {
+            LocalDateTime originalCreatedAt = LocalDateTime.of(2025, 1, 20, 10, 0, 0);
+
+            testUser.setCreatedAt(originalCreatedAt);
+            
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+            when(userMapper.toUserPatchDto(testUser)).thenReturn(testUserPatchDto);
+            when(patchDtoFactory.createPatchDto(any(UserPatchDto.class), eq(testJsonNode))).thenReturn(testUserPatchDto);
+            when(userRepository.save(any(User.class))).thenReturn(updatedUser);
+            when(userMapper.toUserResponseDto(updatedUser)).thenReturn(testUserResponseDto);
+
+            Optional<UserResponseDto> result = userService.patchUser(testUserId, testJsonNode);
+
+            assertThat(result).isPresent();
+            assertThat(result.get().createdAt()).isNotNull();
+            verify(userRepository).findById(testUserId);
+            verify(userValidator).validateForPatch(testUserId, testJsonNode);
+            verify(userMapper).toUserPatchDto(testUser);
+            verify(patchDtoFactory).createPatchDto(any(UserPatchDto.class), eq(testJsonNode));
+            verify(userValidator).validateForPatchWithDto(testUserId, testUserPatchDto);
+            verify(userMapper).updateUserFromPatchDto(testUserPatchDto, testUser);
+            verify(userRepository).save(testUser);
+            verify(userMapper).toUserResponseDto(updatedUser);
+        }
     }
 
     @Nested
@@ -1292,7 +1382,8 @@ class UserServiceImplTest {
                 "User",
                 "test@example.com",
                 UserStatus.INACTIVE,
-                UserRole.USER
+                UserRole.USER,
+                LocalDateTime.now()
             );
         }
 
@@ -1344,7 +1435,8 @@ class UserServiceImplTest {
                 "User",
                 "admin@example.com",
                 UserStatus.INACTIVE,
-                UserRole.ADMIN
+                UserRole.ADMIN,
+                LocalDateTime.now()
             );
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(adminUser));
@@ -1466,7 +1558,8 @@ class UserServiceImplTest {
                 "User",
                 "mod@example.com",
                 UserStatus.INACTIVE,
-                UserRole.MODERATOR
+                UserRole.MODERATOR,
+                LocalDateTime.now()
             );
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(moderatorUser));
@@ -1531,7 +1624,8 @@ class UserServiceImplTest {
                 "User",
                 "test@example.com",
                 UserStatus.ACTIVE,
-                UserRole.MODERATOR
+                UserRole.MODERATOR,
+                LocalDateTime.now()
             );
         }
 
@@ -1584,7 +1678,8 @@ class UserServiceImplTest {
                 "User",
                 "admin@example.com",
                 UserStatus.ACTIVE,
-                UserRole.MODERATOR
+                UserRole.MODERATOR,
+                LocalDateTime.now()
             );
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(adminUser));
@@ -1668,7 +1763,8 @@ class UserServiceImplTest {
                 "User",
                 "test@example.com",
                 UserStatus.ACTIVE,
-                UserRole.ADMIN
+                UserRole.ADMIN,
+                LocalDateTime.now()
             );
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
@@ -1720,7 +1816,8 @@ class UserServiceImplTest {
                 "User",
                 "mod@example.com",
                 UserStatus.ACTIVE,
-                UserRole.USER
+                UserRole.USER,
+                LocalDateTime.now()
             );
 
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(moderatorUser));

@@ -7,5 +7,6 @@ CREATE TABLE IF NOT EXISTS users (
     password_hash VARCHAR(255) NOT NULL,
     password_salt VARCHAR(255) NOT NULL,
     status VARCHAR(20) NOT NULL,
-    role VARCHAR(20) NOT NULL
+    role VARCHAR(20) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

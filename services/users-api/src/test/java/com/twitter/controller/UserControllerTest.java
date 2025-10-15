@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -79,7 +80,7 @@ public class UserControllerTest {
         @Test
         void getUserById_WithValidExistingUserId_ShouldReturnUserWith200Ok() throws Exception {
             User user = createTestUser("testuser", "Test", "User", "test@example.com");
-            User savedUser = userRepository.save(user);
+            User savedUser = userRepository.saveAndFlush(user);
             UUID userId = savedUser.getId();
 
             mockMvc.perform(get("/api/v1/users/{id}", userId))
@@ -91,7 +92,8 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.lastName").value("User"))
                 .andExpect(jsonPath("$.email").value("test@example.com"))
                 .andExpect(jsonPath("$.status").value("ACTIVE"))
-                .andExpect(jsonPath("$.role").value("USER"));
+                .andExpect(jsonPath("$.role").value("USER"))
+                .andExpect(jsonPath("$.createdAt").isNotEmpty());
         }
 
         @Test
@@ -220,6 +222,30 @@ public class UserControllerTest {
         }
 
         @Test
+        void findAll_WithCreatedAtSorting_ShouldReturnSortedUsers() throws Exception {
+            createTestUsers();
+            mockMvc.perform(get("/api/v1/users?sort=createdAt,asc&size=5"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(5))
+                .andExpect(jsonPath("$.content[0].createdAt").exists())
+                .andExpect(jsonPath("$.content[1].createdAt").exists());
+        }
+
+        @Test
+        void findAll_WithCreatedAtDescSorting_ShouldReturnSortedUsers() throws Exception {
+            createTestUsers();
+            mockMvc.perform(get("/api/v1/users?sort=createdAt,desc&size=5"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(5))
+                .andExpect(jsonPath("$.content[0].createdAt").exists())
+                .andExpect(jsonPath("$.content[1].createdAt").exists());
+        }
+
+        @Test
         void findAll_WithNonExistentFilter_ShouldReturnEmptyResult() throws Exception {
             createTestUsers();
             mockMvc.perform(get("/api/v1/users?firstNameContains=NonExistentName"))
@@ -315,7 +341,8 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.email").value("test@example.com"))
                 .andExpect(jsonPath("$.status").value("ACTIVE"))
                 .andExpect(jsonPath("$.role").value("USER"))
-                .andExpect(jsonPath("$.id").isNotEmpty());
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.createdAt").isNotEmpty());
         }
 
         @Test
@@ -340,7 +367,8 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.email").value("john.doe@example.com"))
                 .andExpect(jsonPath("$.status").value("ACTIVE"))
                 .andExpect(jsonPath("$.role").value("USER"))
-                .andExpect(jsonPath("$.id").isNotEmpty());
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.createdAt").isNotEmpty());
         }
 
         @Test
@@ -576,7 +604,8 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.lastName").value("Name"))
                 .andExpect(jsonPath("$.email").value("updated@example.com"))
                 .andExpect(jsonPath("$.status").value("ACTIVE"))
-                .andExpect(jsonPath("$.role").value("USER"));
+                .andExpect(jsonPath("$.role").value("USER"))
+                .andExpect(jsonPath("$.createdAt").isNotEmpty());
         }
 
         @Test
@@ -605,7 +634,8 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.lastName").value("UpdatedLastName"))
                 .andExpect(jsonPath("$.email").value("original@example.com"))
                 .andExpect(jsonPath("$.status").value("ACTIVE"))
-                .andExpect(jsonPath("$.role").value("USER"));
+                .andExpect(jsonPath("$.role").value("USER"))
+                .andExpect(jsonPath("$.createdAt").isNotEmpty());
         }
 
         @Test
@@ -797,6 +827,43 @@ public class UserControllerTest {
                     .content(requestJson))
                 .andExpect(status().isConflict());
         }
+
+        @Test
+        void updateUser_ShouldPreserveCreatedAtTimestamp() throws Exception {
+            User existingUser = createTestUser("testuser", "Original", "Name", "original@example.com");
+            User savedUser = userRepository.saveAndFlush(existingUser);
+            UUID userId = savedUser.getId();
+
+            String originalResponse = mockMvc.perform(get("/api/v1/users/{id}", userId))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+            String originalCreatedAt = objectMapper.readTree(originalResponse).get("createdAt").asText();
+
+            UserUpdateDto updateRequest = new UserUpdateDto(
+                "updateduser",
+                "Updated",
+                "Name",
+                "updated@example.com",
+                "newpassword123"
+            );
+            String requestJson = objectMapper.writeValueAsString(updateRequest);
+
+            String updatedResponse = mockMvc.perform(put("/api/v1/users/{id}", userId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(requestJson))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.createdAt").isNotEmpty())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+            String updatedCreatedAt = objectMapper.readTree(updatedResponse).get("createdAt").asText();
+
+            assertThat(updatedCreatedAt).isEqualTo(originalCreatedAt);
+        }
     }
 
     @Nested
@@ -821,7 +888,8 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.lastName").value("Name"))
                 .andExpect(jsonPath("$.email").value("original@example.com"))
                 .andExpect(jsonPath("$.status").value("ACTIVE"))
-                .andExpect(jsonPath("$.role").value("USER"));
+                .andExpect(jsonPath("$.role").value("USER"))
+                .andExpect(jsonPath("$.createdAt").isNotEmpty());
         }
 
         @Test
@@ -843,7 +911,8 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.lastName").value("UpdatedLastName"))
                 .andExpect(jsonPath("$.email").value("updated@example.com"))
                 .andExpect(jsonPath("$.status").value("ACTIVE"))
-                .andExpect(jsonPath("$.role").value("USER"));
+                .andExpect(jsonPath("$.role").value("USER"))
+                .andExpect(jsonPath("$.createdAt").isNotEmpty());
         }
 
         @Test
@@ -963,7 +1032,7 @@ public class UserControllerTest {
         @Test
         void inactivateUser_WhenUserExistsAndIsRegularUser_ShouldReturn200AndInactivateUser() throws Exception {
             User user = createTestUser("testuser", "Test", "User", "test@example.com", UserRole.USER, UserStatus.ACTIVE);
-            User savedUser = userRepository.save(user);
+            User savedUser = userRepository.saveAndFlush(user);
             UUID userId = savedUser.getId();
 
             mockMvc.perform(patch("/api/v1/users/{id}/inactivate", userId))
@@ -975,7 +1044,8 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.lastName").value("User"))
                 .andExpect(jsonPath("$.email").value("test@example.com"))
                 .andExpect(jsonPath("$.status").value("INACTIVE"))
-                .andExpect(jsonPath("$.role").value("USER"));
+                .andExpect(jsonPath("$.role").value("USER"))
+                .andExpect(jsonPath("$.createdAt").isNotEmpty());
         }
 
         @Test
@@ -1026,7 +1096,7 @@ public class UserControllerTest {
         @Test
         void shouldUpdateUserRoleFromUserToAdmin_WhenUserExists() throws Exception {
             User user = createTestUser("testuser", "Test", "User", "test@example.com", UserRole.USER, UserStatus.ACTIVE);
-            User savedUser = userRepository.save(user);
+            User savedUser = userRepository.saveAndFlush(user);
             UUID userId = savedUser.getId();
 
             UserRoleUpdateDto roleUpdate = new UserRoleUpdateDto(UserRole.ADMIN);
@@ -1043,7 +1113,8 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.lastName").value("User"))
                 .andExpect(jsonPath("$.email").value("test@example.com"))
                 .andExpect(jsonPath("$.status").value("ACTIVE"))
-                .andExpect(jsonPath("$.role").value("ADMIN"));
+                .andExpect(jsonPath("$.role").value("ADMIN"))
+                .andExpect(jsonPath("$.createdAt").isNotEmpty());
         }
 
         @Test
