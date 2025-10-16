@@ -14,7 +14,7 @@
   acceptance: "Понять вход/выход, non-functional requirements, интеграция с users-api"
 - [X] (P1) #2: Проектирование модели данных — Спроектировать схему таблиц для твитов в PostgreSQL
   acceptance: "SQL схема таблиц tweets, likes, retweets с индексами"
-- [ ] (P1) #3: Проектирование API контрактов — Определить REST endpoints и DTO структуры
+- [X] (P1) #3: Проектирование API контрактов — Определить REST endpoints и DTO структуры
   acceptance: "OpenAPI спецификация + JSON schema для всех endpoints"
 
 ### Design Phase (P2)
