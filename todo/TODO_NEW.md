@@ -1,3 +1,5 @@
+Составить промпт для создания единого архитектурного документа из нескольких с удалением дублирующих частей и без примеров кода
+
 Составить план для выполнения задачи 4 C:\learn\projects\twitter\todo\tweet\TWEET_API_COMMON.md
 План сохранить в C:\learn\projects\twitter\todo\TODO.md
 По итогам задачи должен появиться документ C:\learn\projects\twitter\todo\tweet\TWEET_API_ARCHITECTURE.md
@@ -18,3 +20,11 @@ tweet-api Service Layer: SERVICE_LAYER_DESIGN.md
 tweet-api Repository Layer: REPOSITORY_LAYER_DESIGN.md
 tweet-api DTO/Mapper Layer: DTO_MAPPER_LAYER_DESIGN.md
 интеграция с users-api: USERS_API_INTEGRATION_DESIGN.md
+обработка ошибок интеграции: INTEGRATION_ERROR_HANDLING_DESIGN.md
+валидация входных данных: VALIDATION_SYSTEM_DESIGN.md
+бизнес-правила: BUSINESS_RULES_DESIGN.md
+обработка ошибок: ERROR_HANDLING_DESIGN.md
+кэширование: CACHING_SYSTEM_DESIGN.md
+пагинация: PAGINATION_SYSTEM_DESIGN.md
+архитектурные диаграммы: TWEET_API_TECH.md
+технические детали: TWEET_API_TECH.md
