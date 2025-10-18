@@ -32,8 +32,6 @@
 
 
 Все данные по реализации tweet-api находятся в C:\learn\projects\twitter\todo\tweet\
-Архитектура shared-lib: SHARED_LIB_ANALYSIS.md
-tweet-api Controller Layer: CONTROLLER_LAYER_DESIGN.md
 tweet-api Service Layer: SERVICE_LAYER_DESIGN.md
 tweet-api Repository Layer: REPOSITORY_LAYER_DESIGN.md
 tweet-api DTO/Mapper Layer: DTO_MAPPER_LAYER_DESIGN.md

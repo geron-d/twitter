@@ -108,10 +108,13 @@ Tweet API Service предоставляет REST API для:
 #### Controller Layer
 - **REST API endpoints** с OpenAPI документацией и Swagger UI
 - **RESTful архитектура** с четким разделением ресурсов и HTTP методов
+- **TweetController** с реализацией TweetApi интерфейса
 - **Валидация входных данных** через Bean Validation и кастомные валидаторы
 - **Обработка HTTP статусов** и стандартизированных ошибок
 - **Request/Response mapping** через стандартизированные DTO структуры
 - **Пагинация** с offset-based стратегией (максимум 100 элементов на страницу)
+- **Автоматическое логирование** через @LoggableRequest из shared-lib
+- **Централизованная обработка ошибок** через GlobalExceptionHandler
 
 #### Service Layer
 - **Бизнес-логика** и правила домена
@@ -172,24 +175,32 @@ Tweet API Service предоставляет REST API для:
 #### Структура API endpoints
 
 **Основные операции с твитами:**
-- `POST /api/v1/tweets` - Создание твита
-- `GET /api/v1/tweets/{tweetId}` - Получение твита по ID
-- `PUT /api/v1/tweets/{tweetId}` - Обновление твита (только автор)
-- `DELETE /api/v1/tweets/{tweetId}` - Удаление твита (только автор)
+- `POST /api/v1/tweets` - Создание твита (HttpStatus.CREATED, @Valid валидация)
+- `GET /api/v1/tweets/{tweetId}` - Получение твита по ID (Optional pattern, 404 при отсутствии)
+- `PUT /api/v1/tweets/{tweetId}` - Обновление твита (только автор, авторизация в Service Layer)
+- `DELETE /api/v1/tweets/{tweetId}` - Удаление твита (soft delete, ResponseEntity.noContent())
 
 **Операции с пользователями:**
-- `GET /api/v1/tweets/user/{userId}` - Твиты пользователя с пагинацией
-- `GET /api/v1/tweets/timeline/{userId}` - Лента новостей пользователя
+- `GET /api/v1/tweets/user/{userId}` - Твиты пользователя с пагинацией (@PageableDefault, PagedModel)
+- `GET /api/v1/tweets/timeline/{userId}` - Лента новостей пользователя (сложная бизнес-логика в Service Layer)
 
 **Социальные функции:**
-- `POST /api/v1/tweets/{tweetId}/like` - Лайк твита
-- `DELETE /api/v1/tweets/{tweetId}/like` - Убрать лайк
-- `POST /api/v1/tweets/{tweetId}/retweet` - Ретвит с комментарием
-- `DELETE /api/v1/tweets/{tweetId}/retweet` - Убрать ретвит
+- `POST /api/v1/tweets/{tweetId}/like` - Лайк твита (вложенные ресурсы, проверка дублирования)
+- `DELETE /api/v1/tweets/{tweetId}/like` - Убрать лайк (ResponseEntity.noContent())
+- `POST /api/v1/tweets/{tweetId}/retweet` - Ретвит с комментарием (HttpStatus.CREATED)
+- `DELETE /api/v1/tweets/{tweetId}/retweet` - Убрать ретвит (ResponseEntity.noContent())
 
 **Получение статистики и списков:**
-- `GET /api/v1/tweets/{tweetId}/likes` - Список пользователей, лайкнувших твит
-- `GET /api/v1/tweets/{tweetId}/retweets` - Список пользователей, ретвитнувших твит
+- `GET /api/v1/tweets/{tweetId}/likes` - Список пользователей, лайкнувших твит (PagedModel)
+- `GET /api/v1/tweets/{tweetId}/retweets` - Список пользователей, ретвитнувших твит (PagedModel)
+
+#### Реализация контроллеров
+- **TweetController** implements TweetApi интерфейс
+- **@RestController** с @RequestMapping("/api/v1/tweets")
+- **@RequiredArgsConstructor** для автоматической инъекции зависимостей
+- **@LoggableRequest** на всех методах для автоматического логирования
+- **Делегирование бизнес-логики** в TweetService
+- **Optional pattern** для обработки отсутствующих данных
 
 #### Параметры пагинации
 - **page**: номер страницы (начиная с 0, по умолчанию 0)
@@ -213,6 +224,14 @@ Tweet API Service предоставляет REST API для:
 - **Ошибки**: детальные коды ошибок с контекстом
 - **Пагинация**: стандартная структура с метаданными
 - **Метаданные**: timestamp, requestId для трассировки
+
+#### OpenAPI интеграция
+- **TweetApi интерфейс** с @Operation и @ApiResponses аннотациями
+- **DTO с @Schema аннотациями** для детальной документации
+- **TweetApiOpenApiConfig** для конфигурации OpenAPI
+- **Swagger UI** с настройками отображения и фильтрации
+- **SpringDoc OpenAPI** для автоматической генерации документации
+- **Примеры запросов/ответов** в @Schema аннотациях
 
 #### Основные DTO структуры
 
@@ -259,10 +278,11 @@ Tweet API Service предоставляет REST API для:
 - При удалении твита все связанные действия помечаются как неактивные
 
 **Технические правила валидации:**
-- **Bean Validation** для базовой валидации полей
-- **Кастомные валидаторы** для бизнес-правил (проверка существования пользователя)
-- **Защита от самодействий** (пользователь не может лайкнуть свой твит)
-- **Уникальность** социальных действий на пользователя
+- **Bean Validation** для базовой валидации полей (@NotBlank, @Size, @Pattern)
+- **Кастомные валидаторы** для бизнес-правил (@UserExists, @NoSelfAction)
+- **Группы валидации** для разных операций (@Validated(CreateGroup.class))
+- **Валидация UUID** через @NotNull и @Valid аннотации
+- **Обработка ошибок валидации** через @ExceptionHandler(MethodArgumentNotValidException.class)
 
 #### Стандартные коды ошибок
 - **VALIDATION_ERROR**: Ошибки валидации входных данных
@@ -542,6 +562,21 @@ Tweet API Service предоставляет REST API для:
 - **Расширяемость**: возможность добавления tweet-specific компонентов
 - **RFC 7807 соответствие**: стандартизированные ответы об ошибках
 
+#### Структура пакетов Controller Layer
+- **TweetController.java** - основной контроллер с реализацией TweetApi
+- **TweetApi.java** - OpenAPI интерфейс с аннотациями
+- **dto/request/** - Request DTOs (CreateTweetRequestDto, UpdateTweetRequestDto, LikeTweetRequestDto)
+- **dto/response/** - Response DTOs (TweetResponseDto, LikeResponseDto, RetweetResponseDto)
+- **dto/error/** - Error DTOs (ErrorResponseDto, ValidationErrorResponseDto)
+- **validation/** - Кастомные валидаторы (UserExistsValidator, NoSelfActionValidator)
+
+#### Зависимости Controller Layer
+- **shared/common-lib** - LoggableRequestAspect, система исключений
+- **spring-boot-starter-web** - REST API функциональность
+- **spring-boot-starter-validation** - Bean Validation
+- **springdoc-openapi-starter-webmvc-ui** - OpenAPI/Swagger UI
+- **mapstruct** - автоматическая генерация мапперов
+
 ### 10.3 Следующие шаги
 1. **Реализация миграций** для создания схемы в БД
 2. **Создание JPA entities** на основе архитектурной модели
@@ -555,6 +590,10 @@ Tweet API Service предоставляет REST API для:
 10. **Настройка логирования** с @LoggableRequest на контроллерах
 11. **Расширение системы исключений** для tweet-specific случаев
 12. **Создание tweet-specific enums** (TweetStatus, TweetType)
+13. **Реализация TweetController** с TweetApi интерфейсом
+14. **Настройка OpenAPI конфигурации** и Swagger UI
+15. **Создание кастомных валидаторов** (@UserExists, @NoSelfAction)
+16. **Настройка обработки ошибок** в контроллерах
 
 ---
 
