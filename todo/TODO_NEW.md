@@ -32,7 +32,6 @@
 
 
 Все данные по реализации tweet-api находятся в C:\learn\projects\twitter\todo\tweet\
-Проектирование модели данных: TWEET_API_SQL_DATA_MODEL.md
 Проектирование API контрактов: TWEET_API_CONTRACTS.md
 Архитектура users-api: USERS_API_ARCHITECTURE_ANALYSIS.md
 Архитектура shared-lib: SHARED_LIB_ANALYSIS.md
