@@ -327,21 +327,30 @@ Tweet API Service предоставляет REST API для:
 ### 4.4 Shared/Common-lib компоненты
 
 #### LoggableRequestAspect
-- **Автоматическое логирование** HTTP запросов и ответов
+- **Автоматическое логирование** HTTP запросов и ответов через AOP
 - **Скрытие чувствительных данных** через hideFields параметр
 - **AOP интеграция** с @LoggableRequest аннотацией
 - **Структурированное логирование** с детальной информацией
+- **Конфигурируемость** через аннотацию параметры
 
 #### Система исключений
-- **ValidationException** (базовое исключение)
+- **ValidationException** (абстрактное базовое исключение)
+- **UniquenessValidationException** для проверки уникальности данных
 - **BusinessRuleValidationException** для нарушений бизнес-правил
-- **UniquenessValidationException** для нарушений уникальности
 - **FormatValidationException** для ошибок формата данных
-- **GlobalExceptionHandler** для централизованной обработки
+- **ValidationType enum** для классификации типов валидации
+- **GlobalExceptionHandler** для централизованной обработки ошибок
+
+#### GlobalExceptionHandler
+- **RFC 7807 Problem Details** стандарт для ответов об ошибках
+- **Централизованная обработка** всех типов исключений
+- **Консистентные ответы** для всех сервисов
+- **Автоматическое логирование** ошибок
+- **HTTP статус коды**: 400 Bad Request, 409 Conflict, 500 Internal Server Error
 
 #### Enums и утилиты
-- **UserRole, UserStatus** enums для пользователей
-- **ValidationType** enum для классификации валидации
+- **UserRole** (ADMIN, MODERATOR, USER) для авторизации
+- **UserStatus** (ACTIVE, INACTIVE) для управления состоянием
 - **PasswordUtil** для работы с паролями
 - **PatchDtoFactory** для PATCH операций
 
@@ -350,6 +359,7 @@ Tweet API Service предоставляет REST API для:
 - **Типизированные исключения** для разных типов ошибок
 - **@Enumerated(EnumType.STRING)** для сохранения enums в БД
 - **RequestContextHolder** для получения HTTP контекста
+- **Factory методы** для создания типичных исключений
 
 ## 5. Интеграции с внешними сервисами
 
@@ -512,6 +522,26 @@ Tweet API Service предоставляет REST API для:
 - **GlobalExceptionHandler** расширенный для tweet-specific ошибок
 - **Enums** для TweetStatus, TweetType если необходимо
 
+#### Интеграция shared-lib в tweet-api
+- **Зависимости**: `implementation project(':shared:common-lib')` в build.gradle
+- **Конфигурация**: `@Import(GlobalExceptionHandler.class)` в TweetApiConfig
+- **Логирование**: `@LoggableRequest(hideFields = {"password", "token"})` на контроллерах
+- **Валидация**: использование UniquenessValidationException для проверки уникальности
+- **Бизнес-правила**: BusinessRuleValidationException для tweet-specific правил
+
+#### Tweet-specific расширения
+- **TweetValidationException** extends ValidationException для специфичных случаев
+- **ContentValidationException** extends FormatValidationException для валидации контента
+- **TweetStatus enum** (ACTIVE, DELETED, HIDDEN) для управления состоянием твитов
+- **TweetType enum** (ORIGINAL, RETWEET, REPLY) для классификации типов твитов
+
+#### Архитектурные преимущества shared-lib
+- **Консистентность**: единообразные паттерны логирования и обработки ошибок
+- **Масштабируемость**: AOP-based компоненты с минимальным overhead
+- **Безопасность**: автоматическое скрытие чувствительных данных в логах
+- **Расширяемость**: возможность добавления tweet-specific компонентов
+- **RFC 7807 соответствие**: стандартизированные ответы об ошибках
+
 ### 10.3 Следующие шаги
 1. **Реализация миграций** для создания схемы в БД
 2. **Создание JPA entities** на основе архитектурной модели
@@ -521,7 +551,10 @@ Tweet API Service предоставляет REST API для:
 6. **Реализация мониторинга** и structured logging
 7. **Тестирование производительности** с реальными данными
 8. **Адаптация паттернов** users-api для tweet-api
-9. **Расширение shared/common-lib** tweet-specific компонентами
+9. **Интеграция shared/common-lib** компонентов в tweet-api
+10. **Настройка логирования** с @LoggableRequest на контроллерах
+11. **Расширение системы исключений** для tweet-specific случаев
+12. **Создание tweet-specific enums** (TweetStatus, TweetType)
 
 ---
 
