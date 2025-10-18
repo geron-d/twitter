@@ -324,9 +324,43 @@ Tweet API Service предоставляет REST API для:
 - **JUnit 5**: unit тестирование
 - **TestContainers**: интеграционное тестирование
 
+### 4.4 Shared/Common-lib компоненты
+
+#### LoggableRequestAspect
+- **Автоматическое логирование** HTTP запросов и ответов
+- **Скрытие чувствительных данных** через hideFields параметр
+- **AOP интеграция** с @LoggableRequest аннотацией
+- **Структурированное логирование** с детальной информацией
+
+#### Система исключений
+- **ValidationException** (базовое исключение)
+- **BusinessRuleValidationException** для нарушений бизнес-правил
+- **UniquenessValidationException** для нарушений уникальности
+- **FormatValidationException** для ошибок формата данных
+- **GlobalExceptionHandler** для централизованной обработки
+
+#### Enums и утилиты
+- **UserRole, UserStatus** enums для пользователей
+- **ValidationType** enum для классификации валидации
+- **PasswordUtil** для работы с паролями
+- **PatchDtoFactory** для PATCH операций
+
+#### Паттерны использования
+- **@LoggableRequest** на методах контроллера для логирования
+- **Типизированные исключения** для разных типов ошибок
+- **@Enumerated(EnumType.STRING)** для сохранения enums в БД
+- **RequestContextHolder** для получения HTTP контекста
+
 ## 5. Интеграции с внешними сервисами
 
 ### 5.1 Интеграция с users-api
+
+#### Архитектура users-api
+- **Слоистая архитектура**: controller → service → repository → entity
+- **Порт**: 8081, база данных PostgreSQL
+- **OpenAPI/Swagger** конфигурация с детальной документацией
+- **Actuator endpoints** для мониторинга (health, info, metrics, tracing)
+- **Структурированное логирование** с traceId/spanId для трассировки
 
 #### API контракты интеграции:
 - **GET /api/v1/users/{userId}/exists** - проверка существования пользователя
@@ -352,6 +386,12 @@ Tweet API Service предоставляет REST API для:
 - **Graceful degradation** с ограниченной функциональностью
 - **Monitoring и alerting** для проблем интеграции
 - **Structured logging** для трассировки запросов
+
+#### Консистентность архитектуры:
+- **Следование паттернам users-api** для единообразия
+- **Использование shared/common-lib** компонентов
+- **Аналогичная структура пакетов** и слоев
+- **Совместимые конфигурации** Spring Boot и OpenAPI
 
 ### 5.2 Будущие интеграции
 
@@ -450,6 +490,28 @@ Tweet API Service предоставляет REST API для:
 7. **Comprehensive validation** с Bean Validation и кастомными валидаторами
 8. **Circuit breaker pattern** для надежной интеграции с внешними сервисами
 
+### 10.2 Консистентность с users-api
+
+#### Архитектурные принципы
+- **Слоистая архитектура**: controller → service → repository → entity
+- **Интерфейс-реализация** паттерн для всех слоев
+- **DTO паттерн** с использованием Java records
+- **MapStruct маппинг** для автоматической генерации мапперов
+- **Двухуровневая валидация** (DTO + бизнес-правила)
+
+#### Конфигурация и настройки
+- **Порт**: 8082 (следующий после users-api 8081)
+- **База данных**: та же PostgreSQL с отдельной схемой tweet_api
+- **OpenAPI конфигурация** аналогичная users-api
+- **Actuator endpoints** для мониторинга (health, info, metrics, tracing)
+- **Структурированное логирование** с traceId/spanId
+
+#### Использование shared/common-lib
+- **LoggableRequestAspect** для автоматического логирования HTTP запросов
+- **Система исключений** ValidationException и подклассы
+- **GlobalExceptionHandler** расширенный для tweet-specific ошибок
+- **Enums** для TweetStatus, TweetType если необходимо
+
 ### 10.3 Следующие шаги
 1. **Реализация миграций** для создания схемы в БД
 2. **Создание JPA entities** на основе архитектурной модели
@@ -457,6 +519,9 @@ Tweet API Service предоставляет REST API для:
 4. **Создание REST контроллеров** с OpenAPI документацией
 5. **Настройка интеграции** с users-api и contract testing
 6. **Реализация мониторинга** и structured logging
+7. **Тестирование производительности** с реальными данными
+8. **Адаптация паттернов** users-api для tweet-api
+9. **Расширение shared/common-lib** tweet-specific компонентами
 
 ---
 
