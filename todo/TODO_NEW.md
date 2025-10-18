@@ -32,7 +32,6 @@
 
 
 Все данные по реализации tweet-api находятся в C:\learn\projects\twitter\todo\tweet\
-tweet-api Service Layer: SERVICE_LAYER_DESIGN.md
 tweet-api Repository Layer: REPOSITORY_LAYER_DESIGN.md
 tweet-api DTO/Mapper Layer: DTO_MAPPER_LAYER_DESIGN.md
 интеграция с users-api: USERS_API_INTEGRATION_DESIGN.md
