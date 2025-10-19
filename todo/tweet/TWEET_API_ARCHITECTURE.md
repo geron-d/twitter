@@ -129,9 +129,13 @@ Tweet API Service предоставляет REST API для:
 
 #### Repository Layer
 - **Доступ к данным** через Spring Data JPA
-- **Custom queries** для сложных операций
-- **Кэширование** часто используемых данных
-- **Pagination** для больших наборов данных
+- **TweetRepository, LikeRepository, RetweetRepository** интерфейсы
+- **JPA Entities** с оптимизированными индексами и валидацией
+- **Кастомные запросы** для сложных операций через @Query
+- **Specification паттерн** для динамических запросов
+- **Batch операции** для оптимизации производительности
+- **Soft delete** поддержка с временными метками
+- **Денормализация** статистики для быстрых запросов
 
 ### 3.2 Бизнес-логика и транзакции
 
@@ -155,10 +159,107 @@ Tweet API Service предоставляет REST API для:
 - **REPEATABLE_READ** для операций создания (@Transactional)
 - **SERIALIZABLE** для социальных функций (предотвращение дублирования)
 
+### 3.3 JPA Entities и структура данных
+
+#### Tweet Entity
+- **UUID идентификатор** с автогенерацией
+- **userId, content** основные поля твита
+- **createdAt, updatedAt** временные метки
+- **isDeleted, deletedAt** поддержка soft delete
+- **likesCount, retweetsCount, repliesCount** денормализованные счетчики
+- **statsUpdatedAt** метка обновления статистики
+- **Бизнес-методы**: isActive(), softDelete(), incrementLikesCount(), decrementLikesCount()
+
+#### Like Entity
+- **UUID идентификатор** с автогенерацией
+- **tweetId, userId** связь с твитом и пользователем
+- **createdAt** временная метка создания
+- **Уникальное ограничение** на пару (tweetId, userId)
+- **Бизнес-методы**: isByUser(), isForTweet()
+
+#### Retweet Entity
+- **UUID идентификатор** с автогенерацией
+- **tweetId, userId** связь с твитом и пользователем
+- **comment** опциональный комментарий к ретвиту
+- **createdAt** временная метка создания
+- **Уникальное ограничение** на пару (tweetId, userId)
+- **Бизнес-методы**: isByUser(), isForTweet(), hasComment()
+
+#### Индексы для производительности
+- **idx_tweets_user_id_created_at** для твитов пользователя
+- **idx_tweets_created_at** для временной сортировки
+- **idx_tweets_is_deleted** для фильтрации удаленных
+- **idx_tweets_likes_count** для сортировки по популярности
+- **idx_likes_tweet_id, idx_likes_user_id** для лайков
+- **idx_retweets_tweet_id, idx_retweets_user_id** для ретвитов
+
 #### DTO/Mapper Layer
 - **Стандартизированные DTO структуры** для Request/Response
 - **MapStruct** для автоматического маппинга между слоями
 - **Comprehensive validation** через Bean Validation и кастомные валидаторы
+- **Стандартизированные ответы** с metadata и graceful error handling
+- **API versioning** через URL path (/api/v1/)
+
+### 3.4 Repository интерфейсы и кастомные запросы
+
+#### TweetRepository
+- **findByIdAndNotDeleted()** - поиск активного твита по ID
+- **findByUserIdAndNotDeletedOrderByCreatedAtDesc()** - твиты пользователя с пагинацией
+- **findByUserIdInAndNotDeletedOrderByCreatedAtDesc()** - твиты множественных пользователей для ленты
+- **incrementLikesCount(), decrementLikesCount()** - обновление счетчиков лайков
+- **incrementRetweetsCount(), decrementRetweetsCount()** - обновление счетчиков ретвитов
+- **countByUserIdAndNotDeleted()** - подсчет твитов пользователя
+- **findTopTweetsByEngagement()** - топ твиты по популярности
+- **findByContentContainingAndNotDeleted()** - поиск по содержимому
+- **softDeleteById(), softDeleteByUserId()** - массовое soft delete
+
+#### LikeRepository
+- **findByTweetIdAndUserId()** - поиск лайка пользователя для твита
+- **findByTweetIdOrderByCreatedAtDesc()** - лайки твита с пагинацией
+- **findByUserIdOrderByCreatedAtDesc()** - лайки пользователя с пагинацией
+- **countByTweetId(), countByUserId()** - подсчет лайков
+- **existsByTweetIdAndUserId()** - проверка существования лайка
+- **deleteByTweetId(), deleteByUserId()** - массовое удаление лайков
+- **findUserIdsByTweetId()** - пользователи, лайкнувшие твит
+
+#### RetweetRepository
+- **findByTweetIdAndUserId()** - поиск ретвита пользователя для твита
+- **findByTweetIdOrderByCreatedAtDesc()** - ретвиты твита с пагинацией
+- **findByUserIdOrderByCreatedAtDesc()** - ретвиты пользователя с пагинацией
+- **countByTweetId(), countByUserId()** - подсчет ретвитов
+- **existsByTweetIdAndUserId()** - проверка существования ретвита
+- **findByTweetIdWithComments()** - ретвиты с комментариями
+- **deleteByTweetId(), deleteByUserId()** - массовое удаление ретвитов
+- **findUserIdsByTweetId()** - пользователи, ретвитнувшие твит
+
+#### Specification паттерн для динамических запросов
+- **TweetSpecification** класс с методами для динамических запросов
+- **hasUserId(), isNotDeleted()** - базовые фильтры
+- **hasContentContaining()** - поиск по содержимому
+- **createdAfter(), createdBefore()** - фильтрация по времени
+- **hasMinLikesCount(), hasMinRetweetsCount()** - фильтрация по статистике
+- **orderByCreatedAtDesc(), orderByEngagementDesc()** - сортировка
+
+### 3.5 Оптимизация и производительность
+
+#### Batch операции для оптимизации
+- **batchUpdateLikesCount()** - массовое обновление счетчиков лайков
+- **batchSoftDelete()** - массовое soft delete твитов
+- **@Modifying** аннотации для bulk операций
+- **EntityManager** для нативных запросов
+
+#### Конфигурация JPA/Hibernate
+- **batch_size: 20** для batch операций
+- **order_inserts: true** для оптимизации вставок
+- **order_updates: true** для оптимизации обновлений
+- **batch_versioned_data: true** для версионированных данных
+- **open-in-view: false** для предотвращения LazyInitializationException
+
+#### Мониторинг производительности
+- **format_sql: true** для форматирования SQL запросов
+- **show_sql: false** в production для производительности
+- **Индексы** для оптимизации частых запросов
+- **Статистика** использования индексов через PostgreSQL
 - **Стандартизированные ответы** с метаданными (timestamp, requestId)
 - **Graceful error handling** с детальными кодами ошибок
 - **Versioning** для обратной совместимости API
@@ -641,6 +742,21 @@ Tweet API Service предоставляет REST API для:
 - **resilience4j-circuitbreaker** - Circuit Breaker функциональность
 - **mapstruct** - автоматическая генерация мапперов
 
+#### Структура пакетов Repository Layer
+- **TweetRepository.java** - основной репозиторий для твитов
+- **LikeRepository.java** - репозиторий для лайков
+- **RetweetRepository.java** - репозиторий для ретвитов
+- **impl/TweetRepositoryImpl.java** - кастомная реализация с batch операциями
+- **specification/TweetSpecification.java** - спецификации для динамических запросов
+- **entity/** - JPA Entities (Tweet.java, Like.java, Retweet.java)
+
+#### Зависимости Repository Layer
+- **spring-boot-starter-data-jpa** - Spring Data JPA функциональность
+- **postgresql** - PostgreSQL драйвер
+- **hibernate-core** - Hibernate ORM
+- **hibernate-validator** - Bean Validation
+- **spring-boot-starter-validation** - Spring Validation
+
 ### 10.3 Следующие шаги
 1. **Реализация миграций** для создания схемы в БД
 2. **Создание JPA entities** на основе архитектурной модели
@@ -662,6 +778,11 @@ Tweet API Service предоставляет REST API для:
 18. **Настройка Circuit Breaker** и кэширования
 19. **Создание UsersApiClient** для интеграции с users-api
 20. **Реализация tweet-specific исключений** и обработчиков ошибок
+21. **Создание JPA Entities** (Tweet, Like, Retweet) с индексами
+22. **Реализация Repository интерфейсов** с кастомными запросами
+23. **Создание TweetSpecification** для динамических запросов
+24. **Настройка batch операций** и оптимизации производительности
+25. **Создание миграций** для схемы базы данных
 
 ---
 
