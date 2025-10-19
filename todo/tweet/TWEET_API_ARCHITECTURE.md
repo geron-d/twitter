@@ -195,8 +195,13 @@ Tweet API Service предоставляет REST API для:
 
 #### DTO/Mapper Layer
 - **Стандартизированные DTO структуры** для Request/Response
+- **Record-based DTOs** для неизменяемости и краткости кода
 - **MapStruct** для автоматического маппинга между слоями
+- **TweetMapper, LikeMapper, RetweetMapper** интерфейсы
 - **Comprehensive validation** через Bean Validation и кастомные валидаторы
+- **OpenAPI аннотации** для автоматической документации API
+- **Группы валидации** для разных операций (Create, Update, Patch)
+- **Типизированные Error DTOs** для консистентной обработки ошибок
 - **Стандартизированные ответы** с metadata и graceful error handling
 - **API versioning** через URL path (/api/v1/)
 
@@ -239,6 +244,92 @@ Tweet API Service предоставляет REST API для:
 - **createdAfter(), createdBefore()** - фильтрация по времени
 - **hasMinLikesCount(), hasMinRetweetsCount()** - фильтрация по статистике
 - **orderByCreatedAtDesc(), orderByEngagementDesc()** - сортировка
+
+### 3.5 Request/Response DTOs и структура данных
+
+#### Request DTOs
+- **CreateTweetRequestDto** - content (1-280 символов), userId с валидацией @NotBlank, @Size, @Pattern
+- **UpdateTweetRequestDto** - content (1-280 символов), userId с аналогичной валидацией
+- **LikeTweetRequestDto** - userId для лайка твита
+- **RetweetRequestDto** - userId и опциональный comment (до 280 символов)
+
+#### Response DTOs
+- **TweetResponseDto** - id, userId, content, createdAt, updatedAt, isDeleted, stats (TweetStatsDto)
+- **TweetStatsDto** - likesCount, retweetsCount, repliesCount с валидацией @Min(0)
+- **LikeResponseDto** - id, tweetId, userId, createdAt
+- **RetweetResponseDto** - id, tweetId, userId, comment, createdAt
+
+#### Error DTOs
+- **ErrorResponseDto** - error (ErrorInfoDto), meta (ResponseMetaDto)
+- **ErrorInfoDto** - code, message, details (Map<String, Object>)
+- **ValidationErrorResponseDto** - error с деталями валидации, meta
+- **ResponseMetaDto** - timestamp, requestId для трассировки
+
+#### OpenAPI документация
+- **@Schema аннотации** для всех DTO с примерами и описаниями
+- **requiredMode** для указания обязательных полей
+- **format** для типов данных (uuid, date-time)
+- **minLength, maxLength** для ограничений длины
+- **example** для примеров значений
+
+### 3.6 MapStruct мапперы и преобразование данных
+
+#### TweetMapper
+- **toTweet(CreateTweetRequestDto)** - создание Entity из Request DTO с игнорированием системных полей
+- **toTweetResponseDto(Tweet)** - преобразование Entity в Response DTO с вложенной статистикой
+- **updateTweetFromUpdateDto(UpdateTweetRequestDto, @MappingTarget Tweet)** - обновление Entity из Update DTO
+- **toTweetStats(Tweet)** - кастомный метод для преобразования статистики
+- **toTweetResponseDtoList(List<Tweet>)** - маппинг списков твитов
+- **toTweetResponseDtoPage(Page<Tweet>)** - маппинг пагинированных результатов
+
+#### LikeMapper
+- **toLike(LikeTweetRequestDto, UUID tweetId)** - создание Like Entity с tweetId
+- **toLikeResponseDto(Like)** - преобразование Like Entity в Response DTO
+- **toLikeWithTweetId(LikeTweetRequestDto, UUID tweetId)** - кастомный маппер с tweetId
+- **toLikeResponseDtoList(List<Like>)** - маппинг списков лайков
+- **toLikeResponseDtoPage(Page<Like>)** - маппинг пагинированных лайков
+
+#### RetweetMapper
+- **toRetweet(RetweetRequestDto, UUID tweetId)** - создание Retweet Entity с tweetId
+- **toRetweetResponseDto(Retweet)** - преобразование Retweet Entity в Response DTO
+- **toRetweetWithTweetId(RetweetRequestDto, UUID tweetId)** - кастомный маппер с tweetId и comment
+- **toRetweetResponseDtoList(List<Retweet>)** - маппинг списков ретвитов
+- **toRetweetResponseDtoPage(Page<Retweet>)** - маппинг пагинированных ретвитов
+
+#### Конфигурация MapStruct
+- **@Mapper(componentModel = "spring")** для интеграции с Spring
+- **@Mapping(target = "field", ignore = true)** для игнорирования полей при маппинге
+- **@MappingTarget** для обновления существующих объектов
+- **@Named** для кастомных методов маппинга
+- **default методы** для сложной логики маппинга
+
+### 3.7 Валидация DTO и кастомные валидаторы
+
+#### Bean Validation аннотации
+- **@NotBlank** для проверки непустых строк
+- **@Size(min, max)** для ограничения длины строк
+- **@Pattern** для проверки регулярных выражений
+- **@NotNull** для проверки непустых значений
+- **@Min(value)** для проверки минимальных значений
+- **@Valid** для каскадной валидации вложенных объектов
+
+#### Кастомные валидаторы
+- **@UserExists** - проверка существования пользователя через UsersApiClient
+- **UserExistsValidator** - реализация валидатора с fallback при ошибках API
+- **@NoSelfAction** - проверка на самодействия (лайк/ретвит собственного твита)
+- **NoSelfActionValidator** - реализация с рефлексией для разных DTO типов
+
+#### Группы валидации
+- **ValidationGroups.Create** - для операций создания
+- **ValidationGroups.Update** - для операций обновления
+- **ValidationGroups.Patch** - для операций частичного обновления
+- **Использование групп** в @Validated аннотациях контроллеров
+
+#### Обработка ошибок валидации
+- **MethodArgumentNotValidException** - обработка ошибок валидации в контроллерах
+- **ValidationErrorResponseDto** - структурированный ответ с деталями ошибок
+- **FieldError** - информация о конкретных полях с ошибками
+- **BindingResult** - результат валидации с детальной информацией
 
 ### 3.5 Оптимизация и производительность
 
@@ -757,6 +848,20 @@ Tweet API Service предоставляет REST API для:
 - **hibernate-validator** - Bean Validation
 - **spring-boot-starter-validation** - Spring Validation
 
+#### Структура пакетов DTO/Mapper Layer
+- **dto/request/** - Request DTOs (CreateTweetRequestDto, UpdateTweetRequestDto, LikeTweetRequestDto, RetweetRequestDto)
+- **dto/response/** - Response DTOs (TweetResponseDto, TweetStatsDto, LikeResponseDto, RetweetResponseDto)
+- **dto/error/** - Error DTOs (ErrorResponseDto, ErrorInfoDto, ValidationErrorResponseDto, ResponseMetaDto)
+- **dto/validation/** - Валидация (ValidationGroups, UserExists, UserExistsValidator, NoSelfAction, NoSelfActionValidator)
+- **mapper/** - MapStruct мапперы (TweetMapper, LikeMapper, RetweetMapper)
+
+#### Зависимости DTO/Mapper Layer
+- **spring-boot-starter-validation** - Bean Validation функциональность
+- **mapstruct** - MapStruct для автоматического маппинга
+- **swagger-annotations** - OpenAPI/Swagger аннотации
+- **mapstruct-processor** - процессор для генерации мапперов
+- **spring-boot-configuration-processor** - процессор конфигурации Spring Boot
+
 ### 10.3 Следующие шаги
 1. **Реализация миграций** для создания схемы в БД
 2. **Создание JPA entities** на основе архитектурной модели
@@ -783,6 +888,11 @@ Tweet API Service предоставляет REST API для:
 23. **Создание TweetSpecification** для динамических запросов
 24. **Настройка batch операций** и оптимизации производительности
 25. **Создание миграций** для схемы базы данных
+26. **Создание Request/Response DTOs** с OpenAPI аннотациями
+27. **Реализация MapStruct мапперов** (TweetMapper, LikeMapper, RetweetMapper)
+28. **Создание кастомных валидаторов** (@UserExists, @NoSelfAction)
+29. **Настройка групп валидации** для разных операций
+30. **Создание Error DTOs** для обработки ошибок
 
 ---
 
