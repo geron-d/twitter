@@ -668,6 +668,57 @@ Tweet API Service предоставляет REST API для:
 - **Monitoring и alerting** для проблем интеграции
 - **Structured logging** для трассировки запросов
 
+#### Иерархия исключений интеграции
+- **IntegrationException** - базовое исключение для всех ошибок интеграции с внешними сервисами
+- **UsersApiIntegrationException** - специализированное исключение для users-api с factory методами
+- **CacheIntegrationException** - исключение для ошибок кэширования
+- **IntegrationErrorType** enum: CONNECTION_TIMEOUT, SERVICE_UNAVAILABLE, AUTHENTICATION_FAILED, AUTHORIZATION_FAILED, RATE_LIMIT_EXCEEDED, INVALID_RESPONSE, CIRCUIT_BREAKER_OPEN, RETRY_EXHAUSTED, UNKNOWN_ERROR
+- **Типизированные исключения** с контекстом (serviceName, operation, errorType)
+
+#### Fallback стратегии и Graceful Degradation
+- **FallbackStrategy** интерфейс для всех fallback стратегий с приоритизацией
+- **FallbackManager** для централизованного управления fallback стратегиями
+- **UserFallbackStrategy** - создание минимальной информации о пользователе
+- **ConservativeUserFallbackStrategy** - консервативный подход для критических операций
+- **UserExistsFallbackStrategy** - предполагаем существование пользователя
+- **UserActiveFallbackStrategy** - консервативный подход (предполагаем неактивного пользователя)
+
+#### Система деградации функциональности
+- **DegradationLevel** enum: NONE, MINIMAL, MODERATE, SEVERE, CRITICAL
+- **DegradationManager** для оценки и управления уровнями деградации
+- **AdaptiveUsersApiService** с адаптивными стратегиями в зависимости от уровня деградации
+- **Автоматическое определение уровня** на основе состояния Circuit Breaker и метрик
+- **Уведомления о изменении** уровня деградации для мониторинга
+
+#### Расширенное кэширование и мониторинг
+- **MultiLevelUserCacheService** - многоуровневое кэширование (L1/L2 Cache)
+- **SmartUserCacheService** - умное кэширование с TTL и инвалидацией
+- **CachedUserData** - структура для кэшированных данных с временными метками
+- **Адаптивный TTL** на основе типа пользователя (администраторы кэшируются дольше)
+- **Stale cache fallback** - использование устаревших данных при недоступности API
+
+#### Расширенные метрики интеграции
+- **AdvancedUsersApiMetrics** - детальные метрики (success/failure counters, response timer, fallback timer)
+- **Circuit Breaker метрики** - состояние, failure rate, open duration
+- **Cache метрики** - hit rate, size, eviction statistics
+- **Degradation метрики** - текущий уровень деградации
+- **DistributionSummary** - размер ответов, error rate over time
+
+#### Детальная диагностика здоровья
+- **DetailedUsersApiHealthIndicator** - расширенный health check с детальной диагностикой
+- **Многофакторная оценка** состояния (Circuit Breaker, деградация, response time)
+- **Кэш статистика** в health check (L1/L2 hit rate, size)
+- **API availability** проверка с измерением response time
+- **Автоматическое определение** общего состояния здоровья (UP, DEGRADED, DOWN)
+
+#### Расширенный GlobalExceptionHandler
+- **IntegrationExceptionHandler** для обработки исключений интеграции
+- **ProblemDetail** ответы в формате RFC 7807 с детальной информацией
+- **Автоматическое определение HTTP статусов** на основе типа ошибки
+- **Обработка Circuit Breaker исключений** (CallNotPermittedException)
+- **Обработка таймаутов** (TimeoutException) с соответствующими статусами
+- **Структурированное логирование** всех ошибок интеграции
+
 #### Консистентность архитектуры:
 - **Следование паттернам users-api** для единообразия
 - **Использование shared/common-lib** компонентов
@@ -913,6 +964,23 @@ Tweet API Service предоставляет REST API для:
 - **caffeine** - кэш провайдер
 - **micrometer-core** - метрики для мониторинга
 
+#### Структура пакетов обработки ошибок интеграции
+- **integration/exception/** - IntegrationException, UsersApiIntegrationException, CacheIntegrationException
+- **integration/fallback/** - FallbackStrategy, FallbackManager, UserFallbackStrategy, ConservativeUserFallbackStrategy, UserExistsFallbackStrategy, UserActiveFallbackStrategy
+- **integration/degradation/** - DegradationLevel, DegradationContext, DegradationManager, AdaptiveUsersApiService
+- **integration/cache/** - MultiLevelUserCacheService, SmartUserCacheService, CachedUserData
+- **integration/metrics/** - AdvancedUsersApiMetrics, DetailedUsersApiHealthIndicator
+- **integration/handler/** - IntegrationExceptionHandler
+
+#### Конфигурация обработки ошибок интеграции
+- **resilience4j.circuitbreaker**: failure-rate-threshold: 50%, wait-duration: 30s, sliding-window-size: 10, record-exceptions: UsersApiIntegrationException
+- **resilience4j.retry**: max-attempts: 3, wait-duration: 1s, retry-exceptions: UsersApiIntegrationException
+- **resilience4j.timelimiter**: timeout-duration: 5s
+- **spring.cache**: type: caffeine, maximumSize: 1000, expireAfterWrite: 5m, expireAfterAccess: 2m
+- **management.endpoints**: health, info, metrics, prometheus с детальной диагностикой
+- **users-api.fallback**: enabled: true, strategies: user-fallback, conservative-fallback
+- **users-api.degradation**: enabled: true, thresholds: moderate: 0.3, severe: 0.6, critical: 0.8
+
 #### Конфигурация интеграции с users-api
 - **resilience4j.circuitbreaker**: failure-rate-threshold: 50%, wait-duration: 30s, sliding-window-size: 10
 - **resilience4j.retry**: max-attempts: 3, wait-duration: 1s, retry-exceptions: UsersApiException
@@ -959,6 +1027,14 @@ Tweet API Service предоставляет REST API для:
 36. **Создание Health Indicators** для проверки состояния интеграции
 37. **Настройка Contract Testing** с Pact
 38. **Тестирование интеграции** и fallback стратегий
+39. **Реализация системы исключений** интеграции (IntegrationException, UsersApiIntegrationException, CacheIntegrationException)
+40. **Создание Fallback стратегий** и FallbackManager
+41. **Реализация DegradationManager** и AdaptiveUsersApiService
+42. **Настройка многоуровневого кэширования** (MultiLevelUserCacheService, SmartUserCacheService)
+43. **Создание расширенных метрик** (AdvancedUsersApiMetrics, DetailedUsersApiHealthIndicator)
+44. **Реализация IntegrationExceptionHandler** для обработки ошибок интеграции
+45. **Настройка конфигурации** обработки ошибок интеграции
+46. **Тестирование** обработки ошибок и fallback механизмов
 
 ---
 
