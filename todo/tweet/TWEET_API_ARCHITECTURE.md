@@ -496,12 +496,84 @@ Tweet API Service предоставляет REST API для:
 - Один пользователь может ретвитнуть твит только один раз
 - При удалении твита все связанные действия помечаются как неактивные
 
+#### Валидация и бизнес-правила
+
+**Правила создания твита:**
+- Контент не может быть пустым или состоять только из пробелов
+- Максимальная длина контента: 280 символов
+- Пользователь должен существовать в users-api
+- Твит не может быть создан от имени несуществующего пользователя
+
+**Правила обновления твита:**
+- Только автор может обновлять твит
+- Удаленные твиты нельзя обновлять
+- Новый контент должен соответствовать правилам валидации
+
+**Правила удаления твита:**
+- Только автор может удалять твит
+- Удаление выполняется как soft delete
+- Статистика (лайки, ретвиты) сохраняется
+
+**Правила социальных действий:**
+- Пользователь не может лайкнуть/ретвитнуть свой твит
+- Один пользователь может лайкнуть твит только один раз
+- Один пользователь может ретвитнуть твит только один раз
+- При удалении твита все связанные действия помечаются как неактивные
+
 **Технические правила валидации:**
 - **Bean Validation** для базовой валидации полей (@NotBlank, @Size, @Pattern)
 - **Кастомные валидаторы** для бизнес-правил (@UserExists, @NoSelfAction)
 - **Группы валидации** для разных операций (@Validated(CreateGroup.class))
 - **Валидация UUID** через @NotNull и @Valid аннотации
 - **Обработка ошибок валидации** через @ExceptionHandler(MethodArgumentNotValidException.class)
+
+#### Кастомные валидаторы и санитизация контента
+- **@UserExists** - проверка существования пользователя через UsersApiClient с fallback при ошибках API
+- **@NoSelfAction** - проверка на самодействия (лайк/ретвит собственного твита) с рефлексией для разных DTO типов
+- **@TweetExists** - проверка существования твита через TweetRepository с учетом soft delete
+- **@TweetAccess** - проверка прав доступа к твиту для операций обновления/удаления
+- **ContentSanitizer** - санитизация контента для защиты от XSS атак (удаление HTML тегов, script тегов, javascript: протоколов)
+- **ContentValidationService** - валидация и санитизация твитов и комментариев ретвитов
+- **ContentValidationResult** - структура результата валидации контента с флагом валидности и сообщением об ошибке
+- **Spam detection** - обнаружение потенциального спама через регулярные выражения
+
+#### Обработка ошибок валидации и мониторинг
+- **TweetValidationException** - специализированное исключение для ошибок валидации твитов
+- **ContentValidationException** - исключение для ошибок валидации контента
+- **TweetValidationExceptionHandler** - обработчик ошибок валидации с ConstraintViolationException и MethodArgumentNotValidException
+- **ValidationErrorResponse** - структурированный ответ с деталями ошибок валидации
+- **ValidationMetrics** - метрики валидации (success/failure counters, duration timer)
+- **ValidationMetricsAspect** - AOP аспект для автоматического сбора метрик валидации
+- **ValidationConfig** - конфигурация валидации с Validator, MessageSource, LocalValidatorFactoryBean
+- **ValidationProperties** - настройки валидации (maxTweetLength, maxCommentLength, enableSanitization, enableSpamDetection)
+
+#### Интеграция с shared/common-lib
+- **ValidationException** - базовый класс для всех ошибок валидации из shared/common-lib
+- **ValidationType** - типизация ошибок валидации (FORMAT, BUSINESS_RULE, UNIQUENESS)
+- **GlobalExceptionHandler** - централизованная обработка ошибок из shared/common-lib
+- **LoggableRequestAspect** - логирование валидационных ошибок из shared/common-lib
+- **FormatValidationException** - ошибки формата данных
+- **BusinessRuleValidationException** - ошибки бизнес-правил
+- **UniquenessValidationException** - ошибки уникальности
+
+#### Централизованная валидация
+- **TweetValidator** интерфейс для централизованной валидации всех операций с твитами
+- **TweetValidatorImpl** реализация с комплексной валидацией (Bean Validation + бизнес-правила + контент)
+- **validateForCreate** - валидация создания твита (контент, пользователь, санитизация)
+- **validateForUpdate** - валидация обновления твита (существование, доступ, возраст твита)
+- **validateForDelete** - валидация удаления твита (существование, права доступа)
+- **validateForLike** - валидация лайка (существование твита, самолайк, дублирование)
+- **validateForRetweet** - валидация ретвита (существование твита, самортвит, дублирование, комментарий)
+
+#### Многоуровневая система валидации
+- **DTO Level Validation** - Bean Validation аннотации на уровне DTO (@NotBlank, @Size, @Pattern, @NotNull, @Valid)
+- **Service Level Validation** - Бизнес-правила и кастомная валидация через TweetValidator
+- **Entity Level Validation** - Валидация на уровне JPA Entity с @Column constraints
+- **Database Level Validation** - Constraints на уровне БД (unique constraints, foreign keys)
+- **Fail Fast принцип** - валидация на самом раннем этапе
+- **Separation of Concerns** - разделение технической и бизнес валидации
+- **Consistency** - единообразные сообщения об ошибках
+- **Security First** - приоритет безопасности над удобством
 
 #### Стандартные коды ошибок
 - **VALIDATION_ERROR**: Ошибки валидации входных данных
@@ -945,6 +1017,35 @@ Tweet API Service предоставляет REST API для:
 - **mapstruct-processor** - процессор для генерации мапперов
 - **spring-boot-configuration-processor** - процессор конфигурации Spring Boot
 
+#### Структура пакетов системы валидации
+- **validation/annotation/** - кастомные аннотации валидации (@UserExists, @NoSelfAction, @TweetExists, @TweetAccess)
+- **validation/validator/** - кастомные валидаторы (UserExistsValidator, NoSelfActionValidator, TweetExistsValidator, TweetAccessValidator)
+- **validation/service/** - сервисы валидации (TweetValidator, TweetValidatorImpl, ContentValidationService)
+- **validation/sanitizer/** - санитизация контента (ContentSanitizer, ContentValidationResult)
+- **validation/config/** - конфигурация валидации (ValidationConfig, ValidationProperties)
+- **validation/metrics/** - метрики валидации (ValidationMetrics, ValidationMetricsAspect)
+- **validation/exception/** - исключения валидации (TweetValidationException, ContentValidationException)
+- **validation/handler/** - обработчики ошибок валидации (TweetValidationExceptionHandler)
+
+#### Зависимости системы валидации
+- **spring-boot-starter-validation** - Jakarta Bean Validation
+- **hibernate-validator** - реализация Bean Validation
+- **spring-boot-starter-aop** - AOP для метрик валидации
+- **micrometer-core** - метрики для мониторинга валидации
+- **spring-boot-configuration-processor** - обработка конфигурации
+- **spring-boot-starter-test** - тестирование валидации
+- **testcontainers** - интеграционные тесты с БД
+
+#### Конфигурация системы валидации
+- **app.validation.maxTweetLength**: 280 - максимальная длина твита
+- **app.validation.maxCommentLength**: 280 - максимальная длина комментария ретвита
+- **app.validation.enableSanitization**: true - включение санитизации контента
+- **app.validation.enableSpamDetection**: true - включение обнаружения спама
+- **app.validation.maxUpdateAgeDays**: 7 - максимальный возраст твита для обновления
+- **app.validation.enableDuplicatePrevention**: true - предотвращение дублирования действий
+- **spring.jpa.properties.hibernate.validator.apply_to_ddl**: false - отключение валидации на уровне DDL
+- **spring.jpa.properties.hibernate.validator.fail_fast**: true - быстрая остановка при первой ошибке валидации
+
 #### Структура пакетов интеграции с users-api
 - **integration/client/** - UsersApiClient, UsersApiClientImpl, CachedUsersApiService
 - **integration/fallback/** - UsersApiFallbackService, AdaptiveUsersApiService
@@ -1034,7 +1135,14 @@ Tweet API Service предоставляет REST API для:
 43. **Создание расширенных метрик** (AdvancedUsersApiMetrics, DetailedUsersApiHealthIndicator)
 44. **Реализация IntegrationExceptionHandler** для обработки ошибок интеграции
 45. **Настройка конфигурации** обработки ошибок интеграции
-46. **Тестирование** обработки ошибок и fallback механизмов
+47. **Реализация системы валидации** (TweetValidator, TweetValidatorImpl, ContentValidationService)
+48. **Создание кастомных валидаторов** (@UserExists, @NoSelfAction, @TweetExists, @TweetAccess)
+49. **Настройка санитизации контента** (ContentSanitizer, ContentValidationResult)
+50. **Реализация обработки ошибок валидации** (TweetValidationExceptionHandler, ValidationErrorResponse)
+51. **Настройка метрик валидации** (ValidationMetrics, ValidationMetricsAspect)
+52. **Конфигурация валидации** (ValidationConfig, ValidationProperties)
+53. **Тестирование системы валидации** (unit и integration тесты)
+54. **Интеграция с shared/common-lib** компонентами валидации
 
 ---
 
