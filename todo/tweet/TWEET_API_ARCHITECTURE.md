@@ -612,15 +612,33 @@ Tweet API Service предоставляет REST API для:
 - **Структурированное логирование** с traceId/spanId для трассировки
 
 #### API контракты интеграции:
+- **GET /api/v1/users/{userId}** - получение пользователя по ID
 - **GET /api/v1/users/{userId}/exists** - проверка существования пользователя
-- **GET /api/v1/users/{userId}** - получение информации о пользователе
-- **Стандартизированные ответы** с детальными кодами ошибок
-- **Contract testing** с Pact для обеспечения совместимости
+- **POST /api/v1/users/batch** - получение множественных пользователей по ID
+- **Стандартные HTTP статусы** (200, 404, 500) и обработка ошибок
+- **Contract testing** с Pact для проверки совместимости API
+
+#### HTTP клиент и интеграция
+- **UsersApiClient** интерфейс для взаимодействия с users-api
+- **UsersApiClientImpl** реализация с RestTemplate и обработкой ошибок
+- **Методы клиента**: getUserById, getUsersByIds, existsUser, isUserActive, getUserRole, getUserStatus, checkUsersActiveStatus
+- **Обработка ошибок**: HttpClientErrorException, HttpServerErrorException, ResourceAccessException
+- **Типизированные исключения**: UsersApiException для всех ошибок интеграции
+- **Timeout конфигурация** (5 секунд) для предотвращения зависания
 
 #### Текущие интеграции:
 - **Проверка существования пользователей** при создании твита, лайке/ретвите
 - **Получение информации о пользователях** для отображения в списках твитов
 - **Валидация пользователей** для всех операций через кастомные валидаторы
+- **Batch операции** для получения множественных пользователей
+
+#### Circuit Breaker и Fallback стратегии
+- **Circuit Breaker конфигурация**: failure-rate-threshold: 50%, wait-duration: 30s, sliding-window-size: 10, minimum-number-of-calls: 5
+- **Retry механизм**: max-attempts: 3, wait-duration: 1s, retry-exceptions: UsersApiException
+- **TimeLimiter**: timeout-duration: 5s для предотвращения зависания
+- **Fallback стратегии**: UsersApiFallbackService для graceful degradation
+- **Адаптивные стратегии**: в зависимости от состояния Circuit Breaker (CLOSED, OPEN, HALF_OPEN)
+- **Консервативный подход**: для критических операций предполагаем неактивного пользователя
 
 #### Архитектурные решения:
 - **HTTP REST API** для синхронной интеграции
@@ -628,6 +646,20 @@ Tweet API Service предоставляет REST API для:
 - **Retry механизмы** с exponential backoff
 - **Timeout настройки** для предотвращения зависания
 - **Fallback стратегии** для graceful degradation
+
+#### Кэширование и производительность
+- **Caffeine кэш**: maximumSize: 1000, expireAfterWrite: 5m, expireAfterAccess: 2m
+- **@Cacheable** аннотации для getUserById, existsUser, isUserActive, getUserRole, getUserStatus
+- **@CacheEvict** для управления кэшем при обновлениях пользователей
+- **Кэшированные клиенты**: CachedUsersApiService для оптимизации производительности
+- **Batch кэширование**: для множественных пользователей
+
+#### Мониторинг и метрики
+- **UsersApiMetrics**: success/failure counters, response timer для observability
+- **UsersApiHealthIndicator**: проверка состояния интеграции с Circuit Breaker
+- **Circuit Breaker метрики**: мониторинг состояния (CLOSED, OPEN, HALF_OPEN)
+- **Prometheus метрики**: для alerting и мониторинга производительности
+- **Structured logging**: для трассировки запросов и ошибок интеграции
 
 #### Обработка ошибок интеграции:
 - **Детальные коды ошибок** (USER_NOT_FOUND, USER_SERVICE_UNAVAILABLE)
@@ -862,6 +894,32 @@ Tweet API Service предоставляет REST API для:
 - **mapstruct-processor** - процессор для генерации мапперов
 - **spring-boot-configuration-processor** - процессор конфигурации Spring Boot
 
+#### Структура пакетов интеграции с users-api
+- **integration/client/** - UsersApiClient, UsersApiClientImpl, CachedUsersApiService
+- **integration/fallback/** - UsersApiFallbackService, AdaptiveUsersApiService
+- **integration/config/** - CircuitBreakerConfig, CacheConfig, RestTemplateConfig
+- **integration/metrics/** - UsersApiMetrics, UsersApiHealthIndicator
+- **integration/dto/** - BatchUsersRequestDto, BatchUsersResponseDto
+- **integration/exception/** - UsersApiException для обработки ошибок интеграции
+
+#### Зависимости интеграции с users-api
+- **spring-boot-starter-web** - RestTemplate для HTTP клиента
+- **spring-boot-starter-cache** - кэширование с Caffeine
+- **spring-boot-starter-actuator** - мониторинг и health checks
+- **resilience4j-spring-boot2** - Circuit Breaker и Retry механизмы
+- **resilience4j-circuitbreaker** - Circuit Breaker функциональность
+- **resilience4j-retry** - Retry механизмы
+- **resilience4j-timelimiter** - Timeout конфигурация
+- **caffeine** - кэш провайдер
+- **micrometer-core** - метрики для мониторинга
+
+#### Конфигурация интеграции с users-api
+- **resilience4j.circuitbreaker**: failure-rate-threshold: 50%, wait-duration: 30s, sliding-window-size: 10
+- **resilience4j.retry**: max-attempts: 3, wait-duration: 1s, retry-exceptions: UsersApiException
+- **resilience4j.timelimiter**: timeout-duration: 5s
+- **spring.cache**: type: caffeine, maximumSize: 1000, expireAfterWrite: 5m, expireAfterAccess: 2m
+- **users-api**: base-url, timeout, retry-attempts конфигурация
+
 ### 10.3 Следующие шаги
 1. **Реализация миграций** для создания схемы в БД
 2. **Создание JPA entities** на основе архитектурной модели
@@ -893,6 +951,14 @@ Tweet API Service предоставляет REST API для:
 28. **Создание кастомных валидаторов** (@UserExists, @NoSelfAction)
 29. **Настройка групп валидации** для разных операций
 30. **Создание Error DTOs** для обработки ошибок
+31. **Реализация UsersApiClient** для интеграции с users-api
+32. **Настройка Circuit Breaker** и Retry механизмов
+33. **Создание Fallback стратегий** для graceful degradation
+34. **Настройка кэширования** с Caffeine
+35. **Реализация мониторинга** и метрик интеграции
+36. **Создание Health Indicators** для проверки состояния интеграции
+37. **Настройка Contract Testing** с Pact
+38. **Тестирование интеграции** и fallback стратегий
 
 ---
 

@@ -32,7 +32,6 @@
 
 
 Все данные по реализации tweet-api находятся в C:\learn\projects\twitter\todo\tweet\
-интеграция с users-api: USERS_API_INTEGRATION_DESIGN.md
 обработка ошибок интеграции: INTEGRATION_ERROR_HANDLING_DESIGN.md
 валидация входных данных: VALIDATION_SYSTEM_DESIGN.md
 бизнес-правила: BUSINESS_RULES_DESIGN.md
