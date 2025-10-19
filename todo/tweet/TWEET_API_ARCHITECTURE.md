@@ -154,10 +154,110 @@ Tweet API Service предоставляет REST API для:
 - **Твиты пользователя**: проверка существования пользователя, получение твитов с пагинацией, преобразование в DTO
 - **Лента новостей**: проверка существования пользователя, получение подписок через follow-service, получение твитов с пагинацией
 
+### 3.2 Бизнес-логика и транзакции
+
+#### Основные операции с твитами
+- **Создание твита**: валидация входных данных, проверка пользователя через users-api, проверка статуса пользователя, создание и сохранение твита
+- **Получение твита**: поиск по ID с исключением удаленных твитов (@Transactional(readOnly = true))
+- **Обновление твита**: проверка прав автора, валидация обновления, обновление данных и сохранение
+- **Удаление твита**: soft delete с сохранением статистики
+
+#### Социальные функции
+- **Лайк твита**: проверка существования твита и пользователя, проверка на самолайк, проверка дублирования, создание лайка, обновление счетчика
+- **Убрать лайк**: поиск лайка, удаление, обновление счетчика
+- **Ретвит**: проверка существования твита и пользователя, проверка на саморетвит, проверка дублирования, создание ретвита, обновление счетчика
+
+#### Получение данных
+- **Твиты пользователя**: проверка существования пользователя, получение твитов с пагинацией, преобразование в DTO
+- **Лента новостей**: проверка существования пользователя, получение подписок через follow-service, получение твитов с пагинацией
+
 #### Уровни изоляции транзакций
 - **READ_COMMITTED** для операций чтения (@Transactional(readOnly = true))
 - **REPEATABLE_READ** для операций создания (@Transactional)
 - **SERIALIZABLE** для социальных функций (предотвращение дублирования)
+
+#### Правила создания твитов
+- **TweetCreationRules** - валидация всех бизнес-правил для создания твитов
+- **validateUserExists** - проверка существования пользователя через UsersApiClient с fallback при ошибках API
+- **validateUserStatus** - проверка статуса пользователя (ACTIVE, INACTIVE, BANNED)
+- **validateContentRules** - валидация контента через ContentValidationService
+- **validateRateLimiting** - проверка ограничений частоты создания твитов
+- **validateSpamRules** - проверка на спам через SpamDetectionService
+
+#### Правила обновления твитов
+- **TweetUpdateRules** - валидация всех бизнес-правил для обновления твитов
+- **validateOwnership** - проверка прав автора на обновление твита
+- **validateUpdateTimeLimit** - ограничение времени обновления (максимум 7 дней)
+- **validateUpdateFrequency** - ограничение частоты обновлений (максимум 10 в час)
+- **TimeBasedRules** - правила на основе времени для разных операций
+
+#### Правила социальных действий
+- **LikeRules** - валидация всех бизнес-правил для лайков
+- **validateSelfLike** - запрет лайков собственных твитов
+- **validateDuplicateLike** - проверка дублирования лайков
+- **validateLikeTimeLimit** - ограничение времени лайков (максимум 30 дней)
+- **RetweetRules** - валидация всех бизнес-правил для ретвитов
+- **validateSelfRetweet** - запрет ретвитов собственных твитов
+- **validateDuplicateRetweet** - проверка дублирования ретвитов
+- **validateRetweetTimeLimit** - ограничение времени ретвитов (максимум 30 дней)
+- **validateRetweetComment** - валидация комментариев ретвитов
+
+#### Правила контроля доступа и защиты от злоупотреблений
+- **AuthorizationRules** - валидация правил авторизации для операций с твитами
+- **validateCreateAuthorization** - проверка прав на создание твитов (статус ACTIVE, роль не BANNED)
+- **validateUpdateAuthorization** - проверка прав на обновление твитов (модераторы и админы могут обновлять любые твиты)
+- **validateDeleteAuthorization** - проверка прав на удаление твитов (модераторы и админы могут удалять любые твиты)
+- **RoleBasedRules** - валидация ролевого доступа для операций с твитами
+- **validateModerateRoleAccess** - только модераторы и админы могут выполнять операции модерации
+- **validateAdminRoleAccess** - только админы могут выполнять административные операции
+
+#### Защита от злоупотреблений
+- **AbuseDetectionRules** - обнаружение паттернов злоупотреблений в поведении пользователей
+- **detectCreationAbuse** - обнаружение чрезмерного создания твитов, дублирования контента, спам паттернов
+- **detectLikeAbuse** - обнаружение чрезмерного лайкания, like bombing (лайки одному пользователю)
+- **detectRetweetAbuse** - обнаружение чрезмерного ретвитования, retweet bombing
+- **detectUpdateAbuse** - обнаружение чрезмерного обновления твитов
+- **UserBlockingRules** - правила блокировки пользователей за злоупотребления
+- **shouldBlockUser** - проверка необходимости блокировки пользователя
+- **blockUser** - блокировка пользователя за злоупотребления
+- **restrictUser** - временное ограничение действий пользователя
+
+#### Rate Limiting и Spam Detection
+- **RateLimitingRules** - правила ограничения частоты для создания твитов и социальных действий
+- **validateTweetCreationRateLimit** - ограничение частоты создания твитов (максимум 10 в час)
+- **validateSocialActionRateLimit** - ограничение частоты социальных действий (лайки, ретвиты, ответы)
+- **SpamDetectionRules** - обнаружение спам паттернов в контенте твитов
+- **detectSpam** - проверка на спам паттерны (чрезмерное повторение, спам ключевые слова, чрезмерные ссылки, упоминания)
+- **checkUserSpamPatterns** - проверка паттернов спама пользователя (чрезмерное постинг, дублирование контента)
+
+#### Централизованная система бизнес-правил
+- **TweetBusinessRulesManager** - централизованное управление всеми бизнес-правилами
+- **validateCreateRules** - валидация всех правил для создания твитов
+- **validateUpdateRules** - валидация всех правил для обновления твитов
+- **validateDeleteRules** - валидация всех правил для удаления твитов
+- **validateLikeRules** - валидация всех правил для лайков
+- **validateRetweetRules** - валидация всех правил для ретвитов
+- **BusinessRulesProperties** - конфигурация бизнес-правил (rate limiting, time-based rules, abuse detection, spam detection)
+
+#### Мониторинг и аудит бизнес-правил
+- **BusinessRulesMetrics** - метрики бизнес-правил (violation counters, validation duration, abuse detection)
+- **BusinessRulesAuditLogger** - аудит нарушений бизнес-правил и обнаружения злоупотреблений
+- **logRuleViolation** - логирование нарушений бизнес-правил для аудита
+- **logAbuseDetection** - логирование обнаружения злоупотреблений
+- **recordRuleViolation** - запись метрик нарушений правил
+- **recordAbuseDetection** - запись метрик обнаружения злоупотреблений
+
+#### Многоуровневая система бизнес-правил
+- **Data Integrity Rules** - правила целостности данных (проверка существования пользователей, твитов, уникальность действий)
+- **Access Control Rules** - правила контроля доступа (авторство, роли пользователей, статус аккаунта)
+- **Business Logic Rules** - правила бизнес-логики (временные ограничения, частотные лимиты, возраст твитов)
+- **Security Rules** - правила безопасности (санитизация контента, защита от XSS, валидация входных данных)
+- **Anti-Abuse Rules** - правила защиты от злоупотреблений (обнаружение спама, rate limiting, блокировка пользователей)
+- **Fail Fast принцип** - проверка правил на самом раннем этапе
+- **Separation of Concerns** - разделение разных типов правил
+- **Consistency** - единообразные сообщения об ошибках
+- **Security First** - приоритет безопасности над удобством
+- **Audit Trail** - логирование всех нарушений правил
 
 ### 3.3 JPA Entities и структура данных
 
@@ -1036,6 +1136,41 @@ Tweet API Service предоставляет REST API для:
 - **spring-boot-starter-test** - тестирование валидации
 - **testcontainers** - интеграционные тесты с БД
 
+#### Структура пакетов системы бизнес-правил
+- **business/rules/creation/** - правила создания твитов (TweetCreationRules, RateLimitingRules, SpamDetectionRules)
+- **business/rules/update/** - правила обновления твитов (TweetUpdateRules, TimeBasedRules)
+- **business/rules/social/** - правила социальных действий (LikeRules, RetweetRules)
+- **business/rules/access/** - правила контроля доступа (AuthorizationRules, RoleBasedRules)
+- **business/rules/abuse/** - правила защиты от злоупотреблений (AbuseDetectionRules, UserBlockingRules)
+- **business/rules/manager/** - централизованное управление (TweetBusinessRulesManager)
+- **business/rules/config/** - конфигурация правил (BusinessRulesProperties)
+- **business/rules/metrics/** - метрики и аудит (BusinessRulesMetrics, BusinessRulesAuditLogger)
+
+#### Зависимости системы бизнес-правил
+- **spring-boot-starter-data-redis** - Redis для rate limiting и кэширования
+- **spring-boot-starter-validation** - Jakarta Bean Validation для валидации
+- **micrometer-core** - метрики для мониторинга бизнес-правил
+- **spring-boot-starter-aop** - AOP для аспектов мониторинга
+- **spring-boot-configuration-processor** - обработка конфигурации
+- **spring-boot-starter-test** - тестирование бизнес-правил
+- **testcontainers** - интеграционные тесты с Redis
+
+#### Конфигурация системы бизнес-правил
+- **app.business-rules.rate-limiting.maxTweetsPerHour**: 10 - максимальное количество твитов в час
+- **app.business-rules.rate-limiting.maxLikesPerHour**: 100 - максимальное количество лайков в час
+- **app.business-rules.rate-limiting.maxRetweetsPerHour**: 50 - максимальное количество ретвитов в час
+- **app.business-rules.time-based.maxUpdateAgeDays**: 7 - максимальный возраст твита для обновления
+- **app.business-rules.time-based.maxDeleteAgeDays**: 30 - максимальный возраст твита для удаления
+- **app.business-rules.time-based.maxLikeAgeDays**: 30 - максимальный возраст твита для лайка
+- **app.business-rules.time-based.maxRetweetAgeDays**: 30 - максимальный возраст твита для ретвита
+- **app.business-rules.abuse-detection.maxTweetsPerHour**: 20 - лимит для обнаружения злоупотреблений
+- **app.business-rules.abuse-detection.maxLikesPerHour**: 200 - лимит лайков для обнаружения злоупотреблений
+- **app.business-rules.abuse-detection.maxRetweetsPerHour**: 100 - лимит ретвитов для обнаружения злоупотреблений
+- **app.business-rules.spam-detection.spamKeywords**: ["free money", "click here", "spam", "scam", "win now"] - ключевые слова спама
+- **app.business-rules.spam-detection.maxLinksPerTweet**: 3 - максимальное количество ссылок в твите
+- **app.business-rules.spam-detection.maxMentionsPerTweet**: 5 - максимальное количество упоминаний в твите
+- **app.business-rules.spam-detection.enableSpamDetection**: true - включение обнаружения спама
+
 #### Конфигурация системы валидации
 - **app.validation.maxTweetLength**: 280 - максимальная длина твита
 - **app.validation.maxCommentLength**: 280 - максимальная длина комментария ретвита
@@ -1142,7 +1277,15 @@ Tweet API Service предоставляет REST API для:
 51. **Настройка метрик валидации** (ValidationMetrics, ValidationMetricsAspect)
 52. **Конфигурация валидации** (ValidationConfig, ValidationProperties)
 53. **Тестирование системы валидации** (unit и integration тесты)
-54. **Интеграция с shared/common-lib** компонентами валидации
+55. **Реализация системы бизнес-правил** (TweetBusinessRulesManager, TweetCreationRules, TweetUpdateRules)
+56. **Создание правил социальных действий** (LikeRules, RetweetRules)
+57. **Настройка правил контроля доступа** (AuthorizationRules, RoleBasedRules)
+58. **Реализация защиты от злоупотреблений** (AbuseDetectionRules, UserBlockingRules)
+59. **Настройка Rate Limiting и Spam Detection** (RateLimitingRules, SpamDetectionRules)
+60. **Конфигурация бизнес-правил** (BusinessRulesProperties)
+61. **Настройка мониторинга и аудита** (BusinessRulesMetrics, BusinessRulesAuditLogger)
+62. **Тестирование системы бизнес-правил** (unit и integration тесты)
+63. **Интеграция с Redis** для rate limiting и кэширования
 
 ---
 
