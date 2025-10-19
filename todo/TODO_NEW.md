@@ -35,9 +35,6 @@
 
 
 Все данные по реализации tweet-api находятся в C:\learn\projects\twitter\todo\tweet\
-бизнес-правила: BUSINESS_RULES_DESIGN.md
 обработка ошибок: ERROR_HANDLING_DESIGN.md
 кэширование: CACHING_SYSTEM_DESIGN.md
 пагинация: PAGINATION_SYSTEM_DESIGN.md
-архитектурные диаграммы: TWEET_API_TECH.md
-технические детали: TWEET_API_TECH.md

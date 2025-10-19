@@ -759,6 +759,52 @@ Tweet API Service предоставляет REST API для:
 - **Автоматическое логирование** ошибок
 - **HTTP статус коды**: 400 Bad Request, 409 Conflict, 500 Internal Server Error
 
+#### Стандартизированная обработка ошибок
+- **TweetErrorCode** - иерархия кодов ошибок для всех операций
+- **TweetErrorResponse** - базовая структура ответа об ошибке в формате RFC 7807 Problem Details
+- **ValidationErrorResponse** - специализированная структура для ошибок валидации с деталями полей
+- **BusinessRuleErrorResponse** - специализированная структура для нарушений бизнес-правил с контекстом
+- **ProblemDetail** - стандартизированный формат ответов об ошибках с полями type, title, status, detail, code, context, timestamp, requestId, instance
+
+#### Типизированные исключения
+- **TweetException** - базовый класс для всех tweet-specific исключений с контекстом и метаданными
+- **TweetNotFoundException** - исключение для случаев, когда твит не найден
+- **TweetAccessDeniedException** - исключение для случаев отказа в доступе к твиту
+- **TweetRateLimitExceededException** - исключение для случаев превышения лимитов частоты
+- **SpamDetectedException** - исключение для случаев обнаружения спама
+- **addContext** - метод для добавления контекстной информации к исключениям
+- **getHttpStatus** - метод для получения HTTP статус кода
+- **getErrorTypeUri** - метод для получения URI типа ошибки
+- **toErrorResponse** - метод для преобразования исключения в ответ об ошибке
+
+#### Логирование и мониторинг ошибок
+- **ErrorLoggingService** - сервис для структурированного логирования ошибок
+- **logError** - метод для логирования ошибок с контекстом и метаданными
+- **ErrorLogEntry** - структура для записи информации об ошибке (timestamp, errorCode, errorMessage, exceptionType, requestMethod, requestUri, requestId, userId, userAgent, clientIp, stackTrace, context)
+- **shouldLogError** - метод для определения необходимости логирования ошибки на основе её серьёзности
+- **logStructuredError** - метод для структурированного логирования в JSON формате
+- **ErrorMetricsService** - сервис для сбора метрик ошибок
+- **recordError** - метод для записи метрик ошибок с тегами
+- **recordErrorResponseTime** - метод для записи времени ответа на ошибку
+- **recordUserError** - метод для записи метрик ошибок по пользователям
+- **recordEndpointError** - метод для записи метрик ошибок по эндпоинтам
+- **getErrorType** - метод для классификации типов ошибок (validation, not_found, access_denied, security, integration, internal, other)
+
+#### TweetGlobalExceptionHandler
+- **TweetGlobalExceptionHandler** - расширенный обработчик исключений для tweet-specific ошибок
+- **handleTweetException** - обработка TweetException с локализацией и метриками
+- **handleConstraintViolation** - обработка ConstraintViolationException с деталями валидации
+- **handleMethodArgumentNotValid** - обработка MethodArgumentNotValidException с деталями полей
+- **handleBusinessRuleValidation** - обработка BusinessRuleValidationException с контекстом правил
+- **handleIntegrationException** - обработка IntegrationException для ошибок интеграции
+- **handleCircuitBreakerOpen** - обработка CircuitBreakerOpenException с Retry-After заголовком
+- **handleTimeout** - обработка TimeoutException для таймаутов
+- **handleRuntimeException** - обработка неожиданных RuntimeException с защитой от утечки информации
+- **logError** - метод для логирования ошибок с контекстом запроса
+- **getRequestId** - извлечение ID запроса из заголовков
+- **getLocale** - определение языка пользователя из Accept-Language заголовка
+- **isDevelopmentEnvironment** - проверка среды разработки для отображения деталей ошибок
+
 #### Enums и утилиты
 - **UserRole** (ADMIN, MODERATOR, USER) для авторизации
 - **UserStatus** (ACTIVE, INACTIVE) для управления состоянием
@@ -1155,6 +1201,45 @@ Tweet API Service предоставляет REST API для:
 - **spring-boot-starter-test** - тестирование бизнес-правил
 - **testcontainers** - интеграционные тесты с Redis
 
+#### Структура пакетов системы обработки ошибок
+- **error/code/** - коды ошибок (TweetErrorCode, ErrorCodeMapping)
+- **error/response/** - структуры ответов об ошибках (TweetErrorResponse, ValidationErrorResponse, BusinessRuleErrorResponse)
+- **error/exception/** - исключения (TweetException, TweetNotFoundException, TweetAccessDeniedException, TweetRateLimitExceededException, SpamDetectedException)
+- **error/handler/** - обработчики ошибок (TweetGlobalExceptionHandler)
+- **error/localization/** - локализация (ErrorLocalizationService, messages_en.properties, messages_ru.properties)
+- **error/logging/** - логирование (ErrorLoggingService, ErrorLogEntry)
+- **error/metrics/** - метрики (ErrorMetricsService)
+- **error/config/** - конфигурация (ErrorHandlingProperties)
+
+#### Зависимости системы обработки ошибок
+- **spring-boot-starter-web** - для HTTP обработки ошибок
+- **spring-boot-starter-validation** - для обработки ошибок валидации
+- **micrometer-core** - для метрик ошибок
+- **spring-boot-starter-aop** - для AOP логирования
+- **spring-boot-configuration-processor** - для обработки конфигурации
+- **spring-boot-starter-test** - для тестирования обработки ошибок
+- **jackson-databind** - для JSON сериализации
+
+#### Конфигурация системы обработки ошибок
+- **app.error-handling.enabled**: true - включение системы обработки ошибок
+- **app.error-handling.includeStackTrace**: false - включение stack trace в ответы
+- **app.error-handling.includeExceptionDetails**: false - включение деталей исключений в ответы
+- **app.error-handling.defaultInternalErrorMessage**: "An unexpected error occurred" - сообщение по умолчанию для внутренних ошибок
+- **app.error-handling.responseFormat**: PROBLEM_DETAIL - формат ответов об ошибках
+- **app.error-handling.localization.enabled**: true - включение локализации
+- **app.error-handling.localization.supportedLocales**: ["en", "ru"] - поддерживаемые языки
+- **app.error-handling.localization.defaultLocale**: "en" - язык по умолчанию
+- **app.error-handling.logging.enabled**: true - включение логирования ошибок
+- **app.error-handling.logging.jsonFormat**: true - JSON формат логов
+- **app.error-handling.logging.includeStackTrace**: true - включение stack trace в логи
+- **app.error-handling.logging.logValidationErrors**: false - логирование ошибок валидации
+- **app.error-handling.logging.logSecurityErrors**: true - логирование ошибок безопасности
+- **app.error-handling.logging.logAllErrors**: false - логирование всех ошибок
+- **app.error-handling.metrics.enabled**: true - включение метрик ошибок
+- **app.error-handling.metrics.recordUserErrors**: true - запись метрик по пользователям
+- **app.error-handling.metrics.recordEndpointErrors**: true - запись метрик по эндпоинтам
+- **app.error-handling.metrics.recordResponseTimes**: true - запись времени ответа
+
 #### Конфигурация системы бизнес-правил
 - **app.business-rules.rate-limiting.maxTweetsPerHour**: 10 - максимальное количество твитов в час
 - **app.business-rules.rate-limiting.maxLikesPerHour**: 100 - максимальное количество лайков в час
@@ -1285,7 +1370,14 @@ Tweet API Service предоставляет REST API для:
 60. **Конфигурация бизнес-правил** (BusinessRulesProperties)
 61. **Настройка мониторинга и аудита** (BusinessRulesMetrics, BusinessRulesAuditLogger)
 62. **Тестирование системы бизнес-правил** (unit и integration тесты)
-63. **Интеграция с Redis** для rate limiting и кэширования
+64. **Реализация системы обработки ошибок** (TweetErrorCode, TweetErrorResponse, TweetException)
+65. **Создание типизированных исключений** (TweetNotFoundException, TweetAccessDeniedException, TweetRateLimitExceededException, SpamDetectedException)
+66. **Настройка TweetGlobalExceptionHandler** для централизованной обработки ошибок
+67. **Реализация локализации сообщений** (ErrorLocalizationService, messages_en.properties, messages_ru.properties)
+68. **Настройка логирования ошибок** (ErrorLoggingService, ErrorLogEntry)
+69. **Конфигурация метрик ошибок** (ErrorMetricsService)
+70. **Тестирование системы обработки ошибок** (unit и integration тесты)
+71. **Интеграция с RFC 7807 Problem Details** стандартом
 
 ---
 
