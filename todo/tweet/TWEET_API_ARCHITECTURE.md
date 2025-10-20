@@ -528,11 +528,140 @@ Tweet API Service предоставляет REST API для:
 - `app.cache.http.enableETag` - включение ETag заголовков
 - `app.cache.http.enableLastModified` - включение Last-Modified заголовков
 
-#### Batch операции для оптимизации
-- **batchUpdateLikesCount()** - массовое обновление счетчиков лайков
-- **batchSoftDelete()** - массовое soft delete твитов
-- **@Modifying** аннотации для bulk операций
-- **EntityManager** для нативных запросов
+#### Система пагинации
+- **Многостратегическая пагинация** - Offset-based, Cursor-based и Hybrid подходы
+- **Offset-based Pagination** - для статических списков с произвольным доступом к страницам
+- **Cursor-based Pagination** - для динамических данных с высокой производительностью и консистентностью
+- **Hybrid Pagination** - комбинация подходов с автоматическим выбором стратегии
+- **Классификация данных по стратегиям**:
+  - **Статические данные (OFFSET)** - список пользователей, административные списки, справочные данные
+  - **Динамические данные (CURSOR)** - лента новостей, твиты пользователя, лайки и ретвиты
+  - **Смешанные данные (HYBRID)** - поиск по твитам, фильтрованные списки
+
+#### Offset-based пагинация
+- **OffsetPaginationService** - сервис для offset-based пагинации
+- **getTweets** - получение твитов с пагинацией (page, size, sort)
+- **getTweetsByUser** - получение твитов пользователя с пагинацией
+- **getTweetsWithFilter** - получение твитов с фильтрацией и пагинацией
+- **adjustPageSize** - корректировка размера страницы в пределах лимитов
+- **OffsetPaginationResponse** - ответ с метаданными пагинации
+- **OffsetPaginationMetadata** - метаданные (size, number, totalElements, totalPages, first, last, hasNext, hasPrevious)
+
+#### Cursor-based пагинация
+- **CursorPaginationService** - сервис для cursor-based пагинации
+- **getTweets** - получение твитов с курсором (cursor, size, direction)
+- **getTweetsByUser** - получение твитов пользователя с курсором
+- **getTimeline** - получение ленты новостей с курсором
+- **getTweetsForward** - получение твитов вперед от курсора
+- **getTweetsBackward** - получение твитов назад от курсора
+- **getTweetsInitial** - получение начальных твитов
+- **getNextCursor** - получение курсора для следующей страницы
+- **getPreviousCursor** - получение курсора для предыдущей страницы
+- **encodeCursor** - кодирование курсора в Base64
+- **parseCursor** - парсинг курсора из Base64
+- **CursorPaginationResponse** - ответ с метаданными курсорной пагинации
+- **CursorPaginationMetadata** - метаданные (size, hasNext, hasPrevious, nextCursor, previousCursor)
+
+#### Оптимизированные запросы
+- **Custom Repository Queries** - оптимизированные запросы для пагинации
+- **findAllByIsDeletedFalse** - получение всех твитов с пагинацией
+- **findByUserIdAndIsDeletedFalse** - получение твитов пользователя с пагинацией
+- **findByIdLessThanAndIsDeletedFalseOrderByIdDesc** - cursor-based запрос вперед
+- **findByIdGreaterThanAndIsDeletedFalseOrderByIdAsc** - cursor-based запрос назад
+- **findByUserIdAndIdLessThanAndIsDeletedFalseOrderByIdDesc** - cursor-based запрос пользователя вперед
+- **findByUserIdAndIdGreaterThanAndIsDeletedFalseOrderByIdAsc** - cursor-based запрос пользователя назад
+- **findTimelineInitial** - получение начальной ленты новостей
+- **findTimelineForward** - получение ленты новостей вперед
+- **findTimelineBackward** - получение ленты новостей назад
+- **findTweetSummaries** - получение кратких данных твитов с проекцией
+- **findTweetSummariesByUser** - получение кратких данных твитов пользователя
+- **countByUserIdAndIsDeletedFalse** - подсчет твитов пользователя
+- **countByIsDeletedFalse** - подсчет всех твитов
+- **existsByIdAndIsDeletedFalse** - проверка существования твита
+- **existsByUserIdAndIsDeletedFalse** - проверка существования твитов пользователя
+
+#### Query Optimization Service
+- **QueryOptimizationService** - сервис оптимизации запросов
+- **executeOptimizedQuery** - выполнение оптимизированного запроса
+- **determineOptimizationStrategy** - определение стратегии оптимизации
+- **executeWithProjection** - выполнение с проекцией для уменьшения передачи данных
+- **executeWithIndexHint** - выполнение с подсказками индексов
+- **executeWithBatchLoading** - выполнение с batch loading для больших наборов данных
+- **executeWithCache** - выполнение с кэшированием для часто используемых данных
+- **executeStandard** - стандартное выполнение без оптимизации
+- **estimateResultSize** - оценка размера результата для принятия решений об оптимизации
+- **QueryOptimizationStrategy** - enum стратегий (USE_PROJECTION, USE_INDEX_HINT, USE_BATCH_LOADING, USE_CACHE, STANDARD)
+- **QueryType** - enum типов запросов (TWEETS, USER_TWEETS, TIMELINE, POPULAR_TWEETS)
+
+#### Обработка больших объемов данных
+- **LargeDatasetHandler** - обработчик больших наборов данных
+- **streamLargeDataset** - обработка с streaming для больших наборов данных
+- **parallelLargeDataset** - обработка с параллельным выполнением
+- **chunkLargeDataset** - обработка с разбиением на чанки
+- **getTotalCount** - получение общего количества для больших наборов данных
+- **Stream.iterate** - итерация по батчам данных
+- **IntStream.range().parallel()** - параллельная обработка батчей
+- **streamingBatchSize** - размер батча для streaming
+- **parallelBatchSize** - размер батча для параллельной обработки
+
+#### Мониторинг и метрики пагинации
+- **PaginationMetricsService** - сервис для сбора метрик пагинации
+- **recordPaginationRequest** - запись метрик запроса пагинации (strategy, queryType, pageSize, executionTime)
+- **recordPaginationPerformance** - запись метрик производительности (strategy, queryType, resultSize, totalElements)
+- **recordPaginationError** - запись метрик ошибок пагинации (strategy, queryType, errorType)
+- **Timer** - измерение времени выполнения запросов пагинации
+- **Counter** - подсчет количества запросов пагинации
+- **Gauge** - измерение размера результата и общего количества элементов
+- **Tags** - теги для метрик (strategy, query_type, page_size, error_type)
+
+#### Конфигурация пагинации
+- **PaginationProperties** - конфигурация пагинации через @ConfigurationProperties
+- **enabled** - включение/выключение функций пагинации
+- **Defaults** - настройки по умолчанию
+- **defaultPageSize** - размер страницы по умолчанию (20)
+- **defaultStrategy** - стратегия по умолчанию (CURSOR)
+- **defaultSort** - сортировка по умолчанию (createdAt DESC)
+- **Limits** - лимиты пагинации
+- **maxPageSize** - максимальный размер страницы (100)
+- **minPageSize** - минимальный размер страницы (1)
+- **offsetThreshold** - порог для переключения на cursor-based (1000)
+- **Optimization** - настройки оптимизации
+- **projectionThreshold** - порог для использования проекции (1000)
+- **batchThreshold** - порог для batch loading (500)
+- **enableQueryOptimization** - включение оптимизации запросов
+- **enableIndexHints** - включение подсказок индексов
+- **Performance** - настройки производительности
+- **streamingBatchSize** - размер батча для streaming (1000)
+- **parallelBatchSize** - размер батча для параллельной обработки (500)
+- **maxConcurrentQueries** - максимальное количество одновременных запросов (10)
+- **queryTimeout** - таймаут запроса (30 секунд)
+
+#### Структура пакетов системы пагинации
+- `pagination/offset/` - offset-based пагинация
+- `pagination/cursor/` - cursor-based пагинация
+- `pagination/hybrid/` - hybrid пагинация
+- `pagination/optimization/` - оптимизация запросов
+- `pagination/handler/` - обработка больших объемов данных
+- `pagination/metrics/` - метрики пагинации
+- `pagination/config/` - конфигурация пагинации
+- `pagination/response/` - ответы пагинации
+
+#### Конфигурация системы пагинации
+- `app.pagination.enabled` - включение/выключение функций пагинации
+- `app.pagination.defaults.defaultPageSize` - размер страницы по умолчанию (20)
+- `app.pagination.defaults.defaultStrategy` - стратегия по умолчанию (CURSOR)
+- `app.pagination.defaults.defaultSort` - сортировка по умолчанию (createdAt DESC)
+- `app.pagination.limits.maxPageSize` - максимальный размер страницы (100)
+- `app.pagination.limits.minPageSize` - минимальный размер страницы (1)
+- `app.pagination.limits.offsetThreshold` - порог для переключения на cursor-based (1000)
+- `app.pagination.optimization.projectionThreshold` - порог для использования проекции (1000)
+- `app.pagination.optimization.batchThreshold` - порог для batch loading (500)
+- `app.pagination.optimization.enableQueryOptimization` - включение оптимизации запросов
+- `app.pagination.optimization.enableIndexHints` - включение подсказок индексов
+- `app.pagination.performance.streamingBatchSize` - размер батча для streaming (1000)
+- `app.pagination.performance.parallelBatchSize` - размер батча для параллельной обработки (500)
+- `app.pagination.performance.maxConcurrentQueries` - максимальное количество одновременных запросов (10)
+- `app.pagination.performance.queryTimeout` - таймаут запроса (30 секунд)
 
 #### Конфигурация JPA/Hibernate
 - **batch_size: 20** для batch операций
@@ -1488,7 +1617,21 @@ Tweet API Service предоставляет REST API для:
 85. **Оптимизация кэширования** (стратегии по типам данных, TTL, инвалидация)
 86. **Мониторинг производительности кэширования** (метрики, health checks, логирование)
 87. **Тестирование производительности** (нагрузочное тестирование, профилирование)
-88. **Документация производительности** (метрики, оптимизации, troubleshooting)
+89. **Реализация системы пагинации** (OffsetPaginationService, CursorPaginationService, HybridPaginationService)
+90. **Реализация оптимизированных запросов** (Custom Repository Queries, QueryOptimizationService)
+91. **Реализация обработки больших объемов данных** (LargeDatasetHandler, DatabaseIndexingStrategy)
+92. **Реализация мониторинга пагинации** (PaginationMetricsService)
+93. **Конфигурация системы пагинации** (PaginationProperties, PaginationConfiguration)
+94. **Тестирование системы пагинации** (unit и integration тесты с Testcontainers)
+95. **Настройка индексов базы данных** (составные индексы для пагинации)
+96. **Оптимизация производительности** (стратегии пагинации, оптимизированные запросы)
+97. **Мониторинг пагинации** (метрики производительности, время выполнения запросов)
+98. **Документация пагинации** (стратегии, конфигурация, troubleshooting)
+99. **Интеграция с кэшированием** (кэширование результатов пагинации)
+100. **Настройка streaming и parallel processing** (обработка больших объемов данных)
+101. **Оптимизация индексов** (анализ производительности, предложения по оптимизации)
+102. **Тестирование производительности** (нагрузочное тестирование пагинации)
+103. **Документация производительности** (метрики, оптимизации, troubleshooting)
 
 ---
 
