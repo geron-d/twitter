@@ -433,6 +433,101 @@ Tweet API Service предоставляет REST API для:
 
 ### 3.5 Оптимизация и производительность
 
+#### Многоуровневая архитектура кэширования
+- **HTTP Cache** - кэширование на уровне HTTP заголовков с Cache-Control, ETag, Last-Modified
+- **Application Cache** - кэширование на уровне приложения (Redis) с JSON сериализацией и TTL
+- **Database Cache** - кэширование на уровне БД (PostgreSQL) с query cache и connection pooling
+- **CDN Cache** - кэширование на уровне CDN (будущее) для статического контента
+- **Cache-Aside Pattern** - приложение управляет кэшем
+- **Write-Through Pattern** - запись в кэш и БД одновременно
+- **Write-Behind Pattern** - асинхронная запись в БД
+- **TTL-based Expiration** - время жизни кэша
+- **Event-driven Invalidation** - инвалидация по событиям
+
+#### Стратегии кэширования по типам данных
+- **Static Data** - редко изменяемые данные (пользователи, настройки) с длительным TTL
+- **Semi-Static Data** - периодически изменяемые данные (твиты, статистика) со средним TTL
+- **Dynamic Data** - часто изменяемые данные (лайки, ретвиты) с коротким TTL
+- **Real-time Data** - данные в реальном времени (активность пользователей) без кэширования
+
+#### Redis кэширование
+- **RedisCacheConfig** - конфигурация Redis с JSON сериализацией и TTL
+- **RedisTemplate** - шаблон для работы с Redis с Jackson2JsonRedisSerializer
+- **CacheManager** - менеджер кэшей с конфигурацией для разных типов данных
+- **cacheConfiguration** - конфигурация кэшей с TTL и сериализацией
+- **TweetCacheService** - сервис для кэширования твитов
+- **cacheTweet** - кэширование твита с @CachePut
+- **getCachedTweet** - получение кэшированного твита с @Cacheable
+- **cacheUserTweets** - кэширование твитов пользователя с пагинацией
+- **getCachedUserTweets** - получение кэшированных твитов пользователя
+- **cacheTimeline** - кэширование ленты новостей
+- **getCachedTimeline** - получение кэшированной ленты новостей
+- **cacheTweetStatistics** - кэширование статистики твита
+- **getCachedTweetStatistics** - получение кэшированной статистики
+- **invalidateTweet** - инвалидация кэша твита с @CacheEvict
+- **invalidateUserTweets** - инвалидация кэша твитов пользователя
+- **invalidateTimeline** - инвалидация кэша ленты новостей
+- **invalidateTweetStatistics** - инвалидация кэша статистики
+
+#### User Profile Cache Service
+- **UserProfileCacheService** - сервис для кэширования профилей пользователей
+- **cacheUserProfile** - кэширование профиля пользователя с @CachePut
+- **getCachedUserProfile** - получение кэшированного профиля с @Cacheable
+- **cacheUserExists** - кэширование проверки существования пользователя
+- **getCachedUserExists** - получение кэшированной проверки существования
+- **invalidateUserProfile** - инвалидация кэша профиля с @CacheEvict
+- **invalidateAllUserCaches** - инвалидация всех кэшей пользователя
+
+#### Инвалидация кэша
+- **CacheInvalidationService** - сервис для инвалидации кэша по событиям
+- **handleTweetCreated** - инвалидация кэша при создании твита (@EventListener)
+- **handleTweetUpdated** - инвалидация кэша при обновлении твита
+- **handleTweetDeleted** - инвалидация кэша при удалении твита
+- **handleTweetLiked** - инвалидация кэша статистики при лайке
+- **handleTweetRetweeted** - инвалидация кэша статистики при ретвите
+- **handleUserProfileUpdated** - инвалидация кэша профиля при обновлении
+- **handleUserDeactivated** - инвалидация всех кэшей при деактивации пользователя
+- **invalidateFollowerTimelines** - инвалидация кэша лент подписчиков
+- **invalidateAllCaches** - инвалидация всех кэшей (для обслуживания)
+- **invalidateCachesByPattern** - инвалидация кэшей по паттерну
+
+#### Cache Events
+- **TweetCreatedEvent** - событие создания твита
+- **TweetUpdatedEvent** - событие обновления твита
+- **TweetDeletedEvent** - событие удаления твита
+- **TweetLikedEvent** - событие лайка твита
+- **TweetRetweetedEvent** - событие ретвита твита
+- **UserProfileUpdatedEvent** - событие обновления профиля пользователя
+- **UserDeactivatedEvent** - событие деактивации пользователя
+
+#### Структура пакетов системы кэширования
+- `cache/http/` - HTTP кэширование
+- `cache/redis/` - Redis кэширование
+- `cache/service/` - сервисы кэширования
+- `cache/event/` - события кэширования
+- `cache/metrics/` - метрики кэширования
+- `cache/config/` - конфигурация кэширования
+- `cache/health/` - проверка здоровья кэша
+
+#### Конфигурация системы кэширования
+- `app.cache.enabled` - включение/выключение кэширования
+- `app.cache.ttl.tweetCacheSeconds` - TTL для кэша твитов (300 секунд)
+- `app.cache.ttl.userProfileCacheSeconds` - TTL для кэша профилей (600 секунд)
+- `app.cache.ttl.timelineCacheSeconds` - TTL для кэша лент (30 секунд)
+- `app.cache.ttl.statisticsCacheSeconds` - TTL для кэша статистики (60 секунд)
+- `app.cache.ttl.userTweetsCacheSeconds` - TTL для кэша твитов пользователя (120 секунд)
+- `app.cache.ttl.userExistsCacheSeconds` - TTL для кэша существования пользователя (300 секунд)
+- `app.cache.redis.host` - хост Redis (localhost)
+- `app.cache.redis.port` - порт Redis (6379)
+- `app.cache.redis.password` - пароль Redis
+- `app.cache.redis.database` - база данных Redis (0)
+- `app.cache.redis.timeout` - таймаут подключения (2000 мс)
+- `app.cache.redis.maxConnections` - максимальное количество соединений (10)
+- `app.cache.redis.maxIdleConnections` - максимальное количество неактивных соединений (5)
+- `app.cache.redis.minIdleConnections` - минимальное количество неактивных соединений (1)
+- `app.cache.http.enableETag` - включение ETag заголовков
+- `app.cache.http.enableLastModified` - включение Last-Modified заголовков
+
 #### Batch операции для оптимизации
 - **batchUpdateLikesCount()** - массовое обновление счетчиков лайков
 - **batchSoftDelete()** - массовое soft delete твитов
@@ -1377,7 +1472,23 @@ Tweet API Service предоставляет REST API для:
 68. **Настройка логирования ошибок** (ErrorLoggingService, ErrorLogEntry)
 69. **Конфигурация метрик ошибок** (ErrorMetricsService)
 70. **Тестирование системы обработки ошибок** (unit и integration тесты)
-71. **Интеграция с RFC 7807 Problem Details** стандартом
+72. **Реализация системы кэширования** (CacheControlService, HttpCacheInterceptor, RedisCacheConfig)
+73. **Реализация сервисов кэширования** (TweetCacheService, UserProfileCacheService, StatisticsCacheService)
+74. **Реализация инвалидации кэша** (CacheInvalidationService, Cache Events)
+75. **Реализация мониторинга кэширования** (CacheMetricsService, CacheHealthIndicator)
+76. **Конфигурация кэширования** (CacheProperties, CacheConfiguration)
+77. **Тестирование системы кэширования** (unit и integration тесты с Testcontainers)
+78. **Настройка Redis** (подключение, конфигурация, мониторинг)
+79. **Оптимизация производительности** (TTL, стратегии кэширования, инвалидация)
+80. **Мониторинг кэширования** (метрики hit/miss ratio, размер кэша, производительность)
+81. **Документация кэширования** (стратегии, конфигурация, troubleshooting)
+82. **Интеграция с shared/common-lib** (кэширование пользователей, метрики)
+83. **Настройка HTTP кэширования** (ETag, Last-Modified, Cache-Control заголовки)
+84. **Реализация условных запросов** (If-None-Match, If-Modified-Since)
+85. **Оптимизация кэширования** (стратегии по типам данных, TTL, инвалидация)
+86. **Мониторинг производительности кэширования** (метрики, health checks, логирование)
+87. **Тестирование производительности** (нагрузочное тестирование, профилирование)
+88. **Документация производительности** (метрики, оптимизации, troubleshooting)
 
 ---
 

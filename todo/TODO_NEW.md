@@ -35,6 +35,4 @@
 
 
 Все данные по реализации tweet-api находятся в C:\learn\projects\twitter\todo\tweet\
-обработка ошибок: ERROR_HANDLING_DESIGN.md
-кэширование: CACHING_SYSTEM_DESIGN.md
 пагинация: PAGINATION_SYSTEM_DESIGN.md
