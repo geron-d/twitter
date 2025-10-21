@@ -16,10 +16,11 @@
   dependencies: "Нет"
 
 ### Этап 2: Инфраструктура проекта (P1)
-- [ ] (P1) #2: Создание структуры проекта tweet-api — Создать Gradle модуль в services/
+- [x] (P1) [2025-01-27 15:46] #2: Создание структуры проекта tweet-api — Создать Gradle модуль в services/
   acceptance: "build.gradle + базовая структура папок + Application.java + Dockerfile"
   estimated_time: "1 час"
   dependencies: "#1"
+  metadata: priority=P1, done=2025-01-27T15:46, note="Создана структура проекта, build.gradle, Application.java, Dockerfile, application.yml, .dockerignore. Проект компилируется успешно."
   
 - [ ] (P1) #3: Схема базы данных для твитов — Создать SQL миграцию для таблицы tweets
   acceptance: "SQL миграция для таблицы tweets с индексами"

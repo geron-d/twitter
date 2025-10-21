@@ -1,0 +1,50 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: tweet-api
+  datasource:
+    url: jdbc:postgresql://localhost:5432/twitter
+    username: user
+    password: password
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: none
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    time-zone: UTC
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,tracing
+  endpoint:
+    health:
+      show-details: always
+  tracing:
+    sampling:
+      probability: 1.0
+
+logging:
+  level:
+    com.twitter: DEBUG
+    org.springframework.web: INFO
+    org.springframework.security: DEBUG
+    org.springframework.boot.autoconfigure: WARN
+    org.springframework.boot.context.embedded: WARN
+    org.springframework.boot.actuate: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${spring.application.name:} [%thread] %-5level [%X{traceId:-},%X{spanId:-}] %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${spring.application.name:} [%thread] %-5level [%X{traceId:-},%X{spanId:-}] %logger{36} - %msg%n"
+
+# Tweet API specific configuration
+tweet:
+  max-content-length: 280
+  users-api:
+    base-url: http://localhost:8081
+    timeout: 5000
