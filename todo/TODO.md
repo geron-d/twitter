@@ -22,10 +22,11 @@
   dependencies: "#1"
   metadata: priority=P1, done=2025-01-27T15:46, note="Создана структура проекта, build.gradle, Application.java, Dockerfile, application.yml, .dockerignore. Проект компилируется успешно."
   
-- [ ] (P1) #3: Схема базы данных для твитов — Создать SQL миграцию для таблицы tweets
+- [x] (P1) [2025-01-27 15:50] #3: Схема базы данных для твитов — Создать SQL миграцию для таблицы tweets
   acceptance: "SQL миграция для таблицы tweets с индексами"
   estimated_time: "1 час"
   dependencies: "#2"
+  metadata: priority=P1, done=2025-01-27T15:50, note="Созданы SQL миграции для схемы tweet_api и tweet_api_test, добавлены индексы, триггеры, обновлена конфигурация БД."
   
 - [ ] (P1) #4: Конфигурация приложения — Создать application.yml для порта 8082
   acceptance: "Конфигурация порта, базы данных, подключение к PostgreSQL"

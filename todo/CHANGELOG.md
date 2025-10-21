@@ -11,3 +11,12 @@
 - Добавлен .dockerignore для оптимизации Docker сборки
 - Обновлен settings.gradle для включения нового модуля
 - Проект успешно компилируется
+
+### 15:50 — step 3 done — Схема базы данных для твитов — автор: assistant
+- Создан sql/tweets.sql с миграцией для схемы tweet_api
+- Создан sql/tweets_test.sql для тестовой схемы tweet_api_test
+- Добавлены индексы для производительности (user_id+created_at, created_at, content search)
+- Создан триггер для автоматического обновления updated_at
+- Добавлены CHECK constraints для валидации контента
+- Обновлен application.yml для использования схемы tweet_api
+- Создан application-test.yml для тестовой конфигурации
