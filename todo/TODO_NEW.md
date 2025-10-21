@@ -4,10 +4,6 @@
 Архитектура сервиса tweet-api todo\tweet\TWEET_API_ARCHITECTURE.md
 необходимо удалить дублирующие части и упорядосить архитектуру
 
-Архитектура сервиса tweet-api todo\tweet\TWEET_API_ARCHITECTURE.md
-Необходимо вынести всю информацию и архитектуру по кэшированию в todo\tweet\FUTURE_TWEET_API_ARCHITECTURE.md
-
-
 Есть проект twitter 
 Общая информация по проекту PROJECT_OVERVIEW.md
 Информация по общей библиотеке shared\common-lib\README.md

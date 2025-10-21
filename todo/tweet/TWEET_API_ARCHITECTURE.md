@@ -20,7 +20,9 @@ Tweet API Service является ключевым компонентом Twitt
 5. **Дениormalized счетчики** для оптимизации частых запросов
 6. **Comprehensive validation** с Bean Validation и кастомными валидаторами
 7. **Circuit breaker pattern** для надежной интеграции с внешними сервисами
-8. **Централизованная система бизнес-правил** с валидацией и аудитом
+8. **Многоуровневая система кэширования** для оптимизации производительности
+9. **Гибкая система пагинации** (Offset, Cursor, Hybrid подходы)
+10. **Централизованная система бизнес-правил** с мониторингом и аудитом
 
 ## 1. Обзор системы
 
@@ -109,6 +111,7 @@ Tweet API Service предоставляет REST API для:
 #### Ограничения производительности:
 - Максимум 1 лайк/ретвит на пользователя на твит
 - Атомарные операции для социальных функций
+- Batch операции для множественных запросов
 
 ## 3. Архитектурные компоненты
 
@@ -121,6 +124,7 @@ Tweet API Service предоставляет REST API для:
 - **Валидация входных данных** через Bean Validation и кастомные валидаторы
 - **Обработка HTTP статусов** и стандартизированных ошибок
 - **Request/Response mapping** через стандартизированные DTO структуры
+- **Пагинация** с offset-based стратегией (максимум 100 элементов на страницу)
 - **Автоматическое логирование** через @LoggableRequest из shared-lib
 - **Централизованная обработка ошибок** через GlobalExceptionHandler
 
@@ -130,6 +134,7 @@ Tweet API Service предоставляет REST API для:
 - **Транзакционность** через @Transactional с правильными уровнями изоляции
 - **Интеграция с внешними сервисами** через Circuit Breaker и Fallback
 - **Валидация бизнес-правил** перед операциями
+- **Кэширование** для оптимизации производительности
 - **Типизированные исключения** для обработки ошибок
 - **Координация операций** между различными компонентами
 - **Обработка ошибок** и исключений
@@ -140,6 +145,7 @@ Tweet API Service предоставляет REST API для:
 - **JPA Entities** с оптимизированными индексами и валидацией
 - **Кастомные запросы** для сложных операций через @Query
 - **Specification паттерн** для динамических запросов
+- **Batch операции** для оптимизации производительности
 - **Soft delete** поддержка с временными метками
 - **Денормализация** статистики для быстрых запросов
 
@@ -273,6 +279,14 @@ Tweet API Service предоставляет REST API для:
 - **createdAt** временная метка создания
 - **Уникальное ограничение** на пару (tweetId, userId)
 - **Бизнес-методы**: isByUser(), isForTweet(), hasComment()
+
+#### Индексы для производительности
+- **idx_tweets_user_id_created_at** для твитов пользователя
+- **idx_tweets_created_at** для временной сортировки
+- **idx_tweets_is_deleted** для фильтрации удаленных
+- **idx_tweets_likes_count** для сортировки по популярности
+- **idx_likes_tweet_id, idx_likes_user_id** для лайков
+- **idx_retweets_tweet_id, idx_retweets_user_id** для ретвитов
 
 #### DTO/Mapper Layer
 - **Стандартизированные DTO структуры** для Request/Response
@@ -412,12 +426,244 @@ Tweet API Service предоставляет REST API для:
 - **FieldError** - информация о конкретных полях с ошибками
 - **BindingResult** - результат валидации с детальной информацией
 
-### 3.8 Модель данных
+### 3.8 Оптимизация и производительность
+
+#### Многоуровневая архитектура кэширования
+- **HTTP Cache** - кэширование на уровне HTTP заголовков с Cache-Control, ETag, Last-Modified
+- **Application Cache** - кэширование на уровне приложения (Redis) с JSON сериализацией и TTL
+- **Database Cache** - кэширование на уровне БД (PostgreSQL) с query cache и connection pooling
+- **CDN Cache** - кэширование на уровне CDN (будущее) для статического контента
+- **Cache-Aside Pattern** - приложение управляет кэшем
+- **Write-Through Pattern** - запись в кэш и БД одновременно
+- **Write-Behind Pattern** - асинхронная запись в БД
+- **TTL-based Expiration** - время жизни кэша
+- **Event-driven Invalidation** - инвалидация по событиям
+
+#### Стратегии кэширования по типам данных
+- **Static Data** - редко изменяемые данные (пользователи, настройки) с длительным TTL
+- **Semi-Static Data** - периодически изменяемые данные (твиты, статистика) со средним TTL
+- **Dynamic Data** - часто изменяемые данные (лайки, ретвиты) с коротким TTL
+- **Real-time Data** - данные в реальном времени (активность пользователей) без кэширования
+
+#### Redis кэширование
+- **RedisCacheConfig** - конфигурация Redis с JSON сериализацией и TTL
+- **RedisTemplate** - шаблон для работы с Redis с Jackson2JsonRedisSerializer
+- **CacheManager** - менеджер кэшей с конфигурацией для разных типов данных
+- **cacheConfiguration** - конфигурация кэшей с TTL и сериализацией
+- **TweetCacheService** - сервис для кэширования твитов
+- **cacheTweet** - кэширование твита с @CachePut
+- **getCachedTweet** - получение кэшированного твита с @Cacheable
+- **cacheUserTweets** - кэширование твитов пользователя с пагинацией
+- **getCachedUserTweets** - получение кэшированных твитов пользователя
+- **cacheTimeline** - кэширование ленты новостей
+- **getCachedTimeline** - получение кэшированной ленты новостей
+- **cacheTweetStatistics** - кэширование статистики твита
+- **getCachedTweetStatistics** - получение кэшированной статистики
+- **invalidateTweet** - инвалидация кэша твита с @CacheEvict
+- **invalidateUserTweets** - инвалидация кэша твитов пользователя
+- **invalidateTimeline** - инвалидация кэша ленты новостей
+- **invalidateTweetStatistics** - инвалидация кэша статистики
+
+#### User Profile Cache Service
+- **UserProfileCacheService** - сервис для кэширования профилей пользователей
+- **cacheUserProfile** - кэширование профиля пользователя с @CachePut
+- **getCachedUserProfile** - получение кэшированного профиля с @Cacheable
+- **cacheUserExists** - кэширование проверки существования пользователя
+- **getCachedUserExists** - получение кэшированной проверки существования
+- **invalidateUserProfile** - инвалидация кэша профиля с @CacheEvict
+- **invalidateAllUserCaches** - инвалидация всех кэшей пользователя
+
+#### Инвалидация кэша
+- **CacheInvalidationService** - сервис для инвалидации кэша по событиям
+- **handleTweetCreated** - инвалидация кэша при создании твита (@EventListener)
+- **handleTweetUpdated** - инвалидация кэша при обновлении твита
+- **handleTweetDeleted** - инвалидация кэша при удалении твита
+- **handleTweetLiked** - инвалидация кэша статистики при лайке
+- **handleTweetRetweeted** - инвалидация кэша статистики при ретвите
+- **handleUserProfileUpdated** - инвалидация кэша профиля при обновлении
+- **handleUserDeactivated** - инвалидация всех кэшей при деактивации пользователя
+- **invalidateFollowerTimelines** - инвалидация кэша лент подписчиков
+- **invalidateAllCaches** - инвалидация всех кэшей (для обслуживания)
+- **invalidateCachesByPattern** - инвалидация кэшей по паттерну
+
+#### Cache Events
+- **TweetCreatedEvent** - событие создания твита
+- **TweetUpdatedEvent** - событие обновления твита
+- **TweetDeletedEvent** - событие удаления твита
+- **TweetLikedEvent** - событие лайка твита
+- **TweetRetweetedEvent** - событие ретвита твита
+- **UserProfileUpdatedEvent** - событие обновления профиля пользователя
+- **UserDeactivatedEvent** - событие деактивации пользователя
+
+#### Структура пакетов системы кэширования
+- `cache/http/` - HTTP кэширование
+- `cache/redis/` - Redis кэширование
+- `cache/service/` - сервисы кэширования
+- `cache/event/` - события кэширования
+- `cache/metrics/` - метрики кэширования
+- `cache/config/` - конфигурация кэширования
+- `cache/health/` - проверка здоровья кэша
+
+#### Конфигурация системы кэширования
+- `app.cache.enabled` - включение/выключение кэширования
+- `app.cache.ttl.tweetCacheSeconds` - TTL для кэша твитов (300 секунд)
+- `app.cache.ttl.userProfileCacheSeconds` - TTL для кэша профилей (600 секунд)
+- `app.cache.ttl.timelineCacheSeconds` - TTL для кэша лент (30 секунд)
+- `app.cache.ttl.statisticsCacheSeconds` - TTL для кэша статистики (60 секунд)
+- `app.cache.ttl.userTweetsCacheSeconds` - TTL для кэша твитов пользователя (120 секунд)
+- `app.cache.ttl.userExistsCacheSeconds` - TTL для кэша существования пользователя (300 секунд)
+- `app.cache.redis.host` - хост Redis (localhost)
+- `app.cache.redis.port` - порт Redis (6379)
+- `app.cache.redis.password` - пароль Redis
+- `app.cache.redis.database` - база данных Redis (0)
+- `app.cache.redis.timeout` - таймаут подключения (2000 мс)
+- `app.cache.redis.maxConnections` - максимальное количество соединений (10)
+- `app.cache.redis.maxIdleConnections` - максимальное количество неактивных соединений (5)
+- `app.cache.redis.minIdleConnections` - минимальное количество неактивных соединений (1)
+- `app.cache.http.enableETag` - включение ETag заголовков
+- `app.cache.http.enableLastModified` - включение Last-Modified заголовков
+
+#### Конфигурация системы пагинации
+- **Многостратегическая пагинация** - Offset-based, Cursor-based и Hybrid подходы
+- **Offset-based Pagination** - для статических списков с произвольным доступом к страницам
+- **Cursor-based Pagination** - для динамических данных с высокой производительностью и консистентностью
+- **Hybrid Pagination** - комбинация подходов с автоматическим выбором стратегии
+- **Классификация данных по стратегиям**:
+  - **Статические данные (OFFSET)** - список пользователей, административные списки, справочные данные
+  - **Динамические данные (CURSOR)** - лента новостей, твиты пользователя, лайки и ретвиты
+  - **Смешанные данные (HYBRID)** - поиск по твитам, фильтрованные списки
+
+#### Offset-based пагинация
+- **OffsetPaginationService** - сервис для offset-based пагинации
+- **getTweets** - получение твитов с пагинацией (page, size, sort)
+- **getTweetsByUser** - получение твитов пользователя с пагинацией
+- **getTweetsWithFilter** - получение твитов с фильтрацией и пагинацией
+- **adjustPageSize** - корректировка размера страницы в пределах лимитов
+- **OffsetPaginationResponse** - ответ с метаданными пагинации
+- **OffsetPaginationMetadata** - метаданные (size, number, totalElements, totalPages, first, last, hasNext, hasPrevious)
+
+#### Cursor-based пагинация
+- **CursorPaginationService** - сервис для cursor-based пагинации
+- **getTweets** - получение твитов с курсором (cursor, size, direction)
+- **getTweetsByUser** - получение твитов пользователя с курсором
+- **getTimeline** - получение ленты новостей с курсором
+- **getTweetsForward** - получение твитов вперед от курсора
+- **getTweetsBackward** - получение твитов назад от курсора
+- **getTweetsInitial** - получение начальных твитов
+- **getNextCursor** - получение курсора для следующей страницы
+- **getPreviousCursor** - получение курсора для предыдущей страницы
+- **encodeCursor** - кодирование курсора в Base64
+- **parseCursor** - парсинг курсора из Base64
+- **CursorPaginationResponse** - ответ с метаданными курсорной пагинации
+- **CursorPaginationMetadata** - метаданные (size, hasNext, hasPrevious, nextCursor, previousCursor)
+
+#### Оптимизированные запросы
+- **Custom Repository Queries** - оптимизированные запросы для пагинации
+- **findAllByIsDeletedFalse** - получение всех твитов с пагинацией
+- **findByUserIdAndIsDeletedFalse** - получение твитов пользователя с пагинацией
+- **findByIdLessThanAndIsDeletedFalseOrderByIdDesc** - cursor-based запрос вперед
+- **findByIdGreaterThanAndIsDeletedFalseOrderByIdAsc** - cursor-based запрос назад
+- **findByUserIdAndIdLessThanAndIsDeletedFalseOrderByIdDesc** - cursor-based запрос пользователя вперед
+- **findByUserIdAndIdGreaterThanAndIsDeletedFalseOrderByIdAsc** - cursor-based запрос пользователя назад
+- **findTimelineInitial** - получение начальной ленты новостей
+- **findTimelineForward** - получение ленты новостей вперед
+- **findTimelineBackward** - получение ленты новостей назад
+- **findTweetSummaries** - получение кратких данных твитов с проекцией
+- **findTweetSummariesByUser** - получение кратких данных твитов пользователя
+- **countByUserIdAndIsDeletedFalse** - подсчет твитов пользователя
+- **countByIsDeletedFalse** - подсчет всех твитов
+- **existsByIdAndIsDeletedFalse** - проверка существования твита
+- **existsByUserIdAndIsDeletedFalse** - проверка существования твитов пользователя
+
+#### Query Optimization Service
+- **QueryOptimizationService** - сервис оптимизации запросов
+- **executeOptimizedQuery** - выполнение оптимизированного запроса
+- **determineOptimizationStrategy** - определение стратегии оптимизации
+- **executeWithProjection** - выполнение с проекцией для уменьшения передачи данных
+- **executeWithIndexHint** - выполнение с подсказками индексов
+- **executeWithBatchLoading** - выполнение с batch loading для больших наборов данных
+- **executeWithCache** - выполнение с кэшированием для часто используемых данных
+- **executeStandard** - стандартное выполнение без оптимизации
+- **estimateResultSize** - оценка размера результата для принятия решений об оптимизации
+- **QueryOptimizationStrategy** - enum стратегий (USE_PROJECTION, USE_INDEX_HINT, USE_BATCH_LOADING, USE_CACHE, STANDARD)
+- **QueryType** - enum типов запросов (TWEETS, USER_TWEETS, TIMELINE, POPULAR_TWEETS)
+
+#### Обработка больших объемов данных
+- **LargeDatasetHandler** - обработчик больших наборов данных
+- **streamLargeDataset** - обработка с streaming для больших наборов данных
+- **parallelLargeDataset** - обработка с параллельным выполнением
+- **chunkLargeDataset** - обработка с разбиением на чанки
+- **getTotalCount** - получение общего количества для больших наборов данных
+- **Stream.iterate** - итерация по батчам данных
+- **IntStream.range().parallel()** - параллельная обработка батчей
+- **streamingBatchSize** - размер батча для streaming
+- **parallelBatchSize** - размер батча для параллельной обработки
+
+#### Мониторинг и метрики пагинации
+- **PaginationMetricsService** - сервис для сбора метрик пагинации
+- **recordPaginationRequest** - запись метрик запроса пагинации (strategy, queryType, pageSize, executionTime)
+- **recordPaginationPerformance** - запись метрик производительности (strategy, queryType, resultSize, totalElements)
+- **recordPaginationError** - запись метрик ошибок пагинации (strategy, queryType, errorType)
+- **Timer** - измерение времени выполнения запросов пагинации
+- **Counter** - подсчет количества запросов пагинации
+- **Gauge** - измерение размера результата и общего количества элементов
+- **Tags** - теги для метрик (strategy, query_type, page_size, error_type)
+
+#### Конфигурация пагинации
+- **PaginationProperties** - конфигурация пагинации через @ConfigurationProperties
+- **enabled** - включение/выключение функций пагинации
+- **Defaults** - настройки по умолчанию
+- **defaultPageSize** - размер страницы по умолчанию (20)
+- **defaultStrategy** - стратегия по умолчанию (CURSOR)
+- **defaultSort** - сортировка по умолчанию (createdAt DESC)
+- **Limits** - лимиты пагинации
+- **maxPageSize** - максимальный размер страницы (100)
+- **minPageSize** - минимальный размер страницы (1)
+- **offsetThreshold** - порог для переключения на cursor-based (1000)
+- **Optimization** - настройки оптимизации
+- **projectionThreshold** - порог для использования проекции (1000)
+- **batchThreshold** - порог для batch loading (500)
+- **enableQueryOptimization** - включение оптимизации запросов
+- **enableIndexHints** - включение подсказок индексов
+- **Performance** - настройки производительности
+- **streamingBatchSize** - размер батча для streaming (1000)
+- **parallelBatchSize** - размер батча для параллельной обработки (500)
+- **maxConcurrentQueries** - максимальное количество одновременных запросов (10)
+- **queryTimeout** - таймаут запроса (30 секунд)
+
+#### Структура пакетов системы пагинации
+- `pagination/offset/` - offset-based пагинация
+- `pagination/cursor/` - cursor-based пагинация
+- `pagination/hybrid/` - hybrid пагинация
+- `pagination/optimization/` - оптимизация запросов
+- `pagination/handler/` - обработка больших объемов данных
+- `pagination/metrics/` - метрики пагинации
+- `pagination/config/` - конфигурация пагинации
+- `pagination/response/` - ответы пагинации
+
+#### Конфигурация JPA/Hibernate
+- **batch_size: 20** для batch операций
+- **order_inserts: true** для оптимизации вставок
+- **order_updates: true** для оптимизации обновлений
+- **batch_versioned_data: true** для версионированных данных
+- **open-in-view: false** для предотвращения LazyInitializationException
+
+#### Мониторинг производительности
+- **format_sql: true** для форматирования SQL запросов
+- **show_sql: false** в production для производительности
+- **Индексы** для оптимизации частых запросов
+- **Статистика** использования индексов через PostgreSQL
+- **Стандартизированные ответы** с метаданными (timestamp, requestId)
+- **Graceful error handling** с детальными кодами ошибок
+- **Versioning** для обратной совместимости API
+
+### 3.9 Модель данных
 
 #### Архитектурные принципы проектирования
 - **UUID идентификаторы** для поддержки распределенных систем
 - **Soft delete** с временными метками для сохранения истории
-- **Денормализованные счетчики** для быстрого доступа к статистике
+- **Дениormalized счетчики** для оптимизации частых запросов статистики
+- **Составные индексы** для ускорения сложных запросов
 - **Автоматические триггеры** для поддержания целостности данных
 
 #### Основные сущности
@@ -426,13 +672,19 @@ Tweet API Service предоставляет REST API для:
 - **tweet_retweets** - таблица ретвитов с возможностью комментариев
 - **tweet_replies** - таблица ответов на твиты
 
+#### Стратегия индексации
+- **Составные индексы** для основных запросов (user_id + created_at)
+- **Full-text search** индексы для поиска по содержимому
+- **Специализированные индексы** для аналитических запросов
+- **Партиционированные индексы** для больших объемов данных
+
 #### Автоматизация и целостность
 - **Триггеры** для автоматического обновления счетчиков лайков/ретвитов/ответов
 - **Представления** для оптимизированных запросов и консистентности данных
 - **Ограничения** для валидации бизнес-правил на уровне БД
 - **Cascade удаление** для поддержания ссылочной целостности
 
-### 3.9 REST API Design
+### 3.10 REST API Design
 
 #### Архитектурные принципы API
 - **RESTful архитектура** с четким разделением ресурсов
@@ -617,7 +869,7 @@ Tweet API Service предоставляет REST API для:
 - **INVALID_PAGE_NUMBER**: Некорректный номер страницы
 - **INVALID_PAGE_SIZE**: Некорректный размер страницы
 
-### 3.10 Архитектурные паттерны
+### 3.11 Архитектурные паттерны
 
 #### Repository Pattern
 - Абстракция доступа к данным
@@ -639,7 +891,7 @@ Tweet API Service предоставляет REST API для:
 - Легкое тестирование и мокирование
 - Конфигурируемость через Spring
 
-### 3.11 Конфигурация системы
+### 3.12 Конфигурация системы
 
 #### Конфигурация MapStruct
 
@@ -793,10 +1045,12 @@ Tweet API Service предоставляет REST API для:
 - **Timeout настройки** для предотвращения зависания
 - **Fallback стратегии** для graceful degradation
 
-#### Оптимизация производительности
-- **Batch операции** для получения множественных пользователей
-- **Connection pooling** для управления соединениями
-- **Query optimization** для оптимизации запросов
+#### Кэширование и производительность
+- **Caffeine кэш**: maximumSize: 1000, expireAfterWrite: 5m, expireAfterAccess: 2m
+- **@Cacheable** аннотации для getUserById, existsUser, isUserActive, getUserRole, getUserStatus
+- **@CacheEvict** для управления кэшем при обновлениях пользователей
+- **Кэшированные клиенты**: CachedUsersApiService для оптимизации производительности
+- **Batch кэширование**: для множественных пользователей
 
 #### Мониторинг и метрики
 - **UsersApiMetrics**: success/failure counters, response timer для observability
@@ -807,6 +1061,7 @@ Tweet API Service предоставляет REST API для:
 
 #### Обработка ошибок интеграции:
 - **Детальные коды ошибок** (USER_NOT_FOUND, USER_SERVICE_UNAVAILABLE)
+- **Кэширование** информации о пользователях на 10 минут
 - **Graceful degradation** с ограниченной функциональностью
 - **Monitoring и alerting** для проблем интеграции
 - **Structured logging** для трассировки запросов
@@ -833,24 +1088,24 @@ Tweet API Service предоставляет REST API для:
 - **Автоматическое определение уровня** на основе состояния Circuit Breaker и метрик
 - **Уведомления о изменении** уровня деградации для мониторинга
 
-#### Расширенная оптимизация производительности
-- **MultiLevelDataService** - многоуровневая обработка данных
-- **SmartDataService** - умная обработка данных с адаптивными стратегиями
-- **CachedData** - структура для оптимизированных данных с временными метками
-- **Адаптивные стратегии** на основе типа данных
-- **Stale data fallback** - использование устаревших данных при недоступности API
+#### Расширенное кэширование и мониторинг
+- **MultiLevelUserCacheService** - многоуровневое кэширование (L1/L2 Cache)
+- **SmartUserCacheService** - умное кэширование с TTL и инвалидацией
+- **CachedUserData** - структура для кэшированных данных с временными метками
+- **Адаптивный TTL** на основе типа пользователя (администраторы кэшируются дольше)
+- **Stale cache fallback** - использование устаревших данных при недоступности API
 
 #### Расширенные метрики интеграции
 - **AdvancedUsersApiMetrics** - детальные метрики (success/failure counters, response timer, fallback timer)
 - **Circuit Breaker метрики** - состояние, failure rate, open duration
-- **Performance метрики** - response time, throughput, error rate
+- **Cache метрики** - hit rate, size, eviction statistics
 - **Degradation метрики** - текущий уровень деградации
 - **DistributionSummary** - размер ответов, error rate over time
 
 #### Детальная диагностика здоровья
 - **DetailedUsersApiHealthIndicator** - расширенный health check с детальной диагностикой
 - **Многофакторная оценка** состояния (Circuit Breaker, деградация, response time)
-- **Performance статистика** в health check (response time, throughput)
+- **Кэш статистика** в health check (L1/L2 hit rate, size)
 - **API availability** проверка с измерением response time
 - **Автоматическое определение** общего состояния здоровья (UP, DEGRADED, DOWN)
 
@@ -872,7 +1127,7 @@ Tweet API Service предоставляет REST API для:
 - **UsersApiClient** интерфейс для взаимодействия с users-api
 - **Circuit Breaker** для защиты от сбоев внешних сервисов
 - **Fallback стратегии** для graceful degradation при недоступности users-api
-- **Оптимизация производительности** для частых запросов
+- **Кэширование** информации о пользователях для оптимизации производительности
 - **Типизированные исключения** для обработки ошибок интеграции
 
 #### Circuit Breaker конфигурация
@@ -890,7 +1145,7 @@ Tweet API Service предоставляет REST API для:
 - **Асинхронная обработка** через message queues
 
 #### timeline-service (планируется):
-- **Оптимизация лент** для быстрого доступа
+- **Кэширование лент** для быстрого доступа
 - **Асинхронное обновление** при создании твитов
 - **Personalization** на основе поведения пользователя
 
@@ -899,6 +1154,8 @@ Tweet API Service предоставляет REST API для:
 ### 6.1 Производительность
 - **Время ответа**: < 200ms для чтения, < 500ms для записи
 - **Пропускная способность**: 1000 RPS на чтение, 100 RPS на запись
+- **Database performance**: Query execution time < 100ms
+- **Cache hit rate**: > 80% для часто запрашиваемых данных
 
 ### 6.2 Надежность и доступность
 - **Доступность**: 99.9% uptime
@@ -912,13 +1169,13 @@ Tweet API Service предоставляет REST API для:
 
 #### Производительность базы данных
 - **Риск**: Медленные запросы при росте объема данных
-- **Митигация**: Партиционирование таблиц, архивирование старых данных
-- **Мониторинг**: Время выполнения запросов, размер БД
+- **Митигация**: Составные индексы, партиционирование таблиц, архивирование старых данных
+- **Мониторинг**: Время выполнения запросов, использование индексов, размер БД
 
 #### Высокая нагрузка на чтение
 - **Риск**: Перегрузка сервера при запросах ленты новостей
-- **Митигация**: Read replicas, load balancing
-- **Мониторинг**: RPS, время ответа, использование CPU
+- **Митигация**: Redis кэширование, CDN, оптимизированная пагинация, read replicas
+- **Мониторинг**: RPS, время ответа, hit rate кэша, использование CPU
 
 #### Проблемы интеграции
 - **Риск**: Каскадные сбои при недоступности users-api
@@ -937,17 +1194,37 @@ Tweet API Service предоставляет REST API для:
 - **Митигация**: Strong authentication, input validation, rate limiting
 - **Мониторинг**: Попытки несанкционированного доступа, подозрительная активность
 
-## 8. Миграции и развертывание
+## 8. Критерии успешности и метрики
 
-### 8.1 Стратегия миграций
+### 8.1 Технические метрики
+- **Response time**: < 200ms для чтения, < 500ms для записи
+- **Throughput**: 1000 RPS для чтения, 100 RPS для записи
+- **Availability**: 99.9% uptime
+- **Error rate**: < 0.1% для всех операций
+
+### 8.2 Бизнес-метрики
+- **API success rate**: > 99.9%
+- **User satisfaction**: Measured through feedback
+- **Feature adoption**: Usage of new features
+- **Performance perception**: User-reported performance
+
+### 8.3 Операционные метрики
+- **Deployment frequency**: Weekly releases
+- **Lead time**: < 1 day from commit to production
+- **Mean time to recovery**: < 30 minutes
+- **Change failure rate**: < 5%
+
+## 9. Миграции и развертывание
+
+### 9.1 Стратегия миграций
 - **Создание схемы** tweet_api в PostgreSQL
-- **Поэтапное развертывание** таблиц и связей
+- **Поэтапное развертывание** таблиц, индексов и триггеров
 - **Версионирование миграций** для отслеживания изменений
 - **Rollback стратегии** для безопасного отката изменений
 
-## 9. Заключение
+## 10. Заключение
 
-### 9.1 Ключевые архитектурные решения
+### 10.1 Ключевые архитектурные решения
 1. **Микросервисная архитектура** с четким разделением ответственности
 2. **RESTful API** с стандартизированными DTO и обработкой ошибок
 3. **UUID идентификаторы** для поддержки распределенных систем
@@ -957,7 +1234,7 @@ Tweet API Service предоставляет REST API для:
 7. **Comprehensive validation** с Bean Validation и кастомными валидаторами
 8. **Circuit breaker pattern** для надежной интеграции с внешними сервисами
 
-### 9.2 Консистентность с users-api
+### 10.2 Консистентность с users-api
 
 #### Архитектурные принципы
 - **Слоистая архитектура**: controller → service → repository → entity
@@ -1179,18 +1456,20 @@ Tweet API Service предоставляет REST API для:
 
 #### Зависимости интеграции с users-api
 - **spring-boot-starter-web** - RestTemplate для HTTP клиента
+- **spring-boot-starter-cache** - кэширование с Caffeine
 - **spring-boot-starter-actuator** - мониторинг и health checks
 - **resilience4j-spring-boot2** - Circuit Breaker и Retry механизмы
 - **resilience4j-circuitbreaker** - Circuit Breaker функциональность
 - **resilience4j-retry** - Retry механизмы
 - **resilience4j-timelimiter** - Timeout конфигурация
+- **caffeine** - кэш провайдер
 - **micrometer-core** - метрики для мониторинга
 
 #### Структура пакетов обработки ошибок интеграции
-- **integration/exception/** - IntegrationException, UsersApiIntegrationException
+- **integration/exception/** - IntegrationException, UsersApiIntegrationException, CacheIntegrationException
 - **integration/fallback/** - FallbackStrategy, FallbackManager, UserFallbackStrategy, ConservativeUserFallbackStrategy, UserExistsFallbackStrategy, UserActiveFallbackStrategy
 - **integration/degradation/** - DegradationLevel, DegradationContext, DegradationManager, AdaptiveUsersApiService
-- **integration/performance/** - MultiLevelDataService, SmartDataService, CachedData
+- **integration/cache/** - MultiLevelUserCacheService, SmartUserCacheService, CachedUserData
 - **integration/metrics/** - AdvancedUsersApiMetrics, DetailedUsersApiHealthIndicator
 - **integration/handler/** - IntegrationExceptionHandler
 
@@ -1198,6 +1477,7 @@ Tweet API Service предоставляет REST API для:
 - **resilience4j.circuitbreaker**: failure-rate-threshold: 50%, wait-duration: 30s, sliding-window-size: 10, record-exceptions: UsersApiIntegrationException
 - **resilience4j.retry**: max-attempts: 3, wait-duration: 1s, retry-exceptions: UsersApiIntegrationException
 - **resilience4j.timelimiter**: timeout-duration: 5s
+- **spring.cache**: type: caffeine, maximumSize: 1000, expireAfterWrite: 5m, expireAfterAccess: 2m
 - **management.endpoints**: health, info, metrics, prometheus с детальной диагностикой
 - **users-api.fallback**: enabled: true, strategies: user-fallback, conservative-fallback
 - **users-api.degradation**: enabled: true, thresholds: moderate: 0.3, severe: 0.6, critical: 0.8
@@ -1206,13 +1486,14 @@ Tweet API Service предоставляет REST API для:
 - **resilience4j.circuitbreaker**: failure-rate-threshold: 50%, wait-duration: 30s, sliding-window-size: 10
 - **resilience4j.retry**: max-attempts: 3, wait-duration: 1s, retry-exceptions: UsersApiException
 - **resilience4j.timelimiter**: timeout-duration: 5s
+- **spring.cache**: type: caffeine, maximumSize: 1000, expireAfterWrite: 5m, expireAfterAccess: 2m
 - **users-api**: base-url, timeout, retry-attempts конфигурация
 
-### 9.3 Следующие шаги
+### 10.3 Следующие шаги
 
 #### Этап 1: Базовая инфраструктура
 1. **Создание миграций** для схемы базы данных
-2. **Создание JPA Entities** (Tweet, Like, Retweet)
+2. **Создание JPA Entities** (Tweet, Like, Retweet) с индексами
 3. **Реализация Repository интерфейсов** с кастомными запросами
 4. **Создание Request/Response DTOs** с OpenAPI аннотациями
 5. **Реализация MapStruct мапперов** (TweetMapper, LikeMapper, RetweetMapper)
@@ -1229,14 +1510,16 @@ Tweet API Service предоставляет REST API для:
 12. **Создание Error DTOs** для обработки ошибок
 13. **Настройка обработки ошибок** в контроллерах
 
-#### Этап 4: Интеграция
+#### Этап 4: Интеграция и производительность
 14. **Реализация UsersApiClient** для интеграции с users-api
 15. **Настройка Circuit Breaker** и Retry механизмов
+16. **Настройка кэширования** с Redis
+17. **Реализация системы пагинации** (Offset, Cursor, Hybrid)
 
-#### Этап 5: Тестирование
-16. **Настройка Contract Testing** с Pact
-17. **Unit тестирование** компонентов
-18. **Интеграционное тестирование** с TestContainers
+#### Этап 5: Мониторинг и тестирование
+18. **Реализация мониторинга** и метрик
+19. **Настройка Contract Testing** с Pact
+20. **Тестирование производительности** и нагрузочное тестирование
 
 ---
 
