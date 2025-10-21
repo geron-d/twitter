@@ -4,11 +4,9 @@
 Архитектура сервиса tweet-api todo\tweet\TWEET_API_ARCHITECTURE.md
 необходимо удалить дублирующие части и упорядосить архитектуру
 
-Есть проект twitter 
-Общая информация по проекту PROJECT_OVERVIEW.md
-Информация по общей библиотеке shared\common-lib\README.md
-Информация по users-api services\users-api\README.md
-Нужно написать план создания сервиса tweet-api.
+Есть проект twitter
 Архитектура сервиса tweet-api todo\tweet\TWEET_API_ARCHITECTURE.md
 Старый план todo\tweet\TWEET_API_COMMON.md
-Вся часть с архитектурой уже выполнена, нужно составить новый план реализации сервиса на основании архитектуры todo\tweet\TWEET_API_ARCHITECTURE.md
+Новый план todo\tweet\TWEET_API_COMMON_2.md
+Нужно составить новый план реализации запроса для управления твитами 
+POST   /api/v1/tweets                    # Создать твит
