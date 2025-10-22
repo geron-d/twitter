@@ -60,10 +60,11 @@
   dependencies: "#7"
   metadata: priority=P1, done=2025-01-27T16:02, note="Создан TweetResponseDto с полями id, userId, content, createdAt, updatedAt, JSON форматированием дат."
   
-- [ ] (P1) #9: MapStruct маппер — Реализовать TweetMapper
+- [x] (P1) [2025-01-27 16:04] #9: MapStruct маппер — Реализовать TweetMapper
   acceptance: "Маппер для конвертации CreateTweetRequestDto → Tweet → TweetResponseDto"
   estimated_time: "30 минут"
   dependencies: "#8"
+  metadata: priority=P1, done=2025-01-27T16:04, note="Создан TweetMapper с MapStruct, методы для конвертации между DTO и Entity, Spring component model."
 
 ### Этап 5: Сервисный слой (P1)
 - [ ] (P1) #10: Интерфейс TweetService — Определить контракт для создания твита

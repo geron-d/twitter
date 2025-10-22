@@ -12,6 +12,17 @@
 - Обновлен settings.gradle для включения нового модуля
 - Проект успешно компилируется
 
+### 16:04 — step 9 done — Создание MapStruct маппера — автор: assistant
+- Создан TweetMapper интерфейс в пакете com.twitter.mapper
+- Настроен MapStruct с Spring component model
+- Реализованы методы для конвертации:
+  - CreateTweetRequestDto → Tweet (toEntity)
+  - Tweet → TweetResponseDto (toResponseDto)
+  - Update операции (updateEntity)
+  - Tweet → CreateTweetRequestDto (toRequestDto)
+- MapStruct успешно сгенерировал реализацию TweetMapperImpl
+- Проект успешно компилируется
+
 ### 15:50 — step 3 done — Схема базы данных для твитов — автор: assistant
 - Создан sql/tweets.sql с миграцией для схемы tweet_api
 - Создан sql/tweets_test.sql для тестовой схемы tweet_api_test
@@ -29,6 +40,17 @@
 - Создана тестовая конфигурация application-test.yml
 - Проект успешно компилируется
 
+### 16:04 — step 9 done — Создание MapStruct маппера — автор: assistant
+- Создан TweetMapper интерфейс в пакете com.twitter.mapper
+- Настроен MapStruct с Spring component model
+- Реализованы методы для конвертации:
+  - CreateTweetRequestDto → Tweet (toEntity)
+  - Tweet → TweetResponseDto (toResponseDto)
+  - Update операции (updateEntity)
+  - Tweet → CreateTweetRequestDto (toRequestDto)
+- MapStruct успешно сгенерировал реализацию TweetMapperImpl
+- Проект успешно компилируется
+
 ### 15:54 — step 5 done — Реализация JPA Entity Tweet — автор: assistant
 - Создана JPA Entity Tweet в пакете com.twitter.entity
 - Добавлены все необходимые поля: id, userId, content, createdAt, updatedAt
@@ -37,6 +59,17 @@
 - Использованы аннотации Lombok (@Data, @Builder, @NoArgsConstructor, @AllArgsConstructor)
 - Добавлены Hibernate аннотации (@CreationTimestamp, @UpdateTimestamp)
 - Реализована кастомная валидация контента в @PrePersist/@PreUpdate
+- Проект успешно компилируется
+
+### 16:04 — step 9 done — Создание MapStruct маппера — автор: assistant
+- Создан TweetMapper интерфейс в пакете com.twitter.mapper
+- Настроен MapStruct с Spring component model
+- Реализованы методы для конвертации:
+  - CreateTweetRequestDto → Tweet (toEntity)
+  - Tweet → TweetResponseDto (toResponseDto)
+  - Update операции (updateEntity)
+  - Tweet → CreateTweetRequestDto (toRequestDto)
+- MapStruct успешно сгенерировал реализацию TweetMapperImpl
 - Проект успешно компилируется
 
 ### 15:56 — step 6 done — Создание TweetRepository — автор: assistant
@@ -49,6 +82,17 @@
 - Добавлены методы для подсчёта твитов и массового удаления
 - Проект успешно компилируется
 
+### 16:04 — step 9 done — Создание MapStruct маппера — автор: assistant
+- Создан TweetMapper интерфейс в пакете com.twitter.mapper
+- Настроен MapStruct с Spring component model
+- Реализованы методы для конвертации:
+  - CreateTweetRequestDto → Tweet (toEntity)
+  - Tweet → TweetResponseDto (toResponseDto)
+  - Update операции (updateEntity)
+  - Tweet → CreateTweetRequestDto (toRequestDto)
+- MapStruct успешно сгенерировал реализацию TweetMapperImpl
+- Проект успешно компилируется
+
 ### 16:00 — step 7 done — Создание CreateTweetRequestDto — автор: assistant
 - Создан CreateTweetRequestDto в пакете com.twitter.dto.request
 - Добавлена валидация @NotBlank для поля content
@@ -58,6 +102,17 @@
 - Добавлена подробная JavaDoc документация
 - Проект успешно компилируется
 
+### 16:04 — step 9 done — Создание MapStruct маппера — автор: assistant
+- Создан TweetMapper интерфейс в пакете com.twitter.mapper
+- Настроен MapStruct с Spring component model
+- Реализованы методы для конвертации:
+  - CreateTweetRequestDto → Tweet (toEntity)
+  - Tweet → TweetResponseDto (toResponseDto)
+  - Update операции (updateEntity)
+  - Tweet → CreateTweetRequestDto (toRequestDto)
+- MapStruct успешно сгенерировал реализацию TweetMapperImpl
+- Проект успешно компилируется
+
 ### 16:02 — step 8 done — Создание TweetResponseDto — автор: assistant
 - Создан TweetResponseDto в пакете com.twitter.dto.response
 - Добавлены все необходимые поля: id, userId, content, createdAt, updatedAt
@@ -65,4 +120,15 @@
 - Добавлено JSON форматирование дат с @JsonFormat
 - Использованы Lombok аннотации (@Data, @Builder, @NoArgsConstructor, @AllArgsConstructor)
 - Добавлена подробная JavaDoc документация
+- Проект успешно компилируется
+
+### 16:04 — step 9 done — Создание MapStruct маппера — автор: assistant
+- Создан TweetMapper интерфейс в пакете com.twitter.mapper
+- Настроен MapStruct с Spring component model
+- Реализованы методы для конвертации:
+  - CreateTweetRequestDto → Tweet (toEntity)
+  - Tweet → TweetResponseDto (toResponseDto)
+  - Update операции (updateEntity)
+  - Tweet → CreateTweetRequestDto (toRequestDto)
+- MapStruct успешно сгенерировал реализацию TweetMapperImpl
 - Проект успешно компилируется
