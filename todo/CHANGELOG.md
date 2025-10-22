@@ -84,3 +84,15 @@
 - Добавлена подробная JavaDoc документация с описанием процесса
 - Описаны возможные исключения (ConstraintViolationException, UserNotFoundException, TweetCreationException)
 - Проект успешно компилируется
+
+### 16:08 — step 11 done — Реализация TweetServiceImpl — автор: assistant
+- Создан TweetServiceImpl в пакете com.twitter.service.impl
+- Реализован полный цикл создания твита:
+  - Валидация входных данных с Bean Validation
+  - Проверка существования пользователя (placeholder)
+  - Конвертация DTO → Entity → Response DTO
+  - Сохранение в базу данных
+- Добавлены Spring аннотации (@Service, @Transactional, @RequiredArgsConstructor)
+- Реализовано логирование с SLF4J (@Slf4j)
+- Добавлена обработка исключений и транзакционность
+- Проект успешно компилируется

@@ -73,10 +73,11 @@
   dependencies: "#9"
   metadata: priority=P1, done=2025-01-27T16:06, note="Создан интерфейс TweetService с методом createTweet, документацией и описанием исключений."
   
-- [ ] (P1) #11: TweetServiceImpl — Реализовать бизнес-логику создания твита
+- [x] (P1) [2025-01-27 16:08] #11: TweetServiceImpl — Реализовать бизнес-логику создания твита
   acceptance: "Валидация контента, проверка пользователя, сохранение твита"
   estimated_time: "1 час"
   dependencies: "#10"
+  metadata: priority=P1, done=2025-01-27T16:08, note="Создан TweetServiceImpl с полной бизнес-логикой, валидацией, транзакциями, логированием. Placeholder для users-api интеграции."
 
 ### Этап 6: Интеграция с users-api (P1)
 - [ ] (P1) #12: Клиент Users API — Реализовать HTTP клиент для проверки пользователя
