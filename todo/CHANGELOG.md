@@ -48,3 +48,12 @@
 - Реализованы методы для работы с временными диапазонами
 - Добавлены методы для подсчёта твитов и массового удаления
 - Проект успешно компилируется
+
+### 16:00 — step 7 done — Создание CreateTweetRequestDto — автор: assistant
+- Создан CreateTweetRequestDto в пакете com.twitter.dto.request
+- Добавлена валидация @NotBlank для поля content
+- Реализована валидация @Size(min=1, max=280) для длины контента
+- Добавлена валидация @NotNull для поля userId
+- Использованы Lombok аннотации (@Data, @Builder, @NoArgsConstructor, @AllArgsConstructor)
+- Добавлена подробная JavaDoc документация
+- Проект успешно компилируется

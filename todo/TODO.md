@@ -48,10 +48,11 @@
   metadata: priority=P1, done=2025-01-27T15:56, note="Создан TweetRepository с JpaRepository, кастомными методами для поиска по пользователю, пагинации, поиска по контенту."
 
 ### Этап 4: DTO и маппинг (P1)
-- [ ] (P1) #7: Request DTO для создания твита — Создать CreateTweetRequestDto
+- [x] (P1) [2025-01-27 16:00] #7: Request DTO для создания твита — Создать CreateTweetRequestDto
   acceptance: "DTO с полями content (1-280 символов), userId с валидацией"
   estimated_time: "30 минут"
   dependencies: "#6"
+  metadata: priority=P1, done=2025-01-27T16:00, note="Создан CreateTweetRequestDto с валидацией @NotBlank, @Size для content и @NotNull для userId."
   
 - [ ] (P1) #8: Response DTO для твита — Создать TweetResponseDto
   acceptance: "DTO с полями id, userId, content, createdAt, updatedAt"
