@@ -1,3 +1,4 @@
+-- Create tweets table
 CREATE TABLE IF NOT EXISTS tweets (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL,
@@ -28,6 +29,6 @@ END;
 $$ language 'plpgsql';
 
 CREATE TRIGGER update_tweets_updated_at 
-    BEFORE UPDATE ON tweet_api.tweets 
+    BEFORE UPDATE ON tweets 
     FOR EACH ROW 
-    EXECUTE FUNCTION tweet_api.update_updated_at_column();
+    EXECUTE FUNCTION update_updated_at_column();
