@@ -28,16 +28,18 @@
   dependencies: "#2"
   metadata: priority=P1, done=2025-01-27T15:50, note="Созданы SQL миграции для схемы tweet_api и tweet_api_test, добавлены индексы, триггеры, обновлена конфигурация БД."
   
-- [ ] (P1) #4: Конфигурация приложения — Создать application.yml для порта 8082
+- [x] (P1) [2025-01-27 15:52] #4: Конфигурация приложения — Создать application.yml для порта 8082
   acceptance: "Конфигурация порта, базы данных, подключение к PostgreSQL"
   estimated_time: "30 минут"
   dependencies: "#3"
+  metadata: priority=P1, done=2025-01-27T15:52, note="Конфигурация application.yml и application-test.yml настроена для порта 8082, PostgreSQL, трейсинга и логирования."
 
 ### Этап 3: Модель данных (P1)
-- [ ] (P1) #5: Реализация JPA Entity Tweet — Создать сущность Tweet
+- [x] (P1) [2025-01-27 15:54] #5: Реализация JPA Entity Tweet — Создать сущность Tweet
   acceptance: "Класс Tweet с полями id, userId, content, createdAt, updatedAt"
   estimated_time: "1 час"
   dependencies: "#4"
+  metadata: priority=P1, done=2025-01-27T15:54, note="Создана JPA Entity Tweet с валидацией, маппингом на таблицу tweets, аннотациями Lombok и Hibernate."
   
 - [ ] (P1) #6: Создание TweetRepository — Реализовать репозиторий для твитов
   acceptance: "TweetRepository с методом save() и кастомными запросами"

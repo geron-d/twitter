@@ -20,3 +20,21 @@
 - Добавлены CHECK constraints для валидации контента
 - Обновлен application.yml для использования схемы tweet_api
 - Создан application-test.yml для тестовой конфигурации
+
+### 15:52 — step 4 done — Конфигурация приложения — автор: assistant
+- Проверена и подтверждена конфигурация application.yml для порта 8082
+- Настроено подключение к PostgreSQL без отдельной схемы
+- Добавлены настройки трейсинга и мониторинга
+- Настроено логирование с трейсингом
+- Создана тестовая конфигурация application-test.yml
+- Проект успешно компилируется
+
+### 15:54 — step 5 done — Реализация JPA Entity Tweet — автор: assistant
+- Создана JPA Entity Tweet в пакете com.twitter.entity
+- Добавлены все необходимые поля: id, userId, content, createdAt, updatedAt
+- Настроен маппинг на таблицу tweets с правильными типами данных
+- Добавлена валидация полей (@NotNull, @NotBlank, @Size)
+- Использованы аннотации Lombok (@Data, @Builder, @NoArgsConstructor, @AllArgsConstructor)
+- Добавлены Hibernate аннотации (@CreationTimestamp, @UpdateTimestamp)
+- Реализована кастомная валидация контента в @PrePersist/@PreUpdate
+- Проект успешно компилируется
