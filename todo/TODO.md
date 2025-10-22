@@ -67,10 +67,11 @@
   metadata: priority=P1, done=2025-01-27T16:04, note="Создан TweetMapper с MapStruct, методы для конвертации между DTO и Entity, Spring component model."
 
 ### Этап 5: Сервисный слой (P1)
-- [ ] (P1) #10: Интерфейс TweetService — Определить контракт для создания твита
+- [x] (P1) [2025-01-27 16:06] #10: Интерфейс TweetService — Определить контракт для создания твита
   acceptance: "Метод createTweet(CreateTweetRequestDto) возвращает TweetResponseDto"
   estimated_time: "15 минут"
   dependencies: "#9"
+  metadata: priority=P1, done=2025-01-27T16:06, note="Создан интерфейс TweetService с методом createTweet, документацией и описанием исключений."
   
 - [ ] (P1) #11: TweetServiceImpl — Реализовать бизнес-логику создания твита
   acceptance: "Валидация контента, проверка пользователя, сохранение твита"
