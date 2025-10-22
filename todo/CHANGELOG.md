@@ -57,3 +57,12 @@
 - Использованы Lombok аннотации (@Data, @Builder, @NoArgsConstructor, @AllArgsConstructor)
 - Добавлена подробная JavaDoc документация
 - Проект успешно компилируется
+
+### 16:02 — step 8 done — Создание TweetResponseDto — автор: assistant
+- Создан TweetResponseDto в пакете com.twitter.dto.response
+- Добавлены все необходимые поля: id, userId, content, createdAt, updatedAt
+- Использованы правильные типы данных (UUID, String, LocalDateTime)
+- Добавлено JSON форматирование дат с @JsonFormat
+- Использованы Lombok аннотации (@Data, @Builder, @NoArgsConstructor, @AllArgsConstructor)
+- Добавлена подробная JavaDoc документация
+- Проект успешно компилируется

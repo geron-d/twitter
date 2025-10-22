@@ -54,10 +54,11 @@
   dependencies: "#6"
   metadata: priority=P1, done=2025-01-27T16:00, note="Создан CreateTweetRequestDto с валидацией @NotBlank, @Size для content и @NotNull для userId."
   
-- [ ] (P1) #8: Response DTO для твита — Создать TweetResponseDto
+- [x] (P1) [2025-01-27 16:02] #8: Response DTO для твита — Создать TweetResponseDto
   acceptance: "DTO с полями id, userId, content, createdAt, updatedAt"
   estimated_time: "30 минут"
   dependencies: "#7"
+  metadata: priority=P1, done=2025-01-27T16:02, note="Создан TweetResponseDto с полями id, userId, content, createdAt, updatedAt, JSON форматированием дат."
   
 - [ ] (P1) #9: MapStruct маппер — Реализовать TweetMapper
   acceptance: "Маппер для конвертации CreateTweetRequestDto → Tweet → TweetResponseDto"
