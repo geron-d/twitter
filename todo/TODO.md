@@ -41,10 +41,11 @@
   dependencies: "#4"
   metadata: priority=P1, done=2025-01-27T15:54, note="Создана JPA Entity Tweet с валидацией, маппингом на таблицу tweets, аннотациями Lombok и Hibernate."
   
-- [ ] (P1) #6: Создание TweetRepository — Реализовать репозиторий для твитов
+- [x] (P1) [2025-01-27 15:56] #6: Создание TweetRepository — Реализовать репозиторий для твитов
   acceptance: "TweetRepository с методом save() и кастомными запросами"
   estimated_time: "30 минут"
   dependencies: "#5"
+  metadata: priority=P1, done=2025-01-27T15:56, note="Создан TweetRepository с JpaRepository, кастомными методами для поиска по пользователю, пагинации, поиска по контенту."
 
 ### Этап 4: DTO и маппинг (P1)
 - [ ] (P1) #7: Request DTO для создания твита — Создать CreateTweetRequestDto
