@@ -80,10 +80,11 @@
   metadata: priority=P1, done=2025-01-27T16:08, note="Создан TweetServiceImpl с полной бизнес-логикой, валидацией, транзакциями, логированием. Placeholder для users-api интеграции."
 
 ### Этап 6: Интеграция с users-api (P1)
-- [ ] (P1) #12: Клиент Users API — Реализовать HTTP клиент для проверки пользователя
+- [x] (P1) [2025-01-27 16:25] #12: Клиент Users API — Реализовать HTTP клиент для проверки пользователя
   acceptance: "UsersApiClient с методом existsUser(userId)"
   estimated_time: "1 час"
   dependencies: "#11"
+  metadata: priority=P1, done=2025-01-27T16:25, note="Централизация валидации: проверка пользователя перенесена в TweetValidator. TweetServiceImpl упрощен, вся валидация централизована в TweetValidatorImpl с интеграцией UserGateway. Проект компилируется успешно."
   
 - [ ] (P1) #13: Валидатор пользователя — Создать кастомный валидатор @UserExists
   acceptance: "Валидатор проверяет существование пользователя через users-api"

@@ -104,3 +104,42 @@
 - Упрощён TweetServiceImpl - теперь использует TweetValidator
 - Сохранена вся функциональность валидации
 - Проект успешно компилируется
+
+### 16:10 — step 12 done — Клиент Users API — автор: assistant
+- Создан интерфейс UsersApiClient в пакете com.twitter.client
+- Реализован UsersApiClientImpl с WebClient для HTTP запросов к users-api
+- Создан UsersApiException для обработки ошибок интеграции
+- Добавлена конфигурация WebClientConfig с настройками таймаутов
+- Обновлён application.yml с настройками users-api (base-url, timeout)
+- Интегрирован UsersApiClient в TweetServiceImpl для проверки существования пользователя
+- Добавлена зависимость spring-boot-starter-webflux в build.gradle
+- Проект успешно компилируется
+
+### 16:15 — step 12 refactored — Рефакторинг на Feign Client — автор: assistant
+- Удалены WebClient зависимости и конфигурация
+- Добавлена зависимость spring-cloud-starter-openfeign в build.gradle
+- Добавлен Spring Cloud BOM в корневой build.gradle
+- Переписан UsersApiClient как Feign Client с @FeignClient аннотацией
+- Создана конфигурация FeignConfig с @EnableFeignClients
+- Обновлён application.yml с настройками Feign (timeout, logging)
+- Упрощён TweetServiceImpl - убрана обработка UsersApiException
+- Удалены ненужные файлы: UsersApiClientImpl, WebClientConfig, UsersApiException
+- Проект успешно компилируется с Feign Client
+
+### 16:20 — step 12 architecture refactored — Архитектурный рефакторинг Gateway Pattern — автор: assistant
+- Создан UserGateway в пакете com.twitter.gateway для бизнес-логики
+- Упрощён UsersApiClient до чистого Feign Client без default методов
+- Разделена ответственность: UsersApiClient - HTTP запросы, UserGateway - бизнес-логика
+- Обновлён TweetServiceImpl для использования UserGateway вместо UsersApiClient
+- Добавлено подробное логирование в UserGateway
+- Улучшена архитектура согласно Gateway Pattern
+- Проект успешно компилируется
+
+### 16:25 — step 12 validation centralized — Централизация валидации в TweetValidator — автор: assistant
+- Перенесена проверка существования пользователя из TweetServiceImpl в TweetValidatorImpl
+- Добавлена интеграция UserGateway в TweetValidatorImpl
+- Упрощён TweetServiceImpl - убрана дублирующая логика валидации
+- Централизована вся валидация в TweetValidator (контент + пользователь)
+- Улучшена архитектура: единая точка валидации для всех операций с твитами
+- Добавлено подробное логирование в TweetValidatorImpl
+- Проект успешно компилируется

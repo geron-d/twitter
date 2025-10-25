@@ -1,6 +1,7 @@
 package com.twitter.validation;
 
 import com.twitter.dto.request.CreateTweetRequestDto;
+import com.twitter.gateway.UserGateway;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
@@ -24,6 +25,7 @@ import java.util.UUID;
 public class TweetValidatorImpl implements TweetValidator {
 
     private final Validator validator;
+    private final UserGateway userGateway;
 
     /**
      * Performs complete validation for tweet creation.
@@ -68,22 +70,20 @@ public class TweetValidatorImpl implements TweetValidator {
      * Validates that the user exists in the system.
      * <p>
      * This method checks if the provided user ID corresponds to an existing user.
-     * It will be integrated with users-api service for actual user validation.
+     * It integrates with users-api service through UserGateway for actual user validation.
      *
      * @param userId the user ID to validate
      * @throws RuntimeException if user doesn't exist
      */
     @Override
     public void validateUserExists(UUID userId) {
-        // TODO: Replace with actual users-api integration
-        // For now, we'll just log and assume user exists
-        log.debug("Validating user existence for ID: {}", userId);
-
-        // Placeholder validation - in real implementation this would call users-api
         if (userId == null) {
-            throw new RuntimeException("User ID cannot be null");
+            throw new IllegalArgumentException("User ID cannot be null");
         }
 
-        log.debug("User validation passed for ID: {}", userId);
+        boolean userExists = userGateway.existsUser(userId);
+        if (!userExists) {
+            throw new IllegalArgumentException("User does not exist: " + userId);
+        }
     }
 }
