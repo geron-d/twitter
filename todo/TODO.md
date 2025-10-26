@@ -85,17 +85,20 @@
   estimated_time: "1 час"
   dependencies: "#11"
   metadata: priority=P1, done=2025-01-27T16:25, note="Централизация валидации: проверка пользователя перенесена в TweetValidator. TweetServiceImpl упрощен, вся валидация централизована в TweetValidatorImpl с интеграцией UserGateway. Проект компилируется успешно."
-  
-- [ ] (P1) #13: Валидатор пользователя — Создать кастомный валидатор @UserExists
-  acceptance: "Валидатор проверяет существование пользователя через users-api"
-  estimated_time: "45 минут"
+
+### Этап 6.5: Валидация (P1)
+- [x] (P1) [2025-01-27 16:25] #13: TweetValidator — Реализовать валидатор для твитов
+  acceptance: "TweetValidator с методами валидации контента и проверки пользователя"
+  estimated_time: "30 минут"
   dependencies: "#12"
+  metadata: priority=P1, done=2025-01-27T16:25, note="Создан TweetValidator интерфейс и TweetValidatorImpl с централизованной валидацией контента и проверки пользователя через UserGateway."
 
 ### Этап 7: REST API контроллер (P1)
-- [ ] (P1) #14: TweetController — Реализовать POST /api/v1/tweets эндпоинт
+- [x] (P1) [2025-01-27 16:32] #14: TweetController — Реализовать POST /api/v1/tweets эндпоинт
   acceptance: "Контроллер принимает CreateTweetRequestDto, возвращает TweetResponseDto"
   estimated_time: "45 минут"
   dependencies: "#13"
+  metadata: priority=P1, done=2025-01-27T16:32, note="Создан TweetController с POST /api/v1/tweets эндпоинтом, использованием @LoggableRequest для логирования, валидацией через @Valid, возвратом 201 Created. Проект компилируется успешно."
   
 - [ ] (P1) #15: Обработка ошибок — Реализовать обработку ошибок валидации
   acceptance: "Обработка ошибок валидации с детальными сообщениями"

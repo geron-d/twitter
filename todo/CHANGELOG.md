@@ -143,3 +143,14 @@
 - Улучшена архитектура: единая точка валидации для всех операций с твитами
 - Добавлено подробное логирование в TweetValidatorImpl
 - Проект успешно компилируется
+
+### 16:32 — step 13 and 14 done — Реализация TweetValidator и TweetController — автор: assistant
+- Добавлен task #13 в TODO.md: TweetValidator реализован ранее в рамках task #12
+- Создан TweetController с POST /api/v1/tweets эндпоинтом
+- Использована аннотация @RestController с @RequestMapping("/api/v1/tweets")
+- Добавлен метод createTweet с @PostMapping и аннотацией @Valid для валидации
+- Интегрирован @LoggableRequest для логирования всех запросов
+- Возвращается ResponseEntity с HTTP статусом 201 CREATED
+- Добавлена документация с @param и @return тегами
+- Проект компилируется без ошибок
+- Controller готов для интеграционного тестирования
