@@ -1,3 +1,4 @@
+- протестировать создание
 - заимпортить ошибки в TweetService
 - сделать ошибки по аналогии с UserValidatorImpl
 - сделать в users-api existsUser и использовать в tweet

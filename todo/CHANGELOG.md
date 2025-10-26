@@ -154,3 +154,25 @@
 - Добавлена документация с @param и @return тегами
 - Проект компилируется без ошибок
 - Controller готов для интеграционного тестирования
+
+### 16:35 — step 15 done — Обработка ошибок валидации — автор: assistant
+- Обработка ошибок реализована автоматически через GlobalExceptionHandler из common-lib
+- Подключена автоматическая обработка всех типов исключений через @RestControllerAdvice
+- Обрабатываются ConstraintViolationException → 400 Bad Request
+- Обрабатываются RuntimeException → 500 Internal Server Error
+- Все ошибки возвращают RFC 7807 Problem Details формат
+- Добавлено логирование всех исключений через автоматический механизм
+- Не требуется дополнительной конфигурации - работает из коробки
+- Проект успешно компилируется
+
+### 16:40 — step 16 done — Обновление Docker Compose для tweet-api — автор: assistant
+- Добавлен сервис tweet-api в docker-compose.yml
+- Настроен порт 8082 для tweet-api сервиса
+- Добавлены зависимости от postgres и users-api с условием service_healthy
+- Настроены переменные окружения для интеграции с users-api (USERS_API_URL)
+- Добавлен health check с использованием curl для порта 8082
+- Настроен volume для логов ./logs:/app/logs
+- Обновлён application.yml для поддержки переменных окружения:
+  - SPRING_DATASOURCE_URL, SPRING_DATASOURCE_USERNAME, SPRING_DATASOURCE_PASSWORD
+  - USERS_API_URL для Feign client
+- Сервис готов к запуску через docker-compose up

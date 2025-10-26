@@ -100,16 +100,18 @@
   dependencies: "#13"
   metadata: priority=P1, done=2025-01-27T16:32, note="Создан TweetController с POST /api/v1/tweets эндпоинтом, использованием @LoggableRequest для логирования, валидацией через @Valid, возвратом 201 Created. Проект компилируется успешно."
   
-- [ ] (P1) #15: Обработка ошибок — Реализовать обработку ошибок валидации
+- [x] (P1) [2025-01-27 16:35] #15: Обработка ошибок — Реализовать обработку ошибок валидации
   acceptance: "Обработка ошибок валидации с детальными сообщениями"
   estimated_time: "30 минут"
   dependencies: "#14"
+  metadata: priority=P1, done=2025-01-27T16:35, note="Обработка ошибок реализована автоматически через GlobalExceptionHandler из common-lib. Обрабатываются все типы исключений: ConstraintViolationException (400), RuntimeException (500), другие типы валидации. Все ошибки возвращают RFC 7807 Problem Details формат."
 
 ### Этап 8: Конфигурация и тестирование (P2)
-- [ ] (P2) #16: Обновление Docker Compose — Добавить tweet-api в docker-compose.yml
+- [x] (P2) [2025-01-27 16:40] #16: Обновление Docker Compose — Добавить tweet-api в docker-compose.yml
   acceptance: "Сервис tweet-api в compose с зависимостью от users-api"
   estimated_time: "15 минут"
   dependencies: "#15"
+  metadata: priority=P2, done=2025-01-27T16:40, note="Добавлен сервис tweet-api в docker-compose.yml с портом 8082, зависимостями от postgres и users-api, настройками переменных окружения, health checks, volume для логов. Обновлён application.yml для поддержки переменных окружения для Docker."
   
 - [ ] (P2) #17: Unit тесты — Создать тесты для TweetService и TweetController
   acceptance: "Тесты для создания твита, валидации, обработки ошибок"
