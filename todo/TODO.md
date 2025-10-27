@@ -140,14 +140,21 @@ Response: { "exists": true/false }
   - Указано, что метод выполняет эффективную проверку без загрузки entity
   - Описано использование repository's existsById с оптимизированным SQL
 
-- [ ] **(P1) #6: Реализовать метод в UserServiceImpl**  
+- [x] **(P1) #6: Реализовать метод в UserServiceImpl**  
+  Выполнено: 2025-01-27  
   Описание: Реализовать логику в `services/users-api/.../UserServiceImpl.java`.  
-  Статус: To Do  
   Acceptance:
   - Использован `userRepository.existsById(id)` для эффективной проверки
   - Добавлена обработка edge cases (null, etc.)
   - Добавлено логирование операций
   - Обеспечена обработка возможных исключений
+  
+  **Результат:**
+  - Добавлена реализация метода existsById в UserServiceImpl
+  - Использован userRepository.existsById(id) для оптимальной производительности
+  - Добавлена проверка на null с обработкой edge cases
+  - Добавлено логирование для debugging и мониторинга
+  - Метод использует @Override аннотацию
 
 - [ ] **(P1) #7: Добавить метод в UserApi интерфейс**  
   Описание: Добавить endpoint в OpenAPI интерфейс с аннотациями.  
