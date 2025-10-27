@@ -1,5 +1,4 @@
-- заимпортить ошибки в TweetService
-- сделать в users-api existsUser и использовать в tweet
+- сделать в users-api existsUser и использовать в tweet для валидации пользователя вместо getUserById
 - open-api для контроллера
 
 Есть проект twitter
