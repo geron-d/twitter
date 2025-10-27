@@ -126,13 +126,19 @@ Response: { "exists": true/false }
   - Настроены @Schema аннотации для OpenAPI документации
   - DTO минималистичный и оптимизированный для передачи только boolean значения
 
-- [ ] **(P1) #5: Добавить метод в UserService интерфейс**  
+- [x] **(P1) #5: Добавить метод в UserService интерфейс**  
+  Выполнено: 2025-01-27  
   Описание: Добавить метод `boolean existsById(UUID id)` в `services/users-api/.../UserService.java`.  
-  Статус: To Do  
   Acceptance:
   - Добавлен метод в интерфейс с документацией
   - Указано возвращаемое значение boolean
   - Добавлен Javadoc с описанием поведения
+  
+  **Результат:**
+  - Добавлен метод boolean existsById(UUID id) в интерфейс UserService
+  - Добавлен полный Javadoc с описанием функциональности
+  - Указано, что метод выполняет эффективную проверку без загрузки entity
+  - Описано использование repository's existsById с оптимизированным SQL
 
 - [ ] **(P1) #6: Реализовать метод в UserServiceImpl**  
   Описание: Реализовать логику в `services/users-api/.../UserServiceImpl.java`.  
