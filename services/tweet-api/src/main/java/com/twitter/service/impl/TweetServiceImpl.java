@@ -33,7 +33,7 @@ public class TweetServiceImpl implements TweetService {
         tweetValidator.validateForCreate(requestDto);
 
         Tweet tweet = tweetMapper.toEntity(requestDto);
-        Tweet savedTweet = tweetRepository.save(tweet);
+        Tweet savedTweet = tweetRepository.saveAndFlush(tweet);
         return tweetMapper.toResponseDto(savedTweet);
     }
 }
