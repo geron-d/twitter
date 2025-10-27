@@ -1,242 +1,160 @@
-# TODO - Реализация POST /api/v1/tweets (Создание твита)
+# TODO
 
 ## Meta
-- project: twitter-tweet-api
-- feature: POST /api/v1/tweets - Создание твита
+- project: Twitter Twitter microservice validation refactoring
 - updated: 2025-01-27
-- port: 8082
-- database: PostgreSQL (схема: tweet_api)
+- changelog: todo/CHANGELOG.md
 
 ## Tasks
 
-### Этап 1: Анализ и проектирование (P1)
-- [X] (P1) #1: Анализ требований для POST /api/v1/tweets — Определить входные/выходные данные и бизнес-правила
-  acceptance: "Понять структуру запроса, валидацию, интеграцию с users-api"
-  estimated_time: "30 минут"
-  dependencies: "Нет"
+### Analysis Phase
 
-### Этап 2: Инфраструктура проекта (P1)
-- [x] (P1) [2025-01-27 15:46] #2: Создание структуры проекта tweet-api — Создать Gradle модуль в services/
-  acceptance: "build.gradle + базовая структура папок + Application.java + Dockerfile"
-  estimated_time: "1 час"
-  dependencies: "#1"
-  metadata: priority=P1, done=2025-01-27T15:46, note="Создана структура проекта, build.gradle, Application.java, Dockerfile, application.yml, .dockerignore. Проект компилируется успешно."
+- [x] (P1) #1: Анализ текущей реализации TweetValidatorImpl — Изучение структуры и использования исключений  
+  acceptance: "Понять текущую реализацию и используемые типы исключений"
   
-- [x] (P1) [2025-01-27 15:50] #3: Схема базы данных для твитов — Создать SQL миграцию для таблицы tweets
-  acceptance: "SQL миграция для таблицы tweets с индексами"
-  estimated_time: "1 час"
-  dependencies: "#2"
-  metadata: priority=P1, done=2025-01-27T15:50, note="Созданы SQL миграции для схемы tweet_api и tweet_api_test, добавлены индексы, триггеры, обновлена конфигурация БД."
+- [x] (P1) #2: Анализ структуры исключений в UsersValidatorImpl — Сравнительный анализ паттернов валидации  
+  acceptance: "Выявить паттерны использования специализированных исключений"
   
-- [x] (P1) [2025-01-27 15:52] #4: Конфигурация приложения — Создать application.yml для порта 8082
-  acceptance: "Конфигурация порта, базы данных, подключение к PostgreSQL"
-  estimated_time: "30 минут"
-  dependencies: "#3"
-  metadata: priority=P1, done=2025-01-27T15:52, note="Конфигурация application.yml и application-test.yml настроена для порта 8082, PostgreSQL, трейсинга и логирования."
+- [x] (P1) #3: Анализ GlobalExceptionHandler — Изучение обработки исключений  
+  acceptance: "Понять как обрабатываются разные типы validation exceptions"
 
-### Этап 3: Модель данных (P1)
-- [x] (P1) [2025-01-27 15:54] #5: Реализация JPA Entity Tweet — Создать сущность Tweet
-  acceptance: "Класс Tweet с полями id, userId, content, createdAt, updatedAt"
-  estimated_time: "1 час"
-  dependencies: "#4"
-  metadata: priority=P1, done=2025-01-27T15:54, note="Создана JPA Entity Tweet с валидацией, маппингом на таблицу tweets, аннотациями Lombok и Hibernate."
-  
-- [x] (P1) [2025-01-27 15:56] #6: Создание TweetRepository — Реализовать репозиторий для твитов
-  acceptance: "TweetRepository с методом save() и кастомными запросами"
-  estimated_time: "30 минут"
-  dependencies: "#5"
-  metadata: priority=P1, done=2025-01-27T15:56, note="Создан TweetRepository с JpaRepository, кастомными методами для поиска по пользователю, пагинации, поиска по контенту."
+### Design Phase
 
-### Этап 4: DTO и маппинг (P1)
-- [x] (P1) [2025-01-27 16:00] #7: Request DTO для создания твита — Создать CreateTweetRequestDto
-  acceptance: "DTO с полями content (1-280 символов), userId с валидацией"
-  estimated_time: "30 минут"
-  dependencies: "#6"
-  metadata: priority=P1, done=2025-01-27T16:00, note="Создан CreateTweetRequestDto с валидацией @NotBlank, @Size для content и @NotNull для userId."
+- [ ] (P1) #4: Разработка стратегии рефакторинга — Определение типов исключений для разных валидаций  
+  acceptance: "Определить какие ValidationException использовать для каждого типа ошибки"
   
-- [x] (P1) [2025-01-27 16:02] #8: Response DTO для твита — Создать TweetResponseDto
-  acceptance: "DTO с полями id, userId, content, createdAt, updatedAt"
-  estimated_time: "30 минут"
-  dependencies: "#7"
-  metadata: priority=P1, done=2025-01-27T16:02, note="Создан TweetResponseDto с полями id, userId, content, createdAt, updatedAt, JSON форматированием дат."
-  
-- [x] (P1) [2025-01-27 16:04] #9: MapStruct маппер — Реализовать TweetMapper
-  acceptance: "Маппер для конвертации CreateTweetRequestDto → Tweet → TweetResponseDto"
-  estimated_time: "30 минут"
-  dependencies: "#8"
-  metadata: priority=P1, done=2025-01-27T16:04, note="Создан TweetMapper с MapStruct, методы для конвертации между DTO и Entity, Spring component model."
+  **Детали:**
+  - `FormatValidationException` - для Bean Validation violations и пустого контента
+  - `BusinessRuleValidationException` - для несуществующего пользователя
+  - Удалить использование `ConstraintViolationException` и `IllegalArgumentException`
 
-### Этап 5: Сервисный слой (P1)
-- [x] (P1) [2025-01-27 16:06] #10: Интерфейс TweetService — Определить контракт для создания твита
-  acceptance: "Метод createTweet(CreateTweetRequestDto) возвращает TweetResponseDto"
-  estimated_time: "15 минут"
-  dependencies: "#9"
-  metadata: priority=P1, done=2025-01-27T16:06, note="Создан интерфейс TweetService с методом createTweet, документацией и описанием исключений."
-  
-- [x] (P1) [2025-01-27 16:08] #11: TweetServiceImpl — Реализовать бизнес-логику создания твита
-  acceptance: "Валидация контента, проверка пользователя, сохранение твита"
-  estimated_time: "1 час"
-  dependencies: "#10"
-  metadata: priority=P1, done=2025-01-27T16:08, note="Создан TweetServiceImpl с полной бизнес-логикой, валидацией, транзакциями, логированием. Placeholder для users-api интеграции."
+### Implementation Phase
 
-### Этап 6: Интеграция с users-api (P1)
-- [x] (P1) [2025-01-27 16:25] #12: Клиент Users API — Реализовать HTTP клиент для проверки пользователя
-  acceptance: "UsersApiClient с методом existsUser(userId)"
-  estimated_time: "1 час"
-  dependencies: "#11"
-  metadata: priority=P1, done=2025-01-27T16:25, note="Централизация валидации: проверка пользователя перенесена в TweetValidator. TweetServiceImpl упрощен, вся валидация централизована в TweetValidatorImpl с интеграцией UserGateway. Проект компилируется успешно."
-
-### Этап 6.5: Валидация (P1)
-- [x] (P1) [2025-01-27 16:25] #13: TweetValidator — Реализовать валидатор для твитов
-  acceptance: "TweetValidator с методами валидации контента и проверки пользователя"
-  estimated_time: "30 минут"
-  dependencies: "#12"
-  metadata: priority=P1, done=2025-01-27T16:25, note="Создан TweetValidator интерфейс и TweetValidatorImpl с централизованной валидацией контента и проверки пользователя через UserGateway."
-
-### Этап 7: REST API контроллер (P1)
-- [x] (P1) [2025-01-27 16:32] #14: TweetController — Реализовать POST /api/v1/tweets эндпоинт
-  acceptance: "Контроллер принимает CreateTweetRequestDto, возвращает TweetResponseDto"
-  estimated_time: "45 минут"
-  dependencies: "#13"
-  metadata: priority=P1, done=2025-01-27T16:32, note="Создан TweetController с POST /api/v1/tweets эндпоинтом, использованием @LoggableRequest для логирования, валидацией через @Valid, возвратом 201 Created. Проект компилируется успешно."
+- [ ] (P1) #5: Рефакторинг validateContent() — Замена ConstraintViolationException на FormatValidationException  
+  acceptance: "validateContent() бросает FormatValidationException вместо ConstraintViolationException"
   
-- [x] (P1) [2025-01-27 16:35] #15: Обработка ошибок — Реализовать обработку ошибок валидации
-  acceptance: "Обработка ошибок валидации с детальными сообщениями"
-  estimated_time: "30 минут"
-  dependencies: "#14"
-  metadata: priority=P1, done=2025-01-27T16:35, note="Обработка ошибок реализована автоматически через GlobalExceptionHandler из common-lib. Обрабатываются все типы исключений: ConstraintViolationException (400), RuntimeException (500), другие типы валидации. Все ошибки возвращают RFC 7807 Problem Details формат."
+  **Изменения:**
+  - Заменить `throw new ConstraintViolationException()` на `throw FormatValidationException.beanValidationError()`
+  - Добавить детализацию по полям и constraints
+  - Обновить импорты
 
-### Этап 8: Конфигурация и тестирование (P2)
-- [x] (P2) [2025-01-27 16:40] #16: Обновление Docker Compose — Добавить tweet-api в docker-compose.yml
-  acceptance: "Сервис tweet-api в compose с зависимостью от users-api"
-  estimated_time: "15 минут"
-  dependencies: "#15"
-  metadata: priority=P2, done=2025-01-27T16:40, note="Добавлен сервис tweet-api в docker-compose.yml с портом 8082, зависимостями от postgres и users-api, настройками переменных окружения, health checks, volume для логов. Обновлён application.yml для поддержки переменных окружения для Docker."
+- [ ] (P1) #6: Рефакторинг validateUserExists() — Замена IllegalArgumentException на BusinessRuleValidationException  
+  acceptance: "validateUserExists() бросает BusinessRuleValidationException вместо IllegalArgumentException"
   
-- [ ] (P2) #17: Unit тесты — Создать тесты для TweetService и TweetController
-  acceptance: "Тесты для создания твита, валидации, обработки ошибок"
-  estimated_time: "1 час"
-  dependencies: "#16"
+  **Изменения:**
+  - Заменить `throw new IllegalArgumentException()` на `throw new BusinessRuleValidationException()`
+  - Использовать корректные ruleName и context
+  - Обновить документацию
+
+- [ ] (P2) #7: Обновление интерфейса TweetValidator — Изменение сигнатур методов  
+  acceptance: "TweetValidator.java отражает новые типы исключений в @throws"
   
-- [ ] (P2) #18: Интеграционные тесты — Создать тесты с реальной БД
-  acceptance: "Тесты POST /api/v1/tweets с TestContainers"
-  estimated_time: "45 минут"
-  dependencies: "#17"
+  **Изменения:**
+  - Обновить javadoc для методов
+  - Изменить @throws ConstraintViolationException на соответствующие исключения
+  - Заменить @throws RuntimeException на конкретные типы
+
+### Testing Phase
+
+- [ ] (P1) #8: Написание unit-тестов для TweetValidatorImpl — Проверка новых типов исключений  
+  acceptance: "Все методы валидации покрыты тестами, проверяющими корректные типы исключений"
+  
+  **Сценарии:**
+  - Bean validation violations → FormatValidationException
+  - Пустой контент → FormatValidationException  
+  - null userId → BusinessRuleValidationException
+  - Несуществующий userId → BusinessRuleValidationException
+
+- [ ] (P2) #9: Интеграционные тесты — Проверка обработки через GlobalExceptionHandler  
+  acceptance: "Исключения корректно обрабатываются GlobalExceptionHandler и возвращают правильные HTTP статусы"
+  
+  **Сценарии:**
+  - Проверить HTTP 400 для FormatValidationException
+  - Проверить HTTP 409 для BusinessRuleValidationException
+  - Проверить ProblemDetail структуру
+
+### Documentation Phase
+
+- [ ] (P3) #10: Обновление JavaDoc — Документация новых типов исключений  
+  acceptance: "Все методы содержат актуальную документацию по типам исключений"
+  
+  **Обновить:**
+  - TweetValidator.java
+  - TweetValidatorImpl.java
+  - Метод validateContent()
+  - Метод validateUserExists()
 
 ## Assumptions
-- Используем PostgreSQL с отдельной схемой tweet_api
-- Порт 8082 для tweet-api сервиса
-- Интеграция с users-api (порт 8081) для валидации пользователей
-- Максимальная длина твита: 280 символов
-- Используем Spring Boot 3.5.5 и Java 24
-- Следуем архитектурным паттернам из users-api
 
-## Technical Requirements
+- GlobalExceptionHandler уже настроен и обрабатывает FormatValidationException и BusinessRuleValidationException
+- Библиотека common-lib содержит все необходимые exception классы
+- UserGateway.existsUser() корректно реализован и интегрирован
+- Bean Validation аннотации на CreateTweetRequestDto валидны
+- Текущая функциональность валидации не должна измениться, меняются только типы исключений
 
-### Функциональные требования для POST /api/v1/tweets
-- **Входные данные:**
-  - content (String, 1-280 символов) - содержимое твита
-  - userId (UUID) - идентификатор пользователя-автора
+## Risks
 
-- **Выходные данные:**
-  - id (UUID) - идентификатор созданного твита
-  - userId (UUID) - идентификатор автора
-  - content (String) - содержимое твита
-  - createdAt (Timestamp) - время создания
-  - updatedAt (Timestamp) - время последнего обновления
+- **Риск P1**: Изменение типов исключений может сломать существующие тесты
+  - Митигация: Обновить все тесты после рефакторинга
+  - Митигация: Использовать семантический поиск для поиска всех использований
 
-- **Бизнес-правила:**
-  - Контент не может быть пустым или состоять только из пробелов
-  - Максимальная длина контента: 280 символов
-  - Пользователь должен существовать в users-api
-  - Твит создается с текущим временем
+- **Риск P2**: Несовместимость с текущей обработкой ошибок в TweetController
+  - Митигация: Проверить, что @Valid на @RequestBody работает корректно с новой обработкой
+  - Митигация: Проверить, что GlobalExceptionHandler корректно обрабатывает новые типы
 
-### Нефункциональные требования
-- Время ответа API < 500ms для создания твита
-- Обработка ошибок валидации с детальными сообщениями
-- Интеграция с users-api с обработкой ошибок
+- **Риск P3**: Непоследовательность в обработке ошибок между services
+  - Митигация: Следовать паттернам из UserValidatorImpl
+  - Митигация: Убедиться, что используются exception классы из common-lib
 
-## Database Schema (упрощенная)
-```sql
--- Схема Tweet API
-CREATE SCHEMA IF NOT EXISTS tweet_api;
+## Technical Details
 
--- Таблица твитов (упрощенная версия)
-CREATE TABLE tweet_api.tweets (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL,
-    content VARCHAR(280) NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
+### Mapping Validation Errors to Exceptions
 
--- Индекс для производительности
-CREATE INDEX idx_tweets_user_id_created_at ON tweet_api.tweets(user_id, created_at DESC);
+| Validation Type | Current Exception | Target Exception | HTTP Status |
+|----------------|-------------------|------------------|-------------|
+| Bean Validation violations | ConstraintViolationException | FormatValidationException | 400 |
+| Empty content check | ConstraintViolationException | FormatValidationException | 400 |
+| Null userId | IllegalArgumentException | BusinessRuleValidationException | 409 |
+| User not exists | IllegalArgumentException | BusinessRuleValidationException | 409 |
+
+### Code Patterns
+
+**Before (TweetValidatorImpl):**
+```java
+throw new ConstraintViolationException("Tweet creation validation failed", violations);
+throw new IllegalArgumentException("User does not exist: " + userId);
 ```
 
-## API Contract
-```yaml
-POST /api/v1/tweets
-Content-Type: application/json
-
-Request Body:
-{
-  "content": "Hello, Twitter!",
-  "userId": "123e4567-e89b-12d3-a456-426614174000"
-}
-
-Response (201 Created):
-{
-  "id": "987fcdeb-51a2-43d7-8f9e-123456789abc",
-  "userId": "123e4567-e89b-12d3-a456-426614174000",
-  "content": "Hello, Twitter!",
-  "createdAt": "2025-01-27T10:30:00Z",
-  "updatedAt": "2025-01-27T10:30:00Z"
-}
-
-Error Response (400 Bad Request):
-{
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Validation failed",
-    "details": {
-      "content": "Content cannot be empty",
-      "userId": "User does not exist"
-    }
-  }
-}
+**After (TweetValidatorImpl):**
+```java
+throw FormatValidationException.beanValidationError("content", "CONTENT_VALIDATION", 
+    "Validation failed: " + violations.toString());
+throw new BusinessRuleValidationException("USER_NOT_EXISTS", userId.toString());
 ```
 
-## Integration Points
-- **users-api (Порт 8081):** Проверка существования пользователя при создании твита
+## Notes
+
+- Ссылка на архитектуру: todo/tweet/TWEET_API_ARCHITECTURE.md
+- Ссылка на старый план: todo/tweet/TWEET_API_COMMON.md
+- Ссылка на новый план: todo/tweet/TWEET_API_COMMON_2.md
+- Параллельно выполняется задача: Реализация existsUser в users-api (todo/TODO_NEW.md)
+- Проект использует Java 24
+- Проект использует Spring Boot и Jakarta Validation
 
 ## Success Criteria
-- POST /api/v1/tweets эндпоинт работает корректно
-- Валидация входных данных функционирует
-- Интеграция с users-api для проверки пользователя работает
-- Обработка ошибок возвращает детальные сообщения
-- Тесты покрывают основную функциональность
 
-## Time Estimation
-- **Этап 1-2 (Анализ и инфраструктура):** 2 часа
-- **Этап 3-4 (Модель данных и DTO):** 2 часа  
-- **Этап 5-6 (Сервис и интеграция):** 2.5 часа
-- **Этап 7 (Контроллер):** 1.5 часа
-- **Этап 8 (Тестирование):** 2 часа
-
-**Общее время:** 10 часов (1-2 дня)
+- ✅ TweetValidatorImpl использует только FormatValidationException и BusinessRuleValidationException
+- ✅ TweetValidatorImpl не использует ConstraintViolationException и IllegalArgumentException
+- ✅ Все тесты проходят
+- ✅ API возвращает корректные HTTP статусы (400 для format, 409 для business rules)
+- ✅ ProblemDetail структура соответствует пользовательским ожиданиям
+- ✅ Код соответствует стандартам проекта (JavaDoc, error messages, logging)
 
 ## Next Steps
-1. Начать с создания структуры проекта tweet-api
-2. Реализовать схему базы данных и JPA сущность
-3. Создать DTO и маппер
-4. Реализовать сервисный слой
-5. Создать REST API контроллер
-6. Добавить интеграцию с users-api
-7. Настроить тестирование
 
-## Priority Focus
-- **P1 (Critical):** Основная функциональность создания твита
-- **P1 (Critical):** Валидация входных данных
-- **P1 (Critical):** Интеграция с users-api
-- **P2 (Important):** Тестирование и обработка ошибок
+После завершения рефакторинга:
+1. Провести code review
+2. Обновить API документацию (Swagger/OpenAPI)
+3. Обновить примеры использования в README
+4. Добавить метрики для отслеживания типов validation errors
+
