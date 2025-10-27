@@ -114,3 +114,24 @@
 
 **Следующий шаг:** Добавить метод в UserApi интерфейс с OpenAPI аннотациями (#7)
 
+### 2025-01-27 — Step #7 done — Add existsUser method to UserApi interface
+**Автор**: assistant  
+**Задача**: Добавить endpoint existsUser в UserApi интерфейс с OpenAPI аннотациями
+
+**Результат:**
+- Добавлен метод existsUser(UUID userId) в UserApi интерфейс
+- Настроены полные OpenAPI аннотации (@Operation, @ApiResponses)
+- Добавлен import для UserExistsResponseDto
+- Настроены примеры для обоих сценариев (существует/не существует)
+- Добавлен пример ошибки 400 для невалидного UUID
+
+**Детали:**
+- @Operation аннотация с summary и description
+- @ApiResponses с двумя вариантами 200 OK (exists: true/false)
+- @ApiResponse с примером 400 Bad Request для невалидного UUID
+- @Parameter аннотация для userId параметра с примером
+- Возвращаемый тип: ResponseEntity<UserExistsResponseDto>
+- Все примеры в формате JSON
+
+**Следующий шаг:** Реализовать endpoint в UserController (#8)
+
