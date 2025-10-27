@@ -2,8 +2,6 @@
 - сделать в users-api existsUser и использовать в tweet
 - open-api для контроллера
 
-- удалить лишние методы из TweetMapper
-
 Есть проект twitter
 Архитектура сервиса tweet-api todo\tweet\TWEET_API_ARCHITECTURE.md
 Старый план todo\tweet\TWEET_API_COMMON.md

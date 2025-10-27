@@ -1,5 +1,7 @@
 package com.twitter.service;
 
+import com.twitter.common.exception.validation.BusinessRuleValidationException;
+import com.twitter.common.exception.validation.FormatValidationException;
 import com.twitter.dto.request.CreateTweetRequestDto;
 import com.twitter.dto.response.TweetResponseDto;
 
@@ -24,9 +26,8 @@ public interface TweetService {
      *
      * @param requestDto the tweet creation request containing content and userId
      * @return TweetResponseDto containing the created tweet data
-     * @throws jakarta.validation.ConstraintViolationException if validation fails
-     * @throws com.twitter.exception.UserNotFoundException     if user doesn't exist
-     * @throws com.twitter.exception.TweetCreationException    if tweet creation fails
+     * @throws FormatValidationException       if content validation fails
+     * @throws BusinessRuleValidationException if user doesn't exist
      */
     TweetResponseDto createTweet(CreateTweetRequestDto requestDto);
 }
