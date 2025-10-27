@@ -1,9 +1,10 @@
 package com.twitter.validation;
 
+import com.twitter.common.exception.validation.BusinessRuleValidationException;
+import com.twitter.common.exception.validation.FormatValidationException;
 import com.twitter.dto.request.CreateTweetRequestDto;
 import com.twitter.gateway.UserGateway;
 import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of the tweet validator for Twitter system.
@@ -34,7 +36,8 @@ public class TweetValidatorImpl implements TweetValidator {
      * and user existence checks. It ensures data integrity and business rules compliance.
      *
      * @param requestDto DTO containing tweet data for creation
-     * @throws ConstraintViolationException if validation fails
+     * @throws FormatValidationException if content validation fails
+     * @throws BusinessRuleValidationException if user doesn't exist
      */
     @Override
     public void validateForCreate(CreateTweetRequestDto requestDto) {
@@ -49,7 +52,7 @@ public class TweetValidatorImpl implements TweetValidator {
      * and performs additional custom validation for content rules.
      *
      * @param requestDto DTO containing tweet data to validate
-     * @throws ConstraintViolationException if content validation fails
+     * @throws FormatValidationException if content validation fails
      */
     @Override
     public void validateContent(CreateTweetRequestDto requestDto) {
@@ -57,12 +60,15 @@ public class TweetValidatorImpl implements TweetValidator {
 
         if (!violations.isEmpty()) {
             log.warn("Validation violations found: {}", violations);
-            throw new ConstraintViolationException("Tweet creation validation failed", violations);
+            String errorMessage = violations.stream()
+                .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
+                .collect(Collectors.joining(", "));
+            throw FormatValidationException.beanValidationError("content", "CONTENT_VALIDATION", errorMessage);
         }
 
         if (requestDto.getContent() != null && requestDto.getContent().trim().isEmpty()) {
             log.warn("Tweet content is empty or contains only whitespace");
-            throw new ConstraintViolationException("Tweet content cannot be empty", Set.of());
+            throw new FormatValidationException("content", "EMPTY_CONTENT", "Tweet content cannot be empty");
         }
     }
 
@@ -73,17 +79,19 @@ public class TweetValidatorImpl implements TweetValidator {
      * It integrates with users-api service through UserGateway for actual user validation.
      *
      * @param userId the user ID to validate
-     * @throws RuntimeException if user doesn't exist
+     * @throws BusinessRuleValidationException if user doesn't exist or userId is null
      */
     @Override
     public void validateUserExists(UUID userId) {
         if (userId == null) {
-            throw new IllegalArgumentException("User ID cannot be null");
+            log.warn("User ID is null");
+            throw new BusinessRuleValidationException("USER_ID_NULL", "User ID cannot be null");
         }
 
         boolean userExists = userGateway.existsUser(userId);
         if (!userExists) {
-            throw new IllegalArgumentException("User does not exist: " + userId);
+            log.warn("User with ID {} does not exist", userId);
+            throw new BusinessRuleValidationException("USER_NOT_EXISTS", userId);
         }
     }
 }

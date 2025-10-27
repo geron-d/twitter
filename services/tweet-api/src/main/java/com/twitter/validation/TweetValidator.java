@@ -1,7 +1,8 @@
 package com.twitter.validation;
 
+import com.twitter.common.exception.validation.BusinessRuleValidationException;
+import com.twitter.common.exception.validation.FormatValidationException;
 import com.twitter.dto.request.CreateTweetRequestDto;
-import jakarta.validation.ConstraintViolationException;
 
 import java.util.UUID;
 
@@ -21,7 +22,8 @@ public interface TweetValidator {
      * and user existence checks. It ensures data integrity and business rules compliance.
      *
      * @param requestDto DTO containing tweet data for creation
-     * @throws ConstraintViolationException if validation fails
+     * @throws FormatValidationException if content validation fails
+     * @throws BusinessRuleValidationException if user doesn't exist
      */
     void validateForCreate(CreateTweetRequestDto requestDto);
 
@@ -32,7 +34,7 @@ public interface TweetValidator {
      * and performs additional custom validation for content rules.
      *
      * @param requestDto DTO containing tweet data to validate
-     * @throws ConstraintViolationException if content validation fails
+     * @throws FormatValidationException if content validation fails
      */
     void validateContent(CreateTweetRequestDto requestDto);
 
@@ -43,7 +45,7 @@ public interface TweetValidator {
      * It will be integrated with users-api service for actual user validation.
      *
      * @param userId the user ID to validate
-     * @throws RuntimeException if user doesn't exist
+     * @throws BusinessRuleValidationException if user doesn't exist or userId is null
      */
     void validateUserExists(UUID userId);
 }
