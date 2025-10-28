@@ -5,7 +5,7 @@ spring:
   application:
     name: tweet-api
   datasource:
-    url: jdbc:postgresql://localhost:5432/twitter
+    url: jdbc:postgresql://postgres:5432/twitter
     username: user
     password: password
     driver-class-name: org.postgresql.Driver
@@ -47,7 +47,7 @@ app:
   tweet:
     max-content-length: 280
   users-api:
-    base-url: http://localhost:8081
+    base-url: http://users-api:8081
 
 # Feign configuration
 feign:
