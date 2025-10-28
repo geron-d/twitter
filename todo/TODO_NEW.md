@@ -4,6 +4,7 @@
 - docs
 - readme
 - review
+- postman
 
 Есть проект twitter
 Архитектура сервиса tweet-api todo\tweet\TWEET_API_ARCHITECTURE.md

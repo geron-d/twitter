@@ -26,6 +26,9 @@ RUN ./gradlew :services:users-api:build -x test --no-daemon --parallel --build-c
 # Stage 2: Runtime stage
 FROM eclipse-temurin:24-jre
 
+# Install curl for healthcheck
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
 # Create app user for security
 RUN groupadd -r appuser && useradd -r -g appuser appuser
 
