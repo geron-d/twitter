@@ -193,23 +193,38 @@ Response: { "exists": true/false }
 
 ### Phase 3: Integration in tweet-api (P2)
 
-- [ ] **(P2) #9: Добавить метод existsUser в UsersApiClient**  
+- [x] **(P2) #9: Добавить метод existsUser в UsersApiClient**  
+  Выполнено: 2025-01-27  
   Описание: Расширить Feign клиент в tweet-api.  
-  Статус: To Do  
   Acceptance:
   - Добавлен метод в UsersApiClient интерфейс
   - Настроен правильный путь /api/v1/users/{userId}/exists
   - Добавлены необходимые аннотации Feign
-  - Возвращает только boolean без DTO
+  - Возвращает Map<String, Boolean> для извлечения поля exists
+  
+  **Результат:**
+  - Добавлен метод existsUser в UsersApiClient
+  - Настроен путь @GetMapping("/{userId}/exists")
+  - Возвращаемый тип: Map<String, Boolean> для простоты парсинга
+  - Добавлен import для Map
+  - Добавлен JavaDoc комментарий
 
-- [ ] **(P2) #10: Обновить UserGateway в tweet-api**  
+- [x] **(P2) #10: Обновить UserGateway в tweet-api**  
+  Выполнено: 2025-01-27  
   Описание: Изменить метод existsUser для использования нового endpoint.  
-  Статус: To Do  
   Acceptance:
   - Заменен вызов getUserById на existsUser
   - Убрана обработка исключений из try-catch блока
   - Сохранена проверка на null
   - Улучшено логирование
+  
+  **Результат:**
+  - Обновлен метод existsUser в UserGateway
+  - Использует usersApiClient.existsUser(userId) вместо getUserById
+  - Извлекает boolean значение из UserExistsResponseDto
+  - Сохранен try-catch для обработки возможных ошибок
+  - Улучшено логирование для debugging
+  - Используется record accessor метод exists()
 
 ### Phase 4: Testing & Documentation (P2)
 

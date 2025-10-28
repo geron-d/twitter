@@ -1,5 +1,9 @@
-- сделать в users-api existsUser и использовать в tweet для валидации пользователя вместо getUserById
-- open-api для контроллера
+- юнит тесты
+- интеграционные тесты 
+- swagger
+- docs
+- readme
+- review
 
 Есть проект twitter
 Архитектура сервиса tweet-api todo\tweet\TWEET_API_ARCHITECTURE.md

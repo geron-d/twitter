@@ -1,10 +1,11 @@
 package com.twitter.client;
 
-import java.util.UUID;
-
+import com.twitter.common.dto.UserExistsResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+
+import java.util.UUID;
 
 /**
  * Feign Client для интеграции с Users API.
@@ -16,14 +17,13 @@ import org.springframework.web.bind.annotation.PathVariable;
     path = "/api/v1/users"
 )
 public interface UsersApiClient {
-    
+
     /**
-     * Получает пользователя по идентификатору.
+     * Проверяет существование пользователя по идентификатору.
      *
-     * @param userId идентификатор пользователя
-     * @return данные пользователя
-     * @throws org.springframework.web.client.HttpClientErrorException.NotFound если пользователь не найден
+     * @param userId идентификатор пользователя для проверки
+     * @return UserExistsResponseDto с полем exists типа boolean
      */
-    @GetMapping("/{userId}")
-    Object getUserById(@PathVariable("userId") UUID userId);
+    @GetMapping("/{userId}/exists")
+    UserExistsResponseDto existsUser(@PathVariable("userId") UUID userId);
 }

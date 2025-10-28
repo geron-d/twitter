@@ -1,4 +1,4 @@
-package com.twitter.dto;
+package com.twitter.common.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -6,8 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * Data Transfer Object for user existence check response.
  * <p>
  * This record represents the response from checking whether a user exists
- * in the system. It provides a boolean value indicating the user's existence
- * without exposing any sensitive user data.
+ * in the system.
  */
 @Schema(
     name = "UserExistsResponse",
@@ -29,5 +28,4 @@ public record UserExistsResponseDto(
     boolean exists
 ) {
 }
-
 

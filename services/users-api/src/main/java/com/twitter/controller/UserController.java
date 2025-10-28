@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.twitter.common.aspect.LoggableRequest;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.ValidationException;
+import com.twitter.common.dto.UserExistsResponseDto;
 import com.twitter.dto.*;
 import com.twitter.dto.filter.UserFilter;
 import com.twitter.service.UserService;

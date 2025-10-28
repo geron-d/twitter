@@ -156,3 +156,49 @@
 
 **Следующий шаг:** Phase 2 завершена! Следующий шаг - Phase 3: Integration in tweet-api (P2)
 
+### 2025-01-27 — Step #9 done — Add existsUser method to UsersApiClient
+**Автор**: assistant  
+**Задача**: Добавить метод existsUser в UsersApiClient Feign Client
+
+**Результат:**
+- Добавлен метод existsUser в UsersApiClient
+- Настроен путь @GetMapping("/{userId}/exists")
+- Возвращаемый тип: Map<String, Boolean> для простоты парсинга
+- Добавлен import для Map
+- Добавлен JavaDoc комментарий
+
+**Детали:**
+- Feign Client расширен методом для вызова нового endpoint
+- URL: GET /api/v1/users/{userId}/exists
+- Возвращаемый тип Map<String, Boolean> для извлечения поля "exists"
+- Используется @PathVariable("userId") для параметра
+- Интегрирован с существующим Feign клиентом
+
+**Следующий шаг:** Обновить UserGateway для использования нового метода (#10)
+
+### 2025-01-27 — Step #10 done — Update UserGateway to use existsUser endpoint
+**Автор**: assistant  
+**Задача**: Обновить UserGateway для использования нового endpoint existsUser
+
+**Результат:**
+- Обновлен метод existsUser в UserGateway
+- Использует usersApiClient.existsUser(userId) вместо getUserById
+- Извлекает boolean значение из UserExistsResponseDto
+- Сохранен try-catch для обработки возможных ошибок
+- Улучшено логирование для debugging
+
+**Детали:**
+- Заменен вызов getUserById на existsUser для оптимальной производительности
+- Использован record accessor метод exists() для извлечения boolean значения
+- Сохранена обработка исключений для защиты от сетевых ошибок
+- Улучшено логирование с явным указанием результата проверки
+- Метод теперь использует новый lightweight endpoint
+
+**Примечание:** Дополнительно выполнено:
+- Вынесен UserExistsResponseDto в shared/common-lib для переиспользования
+- Обновлены все импорты в users-api и tweet-api
+- Удален дублированный DTO из users-api
+- UsersApiClient теперь использует правильный тип возврата
+
+**Следующий шаг:** Phase 3 завершена! Переход к Phase 4: Testing & Documentation (P2)
+

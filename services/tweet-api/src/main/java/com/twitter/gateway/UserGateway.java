@@ -2,6 +2,7 @@ package com.twitter.gateway;
 
 import java.util.UUID;
 
+import com.twitter.common.dto.UserExistsResponseDto;
 import org.springframework.stereotype.Component;
 
 import com.twitter.client.UsersApiClient;
@@ -33,9 +34,10 @@ public class UserGateway {
         }
         
         try {
-            usersApiClient.getUserById(userId);
-            log.debug("User {} exists", userId);
-            return true;
+            UserExistsResponseDto response = usersApiClient.existsUser(userId);
+            boolean exists = response.exists();
+            log.debug("User {} exists: {}", userId, exists);
+            return exists;
         } catch (Exception ex) {
             log.debug("User {} does not exist: {}", userId, ex.getMessage());
             return false;
