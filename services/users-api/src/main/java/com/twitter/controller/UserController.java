@@ -4,10 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.twitter.common.aspect.LoggableRequest;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.ValidationException;
-import com.twitter.dto.UserRequestDto;
-import com.twitter.dto.UserResponseDto;
-import com.twitter.dto.UserRoleUpdateDto;
-import com.twitter.dto.UserUpdateDto;
+import com.twitter.dto.*;
 import com.twitter.dto.filter.UserFilter;
 import com.twitter.service.UserService;
 import jakarta.validation.Valid;
@@ -39,6 +36,20 @@ import java.util.UUID;
 public class UserController implements UserApi {
 
     private final UserService userService;
+
+    /**
+     * Checks whether a user exists by their unique identifier.
+     *
+     * @param userId the unique identifier of the user to check
+     * @return ResponseEntity containing UserExistsResponseDto with boolean exists field
+     */
+    @LoggableRequest
+    @GetMapping("/{userId}/exists")
+    @Override
+    public ResponseEntity<UserExistsResponseDto> existsUser(@PathVariable("userId") UUID userId) {
+        boolean exists = userService.existsById(userId);
+        return ResponseEntity.ok(new UserExistsResponseDto(exists));
+    }
 
     /**
      * Retrieves a user by their unique identifier.
@@ -73,7 +84,7 @@ public class UserController implements UserApi {
     @LoggableRequest
     @GetMapping
     @Override
-    public PagedModel<UserResponseDto> findAll(@ModelAttribute UserFilter userFilter, 
+    public PagedModel<UserResponseDto> findAll(@ModelAttribute UserFilter userFilter,
                                                @PageableDefault(size = 10) Pageable pageable) {
         Page<UserResponseDto> users = userService.findAll(userFilter, pageable);
         return new PagedModel<>(users);

@@ -135,3 +135,24 @@
 
 **Следующий шаг:** Реализовать endpoint в UserController (#8)
 
+### 2025-01-27 — Step #8 done — Implement existsUser endpoint in UserController
+**Автор**: assistant  
+**Задача**: Добавить обработчик GET запроса existsUser в UserController
+
+**Результат:**
+- Добавлен метод existsUser в UserController
+- Использована аннотация @GetMapping("/{userId}/exists")
+- Использован @LoggableRequest для автоматического логирования
+- Добавлен import для UserExistsResponseDto
+- Метод вызывает userService.existsById() и оборачивает результат в DTO
+
+**Детали:**
+- URL mapping: GET /api/v1/users/{userId}/exists
+- Метод возвращает ResponseEntity.ok() с UserExistsResponseDto
+- Вызывает userService.existsById(userId) для получения boolean значения
+- Оборачивает результат в new UserExistsResponseDto(exists)
+- Полная JavaDoc документация добавлена
+- Использует @Override для реализации интерфейса UserApi
+
+**Следующий шаг:** Phase 2 завершена! Следующий шаг - Phase 3: Integration in tweet-api (P2)
+

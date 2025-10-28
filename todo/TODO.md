@@ -173,14 +173,23 @@ Response: { "exists": true/false }
   - Добавлен пример ошибки для невалидного UUID (400 Bad Request)
   - Указаны все коды ответа (200 OK для успешной проверки, 400 Bad Request)
 
-- [ ] **(P1) #8: Реализовать endpoint в UserController**  
+- [x] **(P1) #8: Реализовать endpoint в UserController**  
+  Выполнено: 2025-01-27  
   Описание: Добавить обработчик GET запроса в контроллер.  
-  Статус: To Do  
   Acceptance:
   - Добавлен метод в UserController
   - Использован сервисный слой для получения данных
   - Настроен маппинг ответа в DTO
   - Добавлен @LoggableRequest для логирования
+  
+  **Результат:**
+  - Добавлен метод existsUser в UserController
+  - Использован аннотация @GetMapping("/{userId}/exists") для маппинга URL
+  - Использован @LoggableRequest для автоматического логирования запросов
+  - Добавлен import для UserExistsResponseDto
+  - Метод вызывает userService.existsById() и оборачивает результат в DTO
+  - Возвращает ResponseEntity.ok() с UserExistsResponseDto
+  - Добавлен полный JavaDoc для метода
 
 ### Phase 3: Integration in tweet-api (P2)
 
