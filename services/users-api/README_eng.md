@@ -101,6 +101,7 @@ http://localhost:8081/api/v1/users
 | Method | Path | Description | Parameters | Request Body | Response |
 |--------|------|-------------|------------|--------------|----------|
 | `GET` | `/{id}` | Get user by ID | `id` (UUID) | - | `UserResponseDto` |
+| `GET` | `/{userId}/exists` | Check user existence | `userId` (UUID) | - | `UserExistsResponseDto` |
 | `GET` | `/` | Get user list | `UserFilter`, `Pageable` | - | `PagedModel<UserResponseDto>` |
 | `POST` | `/` | Create new user | - | `UserRequestDto` | `UserResponseDto` |
 | `PUT` | `/{id}` | Full user update | `id` (UUID) | `UserUpdateDto` | `UserResponseDto` |
@@ -136,7 +137,38 @@ GET /api/v1/users/{id}
 }
 ```
 
-#### 2. Get User List
+#### 2. Check User Existence
+```http
+GET /api/v1/users/{userId}/exists
+```
+
+**Parameters:**
+- `userId` (UUID) - user identifier to check
+
+**Responses:**
+- `200 OK` - check completed successfully
+
+**Example Response (user exists):**
+```json
+{
+  "exists": true
+}
+```
+
+**Example Response (user does not exist):**
+```json
+{
+  "exists": false
+}
+```
+
+**Features:**
+- The endpoint always returns HTTP 200 OK, regardless of the check result
+- The `exists` field contains `true` if the user is found in the system, and `false` otherwise
+- If `userId` is `null`, the method returns `false` without accessing the database
+- This is a lightweight endpoint optimized for checking existence without loading full user data
+
+#### 3. Get User List
 ```http
 GET /api/v1/users?firstNameContains=John&role=USER&page=0&size=10&sort=login,asc
 ```
@@ -188,7 +220,7 @@ GET /api/v1/users?firstNameContains=John&role=USER&page=0&size=10&sort=login,asc
 }
 ```
 
-#### 3. Create User
+#### 4. Create User
 ```http
 POST /api/v1/users
 Content-Type: application/json
@@ -215,7 +247,7 @@ Content-Type: application/json
 - `400 Bad Request` - validation error
 - `409 Conflict` - user with such login/email already exists
 
-#### 4. Update User (PUT)
+#### 5. Update User (PUT)
 ```http
 PUT /api/v1/users/{id}
 Content-Type: application/json
@@ -238,7 +270,7 @@ Content-Type: application/json
 - `400 Bad Request` - validation error
 - `409 Conflict` - uniqueness conflict
 
-#### 5. Partial User Update (PATCH)
+#### 6. Partial User Update (PATCH)
 ```http
 PATCH /api/v1/users/{id}
 Content-Type: application/json
@@ -258,7 +290,7 @@ Content-Type: application/json
 - `400 Bad Request` - validation error or incorrect JSON Patch
 - `409 Conflict` - login/email uniqueness conflict
 
-#### 6. Deactivate User
+#### 7. Deactivate User
 ```http
 PATCH /api/v1/users/{id}/inactivate
 ```
@@ -268,7 +300,7 @@ PATCH /api/v1/users/{id}/inactivate
 - `404 Not Found` - user not found
 - `400 Bad Request` - attempt to deactivate the last administrator
 
-#### 7. Update User Role
+#### 8. Update User Role
 ```http
 PATCH /api/v1/users/{id}/role
 Content-Type: application/json
@@ -326,7 +358,7 @@ The service includes complete OpenAPI 3.0 documentation provided through SpringD
 - **Schema Explorer**: View and understand data models
 
 #### Complete API Coverage
-- **All Endpoints**: Documentation of all 7 API endpoints
+- **All Endpoints**: Documentation of all 8 API endpoints
 - **Data Models**: Detailed schemas for all DTOs and entities
 - **Error Handling**: Documentation of all error scenarios and responses
 - **Validation Rules**: Field-level validation requirements
@@ -443,12 +475,19 @@ The main service for working with users, implementing the following operations:
    - Returns `Optional<UserResponseDto>`
    - Logic: repository search and DTO mapping
 
-2. **`findAll(UserFilter userFilter, Pageable pageable)`**
+2. **`existsById(UUID id)`**
+   - Checks user existence by identifier
+   - Returns `boolean`
+   - Logic:
+     - If `id` is `null`, returns `false` without accessing the database
+     - Otherwise calls `userRepository.existsById(id)`
+
+3. **`findAll(UserFilter userFilter, Pageable pageable)`**
    - Gets user list with filtering and pagination
    - Returns `Page<UserResponseDto>`
    - Logic: building specification from filter and mapping results
 
-3. **`createUser(UserRequestDto userRequest)`**
+4. **`createUser(UserRequestDto userRequest)`**
    - Creates new user
    - Returns `UserResponseDto`
    - Logic:
@@ -458,7 +497,7 @@ The main service for working with users, implementing the following operations:
      - Hash password
      - Save to database
 
-4. **`updateUser(UUID id, UserUpdateDto userDetails)`**
+5. **`updateUser(UUID id, UserUpdateDto userDetails)`**
    - Full user update
    - Returns `Optional<UserResponseDto>`
    - Logic:
@@ -468,7 +507,7 @@ The main service for working with users, implementing the following operations:
      - Hash new password (if specified)
      - Save changes
 
-5. **`patchUser(UUID id, JsonNode patchNode)`**
+6. **`patchUser(UUID id, JsonNode patchNode)`**
    - Partial user update
    - Returns `Optional<UserResponseDto>`
    - Logic:
@@ -478,7 +517,7 @@ The main service for working with users, implementing the following operations:
      - Check uniqueness
      - Update entity
 
-6. **`inactivateUser(UUID id)`**
+7. **`inactivateUser(UUID id)`**
    - User deactivation
    - Returns `Optional<UserResponseDto>`
    - Logic:
@@ -486,7 +525,7 @@ The main service for working with users, implementing the following operations:
      - Set INACTIVE status
      - Log operation
 
-7. **`updateUserRole(UUID id, UserRoleUpdateDto roleUpdate)`**
+8. **`updateUserRole(UUID id, UserRoleUpdateDto roleUpdate)`**
    - Update user role
    - Returns `Optional<UserResponseDto>`
    - Logic:
@@ -768,6 +807,26 @@ curl -X POST http://localhost:8081/api/v1/users \
 
 ```bash
 curl "http://localhost:8081/api/v1/users?firstNameContains=John&role=USER&page=0&size=10"
+```
+
+### Checking User Existence
+
+```bash
+curl http://localhost:8081/api/v1/users/123e4567-e89b-12d3-a456-426614174000/exists
+```
+
+**Response (user exists):**
+```json
+{
+  "exists": true
+}
+```
+
+**Response (user does not exist):**
+```json
+{
+  "exists": false
+}
 ```
 
 ### Updating User
