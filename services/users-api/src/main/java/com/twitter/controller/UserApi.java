@@ -614,26 +614,6 @@ public interface UserApi {
                         """
                 )
             )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Invalid user ID format",
-            content = @Content(
-                mediaType = "application/problem+json",
-                examples = @ExampleObject(
-                    name = "Invalid UUID",
-                    summary = "Invalid UUID format error",
-                    value = """
-                        {
-                          "type": "https://example.com/errors/bad-request",
-                          "title": "Bad Request",
-                          "status": 400,
-                          "detail": "Invalid UUID format for parameter 'userId'",
-                          "timestamp": "2025-01-27T15:30:00Z"
-                        }
-                        """
-                )
-            )
         )
     })
     ResponseEntity<UserExistsResponseDto> existsUser(

@@ -1,6 +1,6 @@
 - юнит тесты (tweet)
 - интеграционные тесты (tweet)
-- swagger (users, tweet)
+- swagger (tweet)
 - docs (users, tweet)
 - readme (users, tweet)
 - review (users, tweet)
