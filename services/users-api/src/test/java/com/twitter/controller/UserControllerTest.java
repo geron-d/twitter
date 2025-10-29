@@ -1200,4 +1200,30 @@ public class UserControllerTest {
                 .andExpect(status().isInternalServerError());
         }
     }
+
+    @Nested
+    class ExistsUserIntegrationTests {
+
+        @Test
+        void existsUser_WithValidExistingUserId_ShouldReturn200OkAndTrue() throws Exception {
+            User user = createTestUser("testuser", "Test", "User", "test@example.com");
+            User savedUser = userRepository.saveAndFlush(user);
+            UUID userId = savedUser.getId();
+
+            mockMvc.perform(get("/api/v1/users/{userId}/exists", userId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.exists").value(true));
+        }
+
+        @Test
+        void existsUser_WithValidNonExistentUserId_ShouldReturn200OkAndFalse() throws Exception {
+            UUID nonExistentUserId = UUID.randomUUID();
+
+            mockMvc.perform(get("/api/v1/users/{userId}/exists", nonExistentUserId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.exists").value(false));
+        }
+    }
 }
