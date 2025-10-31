@@ -1,13 +1,13 @@
 package com.twitter.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.twitter.dto.*;
-import com.twitter.dto.filter.UserFilter;
-import com.twitter.entity.User;
 import com.twitter.common.enums.UserRole;
 import com.twitter.common.enums.UserStatus;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.ValidationException;
+import com.twitter.dto.*;
+import com.twitter.dto.filter.UserFilter;
+import com.twitter.entity.User;
 import com.twitter.mapper.UserMapper;
 import com.twitter.repository.UserRepository;
 import com.twitter.util.PasswordUtil;
@@ -212,6 +212,21 @@ public class UserServiceImpl implements UserService {
             log.info("User role updated for ID {}: {} -> {}", id, oldRole, newRole);
             return userMapper.toUserResponseDto(updatedUser);
         });
+    }
+
+    /**
+     * Checks whether a user exists in the system by their unique identifier.
+     *
+     * @param id the unique identifier of the user to check
+     * @return true if the user exists, false otherwise
+     */
+    @Override
+    public boolean existsById(UUID id) {
+        if (id == null) {
+            return false;
+        }
+
+        return userRepository.existsById(id);
     }
 
     /**

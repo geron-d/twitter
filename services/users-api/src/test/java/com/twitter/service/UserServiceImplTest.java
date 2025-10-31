@@ -1836,4 +1836,43 @@ class UserServiceImplTest {
             verify(userMapper).toUserResponseDto(updatedToUser);
         }
     }
+
+    @Nested
+    class ExistsByIdTest {
+
+        private UUID testUserId;
+
+        @BeforeEach
+        void setUp() {
+            testUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+        }
+
+        @Test
+        void existsById_WhenUserExists_ShouldReturnTrue() {
+            when(userRepository.existsById(testUserId)).thenReturn(true);
+
+            boolean result = userService.existsById(testUserId);
+
+            assertThat(result).isTrue();
+            verify(userRepository).existsById(testUserId);
+        }
+
+        @Test
+        void existsById_WhenUserDoesNotExist_ShouldReturnFalse() {
+            when(userRepository.existsById(testUserId)).thenReturn(false);
+
+            boolean result = userService.existsById(testUserId);
+
+            assertThat(result).isFalse();
+            verify(userRepository).existsById(testUserId);
+        }
+
+        @Test
+        void existsById_WhenIdIsNull_ShouldReturnFalseWithoutCallingRepository() {
+            boolean result = userService.existsById(null);
+
+            assertThat(result).isFalse();
+            verify(userRepository, never()).existsById(any());
+        }
+    }
 }

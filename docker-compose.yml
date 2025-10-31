@@ -72,6 +72,43 @@ services:
       retries: 3
       start_period: 60s
 
+  # Tweet API Service
+  tweet-api:
+    build:
+      context: .
+      dockerfile: services/tweet-api/Dockerfile
+    container_name: twitter-tweet-api
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/twitter
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      SPRING_JPA_SHOW_SQL: false
+      LOGGING_LEVEL_COM_TWITTER: DEBUG
+      LOGGING_LEVEL_ORG_HIBERNATE_SQL: DEBUG
+      # Feign client для интеграции с users-api
+      USERS_API_URL: http://users-api:8081
+    depends_on:
+      postgres:
+        condition: service_healthy
+      users-api:
+        condition: service_healthy
+    networks:
+      - twitter-network
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
 volumes:
   postgres_data:
     driver: local

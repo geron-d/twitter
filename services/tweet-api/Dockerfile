@@ -1,4 +1,4 @@
-# Multi-stage build for Twitter Users API
+# Multi-stage build for Twitter Tweet API
 # Stage 1: Build stage with Gradle
 FROM gradle:jdk24 AS build
 
@@ -21,7 +21,7 @@ RUN chmod +x gradlew
 RUN ./gradlew dependencies --no-daemon
 
 # Build the application with optimized flags
-RUN ./gradlew :services:users-api:build -x test --no-daemon --parallel --build-cache
+RUN ./gradlew :services:tweet-api:build -x test --no-daemon --parallel --build-cache
 
 # Stage 2: Runtime stage
 FROM eclipse-temurin:24-jre
@@ -36,7 +36,7 @@ RUN groupadd -r appuser && useradd -r -g appuser appuser
 WORKDIR /app
 
 # Copy the built JAR from build stage
-COPY --from=build /app/services/users-api/build/libs/*.jar app.jar
+COPY --from=build /app/services/tweet-api/build/libs/*.jar app.jar
 
 # Create logs directory
 RUN mkdir -p /app/logs && chown -R appuser:appuser /app
@@ -45,14 +45,14 @@ RUN mkdir -p /app/logs && chown -R appuser:appuser /app
 USER appuser
 
 # Expose port
-EXPOSE 8081
+EXPOSE 8082
 
 # Set JVM options for production
 ENV JAVA_OPTS="-Xms512m -Xmx1024m -XX:+UseG1GC -XX:+UseContainerSupport"
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
-  CMD curl -f http://localhost:8081/actuator/health || exit 1
+  CMD curl -f http://localhost:8082/actuator/health || exit 1
 
 # Run the application
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]

@@ -1,6 +1,7 @@
 package com.twitter.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.twitter.common.dto.UserExistsResponseDto;
 import com.twitter.dto.UserRequestDto;
 import com.twitter.dto.UserResponseDto;
 import com.twitter.dto.UserRoleUpdateDto;
@@ -570,4 +571,56 @@ public interface UserApi {
         UUID id,
         @Parameter(description = "Data containing the new role information", required = true)
         UserRoleUpdateDto roleUpdate);
+
+    /**
+     * Checks whether a user exists by their unique identifier.
+     */
+    @Operation(
+        summary = "Check user existence",
+        description = "Checks whether a user exists in the system by their unique identifier. " +
+                      "Returns true if user exists, false otherwise."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "User existence check completed successfully",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = UserExistsResponseDto.class),
+                examples = @ExampleObject(
+                    name = "User Exists",
+                    summary = "Example: user exists",
+                    value = """
+                        {
+                          "exists": true
+                        }
+                        """
+                )
+            )
+        ),
+        @ApiResponse(
+            responseCode = "200",
+            description = "User does not exist",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = UserExistsResponseDto.class),
+                examples = @ExampleObject(
+                    name = "User Does Not Exist",
+                    summary = "Example: user does not exist",
+                    value = """
+                        {
+                          "exists": false
+                        }
+                        """
+                )
+            )
+        )
+    })
+    ResponseEntity<UserExistsResponseDto> existsUser(
+        @Parameter(
+            description = "Unique identifier of the user to check",
+            required = true,
+            example = "123e4567-e89b-12d3-a456-426614174000"
+        )
+        UUID userId);
 }

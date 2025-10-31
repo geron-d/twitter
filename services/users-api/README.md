@@ -101,6 +101,7 @@ http://localhost:8081/api/v1/users
 | Метод | Путь | Описание | Параметры | Тело запроса | Ответ |
 |-------|------|----------|-----------|--------------|-------|
 | `GET` | `/{id}` | Получить пользователя по ID | `id` (UUID) | - | `UserResponseDto` |
+| `GET` | `/{userId}/exists` | Проверить существование пользователя | `userId` (UUID) | - | `UserExistsResponseDto` |
 | `GET` | `/` | Получить список пользователей | `UserFilter`, `Pageable` | - | `PagedModel<UserResponseDto>` |
 | `POST` | `/` | Создать нового пользователя | - | `UserRequestDto` | `UserResponseDto` |
 | `PUT` | `/{id}` | Полное обновление пользователя | `id` (UUID) | `UserUpdateDto` | `UserResponseDto` |
@@ -136,7 +137,38 @@ GET /api/v1/users/{id}
 }
 ```
 
-#### 2. Получить список пользователей
+#### 2. Проверить существование пользователя
+```http
+GET /api/v1/users/{userId}/exists
+```
+
+**Параметры:**
+- `userId` (UUID) - идентификатор пользователя для проверки
+
+**Ответы:**
+- `200 OK` - проверка выполнена успешно
+
+**Пример ответа (пользователь существует):**
+```json
+{
+  "exists": true
+}
+```
+
+**Пример ответа (пользователь не существует):**
+```json
+{
+  "exists": false
+}
+```
+
+**Особенности:**
+- Эндпоинт всегда возвращает HTTP 200 OK, независимо от результата проверки
+- Поле `exists` содержит `true`, если пользователь найден в системе, и `false` в противном случае
+- Если `userId` равен `null`, метод возвращает `false` без обращения к базе данных
+- Это легковесный эндпоинт, оптимизированный для проверки существования без загрузки полных данных пользователя
+
+#### 3. Получить список пользователей
 ```http
 GET /api/v1/users?firstNameContains=John&role=USER&page=0&size=10&sort=login,asc
 ```
@@ -188,7 +220,7 @@ GET /api/v1/users?firstNameContains=John&role=USER&page=0&size=10&sort=login,asc
 }
 ```
 
-#### 3. Создать пользователя
+#### 4. Создать пользователя
 ```http
 POST /api/v1/users
 Content-Type: application/json
@@ -215,7 +247,7 @@ Content-Type: application/json
 - `400 Bad Request` - ошибка валидации
 - `409 Conflict` - пользователь с таким логином/email уже существует
 
-#### 4. Обновить пользователя (PUT)
+#### 5. Обновить пользователя (PUT)
 ```http
 PUT /api/v1/users/{id}
 Content-Type: application/json
@@ -238,7 +270,7 @@ Content-Type: application/json
 - `400 Bad Request` - ошибка валидации
 - `409 Conflict` - конфликт уникальности
 
-#### 5. Частичное обновление пользователя (PATCH)
+#### 6. Частичное обновление пользователя (PATCH)
 ```http
 PATCH /api/v1/users/{id}
 Content-Type: application/json
@@ -258,7 +290,7 @@ Content-Type: application/json
 - `400 Bad Request` - ошибка валидации или некорректный JSON Patch
 - `409 Conflict` - конфликт уникальности логина/email
 
-#### 6. Деактивировать пользователя
+#### 7. Деактивировать пользователя
 ```http
 PATCH /api/v1/users/{id}/inactivate
 ```
@@ -268,7 +300,7 @@ PATCH /api/v1/users/{id}/inactivate
 - `404 Not Found` - пользователь не найден
 - `400 Bad Request` - попытка деактивировать последнего администратора
 
-#### 7. Обновить роль пользователя
+#### 8. Обновить роль пользователя
 ```http
 PATCH /api/v1/users/{id}/role
 Content-Type: application/json
@@ -443,12 +475,19 @@ logging:
    - Возвращает `Optional<UserResponseDto>`
    - Логика: поиск в репозитории и маппинг в DTO
 
-2. **`findAll(UserFilter userFilter, Pageable pageable)`**
+2. **`existsById(UUID id)`**
+   - Проверяет существование пользователя по идентификатору
+   - Возвращает `boolean`
+   - Логика:
+     - Если `id` равен `null`, возвращает `false` без обращения к базе данных
+     - Иначе вызывает `userRepository.existsById(id)`
+
+3. **`findAll(UserFilter userFilter, Pageable pageable)`**
    - Получает список пользователей с фильтрацией и пагинацией
    - Возвращает `Page<UserResponseDto>`
    - Логика: построение спецификации из фильтра и маппинг результатов
 
-3. **`createUser(UserRequestDto userRequest)`**
+4. **`createUser(UserRequestDto userRequest)`**
    - Создает нового пользователя
    - Возвращает `UserResponseDto`
    - Логика:
@@ -458,7 +497,7 @@ logging:
      - Хеширование пароля
      - Сохранение в БД
 
-4. **`updateUser(UUID id, UserUpdateDto userDetails)`**
+5. **`updateUser(UUID id, UserUpdateDto userDetails)`**
    - Полное обновление пользователя
    - Возвращает `Optional<UserResponseDto>`
    - Логика:
@@ -468,7 +507,7 @@ logging:
      - Хеширование нового пароля (если указан)
      - Сохранение изменений
 
-5. **`patchUser(UUID id, JsonNode patchNode)`**
+6. **`patchUser(UUID id, JsonNode patchNode)`**
    - Частичное обновление пользователя
    - Возвращает `Optional<UserResponseDto>`
    - Логика:
@@ -478,7 +517,7 @@ logging:
      - Проверка уникальности
      - Обновление сущности
 
-6. **`inactivateUser(UUID id)`**
+7. **`inactivateUser(UUID id)`**
    - Деактивация пользователя
    - Возвращает `Optional<UserResponseDto>`
    - Логика:
@@ -486,7 +525,7 @@ logging:
      - Установка статуса INACTIVE
      - Логирование операции
 
-7. **`updateUserRole(UUID id, UserRoleUpdateDto roleUpdate)`**
+8. **`updateUserRole(UUID id, UserRoleUpdateDto roleUpdate)`**
    - Обновление роли пользователя
    - Возвращает `Optional<UserResponseDto>`
    - Логика:
@@ -763,6 +802,26 @@ curl -X POST http://localhost:8081/api/v1/users \
 
 ```bash
 curl "http://localhost:8081/api/v1/users?firstNameContains=John&role=USER&page=0&size=10"
+```
+
+### Проверка существования пользователя
+
+```bash
+curl http://localhost:8081/api/v1/users/123e4567-e89b-12d3-a456-426614174000/exists
+```
+
+**Ответ (пользователь существует):**
+```json
+{
+  "exists": true
+}
+```
+
+**Ответ (пользователь не существует):**
+```json
+{
+  "exists": false
+}
 ```
 
 ### Обновление пользователя

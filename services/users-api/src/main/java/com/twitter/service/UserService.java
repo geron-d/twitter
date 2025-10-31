@@ -118,4 +118,12 @@ public interface UserService {
      * @throws BusinessRuleValidationException if attempting to change the last administrator's role
      */
     Optional<UserResponseDto> updateUserRole(UUID id, UserRoleUpdateDto roleUpdate);
+
+    /**
+     * Checks whether a user exists in the system by their unique identifier.
+     *
+     * @param id the unique identifier of the user to check
+     * @return true if the user exists, false otherwise
+     */
+    boolean existsById(UUID id);
 }
