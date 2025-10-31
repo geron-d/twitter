@@ -1,11 +1,10 @@
-package com.twitter.service.impl;
+package com.twitter.service;
 
 import com.twitter.dto.request.CreateTweetRequestDto;
 import com.twitter.dto.response.TweetResponseDto;
 import com.twitter.entity.Tweet;
 import com.twitter.mapper.TweetMapper;
 import com.twitter.repository.TweetRepository;
-import com.twitter.service.TweetService;
 import com.twitter.validation.TweetValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
