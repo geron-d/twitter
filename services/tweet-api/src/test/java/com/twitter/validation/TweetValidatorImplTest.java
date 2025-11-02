@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -197,6 +198,148 @@ class TweetValidatorImplTest {
                 });
 
             verify(userGateway, never()).existsUser(any());
+        }
+    }
+
+    @Nested
+    class ValidateContentTests {
+
+        @Test
+        void validateContent_WhenValidData_ShouldCompleteWithoutExceptions() {
+            // Arrange
+            UUID validUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+            String validContent = "This is a valid tweet content";
+            CreateTweetRequestDto requestDto = CreateTweetRequestDto.builder()
+                .content(validContent)
+                .userId(validUserId)
+                .build();
+
+            // Act & Assert
+            assertThatCode(() -> tweetValidator.validateContent(requestDto))
+                .doesNotThrowAnyException();
+
+            verify(validator, times(1)).validate(requestDto);
+        }
+
+        @Test
+        void validateContent_WhenContentIsNull_ShouldThrowFormatValidationException() {
+            // Arrange
+            UUID validUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+            CreateTweetRequestDto requestDto = CreateTweetRequestDto.builder()
+                .content(null)
+                .userId(validUserId)
+                .build();
+
+            // Act & Assert
+            assertThatThrownBy(() -> tweetValidator.validateContent(requestDto))
+                .isInstanceOf(FormatValidationException.class)
+                .satisfies(exception -> {
+                    FormatValidationException ex = (FormatValidationException) exception;
+                    assertThat(ex.getFieldName()).isEqualTo("content");
+                    assertThat(ex.getConstraintName()).isEqualTo("CONTENT_VALIDATION");
+                    assertThat(ex.getMessage()).contains("content");
+                });
+
+            verify(validator, times(1)).validate(requestDto);
+        }
+
+        @Test
+        void validateContent_WhenContentIsEmptyString_ShouldThrowFormatValidationException() {
+            // Arrange
+            UUID validUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+            CreateTweetRequestDto requestDto = CreateTweetRequestDto.builder()
+                .content("")
+                .userId(validUserId)
+                .build();
+
+            // Act & Assert
+            assertThatThrownBy(() -> tweetValidator.validateContent(requestDto))
+                .isInstanceOf(FormatValidationException.class)
+                .satisfies(exception -> {
+                    FormatValidationException ex = (FormatValidationException) exception;
+                    assertThat(ex.getFieldName()).isEqualTo("content");
+                    assertThat(ex.getConstraintName()).isEqualTo("CONTENT_VALIDATION");
+                });
+
+            verify(validator, times(1)).validate(requestDto);
+        }
+
+        @Test
+        void validateContent_WhenContentExceedsMaxLength_ShouldThrowFormatValidationException() {
+            // Arrange
+            UUID validUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+            String content281Chars = "a".repeat(281);
+            CreateTweetRequestDto requestDto = CreateTweetRequestDto.builder()
+                .content(content281Chars)
+                .userId(validUserId)
+                .build();
+
+            // Act & Assert
+            assertThatThrownBy(() -> tweetValidator.validateContent(requestDto))
+                .isInstanceOf(FormatValidationException.class)
+                .satisfies(exception -> {
+                    FormatValidationException ex = (FormatValidationException) exception;
+                    assertThat(ex.getFieldName()).isEqualTo("content");
+                    assertThat(ex.getConstraintName()).isEqualTo("CONTENT_VALIDATION");
+                    assertThat(ex.getMessage()).contains("content");
+                });
+
+            verify(validator, times(1)).validate(requestDto);
+        }
+
+        @Test
+        void validateContent_WhenMultipleValidationViolations_ShouldThrowFormatValidationExceptionWithAllViolations() {
+            // Arrange
+            CreateTweetRequestDto requestDto = CreateTweetRequestDto.builder()
+                .content(null)
+                .userId(null)
+                .build();
+
+            // Act & Assert
+            assertThatThrownBy(() -> tweetValidator.validateContent(requestDto))
+                .isInstanceOf(FormatValidationException.class)
+                .satisfies(exception -> {
+                    FormatValidationException ex = (FormatValidationException) exception;
+                    assertThat(ex.getFieldName()).isEqualTo("content");
+                    assertThat(ex.getConstraintName()).isEqualTo("CONTENT_VALIDATION");
+                    assertThat(ex.getMessage()).contains("content");
+                    assertThat(ex.getMessage()).contains("userId");
+                });
+
+            verify(validator, times(1)).validate(requestDto);
+        }
+
+        @Test
+        void validateContent_WhenRequestDtoIsNull_ShouldThrowException() {
+            // Act & Assert
+            assertThatThrownBy(() -> tweetValidator.validateContent(null))
+                .isInstanceOfAny(
+                    FormatValidationException.class,
+                    NullPointerException.class,
+                    IllegalArgumentException.class
+                );
+        }
+
+        @Test
+        void validateContent_WhenValidatorReturnsViolations_ShouldFormatErrorMessageCorrectly() {
+            // Arrange
+            UUID validUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+            CreateTweetRequestDto requestDto = CreateTweetRequestDto.builder()
+                .content("")
+                .userId(validUserId)
+                .build();
+
+            // Act & Assert
+            assertThatThrownBy(() -> tweetValidator.validateContent(requestDto))
+                .isInstanceOf(FormatValidationException.class)
+                .satisfies(exception -> {
+                    FormatValidationException ex = (FormatValidationException) exception;
+                    String errorMessage = ex.getMessage();
+                    assertThat(errorMessage).contains("content");
+                    assertThat(errorMessage.split(", ").length).isGreaterThanOrEqualTo(1);
+                });
+
+            verify(validator, times(1)).validate(requestDto);
         }
     }
 }

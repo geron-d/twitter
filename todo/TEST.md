@@ -1,85 +1,65 @@
-# Тестовые сценарии для метода `validateForCreate` класса `TweetValidatorImpl`
+# Тестовые сценарии для метода `validateContent`
 
-Метод: `validateForCreate(CreateTweetRequestDto requestDto)` (строки 43-46)
+**Класс:** `TweetValidatorImpl`  
+**Метод:** `validateContent(CreateTweetRequestDto requestDto)`  
+**Зависимости:** `Validator validator`, `Logger log` (Slf4j)
 
-## Описание метода
+---
 
-Метод выполняет полную валидацию для создания твита:
-1. Вызывает `validateContent(requestDto)` для валидации контента через Bean Validation и дополнительные правила
-2. Вызывает `validateUserExists(requestDto.getUserId())` для проверки существования пользователя через UserGateway
+## Успешные сценарии
 
-Зависимости:
-- `Validator` (Jakarta Bean Validation) - для валидации DTO
-- `UserGateway` - для проверки существования пользователя
+- **Успешное выполнение при валидном DTO с нормальным контентом**
+  - DTO содержит валидный content (1-280 символов, не пустой, не только пробелы)
+  - `validator.validate()` возвращает пустой Set
+  - Метод завершается без исключений
 
-## Структура тестов
+---
 
-Все тесты должны быть сгруппированы в один `@Nested` класс `ValidateForCreateTests` внутри основного тестового класса `TweetValidatorImplTest`.
+## Ошибочные сценарии и исключения
 
-## Тестовые сценарии
+### Ошибки Bean Validation
 
-### Успешные сценарии
+- **Бросается FormatValidationException при нарушении @NotBlank (content = null)**
+  - DTO содержит `content = null`
+  - `validator.validate()` возвращает Set с одним ConstraintViolation для поля "content" с сообщением о @NotBlank
+  - Бросается `FormatValidationException` с fieldName="content", constraintName="CONTENT_VALIDATION"
+  - Проверяется, что исключение создано через `FormatValidationException.beanValidationError()`
 
-1. **Успешное выполнение при валидных данных**
-   - DTO содержит валидный контент (1-280 символов, не пустой, не только пробелы)
-   - userId не null и соответствует существующему пользователю
-   - Ожидается: метод завершается без исключений
+- **Бросается FormatValidationException при нарушении @NotBlank (content = пустая строка)**
+  - DTO содержит `content = ""`
+  - `validator.validate()` возвращает Set с ConstraintViolation для поля "content"
+  - Бросается `FormatValidationException` с fieldName="content", constraintName="CONTENT_VALIDATION"
 
-### Граничные значения
+- **Бросается FormatValidationException при нарушении @Size (content длиной 0 символов)**
+  - DTO содержит `content = ""` (нарушает @Size(min=1))
+  - `validator.validate()` возвращает Set с ConstraintViolation для поля "content"
+  - Бросается `FormatValidationException` с fieldName="content", constraintName="CONTENT_VALIDATION"
 
-4. **Бросается FormatValidationException при content длиной 0 символов**
-   - content пустая строка ""
-   - userId валидный и существует
-   - Ожидается: выбрасывается FormatValidationException с кодом "CONTENT_VALIDATION" или "EMPTY_CONTENT"
+- **Бросается FormatValidationException при нарушении @Size (content длиной более 280 символов)**
+  - DTO содержит `content` длиной 281+ символов
+  - `validator.validate()` возвращает Set с ConstraintViolation для поля "content" с сообщением о превышении максимальной длины
+  - Бросается `FormatValidationException` с fieldName="content", constraintName="CONTENT_VALIDATION"
+  - В errorMessage содержится информация о propertyPath и message из ConstraintViolation
 
-5. **Бросается FormatValidationException при content длиной 281 символ (превышение максимума)**
-   - content содержит 281 символ
-   - userId валидный и существует
-   - Ожидается: выбрасывается FormatValidationException с кодом "CONTENT_VALIDATION"
+- **Бросается FormatValidationException при множественных нарушениях Bean Validation**
+  - DTO содержит несколько полей с нарушениями (например, content и userId null)
+  - `validator.validate()` возвращает Set с несколькими ConstraintViolation
+  - Бросается `FormatValidationException` с объединенным errorMessage из всех нарушений
+  - errorMessage содержит все propertyPath: message, разделенные запятыми
 
-6. **Бросается FormatValidationException при content состоящей только из пробелов**
-   - content содержит только пробелы (например, "   ")
-   - userId валидный и существует
-   - Ожидается: выбрасывается FormatValidationException с кодом "EMPTY_CONTENT"
+### Обработка null DTO
 
-7. **Бросается FormatValidationException при content = null**
-   - content равен null
-   - userId валидный и существует
-   - Ожидается: выбрасывается FormatValidationException с кодом "CONTENT_VALIDATION"
+- **Бросается NullPointerException при requestDto = null**
+  - Вызов метода с `requestDto = null`
+  - При вызове `validator.validate(null)` или `requestDto.getContent()` бросается `NullPointerException`
+  - Примечание: поведение может зависеть от реализации Validator, но в реальности такой случай возможен
 
-8. **Бросается BusinessRuleValidationException при userId = null**
-   - content валидный
-   - userId равен null
-   - Ожидается: выбрасывается BusinessRuleValidationException с кодом "USER_ID_NULL"
+---
 
-9. **Бросается BusinessRuleValidationException при несуществующем userId**
-   - content валидный
-   - userId не null, но пользователь не существует (userGateway.existsUser возвращает false)
-   - Ожидается: выбрасывается BusinessRuleValidationException с кодом "USER_NOT_EXISTS"
+## Дополнительные сценарии
 
-### Ошибочные сценарии и исключения
-
-10. **Бросается FormatValidationException при нескольких нарушениях Bean Validation**
-    - DTO содержит множественные нарушения (например, content = null и userId = null)
-    - Ожидается: выбрасывается FormatValidationException с кодом "CONTENT_VALIDATION" и сообщением, содержащим все нарушения
-
-11. **Бросается FormatValidationException при requestDto = null**
-    - requestDto равен null
-    - Ожидается: выбрасывается FormatValidationException или NullPointerException (в зависимости от реализации validateContent)
-
-12. **Бросается FormatValidationException при нарушении Bean Validation аннотаций (@NotBlank, @Size)**
-    - content нарушает аннотации (например, пустая строка при @NotBlank)
-    - userId валидный
-    - Ожидается: выбрасывается FormatValidationException с кодом "CONTENT_VALIDATION"
-
-## Примечания по реализации
-
-- Использовать `@ExtendWith(MockitoExtension.class)` для интеграции Mockito
-- Мокировать зависимости: `Validator validator` и `UserGateway userGateway`
-- Использовать `@InjectMocks` для создания экземпляра `TweetValidatorImpl`
-- Создавать валидные и невалидные экземпляры `CreateTweetRequestDto` с помощью builder или конструктора
-- Использовать AssertJ для assertions
-- Проверять тип исключения, код ошибки и сообщение
-- Использовать `verify()` для проверки взаимодействий с моками
-- Структурировать тесты по формату AAA (Arrange - Act - Assert)
-
+- **Проверка корректности форматирования errorMessage при множественных violations**
+  - DTO содержит нарушения для нескольких полей
+  - `validator.validate()` возвращает Set с несколькими ConstraintViolation
+  - Проверяется, что errorMessage содержит все violations в формате "propertyPath: message, propertyPath: message"
+  - Проверяется правильность разделения запятыми и пробелами
