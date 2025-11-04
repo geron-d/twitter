@@ -1,5 +1,6 @@
-- юнит тесты (tweet)
 - интеграционные тесты (tweet)
+- вынести версию wiremock в общий build.gradle
+- вынест конфиги для testconteiners и wiremock
 - swagger (tweet)
 - docs (tweet)
 - readme (tweet)
@@ -13,3 +14,13 @@
 Новый план todo\tweet\TWEET_API_COMMON_2.md
 Нужно составить новый план реализации запроса для управления твитами 
 POST   /api/v1/tweets                    # Создать твит
+
+правила 
+- для кода (с примерами)
+- для контролеров
+- для юнит тестов
+- для интеграционных тестов
+- для swagger
+- для java doc
+- для readme
+- для postman
