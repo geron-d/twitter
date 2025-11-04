@@ -1,11 +1,10 @@
 package com.twitter.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.tomakehurst.wiremock.WireMockServer;
 import com.twitter.dto.request.CreateTweetRequestDto;
 import com.twitter.dto.response.TweetResponseDto;
 import com.twitter.repository.TweetRepository;
-import org.junit.jupiter.api.AfterAll;
+import com.twitter.testconfig.BaseIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -14,19 +13,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebM
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.UUID;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -34,18 +27,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureWebMvc
 @ActiveProfiles("test")
-@Testcontainers
 @Transactional
-public class TweetControllerTest {
-
-    @Container
-    @SuppressWarnings("resource")
-    static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine")
-        .withDatabaseName("twitter_test")
-        .withUsername("test")
-        .withPassword("test");
-
-    private static WireMockServer wireMockServer;
+public class TweetControllerTest extends BaseIntegrationTest {
 
     @Autowired
     private WebApplicationContext webApplicationContext;
@@ -58,80 +41,9 @@ public class TweetControllerTest {
 
     private MockMvc mockMvc;
 
-    @DynamicPropertySource
-    static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgres::getJdbcUrl);
-        registry.add("spring.datasource.username", postgres::getUsername);
-        registry.add("spring.datasource.password", postgres::getPassword);
-        registry.add("spring.datasource.driver-class-name", () -> "org.postgresql.Driver");
-        registry.add("spring.jpa.database-platform", () -> "org.hibernate.dialect.PostgreSQLDialect");
-        registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
-
-        synchronized (TweetControllerTest.class) {
-            if (wireMockServer == null) {
-                wireMockServer = new WireMockServer(0); // Random port
-                wireMockServer.start();
-            }
-        }
-        int wireMockPort = wireMockServer.port();
-        
-        registry.add("wiremock.server.port", () -> String.valueOf(wireMockPort));
-        registry.add("app.users-api.base-url", () -> "http://localhost:" + wireMockPort);
-    }
-
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-        if (wireMockServer != null) {
-            wireMockServer.resetAll();
-        }
-    }
-
-    @AfterAll
-    static void tearDownWireMock() {
-        if (wireMockServer != null && wireMockServer.isRunning()) {
-            wireMockServer.stop();
-        }
-    }
-
-    /**
-     * Sets up WireMock stub for user existence check.
-     *
-     * @param userId the user ID to check
-     * @param exists whether the user exists
-     */
-    protected void setupUserExistsStub(UUID userId, boolean exists) {
-        if (wireMockServer == null) {
-            return;
-        }
-        
-        wireMockServer.stubFor(
-            get(urlEqualTo("/api/v1/users/" + userId + "/exists"))
-                .willReturn(aResponse()
-                    .withStatus(200)
-                    .withHeader("Content-Type", "application/json")
-                    .withBody("{\"exists\":" + exists + "}"))
-        );
-    }
-
-    /**
-     * Sets up WireMock stub for user existence check with error response.
-     *
-     * @param userId the user ID to check
-     * @param statusCode HTTP status code to return
-     */
-    protected void setupUserExistsStubWithError(UUID userId, int statusCode) {
-        if (wireMockServer == null) {
-            return;
-        }
-        
-        wireMockServer.stubFor(
-            get(urlEqualTo("/api/v1/users/" + userId + "/exists"))
-                .willReturn(aResponse()
-                    .withStatus(statusCode)
-                    .withHeader("Content-Type", "application/json")
-                    .withBody("{\"error\":\"Internal Server Error\"}"))
-        );
     }
 
     /**

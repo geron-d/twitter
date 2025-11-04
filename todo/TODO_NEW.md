@@ -1,6 +1,4 @@
-- интеграционные тесты (tweet)
-- вынести версию wiremock в общий build.gradle
-- вынест конфиги для testconteiners и wiremock
+- вынест конфиги для testconteiners и wiremock для users-api
 - swagger (tweet)
 - docs (tweet)
 - readme (tweet)
