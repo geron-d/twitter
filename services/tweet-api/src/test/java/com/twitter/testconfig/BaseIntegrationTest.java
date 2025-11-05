@@ -1,7 +1,6 @@
 package com.twitter.testconfig;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -37,6 +36,17 @@ public abstract class BaseIntegrationTest {
 
     private static WireMockServer wireMockServer;
 
+    static {
+        // Register shutdown hook to ensure WireMock server is stopped when JVM exits
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            synchronized (BaseIntegrationTest.class) {
+                if (wireMockServer != null && wireMockServer.isRunning()) {
+                    wireMockServer.stop();
+                }
+            }
+        }));
+    }
+
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", postgres::getJdbcUrl);
@@ -47,12 +57,42 @@ public abstract class BaseIntegrationTest {
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
 
         synchronized (BaseIntegrationTest.class) {
-            if (wireMockServer == null) {
+            if (wireMockServer == null || !wireMockServer.isRunning()) {
+                if (wireMockServer != null) {
+                    wireMockServer.stop();
+                }
                 wireMockServer = new WireMockServer(0); // Random port
                 wireMockServer.start();
             }
         }
 
+        // Use lazy evaluation to ensure WireMock server is running when port is accessed
+//        registry.add("wiremock.server.port", () -> {
+//            synchronized (BaseIntegrationTest.class) {
+//                if (wireMockServer == null || !wireMockServer.isRunning()) {
+//                    if (wireMockServer == null) {
+//                        wireMockServer = new WireMockServer(0);
+//                    }
+//                    if (!wireMockServer.isRunning()) {
+//                        wireMockServer.start();
+//                    }
+//                }
+//                return String.valueOf(wireMockServer.port());
+//            }
+//        });
+//        registry.add("app.users-api.base-url", () -> {
+//            synchronized (BaseIntegrationTest.class) {
+//                if (wireMockServer == null || !wireMockServer.isRunning()) {
+//                    if (wireMockServer == null) {
+//                        wireMockServer = new WireMockServer(0);
+//                    }
+//                    if (!wireMockServer.isRunning()) {
+//                        wireMockServer.start();
+//                    }
+//                }
+//                return "http://localhost:" + wireMockServer.port();
+//            }
+//        });
         int wireMockPort = wireMockServer.port();
         registry.add("wiremock.server.port", () -> String.valueOf(wireMockPort));
         registry.add("app.users-api.base-url", () -> "http://localhost:" + wireMockPort);
@@ -60,15 +100,16 @@ public abstract class BaseIntegrationTest {
 
     @BeforeEach
     void resetWireMock() {
-        if (wireMockServer != null) {
+        synchronized (BaseIntegrationTest.class) {
+            if (wireMockServer == null || !wireMockServer.isRunning()) {
+                if (wireMockServer == null) {
+                    wireMockServer = new WireMockServer(0);
+                }
+                if (!wireMockServer.isRunning()) {
+                    wireMockServer.start();
+                }
+            }
             wireMockServer.resetAll();
-        }
-    }
-
-    @AfterAll
-    static void tearDownWireMock() {
-        if (wireMockServer != null && wireMockServer.isRunning()) {
-            wireMockServer.stop();
         }
     }
 

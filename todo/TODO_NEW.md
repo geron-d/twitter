@@ -1,4 +1,3 @@
-- вынест конфиги для testconteiners и wiremock для users-api
 - swagger (tweet)
 - docs (tweet)
 - readme (tweet)
