@@ -9,7 +9,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * REST controller for tweet management in Twitter microservices.
@@ -22,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/tweets")
 @RequiredArgsConstructor
-public class TweetController {
+public class TweetController implements TweetApi {
 
     private final TweetService tweetService;
 
@@ -37,12 +40,13 @@ public class TweetController {
      * @param createTweetRequest DTO containing tweet data (content and userId)
      * @return ResponseEntity containing the created tweet data with HTTP 201 status
      * @throws jakarta.validation.ConstraintViolationException if content validation fails
-     * @throws IllegalArgumentException if user doesn't exist
+     * @throws IllegalArgumentException                        if user doesn't exist
      */
     @LoggableRequest
     @PostMapping
+    @Override
     public ResponseEntity<TweetResponseDto> createTweet(
-            @RequestBody @Valid CreateTweetRequestDto createTweetRequest) {
+        @RequestBody @Valid CreateTweetRequestDto createTweetRequest) {
         TweetResponseDto createdTweet = tweetService.createTweet(createTweetRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdTweet);
     }
