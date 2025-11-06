@@ -60,11 +60,11 @@ class TweetMapperTest {
             TweetResponseDto result = mapper.toResponseDto(tweet);
 
             assertNotNull(result, "TweetResponseDto should not be null");
-            assertEquals(tweetId, result.getId(), "ID should be mapped correctly");
-            assertEquals(userId, result.getUserId(), "User ID should be mapped correctly");
-            assertEquals(content, result.getContent(), "Content should be mapped correctly");
-            assertEquals(createdAt, result.getCreatedAt(), "CreatedAt should be mapped correctly");
-            assertEquals(updatedAt, result.getUpdatedAt(), "UpdatedAt should be mapped correctly");
+            assertEquals(tweetId, result.id(), "ID should be mapped correctly");
+            assertEquals(userId, result.userId(), "User ID should be mapped correctly");
+            assertEquals(content, result.content(), "Content should be mapped correctly");
+            assertEquals(createdAt, result.createdAt(), "CreatedAt should be mapped correctly");
+            assertEquals(updatedAt, result.updatedAt(), "UpdatedAt should be mapped correctly");
         }
     }
 }

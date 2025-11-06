@@ -111,7 +111,7 @@ public class TweetControllerTest extends BaseIntegrationTest {
 
             TweetResponseDto responseDto = objectMapper.readValue(responseJson, TweetResponseDto.class);
 
-            assertThat(verifyTweetInDatabase(responseDto.getId())).isTrue();
+            assertThat(verifyTweetInDatabase(responseDto.id())).isTrue();
             assertThat(getTweetCount()).isEqualTo(1);
         }
 

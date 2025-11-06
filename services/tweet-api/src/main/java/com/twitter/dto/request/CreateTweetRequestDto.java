@@ -4,10 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
@@ -25,12 +22,8 @@ import java.util.UUID;
         }
         """
 )
-@Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class CreateTweetRequestDto {
-
+public record CreateTweetRequestDto(
     /**
      * The content of the tweet.
      * Must be between 1 and 280 characters, cannot be blank.
@@ -44,7 +37,7 @@ public class CreateTweetRequestDto {
     )
     @NotBlank(message = "Tweet content cannot be empty")
     @Size(min = 1, max = 280, message = "Tweet content must be between 1 and 280 characters")
-    private String content;
+    String content,
 
     /**
      * The ID of the user creating the tweet.
@@ -57,5 +50,6 @@ public class CreateTweetRequestDto {
         requiredMode = Schema.RequiredMode.REQUIRED
     )
     @NotNull(message = "User ID cannot be null")
-    private UUID userId;
+    UUID userId
+) {
 }

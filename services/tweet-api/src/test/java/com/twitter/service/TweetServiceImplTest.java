@@ -88,11 +88,11 @@ class TweetServiceImplTest {
             TweetResponseDto result = tweetService.createTweet(validRequestDto);
 
             assertThat(result).isNotNull();
-            assertThat(result.getId()).isEqualTo(savedTweet.getId());
-            assertThat(result.getUserId()).isEqualTo(testUserId);
-            assertThat(result.getContent()).isEqualTo("Hello World");
-            assertThat(result.getCreatedAt()).isEqualTo(savedTweet.getCreatedAt());
-            assertThat(result.getUpdatedAt()).isEqualTo(savedTweet.getUpdatedAt());
+            assertThat(result.id()).isEqualTo(savedTweet.getId());
+            assertThat(result.userId()).isEqualTo(testUserId);
+            assertThat(result.content()).isEqualTo("Hello World");
+            assertThat(result.createdAt()).isEqualTo(savedTweet.getCreatedAt());
+            assertThat(result.updatedAt()).isEqualTo(savedTweet.getUpdatedAt());
         }
 
         @Test

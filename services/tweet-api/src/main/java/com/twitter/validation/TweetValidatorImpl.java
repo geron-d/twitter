@@ -42,7 +42,7 @@ public class TweetValidatorImpl implements TweetValidator {
     @Override
     public void validateForCreate(CreateTweetRequestDto requestDto) {
         validateContent(requestDto);
-        validateUserExists(requestDto.getUserId());
+        validateUserExists(requestDto.userId());
     }
 
     /**
@@ -66,7 +66,7 @@ public class TweetValidatorImpl implements TweetValidator {
             throw FormatValidationException.beanValidationError("content", "CONTENT_VALIDATION", errorMessage);
         }
 
-        if (requestDto.getContent() != null && requestDto.getContent().trim().isEmpty()) {
+        if (requestDto.content() != null && requestDto.content().trim().isEmpty()) {
             log.warn("Tweet content is empty or contains only whitespace");
             throw new FormatValidationException("content", "EMPTY_CONTENT", "Tweet content cannot be empty");
         }

@@ -2,10 +2,7 @@ package com.twitter.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -27,12 +24,8 @@ import java.util.UUID;
         }
         """
 )
-@Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class TweetResponseDto {
-
+public record TweetResponseDto(
     /**
      * Unique identifier for the tweet.
      * Generated automatically when tweet is created.
@@ -42,7 +35,7 @@ public class TweetResponseDto {
         example = "123e4567-e89b-12d3-a456-426614174000",
         format = "uuid"
     )
-    private UUID id;
+    UUID id,
 
     /**
      * ID of the user who created this tweet.
@@ -53,7 +46,7 @@ public class TweetResponseDto {
         example = "987fcdeb-51a2-43d7-b123-426614174111",
         format = "uuid"
     )
-    private UUID userId;
+    UUID userId,
 
     /**
      * Content of the tweet.
@@ -64,7 +57,7 @@ public class TweetResponseDto {
         example = "This is a sample tweet content",
         maxLength = 280
     )
-    private String content;
+    String content,
 
     /**
      * Timestamp when the tweet was created.
@@ -76,7 +69,7 @@ public class TweetResponseDto {
         format = "date-time"
     )
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
-    private LocalDateTime createdAt;
+    LocalDateTime createdAt,
 
     /**
      * Timestamp when the tweet was last updated.
@@ -88,5 +81,6 @@ public class TweetResponseDto {
         format = "date-time"
     )
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
-    private LocalDateTime updatedAt;
+    LocalDateTime updatedAt
+) {
 }
