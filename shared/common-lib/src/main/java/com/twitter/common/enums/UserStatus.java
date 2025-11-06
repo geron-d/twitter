@@ -17,14 +17,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
  *   <li><strong>INACTIVE</strong> - User account is deactivated and restricted</li>
  * </ul>
  *
- * <p>Common use cases:</p>
- * <ul>
- *   <li>Account activation and deactivation management</li>
- *   <li>Access control based on account status</li>
- *   <li>User account lifecycle management</li>
- *   <li>Business rule validation for status transitions</li>
- * </ul>
- *
  * @author geron
  * @version 1.0
  */
