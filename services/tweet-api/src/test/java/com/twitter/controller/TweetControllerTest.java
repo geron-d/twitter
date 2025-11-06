@@ -141,7 +141,7 @@ public class TweetControllerTest extends BaseIntegrationTest {
             assertThat(getTweetCount()).isEqualTo(0);
         }
 
-        @org.junit.jupiter.api.Test
+        @Test
         void createTweet_WithNullUserId_ShouldReturn400BadRequest() throws Exception {
             CreateTweetRequestDto request = CreateTweetRequestDto.builder()
                 .userId(null)

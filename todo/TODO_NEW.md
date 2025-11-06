@@ -1,4 +1,3 @@
-- swagger (tweet)
 - docs (tweet)
 - readme (tweet)
 - postman (tweet)
