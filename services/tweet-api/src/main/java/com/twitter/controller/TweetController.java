@@ -20,6 +20,9 @@ import org.springframework.web.bind.annotation.RestController;
  * This controller provides CRUD operations for managing tweets with support for
  * validation and integration with users-api service. It handles HTTP requests
  * and delegates business logic to the TweetService layer.
+ *
+ * @author geron
+ * @version 1.0
  */
 @Slf4j
 @RestController

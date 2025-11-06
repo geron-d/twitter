@@ -16,7 +16,12 @@ import java.util.UUID;
 
 /**
  * JPA Entity representing a Tweet in the database.
+ * <p>
  * Maps to the 'tweets' table with all necessary fields and constraints.
+ * This entity represents a tweet created by a user in the Twitter system.
+ *
+ * @author geron
+ * @version 1.0
  */
 @Entity
 @Table(name = "tweets")

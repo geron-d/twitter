@@ -7,8 +7,10 @@ import org.springframework.stereotype.Repository;
 import java.util.UUID;
 
 /**
- * Repository interface for Tweet entity.
- * Provides CRUD operations and custom query methods for tweets.
+ * Repository interface for tweet data access operations.
+ *
+ * @author geron
+ * @version 1.0
  */
 @Repository
 public interface TweetRepository extends JpaRepository<Tweet, UUID> {

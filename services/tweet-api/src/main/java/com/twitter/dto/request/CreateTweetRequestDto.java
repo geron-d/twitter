@@ -10,7 +10,11 @@ import java.util.UUID;
 
 /**
  * Data Transfer Object for creating a new tweet.
- * Contains validation rules for tweet content and user identification.
+ * <p>
+ * This DTO contains validation rules for tweet content and user identification.
+ *
+ * @author geron
+ * @version 1.0
  */
 @Schema(
     name = "CreateTweetRequest",

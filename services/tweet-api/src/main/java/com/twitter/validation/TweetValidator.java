@@ -12,6 +12,9 @@ import java.util.UUID;
  * This interface centralizes all validation logic extracted from TweetServiceImpl.
  * It provides comprehensive validation for tweet data including content validation,
  * user existence checks, and business rule validation.
+ *
+ * @author geron
+ * @version 1.0
  */
 public interface TweetValidator {
 

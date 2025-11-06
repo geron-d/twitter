@@ -7,17 +7,19 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 /**
- * MapStruct mapper for converting between Tweet DTOs and Entity.
+ * MapStruct mapper for data transformation between Tweet entities and DTO objects.
+ *
+ * @author geron
+ * @version 1.0
  */
 @Mapper
 public interface TweetMapper {
 
     /**
-     * Maps CreateTweetRequestDto to Tweet entity.
-     * Used when creating a new tweet from API request.
+     * Converts CreateTweetRequestDto to Tweet entity.
      *
-     * @param requestDto the request DTO containing tweet data
-     * @return Tweet entity ready for persistence
+     * @param requestDto DTO containing tweet data for creation
+     * @return Tweet entity without service-managed fields
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
@@ -25,11 +27,10 @@ public interface TweetMapper {
     Tweet toEntity(CreateTweetRequestDto requestDto);
 
     /**
-     * Maps Tweet entity to TweetResponseDto.
-     * Used when returning tweet data in API responses.
+     * Converts Tweet entity to TweetResponseDto.
      *
-     * @param tweet the tweet entity from database
-     * @return TweetResponseDto for API response
+     * @param tweet Tweet entity from database
+     * @return DTO containing tweet data for client response
      */
     TweetResponseDto toResponseDto(Tweet tweet);
 }

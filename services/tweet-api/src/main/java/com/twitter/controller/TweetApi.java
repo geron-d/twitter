@@ -27,6 +27,14 @@ public interface TweetApi {
 
     /**
      * Creates a new tweet in the system.
+     * <p>
+     * This method creates a new tweet with the provided content and user ID.
+     * It performs validation on the request data, checks if the user exists via
+     * users-api integration, and saves the tweet to the database. The tweet content
+     * must be between 1 and 280 characters and cannot be empty or only whitespace.
+     *
+     * @param createTweetRequest DTO containing tweet data for creation (content and userId)
+     * @return ResponseEntity containing the created tweet data with HTTP 201 status
      */
     @Operation(
         summary = "Create new tweet",

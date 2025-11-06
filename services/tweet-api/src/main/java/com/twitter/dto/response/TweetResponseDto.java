@@ -9,7 +9,11 @@ import java.util.UUID;
 
 /**
  * Response DTO for Tweet data.
- * Used to return tweet information in API responses.
+ * It contains all relevant tweet data including identifier, user reference,
+ * content, and timestamps for creation and updates.
+ *
+ * @author geron
+ * @version 1.0
  */
 @Schema(
     name = "TweetResponse",

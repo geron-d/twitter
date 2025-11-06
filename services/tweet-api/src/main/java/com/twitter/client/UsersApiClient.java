@@ -8,8 +8,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import java.util.UUID;
 
 /**
- * Feign Client для интеграции с Users API.
- * Предоставляет методы для HTTP запросов к users-api сервису.
+ * Feign Client for integration with Users API service.
+ *
+ * @author geron
+ * @version 1.0
  */
 @FeignClient(
     name = "users-api",
@@ -19,10 +21,10 @@ import java.util.UUID;
 public interface UsersApiClient {
 
     /**
-     * Проверяет существование пользователя по идентификатору.
+     * Checks if a user exists by their identifier.
      *
-     * @param userId идентификатор пользователя для проверки
-     * @return UserExistsResponseDto с полем exists типа boolean
+     * @param userId the user identifier to check
+     * @return UserExistsResponseDto containing the exists field of type boolean
      */
     @GetMapping("/{userId}/exists")
     UserExistsResponseDto existsUser(@PathVariable("userId") UUID userId);

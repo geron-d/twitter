@@ -12,10 +12,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Implementation of TweetService interface.
+ * Implementation of the tweet management service.
  * <p>
- * Provides business logic for tweet operations including creation,
- * validation, and data transformation.
+ * This service provides business logic for tweet operations, including creation,
+ * validation, and data transformation. It handles data validation, user existence
+ * checks via users-api integration, and business rule enforcement.
+ *
+ * @author geron
+ * @version 1.0
  */
 @Service
 @RequiredArgsConstructor
@@ -26,6 +30,18 @@ public class TweetServiceImpl implements TweetService {
     private final TweetMapper tweetMapper;
     private final TweetValidator tweetValidator;
 
+    /**
+     * Creates a new tweet from the provided request data.
+     * <p>
+     * This method performs the following validations:
+     * 1. Validates the request data using TweetValidator
+     * 2. Checks if the user exists via users-api integration
+     *
+     * @param requestDto the tweet creation request containing content and userId
+     * @return TweetResponseDto containing the created tweet data
+     * @throws com.twitter.common.exception.validation.FormatValidationException if content validation fails
+     * @throws com.twitter.common.exception.validation.BusinessRuleValidationException if user doesn't exist
+     */
     @Override
     @Transactional
     public TweetResponseDto createTweet(CreateTweetRequestDto requestDto) {

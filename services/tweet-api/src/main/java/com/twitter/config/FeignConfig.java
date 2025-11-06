@@ -4,8 +4,13 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Конфигурация для Feign Clients.
- * Включает сканирование и регистрацию Feign клиентов.
+ * Configuration class for Feign Clients.
+ * <p>
+ * This configuration class enables scanning and registration of Feign clients
+ * in the specified base package for integration with external services.
+ *
+ * @author geron
+ * @version 1.0
  */
 @Configuration
 @EnableFeignClients(basePackages = "com.twitter.client")

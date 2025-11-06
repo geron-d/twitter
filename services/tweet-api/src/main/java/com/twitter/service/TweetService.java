@@ -6,10 +6,15 @@ import com.twitter.dto.request.CreateTweetRequestDto;
 import com.twitter.dto.response.TweetResponseDto;
 
 /**
- * Service interface for Tweet operations.
+ * Service interface for tweet management in Twitter microservices.
  * <p>
- * Defines the contract for tweet-related business logic,
- * including creation, validation, and data transformation.
+ * This interface defines the contract for tweet management services, providing
+ * business logic for tweet operations, including creation, validation,
+ * and data transformation. It handles integration with users-api service
+ * for user existence verification.
+ *
+ * @author geron
+ * @version 1.0
  */
 public interface TweetService {
 
