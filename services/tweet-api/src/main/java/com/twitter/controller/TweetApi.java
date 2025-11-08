@@ -10,14 +10,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.ResponseEntity;
 
 /**
  * OpenAPI interface for Tweet Management API.
- * <p>
- * This interface contains all OpenAPI annotations for the Tweet Management API endpoints.
- * It provides a centralized location for API documentation and can be implemented
- * by controllers to ensure consistent API documentation across the application.
  *
  * @author geron
  * @version 1.0
@@ -35,6 +32,8 @@ public interface TweetApi {
      *
      * @param createTweetRequest DTO containing tweet data for creation (content and userId)
      * @return ResponseEntity containing the created tweet data with HTTP 201 status
+     * @throws ConstraintViolationException if content validation fails
+     * @throws IllegalArgumentException     if user doesn't exist
      */
     @Operation(
         summary = "Create new tweet",

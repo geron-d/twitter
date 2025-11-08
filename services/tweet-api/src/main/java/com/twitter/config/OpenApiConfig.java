@@ -10,10 +10,6 @@ import java.util.List;
 
 /**
  * Configuration class for OpenAPI/Swagger documentation.
- * <p>
- * This configuration class sets up the OpenAPI documentation for the Tweet API service,
- * including API information, contact details, licensing, and server configurations.
- * It provides a comprehensive documentation setup that follows OpenAPI 3.0 standards.
  *
  * @author geron
  * @version 1.0
@@ -23,12 +19,6 @@ public class OpenApiConfig {
 
     /**
      * Creates and configures the OpenAPI specification for the Tweet API.
-     * <p>
-     * This method defines the main OpenAPI specification including:
-     * - API title, description, and version
-     * - Contact information for API support
-     * - License information
-     * - Server configurations for different environments
      *
      * @return configured OpenAPI instance
      */

@@ -16,10 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * REST controller for tweet management in Twitter microservices.
- * <p>
- * This controller provides CRUD operations for managing tweets with support for
- * validation and integration with users-api service. It handles HTTP requests
- * and delegates business logic to the TweetService layer.
  *
  * @author geron
  * @version 1.0
@@ -33,17 +29,7 @@ public class TweetController implements TweetApi {
     private final TweetService tweetService;
 
     /**
-     * Creates a new tweet in the system.
-     * <p>
-     * This endpoint creates a new tweet with the provided content and user ID.
-     * It performs validation on the request data, checks if the user exists via
-     * users-api integration, and saves the tweet to the database. The tweet content
-     * must be between 1 and 280 characters and cannot be empty or only whitespace.
-     *
-     * @param createTweetRequest DTO containing tweet data (content and userId)
-     * @return ResponseEntity containing the created tweet data with HTTP 201 status
-     * @throws jakarta.validation.ConstraintViolationException if content validation fails
-     * @throws IllegalArgumentException                        if user doesn't exist
+     * @see TweetApi#createTweet
      */
     @LoggableRequest
     @PostMapping
