@@ -8,17 +8,16 @@ import jakarta.validation.constraints.Size;
 /**
  * Data Transfer Object for user update requests.
  * <p>
- * This record represents the data structure used for updating existing users
- * in the system. It includes validation constraints to ensure data
+ * It includes validation constraints to ensure data
  * integrity and security requirements are met during updates.
  *
+ * @param login     unique login name for user authentication
+ * @param firstName user's first name
+ * @param lastName  user's last name
+ * @param email     user's email address
+ * @param password  user's password (will be hashed)
  * @author geron
  * @version 1.0
- * @param login unique login name for user authentication
- * @param firstName user's first name
- * @param lastName user's last name
- * @param email user's email address
- * @param password user's password (will be hashed)
  */
 @Schema(
     name = "UserUpdate",
@@ -55,7 +54,6 @@ public record UserUpdateDto(
      * User's first name.
      * <p>
      * This field stores the user's given name and is optional.
-     * Used for personalization and display purposes.
      */
     @Schema(
         description = "User's first name (optional)",
@@ -69,7 +67,6 @@ public record UserUpdateDto(
      * User's last name.
      * <p>
      * This field stores the user's family name and is optional.
-     * Used for personalization and display purposes.
      */
     @Schema(
         description = "User's last name (optional)",
@@ -83,7 +80,6 @@ public record UserUpdateDto(
      * Unique email address for the user.
      * <p>
      * This field must be unique across all users and is required.
-     * Used for communication and account recovery purposes.
      * Must be a valid email format.
      */
     @Schema(

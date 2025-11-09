@@ -2,6 +2,8 @@ package com.twitter.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.twitter.common.dto.UserExistsResponseDto;
+import com.twitter.common.exception.validation.BusinessRuleValidationException;
+import com.twitter.common.exception.validation.ValidationException;
 import com.twitter.dto.UserRequestDto;
 import com.twitter.dto.UserResponseDto;
 import com.twitter.dto.UserRoleUpdateDto;
@@ -25,8 +27,6 @@ import java.util.UUID;
  * OpenAPI interface for User Management API.
  * <p>
  * This interface contains all OpenAPI annotations for the User Management API endpoints.
- * It provides a centralized location for API documentation and can be implemented
- * by controllers to ensure consistent API documentation across the application.
  *
  * @author geron
  * @version 1.0
@@ -35,7 +35,67 @@ import java.util.UUID;
 public interface UserApi {
 
     /**
+     * Checks whether a user exists by their unique identifier.
+     *
+     * @param userId the unique identifier of the user to check
+     * @return ResponseEntity containing UserExistsResponseDto with boolean exists field
+     */
+    @Operation(
+        summary = "Check user existence",
+        description = "Checks whether a user exists in the system by their unique identifier. " +
+            "Returns true if user exists, false otherwise."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "User existence check completed successfully",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = UserExistsResponseDto.class),
+                examples = @ExampleObject(
+                    name = "User Exists",
+                    summary = "Example: user exists",
+                    value = """
+                        {
+                          "exists": true
+                        }
+                        """
+                )
+            )
+        ),
+        @ApiResponse(
+            responseCode = "200",
+            description = "User does not exist",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = UserExistsResponseDto.class),
+                examples = @ExampleObject(
+                    name = "User Does Not Exist",
+                    summary = "Example: user does not exist",
+                    value = """
+                        {
+                          "exists": false
+                        }
+                        """
+                )
+            )
+        )
+    })
+    ResponseEntity<UserExistsResponseDto> existsUser(
+        @Parameter(
+            description = "Unique identifier of the user to check",
+            required = true,
+            example = "123e4567-e89b-12d3-a456-426614174000"
+        )
+        UUID userId);
+
+    /**
      * Retrieves a user by their unique identifier.
+     * <p>
+     * Returns HTTP 404 if the user does not exist or has been deactivated.
+     *
+     * @param id the unique identifier of the user
+     * @return ResponseEntity containing user data or 404 if not found
      */
     @Operation(
         summary = "Get user by ID",
@@ -92,6 +152,14 @@ public interface UserApi {
 
     /**
      * Retrieves a paginated list of users with optional filtering.
+     * <p>
+     * This endpoint supports filtering by first name, last name, role, and status.
+     * It returns a paginated response with metadata about the total number of
+     * records and pagination information.
+     *
+     * @param userFilter filter criteria for user search (name, role, status)
+     * @param pageable   pagination parameters (page, size, sorting)
+     * @return PagedModel containing filtered list of users with pagination metadata
      */
     @Operation(
         summary = "Get users with filtering and pagination",
@@ -134,12 +202,19 @@ public interface UserApi {
     })
     PagedModel<UserResponseDto> findAll(
         @Parameter(description = "Filter criteria for user search")
-        UserFilter userFilter, 
+        UserFilter userFilter,
         @Parameter(description = "Pagination parameters (page, size, sorting)")
         Pageable pageable);
 
     /**
      * Creates a new user in the system.
+     * <p>
+     * The system automatically sets the status to ACTIVE and role to USER.
+     * The password is securely hashed using PBKDF2 algorithm with a random salt.
+     *
+     * @param userRequest user data for creation
+     * @return the created user data
+     * @throws ValidationException if validation fails or uniqueness conflict occurs
      */
     @Operation(
         summary = "Create new user",
@@ -218,6 +293,15 @@ public interface UserApi {
 
     /**
      * Performs a complete update of an existing user.
+     * <p>
+     * This endpoint replaces all user fields with the new values provided
+     * in the request body. It performs validation and uniqueness checks
+     * before updating the user record.
+     *
+     * @param id          the unique identifier of the user to update
+     * @param userDetails new user data for the update
+     * @return ResponseEntity containing updated user data or 404 if user not found
+     * @throws ValidationException if validation fails or uniqueness conflict occurs
      */
     @Operation(
         summary = "Update user completely",
@@ -312,12 +396,21 @@ public interface UserApi {
     })
     ResponseEntity<UserResponseDto> updateUser(
         @Parameter(description = "Unique identifier of the user to update", required = true, example = "123e4567-e89b-12d3-a456-426614174000")
-        UUID id, 
+        UUID id,
         @Parameter(description = "New user data for the update", required = true)
         UserUpdateDto userDetails);
 
     /**
      * Performs a partial update of user data using JSON Patch.
+     * <p>
+     * This endpoint allows updating only specified fields without modifying
+     * other user data. It uses JSON Patch format to apply changes selectively
+     * and performs validation on the patched data.
+     *
+     * @param id        the unique identifier of the user to update
+     * @param patchNode JSON patch data for partial update
+     * @return ResponseEntity containing updated user data or 404 if user not found
+     * @throws ValidationException if validation fails or JSON format is invalid
      */
     @Operation(
         summary = "Partially update user",
@@ -412,12 +505,19 @@ public interface UserApi {
     })
     ResponseEntity<UserResponseDto> patchUser(
         @Parameter(description = "Unique identifier of the user to update", required = true, example = "123e4567-e89b-12d3-a456-426614174000")
-        UUID id, 
+        UUID id,
         @Parameter(description = "JSON patch data for partial update", required = true)
         JsonNode patchNode);
 
     /**
      * Deactivates a user by setting their status to INACTIVE.
+     * <p>
+     * It includes business rule validation to
+     * prevent deactivation of the last active administrator.
+     *
+     * @param id the unique identifier of the user to deactivate
+     * @return ResponseEntity containing updated user data or 404 if user not found
+     * @throws BusinessRuleValidationException if attempting to deactivate the last administrator
      */
     @Operation(
         summary = "Deactivate user",
@@ -495,6 +595,14 @@ public interface UserApi {
 
     /**
      * Updates the role of a user.
+     * <p>
+     * This endpoint changes the user's role while enforcing business rules
+     * to prevent modification of the last active administrator's role.
+     *
+     * @param id         the unique identifier of the user
+     * @param roleUpdate data containing the new role information
+     * @return ResponseEntity containing updated user data or 404 if user not found
+     * @throws BusinessRuleValidationException if attempting to change the last administrator's role
      */
     @Operation(
         summary = "Update user role",
@@ -571,56 +679,4 @@ public interface UserApi {
         UUID id,
         @Parameter(description = "Data containing the new role information", required = true)
         UserRoleUpdateDto roleUpdate);
-
-    /**
-     * Checks whether a user exists by their unique identifier.
-     */
-    @Operation(
-        summary = "Check user existence",
-        description = "Checks whether a user exists in the system by their unique identifier. " +
-                      "Returns true if user exists, false otherwise."
-    )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "User existence check completed successfully",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = UserExistsResponseDto.class),
-                examples = @ExampleObject(
-                    name = "User Exists",
-                    summary = "Example: user exists",
-                    value = """
-                        {
-                          "exists": true
-                        }
-                        """
-                )
-            )
-        ),
-        @ApiResponse(
-            responseCode = "200",
-            description = "User does not exist",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = UserExistsResponseDto.class),
-                examples = @ExampleObject(
-                    name = "User Does Not Exist",
-                    summary = "Example: user does not exist",
-                    value = """
-                        {
-                          "exists": false
-                        }
-                        """
-                )
-            )
-        )
-    })
-    ResponseEntity<UserExistsResponseDto> existsUser(
-        @Parameter(
-            description = "Unique identifier of the user to check",
-            required = true,
-            example = "123e4567-e89b-12d3-a456-426614174000"
-        )
-        UUID userId);
 }

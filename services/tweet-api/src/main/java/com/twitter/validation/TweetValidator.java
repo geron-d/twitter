@@ -10,8 +10,6 @@ import java.util.UUID;
  * Interface for tweet validation in Twitter system.
  * <p>
  * This interface centralizes all validation logic extracted from TweetServiceImpl.
- * It provides comprehensive validation for tweet data including content validation,
- * user existence checks, and business rule validation.
  *
  * @author geron
  * @version 1.0
@@ -25,7 +23,7 @@ public interface TweetValidator {
      * and user existence checks. It ensures data integrity and business rules compliance.
      *
      * @param requestDto DTO containing tweet data for creation
-     * @throws FormatValidationException if content validation fails
+     * @throws FormatValidationException       if content validation fails
      * @throws BusinessRuleValidationException if user doesn't exist
      */
     void validateForCreate(CreateTweetRequestDto requestDto);

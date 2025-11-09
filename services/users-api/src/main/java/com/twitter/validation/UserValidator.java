@@ -1,21 +1,21 @@
 package com.twitter.validation;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.twitter.dto.UserPatchDto;
-import com.twitter.dto.UserRequestDto;
-import com.twitter.dto.UserUpdateDto;
 import com.twitter.common.enums.UserRole;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.FormatValidationException;
 import com.twitter.common.exception.validation.UniquenessValidationException;
 import com.twitter.common.exception.validation.ValidationException;
+import com.twitter.dto.UserPatchDto;
+import com.twitter.dto.UserRequestDto;
+import com.twitter.dto.UserUpdateDto;
 
 import java.util.UUID;
 
 /**
  * Interface for user validation in Twitter system.
  * <p>
- * This interface centralizes all validation logic extracted from UserServiceImpl.
+ * This interface centralizes all validation logic.
  * It provides comprehensive validation for user data including uniqueness checks,
  * business rule validation, and format validation for JSON Patch operations.
  *
@@ -23,7 +23,7 @@ import java.util.UUID;
  * @version 1.0
  */
 public interface UserValidator {
-    
+
     /**
      * Performs complete validation for user creation.
      * <p>
@@ -34,7 +34,7 @@ public interface UserValidator {
      * @throws ValidationException if validation fails
      */
     void validateForCreate(UserRequestDto userRequest);
-    
+
     /**
      * Performs validation for user update operations.
      * <p>
@@ -47,7 +47,7 @@ public interface UserValidator {
      * @throws ValidationException if validation fails
      */
     void validateForUpdate(UUID userId, UserUpdateDto userUpdate);
-    
+
     /**
      * Performs validation for JSON Patch operations.
      * <p>
@@ -60,7 +60,7 @@ public interface UserValidator {
      * @throws ValidationException if JSON structure validation fails
      */
     void validateForPatch(UUID userId, JsonNode patchNode);
-    
+
     /**
      * Performs validation for PATCH data with a prepared DTO.
      * <p>
@@ -73,7 +73,7 @@ public interface UserValidator {
      * @throws ValidationException if validation fails
      */
     void validateForPatchWithDto(UUID userId, UserPatchDto patchDto);
-    
+
     /**
      * Validates uniqueness of user login and email.
      * <p>
@@ -87,7 +87,7 @@ public interface UserValidator {
      * @throws UniquenessValidationException if uniqueness conflict is detected
      */
     void validateUniqueness(String login, String email, UUID excludeUserId);
-    
+
     /**
      * Validates the possibility of user deactivation.
      * <p>
@@ -99,7 +99,7 @@ public interface UserValidator {
      * @throws BusinessRuleValidationException if business rules are violated
      */
     void validateAdminDeactivation(UUID userId);
-    
+
     /**
      * Validates the possibility of user role change.
      * <p>
@@ -112,7 +112,7 @@ public interface UserValidator {
      * @throws BusinessRuleValidationException if business rules are violated
      */
     void validateRoleChange(UUID userId, UserRole newRole);
-    
+
     /**
      * Validates JSON structure of patch data.
      * <p>
@@ -124,7 +124,7 @@ public interface UserValidator {
      * @throws FormatValidationException if JSON format is invalid
      */
     void validatePatchData(JsonNode patchNode);
-    
+
     /**
      * Performs Bean Validation on patch DTO.
      * <p>

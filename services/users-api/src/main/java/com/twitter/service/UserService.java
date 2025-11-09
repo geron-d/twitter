@@ -29,8 +29,7 @@ public interface UserService {
     /**
      * Retrieves a user by their unique identifier.
      * <p>
-     * This method performs a database lookup and returns the user data
-     * if found. Returns an empty Optional if the user does not exist
+     * Returns an empty Optional if the user does not exist
      * or has been deactivated.
      *
      * @param id the unique identifier of the user

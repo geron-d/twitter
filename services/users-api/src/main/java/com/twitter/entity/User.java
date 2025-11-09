@@ -54,7 +54,6 @@ public class User {
      * User's first name.
      * <p>
      * This field stores the user's given name and is optional.
-     * Used for personalization and display purposes.
      */
     @Column(name = "first_name")
     private String firstName;
@@ -63,7 +62,6 @@ public class User {
      * User's last name.
      * <p>
      * This field stores the user's family name and is optional.
-     * Used for personalization and display purposes.
      */
     @Column(name = "last_name")
     private String lastName;
@@ -72,7 +70,6 @@ public class User {
      * Unique email address for the user.
      * <p>
      * This field must be unique across all users and is required.
-     * Used for communication and account recovery purposes.
      */
     @Column(name = "email", unique = true, nullable = false)
     private String email;
@@ -98,7 +95,6 @@ public class User {
     /**
      * Current status of the user account.
      * <p>
-     * This field indicates whether the user account is active or inactive.
      * It is required and affects the user's ability to access the system.
      */
     @Enumerated(EnumType.STRING)
@@ -117,10 +113,6 @@ public class User {
 
     /**
      * Date and time when the user account was created.
-     * <p>
-     * This field is automatically set when the user is first saved to the database
-     * and cannot be updated afterwards. It provides audit information about
-     * when the user account was originally created in the system.
      */
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
