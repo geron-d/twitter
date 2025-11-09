@@ -28,10 +28,6 @@ import java.util.UUID;
 )
 @Builder
 public record CreateTweetRequestDto(
-    /**
-     * The content of the tweet.
-     * Must be between 1 and 280 characters, cannot be blank.
-     */
     @Schema(
         description = "The content of the tweet",
         example = "This is a sample tweet content",
@@ -43,10 +39,6 @@ public record CreateTweetRequestDto(
     @Size(min = 1, max = 280, message = "Tweet content must be between 1 and 280 characters")
     String content,
 
-    /**
-     * The ID of the user creating the tweet.
-     * Must not be null and should reference an existing user.
-     */
     @Schema(
         description = "The ID of the user creating the tweet",
         example = "123e4567-e89b-12d3-a456-426614174000",

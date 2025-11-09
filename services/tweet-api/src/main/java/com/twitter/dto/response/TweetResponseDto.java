@@ -30,10 +30,6 @@ import java.util.UUID;
 )
 @Builder
 public record TweetResponseDto(
-    /**
-     * Unique identifier for the tweet.
-     * Generated automatically when tweet is created.
-     */
     @Schema(
         description = "Unique identifier for the tweet",
         example = "123e4567-e89b-12d3-a456-426614174000",
@@ -41,10 +37,6 @@ public record TweetResponseDto(
     )
     UUID id,
 
-    /**
-     * ID of the user who created this tweet.
-     * References the user from users-api service.
-     */
     @Schema(
         description = "ID of the user who created this tweet (references users-api service)",
         example = "987fcdeb-51a2-43d7-b123-426614174111",
@@ -52,10 +44,6 @@ public record TweetResponseDto(
     )
     UUID userId,
 
-    /**
-     * Content of the tweet.
-     * Maximum 280 characters as per Twitter standards.
-     */
     @Schema(
         description = "Content of the tweet",
         example = "This is a sample tweet content",
@@ -63,10 +51,6 @@ public record TweetResponseDto(
     )
     String content,
 
-    /**
-     * Timestamp when the tweet was created.
-     * Formatted as ISO 8601 string in UTC timezone.
-     */
     @Schema(
         description = "Timestamp when the tweet was created",
         example = "2025-01-21T20:30:00Z",
@@ -75,10 +59,6 @@ public record TweetResponseDto(
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
     LocalDateTime createdAt,
 
-    /**
-     * Timestamp when the tweet was last updated.
-     * Formatted as ISO 8601 string in UTC timezone.
-     */
     @Schema(
         description = "Timestamp when the tweet was last updated",
         example = "2025-01-21T20:30:00Z",

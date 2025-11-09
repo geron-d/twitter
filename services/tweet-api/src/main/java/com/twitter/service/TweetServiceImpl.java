@@ -1,5 +1,6 @@
 package com.twitter.service;
 
+import com.twitter.controller.TweetApi;
 import com.twitter.dto.request.CreateTweetRequestDto;
 import com.twitter.dto.response.TweetResponseDto;
 import com.twitter.entity.Tweet;
@@ -31,16 +32,7 @@ public class TweetServiceImpl implements TweetService {
     private final TweetValidator tweetValidator;
 
     /**
-     * Creates a new tweet from the provided request data.
-     * <p>
-     * This method performs the following validations:
-     * 1. Validates the request data using TweetValidator
-     * 2. Checks if the user exists via users-api integration
-     *
-     * @param requestDto the tweet creation request containing content and userId
-     * @return TweetResponseDto containing the created tweet data
-     * @throws com.twitter.common.exception.validation.FormatValidationException if content validation fails
-     * @throws com.twitter.common.exception.validation.BusinessRuleValidationException if user doesn't exist
+     * @see TweetService#createTweet
      */
     @Override
     @Transactional

@@ -42,7 +42,6 @@ public class Tweet {
 
     /**
      * ID of the user who created this tweet.
-     * References the user from users-api service.
      */
     @NotNull(message = "User ID cannot be null")
     @Column(name = "user_id", columnDefinition = "UUID", nullable = false)

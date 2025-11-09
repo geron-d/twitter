@@ -10,8 +10,7 @@ import com.twitter.dto.response.TweetResponseDto;
  * <p>
  * This interface defines the contract for tweet management services, providing
  * business logic for tweet operations, including creation, validation,
- * and data transformation. It handles integration with users-api service
- * for user existence verification.
+ * and data transformation.
  *
  * @author geron
  * @version 1.0
