@@ -14,20 +14,13 @@ import org.springframework.util.StringUtils;
  * email, login, and role fields. The filter can be converted to a JPA Specification
  * for database queries using Spring Data JPA.
  *
- * <p>Example usage:</p>
- * <pre>{@code
- * UserFilter filter = new UserFilter("John", "Doe", null, null, UserRole.USER);
- * Specification<User> spec = filter.toSpecification();
- * List<User> users = userRepository.findAll(spec);
- * }</pre>
- *
+ * @param firstNameContains partial match for first name (can be null)
+ * @param lastNameContains  partial match for last name (can be null)
+ * @param email             exact match for email address (can be null)
+ * @param login             exact match for login name (can be null)
+ * @param role              exact match for user role (can be null)
  * @author geron
  * @version 1.0
- * @param firstNameContains partial match for first name (can be null)
- * @param lastNameContains partial match for last name (can be null)
- * @param email exact match for email address (can be null)
- * @param login exact match for login name (can be null)
- * @param role exact match for user role (can be null)
  */
 @Schema(
     name = "UserFilter",
@@ -60,8 +53,6 @@ public record UserFilter(String firstNameContains, String lastNameContains, Stri
 
     /**
      * Creates a specification for first name partial matching.
-     * <p>
-     * Returns null if the filter value is null or empty.
      *
      * @return JPA Specification for first name filtering or null if no filter
      */
@@ -73,8 +64,6 @@ public record UserFilter(String firstNameContains, String lastNameContains, Stri
 
     /**
      * Creates a specification for last name partial matching.
-     * <p>
-     * Returns null if the filter value is null or empty.
      *
      * @return JPA Specification for last name filtering or null if no filter
      */
@@ -86,8 +75,6 @@ public record UserFilter(String firstNameContains, String lastNameContains, Stri
 
     /**
      * Creates a specification for email exact matching.
-     * <p>
-     * Returns null if the filter value is null or empty.
      *
      * @return JPA Specification for email filtering or null if no filter
      */
@@ -99,8 +86,6 @@ public record UserFilter(String firstNameContains, String lastNameContains, Stri
 
     /**
      * Creates a specification for login exact matching.
-     * <p>
-     * Returns null if the filter value is null or empty.
      *
      * @return JPA Specification for login filtering or null if no filter
      */
@@ -112,8 +97,6 @@ public record UserFilter(String firstNameContains, String lastNameContains, Stri
 
     /**
      * Creates a specification for role exact matching.
-     * <p>
-     * Returns null if the filter value is null or empty.
      *
      * @return JPA Specification for role filtering or null if no filter
      */

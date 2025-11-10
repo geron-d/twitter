@@ -112,6 +112,109 @@
 					]
 				},
 				{
+					"name": "check user exists",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/users/{{userId}}/exists",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"{{userId}}",
+								"exists"
+							]
+						},
+						"description": "Checks whether a user exists by their unique identifier. Returns true if user exists, false otherwise."
+					},
+					"response": [
+						{
+							"name": "user exists",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/users/123e4567-e89b-12d3-a456-426614174000/exists",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"users",
+										"123e4567-e89b-12d3-a456-426614174000",
+										"exists"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"exists\": true\n}"
+						},
+						{
+							"name": "user does not exist",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/users/00000000-0000-0000-0000-000000000000/exists",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"users",
+										"00000000-0000-0000-0000-000000000000",
+										"exists"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"exists\": false\n}"
+						}
+					]
+				},
+				{
 					"name": "get users with filtering",
 					"request": {
 						"method": "GET",

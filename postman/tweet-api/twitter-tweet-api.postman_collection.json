@@ -1,0 +1,272 @@
+{
+	"info": {
+		"_postman_id": "twitter-tweet-api-collection",
+		"name": "twitter",
+		"description": "REST API for tweet management in the Twitter microservices system.\n\nThis API provides comprehensive tweet management capabilities including:\n- Tweet creation with content validation\n- User existence validation via users-api integration\n- Content length validation (1-280 characters)\n- Business rule enforcement\n\n## Authentication\nCurrently, the API does not require authentication for basic operations.\nFuture versions will implement JWT-based authentication.\n\n## Rate Limiting\nAPI requests are subject to rate limiting to ensure system stability.\nPlease refer to response headers for current rate limit information.\n\n## Error Handling\nThe API uses standard HTTP status codes and follows RFC 7807 Problem Details\nfor error responses, providing detailed information about validation failures\nand business rule violations.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "twitter-tweet-api"
+	},
+	"item": [
+		{
+			"name": "tweets-api",
+			"description": "API for managing tweets in the Twitter system",
+			"item": [
+				{
+					"name": "create tweet",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"content\": \"{{testTweet_content}}\",\n  \"userId\": \"{{userId}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tweets",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tweets"
+							]
+						},
+						"description": "Creates a new tweet with the provided content and user ID. It performs validation on the request data, checks if the user exists via users-api integration, and saves the tweet to the database. The tweet content must be between 1 and 280 characters and cannot be empty or only whitespace."
+					},
+					"response": [
+						{
+							"name": "tweet created",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"content\": \"This is my first tweet!\",\n  \"userId\": \"123e4567-e89b-12d3-a456-426614174000\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/tweets",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"tweets"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"id\": \"987e6543-e21b-43d2-b654-321987654321\",\n  \"userId\": \"123e4567-e89b-12d3-a456-426614174000\",\n  \"content\": \"This is my first tweet!\",\n  \"createdAt\": \"2025-01-27T15:30:00Z\",\n  \"updatedAt\": \"2025-01-27T15:30:00Z\"\n}"
+						},
+						{
+							"name": "content validation error - too long",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"content\": \"This is a very long tweet content that exceeds the maximum allowed length of 280 characters. This is a very long tweet content that exceeds the maximum allowed length of 280 characters. This is a very long tweet content that exceeds the maximum allowed length of 280 characters. This is a very long tweet content that exceeds the maximum allowed length of 280 characters.\",\n  \"userId\": \"123e4567-e89b-12d3-a456-426614174000\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/tweets",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"tweets"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/problem+json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"type\": \"https://example.com/errors/format-validation\",\n  \"title\": \"Format Validation Error\",\n  \"status\": 400,\n  \"detail\": \"Tweet content must be between 1 and 280 characters\",\n  \"fieldName\": \"content\",\n  \"constraintName\": \"CONTENT_VALIDATION\",\n  \"timestamp\": \"2025-01-27T15:30:00Z\"\n}"
+						},
+						{
+							"name": "user not exists error",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"content\": \"This is my first tweet!\",\n  \"userId\": \"00000000-0000-0000-0000-000000000000\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/tweets",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"tweets"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/problem+json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"type\": \"https://example.com/errors/business-rule-validation\",\n  \"title\": \"Business Rule Validation Error\",\n  \"status\": 400,\n  \"detail\": \"Business rule 'USER_NOT_EXISTS' violated for context: 00000000-0000-0000-0000-000000000000\",\n  \"ruleName\": \"USER_NOT_EXISTS\",\n  \"timestamp\": \"2025-01-27T15:30:00Z\"\n}"
+						},
+						{
+							"name": "constraint violation error - empty content",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"content\": \"\",\n  \"userId\": \"123e4567-e89b-12d3-a456-426614174000\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/tweets",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"tweets"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/problem+json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"type\": \"https://example.com/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"Validation failed: content: Tweet content cannot be empty\",\n  \"timestamp\": \"2025-01-27T15:30:00Z\"\n}"
+						}
+					]
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8082",
+			"type": "string"
+		},
+		{
+			"key": "userId",
+			"value": "123e4567-e89b-12d3-a456-426614174000",
+			"type": "string"
+		},
+		{
+			"key": "testTweet_content",
+			"value": "This is my first tweet!",
+			"type": "string"
+		}
+	]
+}
+

@@ -17,9 +17,6 @@ import java.io.IOException;
  * to existing DTO objects. It uses Jackson ObjectMapper for safe parsing and
  * field updates, ensuring that only specified fields are modified while
  * preserving the integrity of the original object structure.
- * <p>
- * The factory was extracted from UserValidator to improve separation of concerns
- * and provide reusable patch functionality across the application.
  *
  * @author geron
  * @version 1.0
@@ -29,10 +26,6 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class PatchDtoFactory {
 
-    /**
-     * Jackson ObjectMapper for JSON processing and DTO updates.
-     * Injected via constructor to ensure proper Spring dependency management.
-     */
     private final ObjectMapper objectMapper;
 
     /**

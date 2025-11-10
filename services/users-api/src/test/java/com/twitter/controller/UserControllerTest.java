@@ -8,6 +8,7 @@ import com.twitter.entity.User;
 import com.twitter.common.enums.UserRole;
 import com.twitter.common.enums.UserStatus;
 import com.twitter.repository.UserRepository;
+import com.twitter.testconfig.BaseIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -16,15 +17,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebM
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
 import java.util.UUID;
@@ -37,26 +33,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureWebMvc
 @ActiveProfiles("test")
-@Testcontainers
 @Transactional
-public class UserControllerTest {
-
-    @Container
-    @SuppressWarnings("resource")
-    static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine")
-        .withDatabaseName("twitter_test")
-        .withUsername("test")
-        .withPassword("test");
-
-    @DynamicPropertySource
-    static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgres::getJdbcUrl);
-        registry.add("spring.datasource.username", postgres::getUsername);
-        registry.add("spring.datasource.password", postgres::getPassword);
-        registry.add("spring.datasource.driver-class-name", () -> "org.postgresql.Driver");
-        registry.add("spring.jpa.database-platform", () -> "org.hibernate.dialect.PostgreSQLDialect");
-        registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
-    }
+public class UserControllerTest extends BaseIntegrationTest {
 
     @Autowired
     private WebApplicationContext webApplicationContext;
@@ -1198,6 +1176,32 @@ public class UserControllerTest {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(requestJson))
                 .andExpect(status().isInternalServerError());
+        }
+    }
+
+    @Nested
+    class ExistsUserIntegrationTests {
+
+        @Test
+        void existsUser_WithValidExistingUserId_ShouldReturn200OkAndTrue() throws Exception {
+            User user = createTestUser("testuser", "Test", "User", "test@example.com");
+            User savedUser = userRepository.saveAndFlush(user);
+            UUID userId = savedUser.getId();
+
+            mockMvc.perform(get("/api/v1/users/{userId}/exists", userId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.exists").value(true));
+        }
+
+        @Test
+        void existsUser_WithValidNonExistentUserId_ShouldReturn200OkAndFalse() throws Exception {
+            UUID nonExistentUserId = UUID.randomUUID();
+
+            mockMvc.perform(get("/api/v1/users/{userId}/exists", nonExistentUserId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.exists").value(false));
         }
     }
 }

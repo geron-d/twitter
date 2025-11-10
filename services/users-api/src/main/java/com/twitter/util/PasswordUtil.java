@@ -15,13 +15,6 @@ import java.util.Base64;
  * industry-standard security practices for password storage. The implementation
  * uses 10,000 iterations and 256-bit key length for optimal security.
  * <p>
- * Security considerations:
- * <ul>
- *   <li>Uses cryptographically secure random number generation for salt creation</li>
- *   <li>Implements PBKDF2 with HMAC-SHA256 for password hashing</li>
- *   <li>Uses 10,000 iterations to prevent brute force attacks</li>
- *   <li>Generates 16-byte salts to prevent rainbow table attacks</li>
- * </ul>
  *
  * @author geron
  * @version 1.0
@@ -33,14 +26,14 @@ public class PasswordUtil {
      * This algorithm provides strong cryptographic security for password storage.
      */
     private static final String ALGORITHM = "PBKDF2WithHmacSHA256";
-    
+
     /**
      * Number of iterations for PBKDF2 password hashing.
      * Higher values increase security but also computation time.
      * 10,000 iterations provide a good balance between security and performance.
      */
     private static final int ITERATIONS = 10000;
-    
+
     /**
      * Key length in bits for PBKDF2 password hashing.
      * 256 bits provide strong cryptographic security for password storage.
@@ -71,10 +64,10 @@ public class PasswordUtil {
      * This approach provides strong protection against brute force and rainbow table attacks.
      *
      * @param password the plain text password to hash
-     * @param salt the salt to use for hashing (should be 16 bytes)
+     * @param salt     the salt to use for hashing (should be 16 bytes)
      * @return Base64-encoded hash of the password
      * @throws NoSuchAlgorithmException if PBKDF2 algorithm is not available
-     * @throws InvalidKeySpecException if key specification parameters are invalid
+     * @throws InvalidKeySpecException  if key specification parameters are invalid
      */
     public static String hashPassword(String password, byte[] salt)
         throws NoSuchAlgorithmException, InvalidKeySpecException {
