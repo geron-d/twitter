@@ -26,6 +26,8 @@
 | **Lombok** | 1.18.38 | Генерация кода |
 | **Micrometer** | Latest | Мониторинг и метрики |
 | **TestContainers** | 1.21.3 | Интеграционное тестирование |
+| **Spring Cloud OpenFeign** | Latest | Межсервисная коммуникация |
+| **SpringDoc OpenAPI** | Latest | Документация API и Swagger UI |
 
 ### Управление зависимостями
 
@@ -61,8 +63,21 @@
 │  │  │  │   Layer     │  │   Layer     │  │   Layer     │    │ │ │
 │  │  │  └─────────────┘  └─────────────┘  └─────────────┘    │ │ │
 │  │  └─────────────────────────────────────────────────────────┘ │ │
-│  └─────────────────────────────────────────────────────────────┘ │
-│                               │                                 │
+│  │                               │                              │ │
+│  │  ┌─────────────────────────────────────────────────────────┐ │ │
+│  │  │              Tweet API (Port 8082)                      │ │ │
+│  │  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐    │ │ │
+│  │  │  │ Controller  │  │  Service    │  │ Repository  │    │ │ │
+│  │  │  │   Layer     │  │   Layer     │  │   Layer     │    │ │ │
+│  │  │  └─────────────┘  └─────────────┘  └─────────────┘    │ │ │
+│  │  │         │                │                              │ │ │
+│  │  │         └────────┬───────┘                              │ │ │
+│  │  │                  │ Feign Client                        │ │ │
+│  │  └──────────────────┼─────────────────────────────────────┘ │ │
+│  │                     │                                        │ │
+│  └─────────────────────┼────────────────────────────────────────┘ │
+│                        │                                          │
+│                        ▼                                          │
 │  ┌─────────────────────────────────────────────────────────────┐ │
 │  │                Shared Libraries                               │ │
 │  │  ┌─────────────────┐  ┌─────────────────┐                   │ │
@@ -86,7 +101,10 @@
 ### Взаимодействие сервисов
 
 **Текущая реализация:**
-- **REST API** — синхронное взаимодействие через HTTP
+- **REST API** — синхронное взаимодействие через HTTP для внешних клиентов
+- **Spring Cloud OpenFeign** — межсервисная коммуникация (tweet-api ↔ users-api)
+  - Tweet API использует Feign Client для проверки существования пользователей в Users API
+  - Синхронные HTTP вызовы между микросервисами
 - **База данных** — каждый сервис имеет доступ к общей PostgreSQL
 - **Общие библиотеки** — статическое связывание через Gradle
 
@@ -109,7 +127,12 @@ twitter/
 │   └── architecture_1.png      # Схема архитектуры
 ├── 📁 scripts/                  # Скрипты автоматизации
 ├── 📁 services/                 # Микросервисы
-│   └── 📁 users-api/           # Сервис управления пользователями
+│   ├── 📁 users-api/           # Сервис управления пользователями
+│   │   ├── 📁 src/              # Исходный код
+│   │   ├── 📁 build/            # Результаты сборки сервиса
+│   │   ├── Dockerfile           # Docker образ сервиса
+│   │   └── README.md            # Документация сервиса
+│   └── 📁 tweet-api/           # Сервис управления твитами
 │       ├── 📁 src/              # Исходный код
 │       ├── 📁 build/            # Результаты сборки сервиса
 │       ├── Dockerfile           # Docker образ сервиса
@@ -123,7 +146,8 @@ twitter/
 │       ├── 📁 src/              # Исходный код
 │       └── build.gradle         # Конфигурация сборки
 ├── 📁 sql/                      # SQL скрипты
-│   └── users.sql               # Схема таблицы пользователей
+│   ├── users.sql               # Схема таблицы пользователей
+│   └── tweets.sql              # Схема таблицы твитов
 ├── 📁 todo/                     # Планы развития
 │   ├── TODO_Gemini.md          # Планы для Gemini
 │   ├── TODO_GPT5.md            # Планы для GPT-5
@@ -146,6 +170,14 @@ twitter/
   - Ролевая модель (USER, ADMIN, MODERATOR)
   - Безопасное хеширование паролей
   - Валидация и фильтрация данных
+
+- **`tweet-api`** — микросервис управления твитами
+  - REST API для создания твитов
+  - Валидация контента (1-280 символов)
+  - Интеграция с users-api через Feign Client для проверки существования пользователей
+  - OpenAPI/Swagger документация
+  - Обработка ошибок по стандарту RFC 7807 Problem Details
+  - Автоматическое управление временными метками
 
 #### Общие библиотеки (`shared/`)
 
@@ -181,6 +213,7 @@ twitter/
 
 # Сборка конкретного сервиса
 ./gradlew :services:users-api:build
+./gradlew :services:tweet-api:build
 ```
 
 #### Управление зависимостями
@@ -222,6 +255,9 @@ dependencies {
 # Сборка образа users-api
 docker build -f services/users-api/Dockerfile -t twitter-users-api .
 
+# Сборка образа tweet-api
+docker build -f services/tweet-api/Dockerfile -t twitter-tweet-api .
+
 # Сборка всех образов через Docker Compose
 docker-compose build
 
@@ -238,6 +274,7 @@ docker-compose up -d
 
 # Просмотр логов
 docker-compose logs -f users-api
+docker-compose logs -f tweet-api
 
 # Остановка
 docker-compose down
@@ -248,11 +285,15 @@ docker-compose down
 # 1. Запуск PostgreSQL
 docker-compose up -d postgres
 
-# 2. Запуск сервиса
+# 2. Запуск users-api (должен быть запущен первым, так как tweet-api зависит от него)
 ./gradlew :services:users-api:bootRun
+
+# 3. Запуск tweet-api (в отдельном терминале, после запуска users-api)
+./gradlew :services:tweet-api:bootRun
 
 # Или через IDE
 # Запустить Application.java в services/users-api/src/main/java/com/twitter/
+# Затем запустить Application.java в services/tweet-api/src/main/java/com/twitter/
 ```
 
 ## Деплой и окружения
@@ -267,9 +308,10 @@ docker-compose up -d postgres
    ./gradlew test
    ```
 
-2. **Создание Docker образа**
+2. **Создание Docker образов**
    ```bash
    docker build -f services/users-api/Dockerfile -t twitter-users-api:latest .
+   docker build -f services/tweet-api/Dockerfile -t twitter-tweet-api:latest .
    ```
 
 ## Ссылки
@@ -277,6 +319,7 @@ docker-compose up -d postgres
 ### Документация сервисов
 
 - **[Users API](services/users-api/README.md)** — документация сервиса управления пользователями
+- **[Tweet API](services/tweet-api/README.md)** — документация сервиса управления твитами
 - **[Common Library](shared/common-lib/README.md)** — документация общей библиотеки
 
 ### Внешние ресурсы
@@ -309,12 +352,20 @@ docker-compose up -d postgres
 
 3. **Проверка работы**
    ```bash
+   # Проверка users-api (должен быть запущен первым)
    curl http://localhost:8081/actuator/health
+   
+   # Проверка tweet-api (зависит от users-api)
+   curl http://localhost:8082/actuator/health
    ```
 
 4. **Документация API**
-   - Swagger UI: `http://localhost:8081/swagger-ui.html` (планируется)
-   - OpenAPI Spec: `http://localhost:8081/v3/api-docs` (планируется)
+   - **Users API:**
+     - Swagger UI: `http://localhost:8081/swagger-ui.html` (планируется)
+     - OpenAPI Spec: `http://localhost:8081/v3/api-docs` (планируется)
+   - **Tweet API:**
+     - Swagger UI: `http://localhost:8082/swagger-ui.html`
+     - OpenAPI Spec: `http://localhost:8082/v3/api-docs`
 
 ---
 
