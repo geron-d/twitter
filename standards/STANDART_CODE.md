@@ -1103,8 +1103,8 @@ List<User> findActiveUsersByRole(@Param("role") UserRole role, @Param("status") 
 
 **Follow the established JavaDoc standards:**
 
-- See `standards/JAVADOC_STANDARDS.md` for detailed standards
-- See `standards/JAVADOC_TEMPLATES.md` for templates
+- See `standards/STANDART_JAVADOC.md` for detailed standards
+- See `standards/STANDART_JAVADOC.md` for templates
 
 ### 13.2 Required Tags
 
@@ -1254,8 +1254,8 @@ Before submitting code, ensure:
 
 ## References
 
-- [JavaDoc Standards](./JAVADOC_STANDARDS.md)
-- [JavaDoc Templates](./JAVADOC_TEMPLATES.md)
+- [JavaDoc Standards](./STANDART_JAVADOC.md)
+- [JavaDoc Templates](./STANDART_JAVADOC.md)
 - [Spring Boot Documentation](https://spring.io/projects/spring-boot)
 - [MapStruct Documentation](https://mapstruct.org/)
 - [Lombok Documentation](https://projectlombok.org/)

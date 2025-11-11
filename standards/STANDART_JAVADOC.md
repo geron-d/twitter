@@ -1164,6 +1164,3 @@ Most modern IDEs (IntelliJ IDEA, Eclipse) can:
 - [JavaDoc Tags Reference](https://docs.oracle.com/javase/8/docs/technotes/tools/windows/javadoc.html#CHDJGIED)
 - [Spring Boot Documentation](https://spring.io/projects/spring-boot)
 - [Project Code Standards](./STANDART_CODE.md)
-- [Project JavaDoc Standards (Common-Lib)](./JAVADOC_STANDARDS.md)
-- [Project JavaDoc Templates](./JAVADOC_TEMPLATES.md)
-
