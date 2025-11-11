@@ -9,7 +9,6 @@
 POST   /api/v1/tweets                    # Создать твит
 
 правила
-- для swagger
 - для java doc
 - для readme
 - для postman
