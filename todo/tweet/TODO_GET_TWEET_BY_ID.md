@@ -41,16 +41,20 @@
   note: "Добавлен метод getTweetById в TweetController. Использует @GetMapping(\"/{tweetId}\"), @LoggableRequest, @PathVariable, Optional pattern для обработки результата (200 OK или 404 Not Found). Файл: services/tweet-api/src/main/java/com/twitter/controller/TweetController.java"
 
 ### Документация кода (JavaDoc)
-- [ ] (P1) #8: JavaDoc для Service методов — Добавить/проверить JavaDoc для всех методов Service
+- [x] (P1) [2025-01-27] #8: JavaDoc для Service методов — Добавить/проверить JavaDoc для всех методов Service
   acceptance: "TweetService.getTweetById имеет полный JavaDoc, TweetServiceImpl.getTweetById имеет @see ссылку, все JavaDoc на английском языке, все JavaDoc содержат @author geron, @version 1.0"
-- [ ] (P1) #9: JavaDoc для Controller методов — Добавить/проверить JavaDoc для метода контроллера
+  note: "Проверено: TweetService.getTweetById имеет полный JavaDoc с @param и @return. TweetServiceImpl.getTweetById имеет @see TweetService#getTweetById. Классы имеют @author geron и @version 1.0. Все JavaDoc на английском языке."
+- [x] (P1) [2025-01-27] #9: JavaDoc для Controller методов — Добавить/проверить JavaDoc для метода контроллера
   acceptance: "TweetController.getTweetById имеет @see ссылку, все JavaDoc соответствуют стандартам"
+  note: "Проверено: TweetController.getTweetById имеет @see TweetApi#getTweetById. Класс TweetController имеет @author geron и @version 1.0. Все JavaDoc соответствуют стандартам."
 
 ### Тестирование
-- [ ] (P1) #10: Unit тесты для Service — Создать unit тесты для TweetServiceImpl.getTweetById
+- [x] (P1) [2025-01-27] #10: Unit тесты для Service — Создать unit тесты для TweetServiceImpl.getTweetById
   acceptance: "Тесты используют @ExtendWith(MockitoExtension.class), используют именование methodName_WhenCondition_ShouldExpectedResult, используют @Nested для группировки, используют AssertJ для assertions, следуют паттерну AAA, покрыты сценарии: твит найден, твит не найден, проверены взаимодействия с зависимостями (verify)"
-- [ ] (P1) #11: Integration тесты для Controller — Создать integration тесты для GET /api/v1/tweets/{tweetId}
+  note: "Добавлены unit тесты для getTweetById в TweetServiceImplTest. Создан @Nested класс GetTweetByIdTests с 4 тестами: твит найден, твит не найден, проверка взаимодействий при наличии твита, проверка взаимодействий при отсутствии твита. Все тесты используют паттерн AAA, AssertJ, verify для проверки взаимодействий. Файл: services/tweet-api/src/test/java/com/twitter/service/TweetServiceImplTest.java"
+- [x] (P1) [2025-01-27] #11: Integration тесты для Controller — Создать integration тесты для GET /api/v1/tweets/{tweetId}
   acceptance: "Тесты используют @SpringBootTest, @AutoConfigureWebMvc, используют MockMvc для тестирования REST endpoints, используют @Transactional для изоляции, тестированы статус-коды: 200, 404, проверен формат ответов, проверена валидация UUID"
+  note: "Добавлены integration тесты для getTweetById в TweetControllerTest. Создан @Nested класс GetTweetByIdTests с 4 тестами: 200 OK при наличии твита, проверка корректности данных, 404 Not Found при отсутствии твита, 400 Bad Request при невалидном UUID. Добавлен helper метод createAndSaveTweet. Файл: services/tweet-api/src/test/java/com/twitter/controller/TweetControllerTest.java"
 
 ### Swagger/OpenAPI документация
 - [ ] (P1) #12: OpenAPI interface (*Api.java) — Добавить метод getTweetById в TweetApi с полной OpenAPI документацией

@@ -10,12 +10,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -108,6 +108,84 @@ class TweetServiceImplTest {
             verify(tweetMapper, times(1)).toEntity(eq(validRequestDto));
             verify(tweetRepository, times(1)).saveAndFlush(eq(mappedTweet));
             verify(tweetMapper, times(1)).toResponseDto(eq(savedTweet));
+        }
+    }
+
+    @Nested
+    class GetTweetByIdTests {
+
+        private UUID testTweetId;
+        private UUID testUserId;
+        private Tweet foundTweet;
+        private TweetResponseDto responseDto;
+
+        @BeforeEach
+        void setUp() {
+            testTweetId = UUID.fromString("223e4567-e89b-12d3-a456-426614174001");
+            testUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+
+            foundTweet = Tweet.builder()
+                .id(testTweetId)
+                .userId(testUserId)
+                .content("Test tweet content")
+                .createdAt(LocalDateTime.of(2024, 1, 15, 10, 30, 0))
+                .updatedAt(LocalDateTime.of(2024, 1, 15, 10, 30, 0))
+                .build();
+
+            responseDto = TweetResponseDto.builder()
+                .id(testTweetId)
+                .userId(testUserId)
+                .content("Test tweet content")
+                .createdAt(LocalDateTime.of(2024, 1, 15, 10, 30, 0))
+                .updatedAt(LocalDateTime.of(2024, 1, 15, 10, 30, 0))
+                .build();
+        }
+
+        @Test
+        void getTweetById_WhenTweetExists_ShouldReturnOptionalWithTweetResponseDto() {
+            when(tweetRepository.findById(testTweetId)).thenReturn(Optional.of(foundTweet));
+            when(tweetMapper.toResponseDto(foundTweet)).thenReturn(responseDto);
+
+            Optional<TweetResponseDto> result = tweetService.getTweetById(testTweetId);
+
+            assertThat(result).isPresent();
+            assertThat(result.get()).isNotNull();
+            assertThat(result.get().id()).isEqualTo(testTweetId);
+            assertThat(result.get().userId()).isEqualTo(testUserId);
+            assertThat(result.get().content()).isEqualTo("Test tweet content");
+            assertThat(result.get().createdAt()).isEqualTo(foundTweet.getCreatedAt());
+            assertThat(result.get().updatedAt()).isEqualTo(foundTweet.getUpdatedAt());
+        }
+
+        @Test
+        void getTweetById_WhenTweetDoesNotExist_ShouldReturnEmptyOptional() {
+            when(tweetRepository.findById(testTweetId)).thenReturn(Optional.empty());
+
+            Optional<TweetResponseDto> result = tweetService.getTweetById(testTweetId);
+
+            assertThat(result).isEmpty();
+        }
+
+        @Test
+        void getTweetById_WhenTweetExists_ShouldCallRepositoryAndMapper() {
+            when(tweetRepository.findById(testTweetId)).thenReturn(Optional.of(foundTweet));
+            when(tweetMapper.toResponseDto(foundTweet)).thenReturn(responseDto);
+
+            tweetService.getTweetById(testTweetId);
+
+            verify(tweetRepository, times(1)).findById(eq(testTweetId));
+            verify(tweetMapper, times(1)).toResponseDto(eq(foundTweet));
+            verifyNoMoreInteractions(tweetRepository, tweetMapper);
+        }
+
+        @Test
+        void getTweetById_WhenTweetDoesNotExist_ShouldCallRepositoryOnly() {
+            when(tweetRepository.findById(testTweetId)).thenReturn(Optional.empty());
+
+            tweetService.getTweetById(testTweetId);
+
+            verify(tweetRepository, times(1)).findById(eq(testTweetId));
+            verifyNoInteractions(tweetMapper);
         }
     }
 }

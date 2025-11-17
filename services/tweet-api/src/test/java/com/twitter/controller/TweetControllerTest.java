@@ -3,6 +3,7 @@ package com.twitter.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.twitter.dto.request.CreateTweetRequestDto;
 import com.twitter.dto.response.TweetResponseDto;
+import com.twitter.entity.Tweet;
 import com.twitter.repository.TweetRepository;
 import com.twitter.testconfig.BaseIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +22,7 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -77,6 +79,21 @@ public class TweetControllerTest extends BaseIntegrationTest {
      */
     protected long getTweetCount() {
         return tweetRepository.count();
+    }
+
+    /**
+     * Creates and saves a tweet in the database for testing.
+     *
+     * @param userId  the user ID
+     * @param content the tweet content
+     * @return the saved Tweet entity
+     */
+    protected Tweet createAndSaveTweet(UUID userId, String content) {
+        Tweet tweet = Tweet.builder()
+            .userId(userId)
+            .content(content)
+            .build();
+        return tweetRepository.saveAndFlush(tweet);
     }
 
     @Nested
@@ -180,6 +197,63 @@ public class TweetControllerTest extends BaseIntegrationTest {
             
             assertThat(status).isGreaterThanOrEqualTo(400);
             assertThat(getTweetCount()).isEqualTo(0);
+        }
+    }
+
+    @Nested
+    class GetTweetByIdTests {
+
+        private UUID testUserId;
+        private UUID testTweetId;
+
+        @BeforeEach
+        void setUp() {
+            testUserId = UUID.randomUUID();
+        }
+
+        @Test
+        void getTweetById_WhenTweetExists_ShouldReturn200Ok() throws Exception {
+            String content = "Test tweet content";
+            Tweet savedTweet = createAndSaveTweet(testUserId, content);
+            testTweetId = savedTweet.getId();
+
+            mockMvc.perform(get("/api/v1/tweets/{tweetId}", testTweetId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(testTweetId.toString()))
+                .andExpect(jsonPath("$.userId").value(testUserId.toString()))
+                .andExpect(jsonPath("$.content").value(content))
+                .andExpect(jsonPath("$.createdAt").exists())
+                .andExpect(jsonPath("$.updatedAt").exists());
+        }
+
+        @Test
+        void getTweetById_WhenTweetExists_ShouldReturnCorrectTweetData() throws Exception {
+            String content = "Another test tweet";
+            Tweet savedTweet = createAndSaveTweet(testUserId, content);
+            testTweetId = savedTweet.getId();
+
+            String responseJson = mockMvc.perform(get("/api/v1/tweets/{tweetId}", testTweetId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+            TweetResponseDto responseDto = objectMapper.readValue(responseJson, TweetResponseDto.class);
+            assertThat(responseDto.id()).isEqualTo(testTweetId);
+            assertThat(responseDto.userId()).isEqualTo(testUserId);
+            assertThat(responseDto.content()).isEqualTo(content);
+            assertThat(responseDto.createdAt()).isNotNull();
+            assertThat(responseDto.updatedAt()).isNotNull();
+        }
+
+        @Test
+        void getTweetById_WhenTweetDoesNotExist_ShouldReturn404NotFound() throws Exception {
+            testTweetId = UUID.randomUUID();
+
+            mockMvc.perform(get("/api/v1/tweets/{tweetId}", testTweetId))
+                .andExpect(status().isNotFound());
         }
     }
 }
