@@ -16,22 +16,29 @@
 ## Tasks
 
 ### Анализ и проектирование
-- [ ] (P1) #1: Анализ требований — Проанализировать существующий код, определить необходимые изменения
+- [x] (P1) [2025-01-27] #1: Анализ требований — Проанализировать существующий код, определить необходимые изменения
   acceptance: "Понят вход/выход эндпоинта, определены затронутые компоненты, определены стандарты проекта, определена структура ответов (200, 404, 400)"
-- [ ] (P1) #2: Проектирование API и контрактов — Спроектировать структуру метода в Service и Controller
+  note: "Анализ выполнен при создании плана. Определены все необходимые компоненты и стандарты."
+- [x] (P1) [2025-01-27] #2: Проектирование API и контрактов — Спроектировать структуру метода в Service и Controller
   acceptance: "Определен контракт метода getTweetById в TweetService, определена структура ответа (Optional<TweetResponseDto>), определены HTTP статус коды (200, 404), определена обработка ошибок"
+  note: "Проектирование выполнено при создании плана. Определен контракт: Optional<TweetResponseDto> getTweetById(UUID tweetId)."
 
 ### Реализация кода
-- [ ] (P1) #3: Реализация метода в Repository — Проверить доступность findById (используется стандартный из JpaRepository)
+- [x] (P1) [2025-01-27] #3: Реализация метода в Repository — Проверить доступность findById (используется стандартный из JpaRepository)
   acceptance: "Подтверждено, что JpaRepository.findById доступен, дополнительный метод не требуется"
-- [ ] (P1) #4: Реализация метода в Service интерфейсе — Добавить метод getTweetById в TweetService интерфейс
+  note: "Проверено: TweetRepository extends JpaRepository<Tweet, UUID>, метод findById доступен автоматически. Дополнительный метод не требуется."
+- [x] (P1) [2025-01-27] #4: Реализация метода в Service интерфейсе — Добавить метод getTweetById в TweetService интерфейс
   acceptance: "Метод определен в TweetService, имеет JavaDoc с @author geron, @version 1.0, возвращает Optional<TweetResponseDto>, имеет @param и @return в JavaDoc"
-- [ ] (P1) #5: Реализация метода в Service implementation — Реализовать getTweetById в TweetServiceImpl
+  note: "Добавлен метод getTweetById в TweetService с полным JavaDoc. Метод возвращает Optional<TweetResponseDto>. Файл: services/tweet-api/src/main/java/com/twitter/service/TweetService.java"
+- [x] (P1) [2025-01-27] #5: Реализация метода в Service implementation — Реализовать getTweetById в TweetServiceImpl
   acceptance: "Метод реализован с @Transactional(readOnly = true), использует tweetRepository.findById, использует tweetMapper.toResponseDto, возвращает Optional<TweetResponseDto>, имеет @see TweetService#getTweetById в JavaDoc"
-- [ ] (P1) #6: Реализация метода в TweetApi интерфейсе — Добавить метод getTweetById в TweetApi с OpenAPI аннотациями
+  note: "Добавлена реализация getTweetById в TweetServiceImpl. Метод использует @Transactional(readOnly = true), вызывает tweetRepository.findById и преобразует через tweetMapper.toResponseDto. Файл: services/tweet-api/src/main/java/com/twitter/service/TweetServiceImpl.java"
+- [x] (P1) [2025-01-27] #6: Реализация метода в TweetApi интерфейсе — Добавить метод getTweetById в TweetApi с OpenAPI аннотациями
   acceptance: "Метод определен в TweetApi, имеет @Operation с summary и description, имеет @ApiResponses со статусами 200, 404, 400, имеет @Parameter для tweetId, имеет @ExampleObject для успешного ответа и ошибки 404"
-- [ ] (P1) #7: Реализация метода в TweetController — Реализовать GET эндпоинт в TweetController
+  note: "Добавлен метод getTweetById в TweetApi с полной OpenAPI документацией. Включены @Operation, @ApiResponses (200, 404, 400), @Parameter с example, @ExampleObject для всех сценариев. Все ошибки используют RFC 7807 Problem Details. Файл: services/tweet-api/src/main/java/com/twitter/controller/TweetApi.java"
+- [x] (P1) [2025-01-27] #7: Реализация метода в TweetController — Реализовать GET эндпоинт в TweetController
   acceptance: "Метод реализован с @GetMapping(\"/{tweetId}\"), использует @LoggableRequest, использует @PathVariable для tweetId, возвращает ResponseEntity<TweetResponseDto>, возвращает 200 OK при наличии твита, возвращает 404 Not Found при отсутствии твита, имеет @see TweetApi#getTweetById в JavaDoc"
+  note: "Добавлен метод getTweetById в TweetController. Использует @GetMapping(\"/{tweetId}\"), @LoggableRequest, @PathVariable, Optional pattern для обработки результата (200 OK или 404 Not Found). Файл: services/tweet-api/src/main/java/com/twitter/controller/TweetController.java"
 
 ### Документация кода (JavaDoc)
 - [ ] (P1) #8: JavaDoc для Service методов — Добавить/проверить JavaDoc для всех методов Service

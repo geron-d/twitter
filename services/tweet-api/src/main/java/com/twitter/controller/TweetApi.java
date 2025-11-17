@@ -13,6 +13,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.ResponseEntity;
 
+import java.util.UUID;
+
 /**
  * OpenAPI interface for Tweet Management API.
  *
@@ -131,5 +133,92 @@ public interface TweetApi {
     ResponseEntity<TweetResponseDto> createTweet(
         @Parameter(description = "Tweet data for creation", required = true)
         CreateTweetRequestDto createTweetRequest);
+
+    /**
+     * Retrieves a tweet by its unique identifier.
+     * <p>
+     * Returns 200 OK with tweet data if found, or 404 Not Found if the tweet
+     * does not exist. The tweetId must be a valid UUID format.
+     *
+     * @param tweetId the unique identifier of the tweet (UUID format)
+     * @return ResponseEntity containing tweet data with HTTP 200 status if found,
+     *         or HTTP 404 status if not found
+     */
+    @Operation(
+        summary = "Get tweet by ID",
+        description = "Retrieves a tweet from the database by its unique identifier. " +
+            "Returns 200 OK with tweet data if the tweet exists, or 404 Not Found " +
+            "if the tweet does not exist. The tweetId must be a valid UUID format."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Tweet found successfully",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = TweetResponseDto.class),
+                examples = @ExampleObject(
+                    name = "Tweet Response",
+                    summary = "Example tweet data",
+                    value = """
+                        {
+                          "id": "123e4567-e89b-12d3-a456-426614174000",
+                          "userId": "987e6543-e21b-43d2-b654-321987654321",
+                          "content": "This is my first tweet!",
+                          "createdAt": "2025-01-27T15:30:00Z",
+                          "updatedAt": "2025-01-27T15:30:00Z"
+                        }
+                        """
+                )
+            )
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Tweet not found",
+            content = @Content(
+                mediaType = "application/problem+json",
+                examples = @ExampleObject(
+                    name = "Tweet Not Found Error",
+                    summary = "Tweet does not exist",
+                    value = """
+                        {
+                          "type": "https://example.com/errors/not-found",
+                          "title": "Tweet Not Found",
+                          "status": 404,
+                          "detail": "Tweet with ID '123e4567-e89b-12d3-a456-426614174000' not found",
+                          "timestamp": "2025-01-27T15:30:00Z"
+                        }
+                        """
+                )
+            )
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Invalid UUID format",
+            content = @Content(
+                mediaType = "application/problem+json",
+                examples = @ExampleObject(
+                    name = "Invalid UUID Format Error",
+                    summary = "Invalid tweet ID format",
+                    value = """
+                        {
+                          "type": "https://example.com/errors/validation-error",
+                          "title": "Validation Error",
+                          "status": 400,
+                          "detail": "Invalid UUID format for tweetId parameter",
+                          "timestamp": "2025-01-27T15:30:00Z"
+                        }
+                        """
+                )
+            )
+        )
+    })
+    ResponseEntity<TweetResponseDto> getTweetById(
+        @Parameter(
+            description = "Unique identifier of the tweet",
+            required = true,
+            example = "123e4567-e89b-12d3-a456-426614174000"
+        )
+        UUID tweetId);
 }
 
