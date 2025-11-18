@@ -5,6 +5,9 @@ import com.twitter.common.exception.validation.FormatValidationException;
 import com.twitter.dto.request.CreateTweetRequestDto;
 import com.twitter.dto.response.TweetResponseDto;
 
+import java.util.Optional;
+import java.util.UUID;
+
 /**
  * Service interface for tweet management in Twitter microservices.
  * <p>
@@ -34,4 +37,15 @@ public interface TweetService {
      * @throws BusinessRuleValidationException if user doesn't exist
      */
     TweetResponseDto createTweet(CreateTweetRequestDto requestDto);
+
+    /**
+     * Retrieves a tweet by its unique identifier.
+     * <p>
+     * This method retrieves a tweet from the database by its UUID identifier.
+     * Returns an empty Optional if the tweet does not exist.
+     *
+     * @param tweetId the unique identifier of the tweet
+     * @return Optional containing tweet data or empty if not found
+     */
+    Optional<TweetResponseDto> getTweetById(UUID tweetId);
 }

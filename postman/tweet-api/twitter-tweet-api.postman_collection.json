@@ -247,6 +247,106 @@
 							"body": "{\n  \"type\": \"https://example.com/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"Validation failed: content: Tweet content cannot be empty\",\n  \"timestamp\": \"2025-01-27T15:30:00Z\"\n}"
 						}
 					]
+				},
+				{
+					"name": "get tweet by id",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tweets/{{tweetId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tweets",
+								"{{tweetId}}"
+							]
+						},
+						"description": "Retrieves a tweet from the database by its unique identifier. Returns 200 OK with tweet data if the tweet exists, or 404 Not Found if the tweet does not exist. The tweetId must be a valid UUID format."
+					},
+					"response": [
+						{
+							"name": "tweet found",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/tweets/123e4567-e89b-12d3-a456-426614174000",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"tweets",
+										"123e4567-e89b-12d3-a456-426614174000"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"id\": \"123e4567-e89b-12d3-a456-426614174000\",\n  \"userId\": \"987e6543-e21b-43d2-b654-321987654321\",\n  \"content\": \"This is my first tweet!\",\n  \"createdAt\": \"2025-01-27T15:30:00Z\",\n  \"updatedAt\": \"2025-01-27T15:30:00Z\"\n}"
+						},
+						{
+							"name": "tweet not found",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/tweets/00000000-0000-0000-0000-000000000000",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"tweets",
+										"00000000-0000-0000-0000-000000000000"
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/problem+json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"type\": \"https://example.com/errors/not-found\",\n  \"title\": \"Tweet Not Found\",\n  \"status\": 404,\n  \"detail\": \"Tweet with ID '00000000-0000-0000-0000-000000000000' not found\",\n  \"timestamp\": \"2025-01-27T15:30:00Z\"\n}"
+						}
+					]
 				}
 			]
 		}
@@ -259,6 +359,11 @@
 		},
 		{
 			"key": "userId",
+			"value": "123e4567-e89b-12d3-a456-426614174000",
+			"type": "string"
+		},
+		{
+			"key": "tweetId",
 			"value": "123e4567-e89b-12d3-a456-426614174000",
 			"type": "string"
 		},

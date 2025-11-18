@@ -9,10 +9,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.UUID;
 
 /**
  * REST controller for tweet management in Twitter microservices.
@@ -38,6 +42,19 @@ public class TweetController implements TweetApi {
         @RequestBody @Valid CreateTweetRequestDto createTweetRequest) {
         TweetResponseDto createdTweet = tweetService.createTweet(createTweetRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdTweet);
+    }
+
+    /**
+     * @see TweetApi#getTweetById
+     */
+    @LoggableRequest
+    @GetMapping("/{tweetId}")
+    @Override
+    public ResponseEntity<TweetResponseDto> getTweetById(
+        @PathVariable("tweetId") UUID tweetId) {
+        return tweetService.getTweetById(tweetId)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
     }
 }
 

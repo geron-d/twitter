@@ -1,6 +1,5 @@
 package com.twitter.service;
 
-import com.twitter.controller.TweetApi;
 import com.twitter.dto.request.CreateTweetRequestDto;
 import com.twitter.dto.response.TweetResponseDto;
 import com.twitter.entity.Tweet;
@@ -11,6 +10,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Implementation of the tweet management service.
@@ -42,5 +44,15 @@ public class TweetServiceImpl implements TweetService {
         Tweet tweet = tweetMapper.toEntity(requestDto);
         Tweet savedTweet = tweetRepository.saveAndFlush(tweet);
         return tweetMapper.toResponseDto(savedTweet);
+    }
+
+    /**
+     * @see TweetService#getTweetById
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<TweetResponseDto> getTweetById(UUID tweetId) {
+        return tweetRepository.findById(tweetId)
+            .map(tweetMapper::toResponseDto);
     }
 }
