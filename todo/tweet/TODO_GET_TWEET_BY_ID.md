@@ -57,22 +57,27 @@
   note: "Добавлены integration тесты для getTweetById в TweetControllerTest. Создан @Nested класс GetTweetByIdTests с 4 тестами: 200 OK при наличии твита, проверка корректности данных, 404 Not Found при отсутствии твита, 400 Bad Request при невалидном UUID. Добавлен helper метод createAndSaveTweet. Файл: services/tweet-api/src/test/java/com/twitter/controller/TweetControllerTest.java"
 
 ### Swagger/OpenAPI документация
-- [ ] (P1) #12: OpenAPI interface (*Api.java) — Добавить метод getTweetById в TweetApi с полной OpenAPI документацией
+- [x] (P1) [2025-01-27] #12: OpenAPI interface (*Api.java) — Добавить метод getTweetById в TweetApi с полной OpenAPI документацией
   acceptance: "Метод имеет @Tag (уже есть на уровне интерфейса), имеет @Operation с summary и description, имеет @ApiResponses со всеми статус-кодами (200, 404, 400), имеет @Parameter для tweetId с description и example, имеет @ExampleObject для успешного ответа (200), имеет @ExampleObject для ошибки 404, все примеры используют RFC 7807 Problem Details для ошибок"
-- [ ] (P1) #13: DTO Schema аннотации — Проверить @Schema аннотации в TweetResponseDto
+  note: "Метод getTweetById уже был добавлен в TweetApi в задаче #6 с полной OpenAPI документацией. Файл: services/tweet-api/src/main/java/com/twitter/controller/TweetApi.java"
+- [x] (P1) [2025-01-27] #13: DTO Schema аннотации — Проверить @Schema аннотации в TweetResponseDto
   acceptance: "TweetResponseDto имеет @Schema на уровне класса, все поля TweetResponseDto имеют @Schema аннотации, все @Schema содержат description, example, format где нужно"
+  note: "TweetResponseDto полностью соответствует стандартам проекта. Имеет @Schema на уровне класса с name, description, example. Все поля имеют @Schema аннотации с description, example, format (uuid для UUID, date-time для LocalDateTime), maxLength для content. Файл: services/tweet-api/src/main/java/com/twitter/dto/response/TweetResponseDto.java"
 
 ### Обновление README
-- [ ] (P2) #14: Обновление README.md — Обновить README.md с информацией о новом эндпоинте
+- [x] (P2) [2025-01-27] #14: Обновление README.md — Обновить README.md с информацией о новом эндпоинте
   acceptance: "Обновлен раздел \"REST API\" с новым эндпоинтом, добавлено детальное описание эндпоинта GET /api/v1/tweets/{tweetId}, добавлен пример использования в разделе \"Примеры использования\", все описания на русском языке"
+  note: "Обновлен README.md: добавлена возможность получения твита в раздел \"Основные возможности\", добавлен GET /{tweetId} в таблицу эндпоинтов, добавлено детальное описание эндпоинта с примерами ответов (200, 404, 400), добавлен метод getTweetById в описание TweetService, добавлен пример использования с curl. Файл: services/tweet-api/README.md"
 
 ### Postman коллекции
-- [ ] (P2) #15: Обновление Postman коллекции — Добавить запрос get tweet by id в Postman коллекцию
+- [x] (P2) [2025-01-27] #15: Обновление Postman коллекции — Добавить запрос get tweet by id в Postman коллекцию
   acceptance: "Добавлен запрос с именем \"get tweet by id\" (lowercase с пробелами), запрос использует переменную {{baseUrl}}, запрос использует переменную {{tweetId}} для path параметра, запрос имеет описание, добавлены примеры ответов: 200 OK, 404 Not Found, используется правильный Content-Type (application/json для успеха, application/problem+json для ошибок), ошибки следуют RFC 7807 Problem Details"
+  note: "Добавлен запрос \"get tweet by id\" в Postman коллекцию. Запрос использует GET метод, переменную {{baseUrl}} для базового URL, переменную {{tweetId}} для path параметра. Добавлено описание запроса. Добавлены примеры ответов: 200 OK (tweet found) с Content-Type application/json, 404 Not Found (tweet not found) с Content-Type application/problem+json и RFC 7807 Problem Details. Добавлена переменная tweetId в коллекцию и в файл окружения. Файлы: postman/tweet-api/twitter-tweet-api.postman_collection.json, postman/tweet-api/twitter-tweet-api.postman_environment.json"
 
 ### Проверка соответствия стандартам
-- [ ] (P1) #16: Проверка соответствия стандартам — Проверить соответствие всех изменений стандартам проекта
+- [x] (P1) [2025-01-27] #16: Проверка соответствия стандартам — Проверить соответствие всех изменений стандартам проекта
   acceptance: "Проверено соответствие STANDART_CODE.md, проверено соответствие STANDART_PROJECT.md, проверено соответствие STANDART_TEST.md, проверено соответствие STANDART_JAVADOC.md, проверено соответствие STANDART_SWAGGER.md, проверено соответствие STANDART_README.md, проверено соответствие STANDART_POSTMAN.md"
+  note: "Проведена финальная проверка всех изменений на соответствие стандартам проекта. Все изменения соответствуют стандартам: код использует @LoggableRequest, @Transactional(readOnly = true) для read операций, тесты используют правильное именование (methodName_WhenCondition_ShouldExpectedResult), @Nested для группировки, AssertJ для assertions, паттерн AAA, JavaDoc присутствует на всех методах, OpenAPI документация полная с примерами (200, 404, 400), README обновлен на русском языке, Postman коллекция соответствует стандартам (lowercase с пробелами, переменные, примеры ответов, RFC 7807)."
 
 ## Assumptions
 - Tweet entity не имеет поля isDeleted, поэтому используется стандартный findById из JpaRepository
