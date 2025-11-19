@@ -3,7 +3,10 @@ package com.twitter.validation;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.FormatValidationException;
 import com.twitter.dto.request.CreateTweetRequestDto;
+import com.twitter.dto.request.UpdateTweetRequestDto;
+import com.twitter.entity.Tweet;
 import com.twitter.gateway.UserGateway;
+import com.twitter.repository.TweetRepository;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.Nested;
@@ -14,11 +17,11 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -30,6 +33,9 @@ class TweetValidatorImplTest {
 
     @Mock
     private UserGateway userGateway;
+
+    @Mock
+    private TweetRepository tweetRepository;
 
     @InjectMocks
     private TweetValidatorImpl tweetValidator;
@@ -371,6 +377,240 @@ class TweetValidatorImplTest {
                 });
 
             verify(userGateway, times(1)).existsUser(nonExistentUserId);
+        }
+    }
+
+    @Nested
+    class ValidateForUpdateTests {
+
+        @Test
+        void validateForUpdate_WhenValidData_ShouldCompleteWithoutExceptions() {
+            UUID tweetId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+            UUID authorUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174001");
+            String validContent = "This is updated tweet content";
+            UpdateTweetRequestDto requestDto = UpdateTweetRequestDto.builder()
+                .content(validContent)
+                .userId(authorUserId)
+                .build();
+
+            Tweet existingTweet = Tweet.builder()
+                .id(tweetId)
+                .userId(authorUserId)
+                .content("Original content")
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
+            when(tweetRepository.findById(tweetId)).thenReturn(Optional.of(existingTweet));
+
+            assertThatCode(() -> tweetValidator.validateForUpdate(tweetId, requestDto))
+                .doesNotThrowAnyException();
+
+            verify(tweetRepository, times(1)).findById(tweetId);
+            verify(validator, times(1)).validate(requestDto);
+        }
+
+        @Test
+        void validateForUpdate_WhenTweetIdIsNull_ShouldThrowBusinessRuleValidationException() {
+            UUID authorUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174001");
+            String validContent = "This is updated tweet content";
+            UpdateTweetRequestDto requestDto = UpdateTweetRequestDto.builder()
+                .content(validContent)
+                .userId(authorUserId)
+                .build();
+
+            assertThatThrownBy(() -> tweetValidator.validateForUpdate(null, requestDto))
+                .isInstanceOf(BusinessRuleValidationException.class)
+                .satisfies(exception -> {
+                    BusinessRuleValidationException ex = (BusinessRuleValidationException) exception;
+                    assertThat(ex.getRuleName()).isEqualTo("TWEET_ID_NULL");
+                });
+
+            verify(tweetRepository, never()).findById(any());
+            verify(validator, never()).validate(any());
+        }
+
+        @Test
+        void validateForUpdate_WhenTweetNotFound_ShouldThrowBusinessRuleValidationException() {
+            UUID tweetId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+            UUID authorUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174001");
+            String validContent = "This is updated tweet content";
+            UpdateTweetRequestDto requestDto = UpdateTweetRequestDto.builder()
+                .content(validContent)
+                .userId(authorUserId)
+                .build();
+
+            when(tweetRepository.findById(tweetId)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> tweetValidator.validateForUpdate(tweetId, requestDto))
+                .isInstanceOf(BusinessRuleValidationException.class)
+                .satisfies(exception -> {
+                    BusinessRuleValidationException ex = (BusinessRuleValidationException) exception;
+                    assertThat(ex.getRuleName()).isEqualTo("TWEET_NOT_FOUND");
+                    assertThat(ex.getContext()).isEqualTo(tweetId);
+                });
+
+            verify(tweetRepository, times(1)).findById(tweetId);
+            verify(validator, never()).validate(any());
+        }
+
+        @Test
+        void validateForUpdate_WhenUserIsNotAuthor_ShouldThrowBusinessRuleValidationException() {
+            UUID tweetId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+            UUID authorUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174001");
+            UUID differentUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174002");
+            String validContent = "This is updated tweet content";
+            UpdateTweetRequestDto requestDto = UpdateTweetRequestDto.builder()
+                .content(validContent)
+                .userId(differentUserId)
+                .build();
+
+            Tweet existingTweet = Tweet.builder()
+                .id(tweetId)
+                .userId(authorUserId)
+                .content("Original content")
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
+            when(tweetRepository.findById(tweetId)).thenReturn(Optional.of(existingTweet));
+
+            assertThatThrownBy(() -> tweetValidator.validateForUpdate(tweetId, requestDto))
+                .isInstanceOf(BusinessRuleValidationException.class)
+                .satisfies(exception -> {
+                    BusinessRuleValidationException ex = (BusinessRuleValidationException) exception;
+                    assertThat(ex.getRuleName()).isEqualTo("TWEET_ACCESS_DENIED");
+                    assertThat(ex.getContext()).isEqualTo("Only the tweet author can update their tweet");
+                });
+
+            verify(tweetRepository, times(1)).findById(tweetId);
+            verify(validator, never()).validate(any());
+        }
+
+        @Test
+        void validateForUpdate_WhenContentIsEmpty_ShouldThrowFormatValidationException() {
+            UUID tweetId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+            UUID authorUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174001");
+            UpdateTweetRequestDto requestDto = UpdateTweetRequestDto.builder()
+                .content("")
+                .userId(authorUserId)
+                .build();
+
+            Tweet existingTweet = Tweet.builder()
+                .id(tweetId)
+                .userId(authorUserId)
+                .content("Original content")
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
+            when(tweetRepository.findById(tweetId)).thenReturn(Optional.of(existingTweet));
+
+            assertThatThrownBy(() -> tweetValidator.validateForUpdate(tweetId, requestDto))
+                .isInstanceOf(FormatValidationException.class)
+                .satisfies(exception -> {
+                    FormatValidationException ex = (FormatValidationException) exception;
+                    assertThat(ex.getConstraintName()).isEqualTo("CONTENT_VALIDATION");
+                    assertThat(ex.getFieldName()).isEqualTo("content");
+                });
+
+            verify(tweetRepository, times(1)).findById(tweetId);
+            verify(validator, times(1)).validate(requestDto);
+        }
+
+        @Test
+        void validateForUpdate_WhenContentIsNull_ShouldThrowFormatValidationException() {
+            UUID tweetId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+            UUID authorUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174001");
+            UpdateTweetRequestDto requestDto = UpdateTweetRequestDto.builder()
+                .content(null)
+                .userId(authorUserId)
+                .build();
+
+            Tweet existingTweet = Tweet.builder()
+                .id(tweetId)
+                .userId(authorUserId)
+                .content("Original content")
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
+            when(tweetRepository.findById(tweetId)).thenReturn(Optional.of(existingTweet));
+
+            assertThatThrownBy(() -> tweetValidator.validateForUpdate(tweetId, requestDto))
+                .isInstanceOf(FormatValidationException.class)
+                .satisfies(exception -> {
+                    FormatValidationException ex = (FormatValidationException) exception;
+                    assertThat(ex.getConstraintName()).isEqualTo("CONTENT_VALIDATION");
+                    assertThat(ex.getFieldName()).isEqualTo("content");
+                });
+
+            verify(tweetRepository, times(1)).findById(tweetId);
+            verify(validator, times(1)).validate(requestDto);
+        }
+
+        @Test
+        void validateForUpdate_WhenContentExceedsMaxLength_ShouldThrowFormatValidationException() {
+            UUID tweetId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+            UUID authorUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174001");
+            String content281Chars = "a".repeat(281);
+            UpdateTweetRequestDto requestDto = UpdateTweetRequestDto.builder()
+                .content(content281Chars)
+                .userId(authorUserId)
+                .build();
+
+            Tweet existingTweet = Tweet.builder()
+                .id(tweetId)
+                .userId(authorUserId)
+                .content("Original content")
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
+            when(tweetRepository.findById(tweetId)).thenReturn(Optional.of(existingTweet));
+
+            assertThatThrownBy(() -> tweetValidator.validateForUpdate(tweetId, requestDto))
+                .isInstanceOf(FormatValidationException.class)
+                .satisfies(exception -> {
+                    FormatValidationException ex = (FormatValidationException) exception;
+                    assertThat(ex.getConstraintName()).isEqualTo("CONTENT_VALIDATION");
+                    assertThat(ex.getFieldName()).isEqualTo("content");
+                });
+
+            verify(tweetRepository, times(1)).findById(tweetId);
+            verify(validator, times(1)).validate(requestDto);
+        }
+
+        @Test
+        void validateForUpdate_WhenUserIdIsNull_ShouldThrowBusinessRuleValidationException() {
+            UUID tweetId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+            UUID authorUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174001");
+            String validContent = "This is updated tweet content";
+            UpdateTweetRequestDto requestDto = UpdateTweetRequestDto.builder()
+                .content(validContent)
+                .userId(null)
+                .build();
+
+            Tweet existingTweet = Tweet.builder()
+                .id(tweetId)
+                .userId(authorUserId)
+                .content("Original content")
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
+            when(tweetRepository.findById(tweetId)).thenReturn(Optional.of(existingTweet));
+
+            assertThatThrownBy(() -> tweetValidator.validateForUpdate(tweetId, requestDto))
+                .isInstanceOf(BusinessRuleValidationException.class)
+                .satisfies(exception -> {
+                    BusinessRuleValidationException ex = (BusinessRuleValidationException) exception;
+                    assertThat(ex.getRuleName()).isEqualTo("TWEET_ACCESS_DENIED");
+                    assertThat(ex.getContext()).isEqualTo("Only the tweet author can update their tweet");
+                });
+
+            verify(tweetRepository, times(1)).findById(tweetId);
+            verify(validator, never()).validate(any());
         }
     }
 }

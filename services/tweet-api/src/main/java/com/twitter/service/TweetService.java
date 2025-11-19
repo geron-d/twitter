@@ -54,18 +54,21 @@ public interface TweetService {
      * Updates an existing tweet with new content.
      * <p>
      * This method performs the following operations:
-     * 1. Validates the update request (tweet existence, authorization, content)
+     * 1. Validates the update request (tweet existence, authorization, content validation)
      * 2. Retrieves the tweet from the database
-     * 3. Updates the tweet entity with new content using mapper
+     * 3. Updates the tweet entity with new content using mapper (preserves system fields)
      * 4. Saves the updated tweet to the database
      * 5. Converts the saved entity to response DTO
      * 6. Returns the response DTO
+     * <p>
+     * The method is transactional, ensuring data consistency. Only the tweet author
+     * can update their tweet. The tweet content must be between 1 and 280 characters.
      *
-     * @param tweetId   the unique identifier of the tweet to update
+     * @param tweetId    the unique identifier of the tweet to update
      * @param requestDto the tweet update request containing new content and userId
-     * @return TweetResponseDto containing the updated tweet data
-     * @throws FormatValidationException       if content validation fails
-     * @throws BusinessRuleValidationException if tweet doesn't exist, access denied, or other business rule violation
+     * @return TweetResponseDto containing the updated tweet data with updated timestamp
+     * @throws FormatValidationException       if content validation fails (empty, whitespace-only, or constraint violations)
+     * @throws BusinessRuleValidationException if tweetId is null, tweet doesn't exist, or access denied (user is not the tweet author)
      */
     TweetResponseDto updateTweet(UUID tweetId, UpdateTweetRequestDto requestDto);
 }

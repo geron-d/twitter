@@ -56,15 +56,15 @@ public interface TweetValidator {
      * <p>
      * This method validates tweet data for update including:
      * <ul>
-     *   <li>Existence of the tweet</li>
-     *   <li>Authorization check (only tweet author can update)</li>
-     *   <li>Content validation</li>
+     *   <li>Existence of the tweet (tweetId must not be null and tweet must exist)</li>
+     *   <li>Authorization check (only tweet author can update their tweet)</li>
+     *   <li>Content validation (Bean Validation and custom rules)</li>
      * </ul>
      *
-     * @param tweetId   the unique identifier of the tweet to update
+     * @param tweetId    the unique identifier of the tweet to update
      * @param requestDto DTO containing tweet data for update
-     * @throws BusinessRuleValidationException if tweet doesn't exist, access denied, time limit exceeded, or rate limit exceeded
-     * @throws FormatValidationException       if content validation fails
+     * @throws BusinessRuleValidationException if tweetId is null, tweet doesn't exist, or access denied (user is not the tweet author)
+     * @throws FormatValidationException       if content validation fails (empty, whitespace-only, or constraint violations)
      */
     void validateForUpdate(UUID tweetId, UpdateTweetRequestDto requestDto);
 }

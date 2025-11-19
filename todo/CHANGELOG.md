@@ -68,3 +68,102 @@
 - Импортирован UpdateTweetRequestDto
 - Соответствует стандартам проекта (STANDART_CODE.md, STANDART_JAVADOC.md)
 
+### 17:00 — step #7 done — Реализация updateTweet в TweetController — автор: assistant
+
+Добавлен метод updateTweet в TweetController:
+- Метод добавлен с @LoggableRequest для автоматического логирования
+- Используется @PutMapping("/{tweetId}") для HTTP PUT запроса
+- @PathVariable("tweetId") для получения ID твита из пути
+- @RequestBody @Valid для валидации UpdateTweetRequestDto
+- Возвращает ResponseEntity.ok() с обновленным твитом
+- Добавлена JavaDoc с @see TweetApi#updateTweet
+- Импортированы UpdateTweetRequestDto и PutMapping
+- @Override будет добавлен на шаге #8 после добавления метода в TweetApi
+- Соответствует стандартам проекта (STANDART_CODE.md, STANDART_JAVADOC.md)
+
+### 17:15 — step #8 done — Реализация updateTweet в TweetApi — автор: assistant
+
+Добавлен метод updateTweet в TweetApi с полной OpenAPI документацией:
+- @Operation с summary "Update existing tweet" и подробным description
+- @ApiResponses для всех статус-кодов:
+  - 200 OK - успешное обновление с примером TweetResponseDto
+  - 400 Bad Request - 3 типа ошибок (validation error, constraint violation, invalid UUID)
+  - 403 Forbidden - доступ запрещен (не автор твита)
+  - 404 Not Found - твит не найден
+- @Parameter для обоих параметров (tweetId с example, updateTweetRequest)
+- Примеры для всех ответов в формате RFC 7807 Problem Details
+- Добавлена полная JavaDoc документация с @param, @return, @throws
+- Импортирован UpdateTweetRequestDto
+- Добавлен @Override в TweetController после объявления метода в интерфейсе
+- Соответствует стандартам проекта (STANDART_SWAGGER.md, STANDART_JAVADOC.md)
+
+### 17:30 — step #9 done — JavaDoc для UpdateTweetRequestDto — автор: assistant
+
+Улучшен JavaDoc для UpdateTweetRequestDto:
+- Добавлено <p> с дополнительным описанием о валидации и бизнес-правилах
+- Описание включает информацию о том, что только автор может обновлять твит
+- Описание включает ограничения на контент (1-280 символов, не пустой)
+- Все компоненты Record документированы с @param (content, userId)
+- Присутствуют @author geron и @version 1.0
+- Соответствует стандартам проекта (STANDART_JAVADOC.md)
+- Консистентен с CreateTweetRequestDto по структуре документации
+
+### 17:45 — step #10 done — JavaDoc для методов валидации — автор: assistant
+
+Обновлен JavaDoc для validateForUpdate:
+- Улучшено описание проверок в <ul> с детализацией каждой проверки
+- Обновлены @throws в интерфейсе TweetValidator:
+  - Убраны упоминания о time limit и rate limit (проверки были удалены из реализации)
+  - Добавлены детали: tweetId is null, tweet doesn't exist, access denied
+  - Добавлены детали для FormatValidationException: empty, whitespace-only, constraint violations
+- Все параметры документированы с @param (tweetId, requestDto)
+- Все исключения документированы с @throws (BusinessRuleValidationException, FormatValidationException)
+- Реализация использует @see TweetValidator#validateForUpdate согласно стандартам
+- Соответствует стандартам проекта (STANDART_JAVADOC.md)
+
+### 18:00 — step #11 done — JavaDoc для методов сервиса — автор: assistant
+
+Улучшен JavaDoc для updateTweet в интерфейсе TweetService:
+- Добавлено дополнительное <p> с описанием транзакционности и бизнес-правил
+- Улучшено описание операций:
+  - Добавлена деталь о сохранении системных полей при маппинге
+  - Уточнено описание валидации (tweet existence, authorization, content validation)
+- Детализированы @throws:
+  - FormatValidationException: empty, whitespace-only, constraint violations
+  - BusinessRuleValidationException: tweetId is null, tweet doesn't exist, access denied
+- Улучшено описание @return: упомянут updated timestamp
+- Все параметры документированы с @param (tweetId, requestDto)
+- Реализация использует @see TweetService#updateTweet согласно стандартам
+- Соответствует стандартам проекта (STANDART_JAVADOC.md)
+
+### 18:15 — step #12 done — JavaDoc для методов контроллера — автор: assistant
+
+Проверен JavaDoc для updateTweet в TweetController:
+- Используется @see TweetApi#updateTweet согласно стандартам проекта
+- Метод реализует интерфейс TweetApi и делегирует логику к TweetService
+- Полная документация не требуется, так как метод просто делегирует к интерфейсу
+- Соответствует стандартам проекта (STANDART_JAVADOC.md)
+- Консистентен с другими методами контроллера (createTweet, getTweetById)
+
+### 18:30 — step #13 done — Unit тесты для TweetValidator — автор: assistant
+
+Добавлены unit тесты для validateForUpdate:
+- Добавлен @Nested класс ValidateForUpdateTests в TweetValidatorImplTest
+- Добавлен @Mock для TweetRepository
+- Создано 9 тестов, покрывающих все сценарии:
+  1. validateForUpdate_WhenValidData_ShouldCompleteWithoutExceptions - успешный сценарий
+  2. validateForUpdate_WhenTweetIdIsNull_ShouldThrowBusinessRuleValidationException - tweetId is null
+  3. validateForUpdate_WhenTweetNotFound_ShouldThrowBusinessRuleValidationException - твит не найден
+  4. validateForUpdate_WhenUserIsNotAuthor_ShouldThrowBusinessRuleValidationException - нет прав (не автор)
+  5. validateForUpdate_WhenContentIsEmpty_ShouldThrowFormatValidationException - пустой контент
+  6. validateForUpdate_WhenContentIsNull_ShouldThrowFormatValidationException - null контент
+  7. validateForUpdate_WhenContentExceedsMaxLength_ShouldThrowFormatValidationException - превышение длины
+  8. validateForUpdate_WhenContentIsWhitespaceOnly_ShouldThrowFormatValidationException - только пробелы
+  9. validateForUpdate_WhenUserIdIsNull_ShouldThrowFormatValidationException - userId is null
+- Все тесты используют AssertJ (assertThatCode, assertThatThrownBy) и Mockito (when, verify)
+- Проверяются исключения и их сообщения (ruleName, constraintName, fieldName, context)
+- Проверяется корректность вызовов зависимостей (tweetRepository, validator)
+- Импортированы UpdateTweetRequestDto, Tweet, TweetRepository, LocalDateTime, Optional
+- Соответствует стандартам проекта (STANDART_TEST.md)
+- Консистентен с существующими тестами (ValidateForCreateTests, ValidateContentTests, ValidateUserExistsTests)
+
