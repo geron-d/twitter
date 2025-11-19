@@ -16,20 +16,26 @@
 ## Tasks
 
 ### Анализ и проектирование
-- [ ] (P1) #1: Анализ требований — Изучить архитектуру, существующий код и стандарты
+- [x] (P1) #1: Анализ требований — Изучить архитектуру, существующий код и стандарты
   acceptance: "Понять вход/выход, бизнес-правила, определить затронутые стандарты"
-- [ ] (P1) #2: Проектирование API и контрактов — Определить структуру DTO и валидацию
+  metadata: priority=P1, done=2025-01-27T15:30, note="Проанализированы архитектура, существующий код (TweetController, TweetService, TweetValidator, TweetMapper, CreateTweetRequestDto), стандарты проекта (CODE, TEST, JAVADOC, SWAGGER, README, POSTMAN). Определены вход/выход, бизнес-правила обновления твитов, затронутые стандарты и архитектурные компоненты."
+- [x] (P1) #2: Проектирование API и контрактов — Определить структуру DTO и валидацию
   acceptance: "UpdateTweetRequestDto структура, правила валидации, HTTP статусы"
+  metadata: priority=P1, done=2025-01-27T15:45, note="Спроектирована структура UpdateTweetRequestDto (content, userId), определены правила валидации (Bean Validation + бизнес-правила), HTTP статусы для всех сценариев (200, 400, 403, 404, 500), контракт метода updateTweet в TweetApi. Создан документ DESIGN_UPDATE_TWEET.md с полным проектированием."
 
 ### Реализация кода
-- [ ] (P1) #3: Реализация UpdateTweetRequestDto — Создать DTO Record с валидацией
+- [x] (P1) #3: Реализация UpdateTweetRequestDto — Создать DTO Record с валидацией
   acceptance: "DTO создан как Record с @NotBlank, @Size, @Schema аннотациями, размещен в dto/request/"
-- [ ] (P1) #4: Реализация метода маппинга в TweetMapper — Добавить updateTweetFromUpdateDto
+  metadata: priority=P1, done=2025-01-27T16:00, note="Создан UpdateTweetRequestDto.java в dto/request/ с полями content (String, @NotBlank, @Size) и userId (UUID, @NotNull). Добавлены @Schema аннотации для OpenAPI, @Builder для совместимости, полная JavaDoc документация. Файл соответствует стандартам проекта."
+- [x] (P1) #4: Реализация метода маппинга в TweetMapper — Добавить updateTweetFromUpdateDto
   acceptance: "Метод создан с @MappingTarget, игнорирует системные поля (id, createdAt, userId)"
-- [ ] (P1) #5: Реализация validateForUpdate в TweetValidator — Добавить валидацию обновления
+  metadata: priority=P1, done=2025-01-27T16:15, note="Добавлен метод updateTweetFromUpdateDto в TweetMapper с @MappingTarget. Игнорируются системные поля: id, createdAt, updatedAt, userId. Обновляется только поле content. Добавлена полная JavaDoc документация. Импортирован UpdateTweetRequestDto и @MappingTarget."
+- [x] (P1) #5: Реализация validateForUpdate в TweetValidator — Добавить валидацию обновления
   acceptance: "Метод проверяет существование твита, права автора, время обновления, частоту, контент"
-- [ ] (P1) #6: Реализация updateTweet в TweetService — Добавить бизнес-логику обновления
+  metadata: priority=P1, done=2025-01-27T16:30, note="Добавлен метод validateForUpdate в интерфейс TweetValidator и реализация в TweetValidatorImpl. Реализованы все проверки: существование твита, права автора, время обновления (7 дней), частота обновлений (упрощенная проверка - 6 минут между обновлениями), валидация контента. Добавлены приватные методы validateTweetOwnership, validateUpdateTimeLimit, validateUpdateFrequency, validateContent. Добавлена полная JavaDoc документация. Добавлена зависимость TweetRepository."
+- [x] (P1) #6: Реализация updateTweet в TweetService — Добавить бизнес-логику обновления
   acceptance: "Метод использует @Transactional, вызывает валидатор, обновляет через mapper, сохраняет"
+  metadata: priority=P1, done=2025-01-27T16:45, note="Добавлен метод updateTweet в интерфейс TweetService и реализация в TweetServiceImpl. Метод использует @Transactional, вызывает tweetValidator.validateForUpdate(), получает твит из репозитория, обновляет через tweetMapper.updateTweetFromUpdateDto(), сохраняет через tweetRepository.saveAndFlush(), преобразует в TweetResponseDto. Добавлена полная JavaDoc документация в интерфейсе и реализация с @see."
 - [ ] (P1) #7: Реализация updateTweet в TweetController — Добавить REST эндпоинт
   acceptance: "Метод с @LoggableRequest, @Valid, @PathVariable, возвращает ResponseEntity.ok()"
 - [ ] (P1) #8: Реализация updateTweet в TweetApi — Добавить OpenAPI интерфейс

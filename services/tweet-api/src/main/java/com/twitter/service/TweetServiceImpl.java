@@ -1,6 +1,7 @@
 package com.twitter.service;
 
 import com.twitter.dto.request.CreateTweetRequestDto;
+import com.twitter.dto.request.UpdateTweetRequestDto;
 import com.twitter.dto.response.TweetResponseDto;
 import com.twitter.entity.Tweet;
 import com.twitter.mapper.TweetMapper;
@@ -54,5 +55,21 @@ public class TweetServiceImpl implements TweetService {
     public Optional<TweetResponseDto> getTweetById(UUID tweetId) {
         return tweetRepository.findById(tweetId)
             .map(tweetMapper::toResponseDto);
+    }
+
+    /**
+     * @see TweetService#updateTweet
+     */
+    @Override
+    @Transactional
+    public TweetResponseDto updateTweet(UUID tweetId, UpdateTweetRequestDto requestDto) {
+        tweetValidator.validateForUpdate(tweetId, requestDto);
+
+        Tweet tweet = tweetRepository.findById(tweetId)
+            .orElseThrow(() -> new IllegalStateException("Tweet not found after validation"));
+
+        tweetMapper.updateTweetFromUpdateDto(requestDto, tweet);
+        Tweet updatedTweet = tweetRepository.saveAndFlush(tweet);
+        return tweetMapper.toResponseDto(updatedTweet);
     }
 }

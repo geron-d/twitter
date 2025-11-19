@@ -3,6 +3,7 @@ package com.twitter.service;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.FormatValidationException;
 import com.twitter.dto.request.CreateTweetRequestDto;
+import com.twitter.dto.request.UpdateTweetRequestDto;
 import com.twitter.dto.response.TweetResponseDto;
 
 import java.util.Optional;
@@ -48,4 +49,23 @@ public interface TweetService {
      * @return Optional containing tweet data or empty if not found
      */
     Optional<TweetResponseDto> getTweetById(UUID tweetId);
+
+    /**
+     * Updates an existing tweet with new content.
+     * <p>
+     * This method performs the following operations:
+     * 1. Validates the update request (tweet existence, authorization, content)
+     * 2. Retrieves the tweet from the database
+     * 3. Updates the tweet entity with new content using mapper
+     * 4. Saves the updated tweet to the database
+     * 5. Converts the saved entity to response DTO
+     * 6. Returns the response DTO
+     *
+     * @param tweetId   the unique identifier of the tweet to update
+     * @param requestDto the tweet update request containing new content and userId
+     * @return TweetResponseDto containing the updated tweet data
+     * @throws FormatValidationException       if content validation fails
+     * @throws BusinessRuleValidationException if tweet doesn't exist, access denied, or other business rule violation
+     */
+    TweetResponseDto updateTweet(UUID tweetId, UpdateTweetRequestDto requestDto);
 }
