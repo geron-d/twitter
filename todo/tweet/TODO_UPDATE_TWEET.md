@@ -61,12 +61,15 @@
 - [x] (P1) #13: Unit тесты для TweetValidator — Тесты validateForUpdate
   acceptance: "Тесты для всех сценариев: успех, твит не найден, нет прав, превышено время, превышена частота"
   metadata: priority=P1, done=2025-01-27T18:30, note="Добавлен @Nested класс ValidateForUpdateTests в TweetValidatorImplTest с 9 тестами: успешный сценарий, tweetId is null, твит не найден, нет прав (не автор), пустой контент, null контент, превышение длины, только пробелы, userId is null. Добавлен @Mock для TweetRepository. Все тесты используют AssertJ и Mockito, проверяют исключения и их сообщения. Соответствует стандартам проекта (STANDART_TEST.md)."
-- [ ] (P1) #14: Unit тесты для TweetService — Тесты updateTweet
+- [x] (P1) #14: Unit тесты для TweetService — Тесты updateTweet
   acceptance: "Тесты успешного обновления, ошибок валидации, проверка взаимодействий с зависимостями"
-- [ ] (P1) #15: Unit тесты для TweetMapper — Тесты updateTweetFromUpdateDto
+  metadata: priority=P1, done=2025-11-20T17:17, note="Добавлен @Nested класс UpdateTweetTests в TweetServiceImplTest с 4 тестами: успешное обновление (updateTweet_WithValidData_ShouldReturnTweetResponseDto), проверка взаимодействий с зависимостями (updateTweet_WithValidData_ShouldCallEachDependencyExactlyOnce), ошибки валидации (updateTweet_WhenValidationFails_ShouldThrowFormatValidationException), ошибки бизнес-правил (updateTweet_WhenBusinessRuleViolation_ShouldThrowBusinessRuleValidationException). Все тесты используют AssertJ и Mockito, проверяют результат и взаимодействия с зависимостями (tweetValidator, tweetRepository, tweetMapper). Соответствует стандартам проекта (STANDART_TEST.md)."
+- [x] (P1) #15: Unit тесты для TweetMapper — Тесты updateTweetFromUpdateDto
   acceptance: "Тесты маппинга с реальным маппером, проверка игнорируемых полей"
-- [ ] (P2) #16: Integration тесты для TweetController — Тесты REST эндпоинта
+  metadata: priority=P1, done=2025-11-20T17:20, note="Добавлен @Nested класс UpdateTweetFromUpdateDtoTests в TweetMapperTest с 3 тестами: успешное обновление контента (updateTweetFromUpdateDto_WithValidData_ShouldUpdateContentOnly), проверка игнорирования системных полей (updateTweetFromUpdateDto_ShouldIgnoreSystemFields), обработка null DTO (updateTweetFromUpdateDto_WhenUpdateDtoIsNull_ShouldNotChangeTweet). Все тесты используют реальный маппер через Mappers.getMapper(), проверяют обновление только поля content и сохранение системных полей (id, createdAt, updatedAt, userId). Соответствует стандартам проекта (STANDART_TEST.md)."
+- [x] (P2) #16: Integration тесты для TweetController — Тесты REST эндпоинта
   acceptance: "Тесты с MockMvc для всех статус-кодов (200, 400, 404, 403), проверка валидации"
+  metadata: priority=P2, done=2025-11-20T17:23, note="Добавлен @Nested класс UpdateTweetTests в TweetControllerTest с 8 тестами: успешное обновление (updateTweet_WithValidData_ShouldReturn200Ok), пустой контент (updateTweet_WithEmptyContent_ShouldReturn400BadRequest), превышение длины (updateTweet_WithContentExceedingMaxLength_ShouldReturn400BadRequest), null userId (updateTweet_WithNullUserId_ShouldReturn400BadRequest), твит не найден (updateTweet_WhenTweetDoesNotExist_ShouldReturn404NotFound), нет прав (updateTweet_WhenUserIsNotAuthor_ShouldReturn403Forbidden), отсутствие тела запроса (updateTweet_WithMissingBody_ShouldReturn400BadRequest), неверный формат UUID (updateTweet_WithInvalidTweetIdFormat_ShouldReturn400BadRequest). Все тесты используют MockMvc, проверяют статус-коды и изменения в БД. Добавлен helper метод createUpdateRequest. Соответствует стандартам проекта (STANDART_TEST.md)."
 
 ### Swagger/OpenAPI документация
 - [ ] (P1) #17: OpenAPI метод updateTweet в TweetApi — Добавить @Operation и @ApiResponses

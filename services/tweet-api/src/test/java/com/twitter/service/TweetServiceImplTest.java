@@ -1,6 +1,9 @@
 package com.twitter.service;
 
+import com.twitter.common.exception.validation.BusinessRuleValidationException;
+import com.twitter.common.exception.validation.FormatValidationException;
 import com.twitter.dto.request.CreateTweetRequestDto;
+import com.twitter.dto.request.UpdateTweetRequestDto;
 import com.twitter.dto.response.TweetResponseDto;
 import com.twitter.entity.Tweet;
 import com.twitter.mapper.TweetMapper;
@@ -19,6 +22,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -186,6 +190,128 @@ class TweetServiceImplTest {
 
             verify(tweetRepository, times(1)).findById(eq(testTweetId));
             verifyNoInteractions(tweetMapper);
+        }
+    }
+
+    @Nested
+    class UpdateTweetTests {
+
+        private UUID testTweetId;
+        private UUID testUserId;
+        private UpdateTweetRequestDto updateRequestDto;
+        private Tweet existingTweet;
+        private Tweet updatedTweet;
+        private TweetResponseDto responseDto;
+
+        @BeforeEach
+        void setUp() {
+            testTweetId = UUID.fromString("223e4567-e89b-12d3-a456-426614174001");
+            testUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+
+            updateRequestDto = UpdateTweetRequestDto.builder()
+                .content("Updated tweet content")
+                .userId(testUserId)
+                .build();
+
+            existingTweet = Tweet.builder()
+                .id(testTweetId)
+                .userId(testUserId)
+                .content("Original tweet content")
+                .createdAt(LocalDateTime.of(2024, 1, 15, 10, 30, 0))
+                .updatedAt(LocalDateTime.of(2024, 1, 15, 10, 30, 0))
+                .build();
+
+            updatedTweet = Tweet.builder()
+                .id(testTweetId)
+                .userId(testUserId)
+                .content("Updated tweet content")
+                .createdAt(LocalDateTime.of(2024, 1, 15, 10, 30, 0))
+                .updatedAt(LocalDateTime.of(2024, 1, 16, 11, 45, 0))
+                .build();
+
+            responseDto = TweetResponseDto.builder()
+                .id(testTweetId)
+                .userId(testUserId)
+                .content("Updated tweet content")
+                .createdAt(LocalDateTime.of(2024, 1, 15, 10, 30, 0))
+                .updatedAt(LocalDateTime.of(2024, 1, 16, 11, 45, 0))
+                .build();
+        }
+
+        @Test
+        void updateTweet_WithValidData_ShouldReturnTweetResponseDto() {
+            doNothing().when(tweetValidator).validateForUpdate(testTweetId, updateRequestDto);
+            when(tweetRepository.findById(testTweetId)).thenReturn(Optional.of(existingTweet));
+            doNothing().when(tweetMapper).updateTweetFromUpdateDto(updateRequestDto, existingTweet);
+            when(tweetRepository.saveAndFlush(existingTweet)).thenReturn(updatedTweet);
+            when(tweetMapper.toResponseDto(updatedTweet)).thenReturn(responseDto);
+
+            TweetResponseDto result = tweetService.updateTweet(testTweetId, updateRequestDto);
+
+            assertThat(result).isNotNull();
+            assertThat(result.id()).isEqualTo(testTweetId);
+            assertThat(result.userId()).isEqualTo(testUserId);
+            assertThat(result.content()).isEqualTo("Updated tweet content");
+            assertThat(result.createdAt()).isEqualTo(existingTweet.getCreatedAt());
+            assertThat(result.updatedAt()).isEqualTo(updatedTweet.getUpdatedAt());
+        }
+
+        @Test
+        void updateTweet_WithValidData_ShouldCallEachDependencyExactlyOnce() {
+            doNothing().when(tweetValidator).validateForUpdate(testTweetId, updateRequestDto);
+            when(tweetRepository.findById(testTweetId)).thenReturn(Optional.of(existingTweet));
+            doNothing().when(tweetMapper).updateTweetFromUpdateDto(updateRequestDto, existingTweet);
+            when(tweetRepository.saveAndFlush(existingTweet)).thenReturn(updatedTweet);
+            when(tweetMapper.toResponseDto(updatedTweet)).thenReturn(responseDto);
+
+            tweetService.updateTweet(testTweetId, updateRequestDto);
+
+            verify(tweetValidator, times(1)).validateForUpdate(eq(testTweetId), eq(updateRequestDto));
+            verify(tweetRepository, times(1)).findById(eq(testTweetId));
+            verify(tweetMapper, times(1)).updateTweetFromUpdateDto(eq(updateRequestDto), eq(existingTweet));
+            verify(tweetRepository, times(1)).saveAndFlush(eq(existingTweet));
+            verify(tweetMapper, times(1)).toResponseDto(eq(updatedTweet));
+        }
+
+        @Test
+        void updateTweet_WhenValidationFails_ShouldThrowFormatValidationException() {
+            FormatValidationException validationException = new FormatValidationException(
+                "content",
+                "CONTENT_VALIDATION",
+                "Tweet content cannot be empty"
+            );
+            doThrow(validationException)
+                .when(tweetValidator).validateForUpdate(testTweetId, updateRequestDto);
+
+            assertThatThrownBy(() -> tweetService.updateTweet(testTweetId, updateRequestDto))
+                .isInstanceOf(FormatValidationException.class)
+                .isEqualTo(validationException);
+
+            verify(tweetValidator, times(1)).validateForUpdate(eq(testTweetId), eq(updateRequestDto));
+            verify(tweetRepository, never()).findById(any());
+            verify(tweetMapper, never()).updateTweetFromUpdateDto(any(), any());
+            verify(tweetRepository, never()).saveAndFlush(any());
+            verify(tweetMapper, never()).toResponseDto(any());
+        }
+
+        @Test
+        void updateTweet_WhenBusinessRuleViolation_ShouldThrowBusinessRuleValidationException() {
+            BusinessRuleValidationException businessException = new BusinessRuleValidationException(
+                "TWEET_NOT_FOUND",
+                "tweetId=" + testTweetId
+            );
+            doThrow(businessException)
+                .when(tweetValidator).validateForUpdate(testTweetId, updateRequestDto);
+
+            assertThatThrownBy(() -> tweetService.updateTweet(testTweetId, updateRequestDto))
+                .isInstanceOf(BusinessRuleValidationException.class)
+                .isEqualTo(businessException);
+
+            verify(tweetValidator, times(1)).validateForUpdate(eq(testTweetId), eq(updateRequestDto));
+            verify(tweetRepository, never()).findById(any());
+            verify(tweetMapper, never()).updateTweetFromUpdateDto(any(), any());
+            verify(tweetRepository, never()).saveAndFlush(any());
+            verify(tweetMapper, never()).toResponseDto(any());
         }
     }
 }
