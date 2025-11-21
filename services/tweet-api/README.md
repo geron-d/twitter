@@ -10,6 +10,7 @@
 
 - ✅ Создание твитов с валидацией контента
 - ✅ Получение твита по уникальному идентификатору
+- ✅ Обновление твитов с проверкой прав автора
 - ✅ Интеграция с users-api для проверки существования пользователей
 - ✅ Валидация данных (длина контента 1-280 символов)
 - ✅ OpenAPI/Swagger документация
@@ -29,7 +30,8 @@ com.twitter/
 │   └── TweetController.java     # REST контроллер
 ├── dto/
 │   ├── request/
-│   │   └── CreateTweetRequestDto.java  # DTO для создания твита
+│   │   ├── CreateTweetRequestDto.java  # DTO для создания твита
+│   │   └── UpdateTweetRequestDto.java   # DTO для обновления твита
 │   └── response/
 │       └── TweetResponseDto.java       # DTO для ответа
 ├── entity/
@@ -112,6 +114,7 @@ http://localhost:8082/api/v1/tweets
 |--------|---------------|-------------------------------|-------------------------|--------------------|
 | `POST` | `/`           | Создать новый твит            | `CreateTweetRequestDto` | `TweetResponseDto` |
 | `GET`  | `/{tweetId}`  | Получить твит по ID            | -                       | `TweetResponseDto` |
+| `PUT`  | `/{tweetId}`  | Обновить твит                 | `UpdateTweetRequestDto` | `TweetResponseDto` |
 
 ### Детальное описание эндпоинтов
 
@@ -224,6 +227,98 @@ GET /api/v1/tweets/{tweetId}
 }
 ```
 
+#### 3. Обновить твит
+
+```http
+PUT /api/v1/tweets/{tweetId}
+Content-Type: application/json
+```
+
+**Параметры пути:**
+
+- `tweetId` - обязательный, UUID существующего твита
+
+**Тело запроса:**
+
+```json
+{
+  "content": "This is updated tweet content",
+  "userId": "123e4567-e89b-12d3-a456-426614174000"
+}
+```
+
+**Валидация:**
+
+- `content` - обязательное, 1-280 символов, не может быть пустым или только пробелами
+- `userId` - обязательное, UUID автора твита (используется для проверки прав)
+- `tweetId` - обязательный, должен быть валидным UUID форматом
+
+**Бизнес-правила:**
+
+- Только автор твита может обновлять свой твит
+- Твит должен существовать в системе
+- Контент должен соответствовать правилам валидации
+
+**Ответы:**
+
+- `200 OK` - твит успешно обновлен
+- `400 Bad Request` - ошибка валидации контента или нарушение ограничений Bean Validation
+- `409 Conflict` - твит не найден или доступ запрещен (пользователь не является автором)
+
+**Пример успешного ответа (200 OK):**
+
+```json
+{
+  "id": "123e4567-e89b-12d3-a456-426614174000",
+  "userId": "987e6543-e21b-43d2-b654-321987654321",
+  "content": "This is updated tweet content",
+  "createdAt": "2025-01-27T15:30:00Z",
+  "updatedAt": "2025-01-27T16:45:00Z"
+}
+```
+
+**Пример ошибки валидации контента (400 Bad Request):**
+
+```json
+{
+  "type": "https://example.com/errors/format-validation",
+  "title": "Format Validation Error",
+  "status": 400,
+  "detail": "Tweet content must be between 1 and 280 characters",
+  "fieldName": "content",
+  "constraintName": "CONTENT_VALIDATION",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки доступа запрещен (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'TWEET_ACCESS_DENIED' violated for context: Only the tweet author can update their tweet",
+  "ruleName": "TWEET_ACCESS_DENIED",
+  "context": "Only the tweet author can update their tweet",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки твит не найден (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+  "ruleName": "TWEET_NOT_FOUND",
+  "context": "123e4567-e89b-12d3-a456-426614174000",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
 ## OpenAPI/Swagger Документация
 
 ### Обзор
@@ -296,6 +391,16 @@ open http://localhost:8082/swagger-ui.html
         - Поиск твита в БД по UUID
         - Маппинг сущности в DTO ответа
         - Возвращает `Optional.empty()` если твит не найден
+
+3. **`updateTweet(UUID tweetId, UpdateTweetRequestDto requestDto)`**
+    - Обновляет существующий твит
+    - Возвращает `TweetResponseDto`
+    - Логика:
+        - Валидация запроса (существование твита, права автора, контент)
+        - Получение твита из БД
+        - Обновление контента через маппер
+        - Сохранение в БД
+        - Маппинг сущности в DTO ответа
 
 ### Ключевые бизнес-правила:
 
@@ -393,6 +498,24 @@ open http://localhost:8082/swagger-ui.html
     - Проверка, что `userId` не равен `null`
     - Вызов `UserGateway.existsUser()` для проверки существования
     - При отсутствии пользователя выбрасывается `BusinessRuleValidationException`
+
+#### Обновление твита (UPDATE)
+
+Выполняется многоэтапная валидация:
+
+1. **Проверка существования твита:**
+    - Проверка, что `tweetId` не равен `null`
+    - Поиск твита в БД по UUID
+    - При отсутствии твита выбрасывается `BusinessRuleValidationException` с правилом `TWEET_NOT_FOUND`
+
+2. **Проверка прав автора:**
+    - Сравнение `userId` из запроса с `userId` твита
+    - При несовпадении выбрасывается `BusinessRuleValidationException` с правилом `TWEET_ACCESS_DENIED`
+
+3. **Валидация контента:**
+    - Проверка Bean Validation аннотаций (`@NotBlank`, `@Size`)
+    - Проверка, что контент не пустой после trim
+    - При ошибках выбрасывается `FormatValidationException`
 
 ## Работа с базой данных
 
@@ -534,6 +657,43 @@ curl -X GET http://localhost:8082/api/v1/tweets/123e4567-e89b-12d3-a456-42661417
   "title": "Tweet Not Found",
   "status": 404,
   "detail": "Tweet with ID '123e4567-e89b-12d3-a456-426614174000' not found",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+### Обновление твита
+
+```bash
+curl -X PUT http://localhost:8082/api/v1/tweets/123e4567-e89b-12d3-a456-426614174000 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "content": "This is updated tweet content",
+    "userId": "987e6543-e21b-43d2-b654-321987654321"
+  }'
+```
+
+**Ответ (200 OK):**
+
+```json
+{
+  "id": "123e4567-e89b-12d3-a456-426614174000",
+  "userId": "987e6543-e21b-43d2-b654-321987654321",
+  "content": "This is updated tweet content",
+  "createdAt": "2025-01-27T15:30:00Z",
+  "updatedAt": "2025-01-27T16:45:00Z"
+}
+```
+
+**Ответ при отсутствии прав (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'TWEET_ACCESS_DENIED' violated for context: Only the tweet author can update their tweet",
+  "ruleName": "TWEET_ACCESS_DENIED",
+  "context": "Only the tweet author can update their tweet",
   "timestamp": "2025-01-27T15:30:00Z"
 }
 ```

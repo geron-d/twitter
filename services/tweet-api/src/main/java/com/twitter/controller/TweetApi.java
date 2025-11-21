@@ -307,8 +307,8 @@ public interface TweetApi {
             )
         ),
         @ApiResponse(
-            responseCode = "403",
-            description = "Access denied",
+            responseCode = "409",
+            description = "Business rule violation - Access denied",
             content = @Content(
                 mediaType = "application/problem+json",
                 examples = @ExampleObject(
@@ -318,9 +318,10 @@ public interface TweetApi {
                         {
                           "type": "https://example.com/errors/business-rule-validation",
                           "title": "Business Rule Validation Error",
-                          "status": 403,
-                          "detail": "Business rule 'TWEET_ACCESS_DENIED' violated",
+                          "status": 409,
+                          "detail": "Business rule 'TWEET_ACCESS_DENIED' violated for context: Only the tweet author can update their tweet",
                           "ruleName": "TWEET_ACCESS_DENIED",
+                          "context": "Only the tweet author can update their tweet",
                           "timestamp": "2025-01-27T15:30:00Z"
                         }
                         """
@@ -328,8 +329,8 @@ public interface TweetApi {
             )
         ),
         @ApiResponse(
-            responseCode = "404",
-            description = "Tweet not found",
+            responseCode = "409",
+            description = "Business rule violation - Tweet not found",
             content = @Content(
                 mediaType = "application/problem+json",
                 examples = @ExampleObject(
@@ -339,9 +340,10 @@ public interface TweetApi {
                         {
                           "type": "https://example.com/errors/business-rule-validation",
                           "title": "Business Rule Validation Error",
-                          "status": 404,
+                          "status": 409,
                           "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 123e4567-e89b-12d3-a456-426614174000",
                           "ruleName": "TWEET_NOT_FOUND",
+                          "context": "123e4567-e89b-12d3-a456-426614174000",
                           "timestamp": "2025-01-27T15:30:00Z"
                         }
                         """
