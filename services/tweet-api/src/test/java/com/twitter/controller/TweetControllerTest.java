@@ -2,6 +2,7 @@ package com.twitter.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.twitter.dto.request.CreateTweetRequestDto;
+import com.twitter.dto.request.UpdateTweetRequestDto;
 import com.twitter.dto.response.TweetResponseDto;
 import com.twitter.entity.Tweet;
 import com.twitter.repository.TweetRepository;
@@ -24,6 +25,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -94,6 +96,20 @@ public class TweetControllerTest extends BaseIntegrationTest {
             .content(content)
             .build();
         return tweetRepository.saveAndFlush(tweet);
+    }
+
+    /**
+     * Creates a valid UpdateTweetRequestDto for testing.
+     *
+     * @param userId  the user ID
+     * @param content the updated tweet content
+     * @return UpdateTweetRequestDto instance
+     */
+    protected UpdateTweetRequestDto createUpdateRequest(UUID userId, String content) {
+        return UpdateTweetRequestDto.builder()
+            .userId(userId)
+            .content(content)
+            .build();
     }
 
     @Nested
@@ -254,6 +270,136 @@ public class TweetControllerTest extends BaseIntegrationTest {
 
             mockMvc.perform(get("/api/v1/tweets/{tweetId}", testTweetId))
                 .andExpect(status().isNotFound());
+        }
+    }
+
+    @Nested
+    class UpdateTweetTests {
+
+        private UUID testUserId;
+        private UUID testTweetId;
+
+        @BeforeEach
+        void setUp() {
+            testUserId = UUID.randomUUID();
+            String originalContent = "Original tweet content";
+            Tweet existingTweet = createAndSaveTweet(testUserId, originalContent);
+            testTweetId = existingTweet.getId();
+        }
+
+        @Test
+        void updateTweet_WithValidData_ShouldReturn200Ok() throws Exception {
+            String updatedContent = "Updated tweet content";
+            UpdateTweetRequestDto request = createUpdateRequest(testUserId, updatedContent);
+
+            String responseJson = mockMvc.perform(put("/api/v1/tweets/{tweetId}", testTweetId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(testTweetId.toString()))
+                .andExpect(jsonPath("$.userId").value(testUserId.toString()))
+                .andExpect(jsonPath("$.content").value(updatedContent))
+                .andExpect(jsonPath("$.createdAt").exists())
+                .andExpect(jsonPath("$.updatedAt").exists())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+            TweetResponseDto responseDto = objectMapper.readValue(responseJson, TweetResponseDto.class);
+            assertThat(responseDto.id()).isEqualTo(testTweetId);
+            assertThat(responseDto.userId()).isEqualTo(testUserId);
+            assertThat(responseDto.content()).isEqualTo(updatedContent);
+            assertThat(responseDto.createdAt()).isNotNull();
+            assertThat(responseDto.updatedAt()).isNotNull();
+
+            Tweet updatedTweet = tweetRepository.findById(testTweetId).orElseThrow();
+            assertThat(updatedTweet.getContent()).isEqualTo(updatedContent);
+            assertThat(updatedTweet.getId()).isEqualTo(testTweetId);
+            assertThat(updatedTweet.getUserId()).isEqualTo(testUserId);
+        }
+
+        @Test
+        void updateTweet_WithEmptyContent_ShouldReturn400BadRequest() throws Exception {
+            UpdateTweetRequestDto request = createUpdateRequest(testUserId, "");
+
+            mockMvc.perform(put("/api/v1/tweets/{tweetId}", testTweetId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+
+            Tweet tweet = tweetRepository.findById(testTweetId).orElseThrow();
+            assertThat(tweet.getContent()).isEqualTo("Original tweet content");
+        }
+
+        @Test
+        void updateTweet_WithContentExceedingMaxLength_ShouldReturn400BadRequest() throws Exception {
+            String longContent = "A".repeat(281);
+            UpdateTweetRequestDto request = createUpdateRequest(testUserId, longContent);
+
+            mockMvc.perform(put("/api/v1/tweets/{tweetId}", testTweetId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+
+            Tweet tweet = tweetRepository.findById(testTweetId).orElseThrow();
+            assertThat(tweet.getContent()).isEqualTo("Original tweet content");
+        }
+
+        @Test
+        void updateTweet_WithNullUserId_ShouldReturn400BadRequest() throws Exception {
+            UpdateTweetRequestDto request = UpdateTweetRequestDto.builder()
+                .userId(null)
+                .content("Valid content")
+                .build();
+
+            mockMvc.perform(put("/api/v1/tweets/{tweetId}", testTweetId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+
+            Tweet tweet = tweetRepository.findById(testTweetId).orElseThrow();
+            assertThat(tweet.getContent()).isEqualTo("Original tweet content");
+        }
+
+        @Test
+        void updateTweet_WhenTweetDoesNotExist_ShouldReturn409Conflict() throws Exception {
+            UUID nonExistentTweetId = UUID.randomUUID();
+            UpdateTweetRequestDto request = createUpdateRequest(testUserId, "Updated content");
+
+            mockMvc.perform(put("/api/v1/tweets/{tweetId}", nonExistentTweetId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.type").exists())
+                .andExpect(jsonPath("$.ruleName").value("TWEET_NOT_FOUND"));
+        }
+
+        @Test
+        void updateTweet_WhenUserIsNotAuthor_ShouldReturn409Conflict() throws Exception {
+            UUID differentUserId = UUID.randomUUID();
+            UpdateTweetRequestDto request = createUpdateRequest(differentUserId, "Updated content");
+
+            mockMvc.perform(put("/api/v1/tweets/{tweetId}", testTweetId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.type").exists())
+                .andExpect(jsonPath("$.ruleName").value("TWEET_ACCESS_DENIED"));
+
+            Tweet tweet = tweetRepository.findById(testTweetId).orElseThrow();
+            assertThat(tweet.getContent()).isEqualTo("Original tweet content");
+        }
+
+        @Test
+        void updateTweet_WithMissingBody_ShouldReturn400BadRequest() throws Exception {
+            int status = mockMvc.perform(put("/api/v1/tweets/{tweetId}", testTweetId)
+                    .contentType(MediaType.APPLICATION_JSON))
+                .andReturn()
+                .getResponse()
+                .getStatus();
+
+            assertThat(status).isGreaterThanOrEqualTo(400);
         }
     }
 }

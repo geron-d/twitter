@@ -3,6 +3,7 @@ package com.twitter.validation;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.FormatValidationException;
 import com.twitter.dto.request.CreateTweetRequestDto;
+import com.twitter.dto.request.UpdateTweetRequestDto;
 
 import java.util.UUID;
 
@@ -49,4 +50,21 @@ public interface TweetValidator {
      * @throws BusinessRuleValidationException if user doesn't exist or userId is null
      */
     void validateUserExists(UUID userId);
+
+    /**
+     * Performs complete validation for tweet update.
+     * <p>
+     * This method validates tweet data for update including:
+     * <ul>
+     *   <li>Existence of the tweet (tweetId must not be null and tweet must exist)</li>
+     *   <li>Authorization check (only tweet author can update their tweet)</li>
+     *   <li>Content validation (Bean Validation and custom rules)</li>
+     * </ul>
+     *
+     * @param tweetId    the unique identifier of the tweet to update
+     * @param requestDto DTO containing tweet data for update
+     * @throws BusinessRuleValidationException if tweetId is null, tweet doesn't exist, or access denied (user is not the tweet author)
+     * @throws FormatValidationException       if content validation fails (empty, whitespace-only, or constraint violations)
+     */
+    void validateForUpdate(UUID tweetId, UpdateTweetRequestDto requestDto);
 }
