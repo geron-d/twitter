@@ -16,14 +16,20 @@
 ## Tasks
 
 ### Анализ и проектирование
-- [ ] (P1) #1: Анализ требований — Определить структуру полей soft delete, бизнес-правила удаления, валидацию прав доступа
+- [x] (P1) [2025-01-27 15:30] #1: Анализ требований — Определить структуру полей soft delete, бизнес-правила удаления, валидацию прав доступа
   acceptance: "Понять вход/выход, определить затронутые стандарты, спроектировать структуру данных"
-- [ ] (P1) #2: Проектирование API и контрактов — Определить структуру эндпоинта DELETE, HTTP статусы, валидацию
+  done: "Выполнен анализ требований, определены структура полей (isDeleted, deletedAt), бизнес-правила удаления, валидация прав доступа. Создан документ ANALYSIS_DELETE_TWEET.md с полным анализом."
+  artifacts: "todo/tweet/ANALYSIS_DELETE_TWEET.md"
+- [x] (P1) [2025-01-27 15:45] #2: Проектирование API и контрактов — Определить структуру эндпоинта DELETE, HTTP статусы, валидацию
   acceptance: "OpenAPI схема, структура ответов, валидация прав доступа"
+  done: "Спроектирована структура DELETE эндпоинта, определены HTTP статусы (204, 404, 409, 400), структура валидации, OpenAPI документация. Создан DeleteTweetRequestDto. Создан документ DESIGN_DELETE_TWEET.md с полным проектированием."
+  artifacts: "todo/tweet/DESIGN_DELETE_TWEET.md"
 
 ### Реализация кода
-- [ ] (P1) #3: Обновление Entity Tweet — Добавить поля isDeleted и deletedAt, метод softDelete()
+- [x] (P1) [2025-01-27 16:00] #3: Обновление Entity Tweet — Добавить поля isDeleted и deletedAt, метод softDelete()
   acceptance: "Entity обновлена с полями isDeleted (Boolean, default false) и deletedAt (LocalDateTime, nullable), добавлен метод softDelete()"
+  done: "Реализованы изменения в Entity Tweet: добавлены поля isDeleted и deletedAt с @Builder.Default, методы softDelete() и isActive(), обновлен JavaDoc класса. Код соответствует спецификации и стандартам проекта."
+  artifacts: "services/tweet-api/src/main/java/com/twitter/entity/Tweet.java, todo/tweet/IMPLEMENTATION_ENTITY_TWEET.md"
 - [ ] (P1) #4: Обновление Repository — Добавить методы для работы с soft delete
   acceptance: "Методы findByIdAndNotDeleted(), softDeleteById() добавлены в TweetRepository"
 - [ ] (P1) #5: Обновление DTO — Добавить поля isDeleted и deletedAt в TweetResponseDto (опционально)
