@@ -109,3 +109,59 @@
 - `services/tweet-api/src/main/java/com/twitter/entity/Tweet.java` - обновленный файл Entity
 - `todo/tweet/IMPLEMENTATION_ENTITY_TWEET.md` - детальная спецификация для реализации
 
+### 16:15 — step #4 done — Обновление Repository для работы с soft delete — автор: assistant
+
+Добавлены методы в TweetRepository для поддержки soft delete функциональности. Выполнено:
+
+- **Derived query method:**
+  - `findByIdAndIsDeletedFalse(UUID id)` - поиск активных твитов по ID
+  - Использует стандартное имя Spring Data JPA (соответствует Spring Data conventions)
+  - Не требует JavaDoc (self-documenting согласно STANDART_JAVADOC.md)
+
+- **Custom query method:**
+  - `softDeleteById(UUID id, LocalDateTime deletedAt)` - мягкое удаление через @Query
+  - Использует @Modifying и @Query для bulk операции
+  - Устанавливает isDeleted = true и deletedAt = текущее время
+
+- **Структура методов:**
+  - Соответствие стандартам Spring Data JPA
+  - Правильное использование @Modifying для модифицирующих запросов
+  - Импорты для LocalDateTime, Optional, UUID
+
+**Реализованные изменения:**
+- Добавлен метод `findByIdAndIsDeletedFalse()` для поиска активных твитов
+- Добавлен метод `softDeleteById()` с @Query для мягкого удаления
+- Обновлены импорты (LocalDateTime, Optional, @Modifying, @Query, @Param)
+
+**Созданные артефакты:**
+- `services/tweet-api/src/main/java/com/twitter/repository/TweetRepository.java` - обновленный файл Repository
+
+### 16:20 — step #5 done — Обновление DTO для поддержки soft delete полей — автор: assistant
+
+Добавлены опциональные поля soft delete в TweetResponseDto для полноты информации. Выполнено:
+
+- **Добавленные поля:**
+  - `isDeleted` (Boolean, nullable) - флаг удаления твита
+  - `deletedAt` (LocalDateTime, nullable) - временная метка удаления
+  - Поля опциональные, так как удалённые твиты не возвращаются в обычных запросах
+
+- **Обновления документации:**
+  - Обновлен JavaDoc класса с описанием всех параметров (@param)
+  - Обновлены @Schema аннотации для новых полей
+  - Обновлен пример в @Schema с включением полей soft delete
+  - Добавлены описания в @Schema для isDeleted и deletedAt
+
+- **Структура DTO:**
+  - Соответствие стандартам проекта (Records, @Schema, @JsonFormat)
+  - MapStruct автоматически замаппит новые поля (имена совпадают с Entity)
+  - Поля nullable для поддержки активных твитов (isDeleted = false, deletedAt = null)
+
+**Реализованные изменения:**
+- Добавлены поля `isDeleted` (Boolean, nullable) и `deletedAt` (LocalDateTime, nullable) в TweetResponseDto
+- Обновлен JavaDoc класса с @param для всех компонентов
+- Обновлены @Schema аннотации и примеры
+- Добавлены @JsonFormat для deletedAt (соответствует формату createdAt/updatedAt)
+
+**Созданные артефакты:**
+- `services/tweet-api/src/main/java/com/twitter/dto/response/TweetResponseDto.java` - обновленный файл DTO
+

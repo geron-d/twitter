@@ -10,8 +10,15 @@ import java.util.UUID;
 /**
  * Response DTO for Tweet data.
  * It contains all relevant tweet data including identifier, user reference,
- * content, and timestamps for creation and updates.
+ * content, timestamps for creation and updates, and soft delete information.
  *
+ * @param id        unique identifier for the tweet
+ * @param userId    ID of the user who created this tweet
+ * @param content   content of the tweet
+ * @param createdAt timestamp when the tweet was created
+ * @param updatedAt timestamp when the tweet was last updated
+ * @param isDeleted flag indicating whether the tweet has been soft deleted (nullable, typically false for active tweets)
+ * @param deletedAt timestamp when the tweet was soft deleted (nullable, null for active tweets)
  * @author geron
  * @version 1.0
  */
@@ -24,7 +31,9 @@ import java.util.UUID;
           "userId": "987fcdeb-51a2-43d7-b123-426614174111",
           "content": "This is a sample tweet content",
           "createdAt": "2025-01-21T20:30:00Z",
-          "updatedAt": "2025-01-21T20:30:00Z"
+          "updatedAt": "2025-01-21T20:30:00Z",
+          "isDeleted": false,
+          "deletedAt": null
         }
         """
 )
@@ -65,6 +74,21 @@ public record TweetResponseDto(
         format = "date-time"
     )
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
-    LocalDateTime updatedAt
+    LocalDateTime updatedAt,
+
+    @Schema(
+        description = "Flag indicating whether the tweet has been soft deleted. Typically false for active tweets returned by the API.",
+        example = "false"
+    )
+    Boolean isDeleted,
+
+    @Schema(
+        description = "Timestamp when the tweet was soft deleted. Null for active tweets.",
+        example = "2025-01-27T16:00:00Z",
+        format = "date-time",
+        nullable = true
+    )
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
+    LocalDateTime deletedAt
 ) {
 }

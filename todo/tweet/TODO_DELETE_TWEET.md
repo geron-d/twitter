@@ -30,10 +30,14 @@
   acceptance: "Entity обновлена с полями isDeleted (Boolean, default false) и deletedAt (LocalDateTime, nullable), добавлен метод softDelete()"
   done: "Реализованы изменения в Entity Tweet: добавлены поля isDeleted и deletedAt с @Builder.Default, методы softDelete() и isActive(), обновлен JavaDoc класса. Код соответствует спецификации и стандартам проекта."
   artifacts: "services/tweet-api/src/main/java/com/twitter/entity/Tweet.java, todo/tweet/IMPLEMENTATION_ENTITY_TWEET.md"
-- [ ] (P1) #4: Обновление Repository — Добавить методы для работы с soft delete
+- [x] (P1) [2025-01-27 16:15] #4: Обновление Repository — Добавить методы для работы с soft delete
   acceptance: "Методы findByIdAndNotDeleted(), softDeleteById() добавлены в TweetRepository"
-- [ ] (P1) #5: Обновление DTO — Добавить поля isDeleted и deletedAt в TweetResponseDto (опционально)
+  done: "Добавлены методы findByIdAndIsDeletedFalse() (соответствует Spring Data conventions) и softDeleteById() с @Query в TweetRepository. Методы соответствуют стандартам проекта, derived query method не требует JavaDoc."
+  artifacts: "services/tweet-api/src/main/java/com/twitter/repository/TweetRepository.java"
+- [x] (P1) [2025-01-27 16:20] #5: Обновление DTO — Добавить поля isDeleted и deletedAt в TweetResponseDto (опционально)
   acceptance: "TweetResponseDto обновлен с учетом soft delete полей (если требуется в ответах)"
+  done: "Добавлены опциональные поля isDeleted (Boolean, nullable) и deletedAt (LocalDateTime, nullable) в TweetResponseDto. Обновлены @Schema аннотации, примеры и JavaDoc. Поля добавлены для полноты DTO, хотя удалённые твиты не возвращаются в обычных запросах."
+  artifacts: "services/tweet-api/src/main/java/com/twitter/dto/response/TweetResponseDto.java"
 - [ ] (P1) #6: Реализация Validator — Добавить метод validateForDelete в TweetValidator
   acceptance: "Метод validateForDelete добавлен в TweetValidator и TweetValidatorImpl, проверяет существование твита и права доступа"
 - [ ] (P1) #7: Реализация Service — Добавить метод deleteTweet в TweetService
