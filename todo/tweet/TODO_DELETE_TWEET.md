@@ -38,10 +38,14 @@
   acceptance: "TweetResponseDto обновлен с учетом soft delete полей (если требуется в ответах)"
   done: "Добавлены опциональные поля isDeleted (Boolean, nullable) и deletedAt (LocalDateTime, nullable) в TweetResponseDto. Обновлены @Schema аннотации, примеры и JavaDoc. Поля добавлены для полноты DTO, хотя удалённые твиты не возвращаются в обычных запросах."
   artifacts: "services/tweet-api/src/main/java/com/twitter/dto/response/TweetResponseDto.java"
-- [ ] (P1) #6: Реализация Validator — Добавить метод validateForDelete в TweetValidator
+- [x] (P1) [2025-01-27 16:30] #6: Реализация Validator — Добавить метод validateForDelete в TweetValidator
   acceptance: "Метод validateForDelete добавлен в TweetValidator и TweetValidatorImpl, проверяет существование твита и права доступа"
-- [ ] (P1) #7: Реализация Service — Добавить метод deleteTweet в TweetService
+  done: "Добавлен метод validateForDelete в TweetValidator интерфейс и TweetValidatorImpl. Метод проверяет: tweetId на null, существование твита, состояние (не удален), права доступа через validateTweetOwnership(). Создан DeleteTweetRequestDto для передачи userId. Код соответствует DESIGN_DELETE_TWEET.md и стандартам проекта."
+  artifacts: "services/tweet-api/src/main/java/com/twitter/validation/TweetValidator.java, services/tweet-api/src/main/java/com/twitter/validation/TweetValidatorImpl.java, services/tweet-api/src/main/java/com/twitter/dto/request/DeleteTweetRequestDto.java"
+- [x] (P1) [2025-01-27 16:40] #7: Реализация Service — Добавить метод deleteTweet в TweetService
   acceptance: "Метод deleteTweet добавлен в TweetService и TweetServiceImpl, использует @Transactional, вызывает валидацию и soft delete"
+  done: "Добавлен метод deleteTweet в TweetService интерфейс и TweetServiceImpl. Метод использует @Transactional, вызывает validateForDelete для валидации, получает твит из БД, вызывает softDelete() на entity, сохраняет изменения через saveAndFlush. Возвращает void (ответ 204 No Content). Код соответствует стандартам проекта."
+  artifacts: "services/tweet-api/src/main/java/com/twitter/service/TweetService.java, services/tweet-api/src/main/java/com/twitter/service/TweetServiceImpl.java"
 - [ ] (P1) #8: Обновление getTweetById — Исключить удаленные твиты из результатов
   acceptance: "Метод getTweetById обновлен для использования findByIdAndNotDeleted() вместо findById()"
 - [ ] (P1) #9: Реализация Controller — Добавить эндпоинт DELETE /api/v1/tweets/{tweetId}

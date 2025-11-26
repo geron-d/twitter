@@ -3,6 +3,7 @@ package com.twitter.validation;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.FormatValidationException;
 import com.twitter.dto.request.CreateTweetRequestDto;
+import com.twitter.dto.request.DeleteTweetRequestDto;
 import com.twitter.dto.request.UpdateTweetRequestDto;
 
 import java.util.UUID;
@@ -67,4 +68,20 @@ public interface TweetValidator {
      * @throws FormatValidationException       if content validation fails (empty, whitespace-only, or constraint violations)
      */
     void validateForUpdate(UUID tweetId, UpdateTweetRequestDto requestDto);
+
+    /**
+     * Performs complete validation for tweet deletion.
+     * <p>
+     * This method validates tweet data for deletion including:
+     * <ul>
+     *   <li>Existence of the tweet (tweetId must not be null and tweet must exist)</li>
+     *   <li>State check (tweet must not be already deleted)</li>
+     *   <li>Authorization check (only tweet author can delete their tweet)</li>
+     * </ul>
+     *
+     * @param tweetId    the unique identifier of the tweet to delete
+     * @param requestDto DTO containing userId for authorization check
+     * @throws BusinessRuleValidationException if tweetId is null, tweet doesn't exist, is already deleted, or access denied
+     */
+    void validateForDelete(UUID tweetId, DeleteTweetRequestDto requestDto);
 }

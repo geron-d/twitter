@@ -3,6 +3,7 @@ package com.twitter.validation;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.FormatValidationException;
 import com.twitter.dto.request.CreateTweetRequestDto;
+import com.twitter.dto.request.DeleteTweetRequestDto;
 import com.twitter.dto.request.UpdateTweetRequestDto;
 import com.twitter.entity.Tweet;
 import com.twitter.gateway.UserGateway;
@@ -128,6 +129,30 @@ public class TweetValidatorImpl implements TweetValidator {
             log.warn("User {} attempted to update tweet {} owned by user {}", userId, tweet.getId(), tweet.getUserId());
             throw new BusinessRuleValidationException("TWEET_ACCESS_DENIED", "Only the tweet author can update their tweet");
         }
+    }
+
+    /**
+     * @see TweetValidator#validateForDelete
+     */
+    @Override
+    public void validateForDelete(UUID tweetId, DeleteTweetRequestDto requestDto) {
+        if (tweetId == null) {
+            log.warn("Tweet ID is null");
+            throw new BusinessRuleValidationException("TWEET_ID_NULL", "Tweet ID cannot be null");
+        }
+
+        Tweet tweet = tweetRepository.findById(tweetId)
+            .orElseThrow(() -> {
+                log.warn("Tweet with ID {} not found", tweetId);
+                return new BusinessRuleValidationException("TWEET_NOT_FOUND", tweetId);
+            });
+
+        if (Boolean.TRUE.equals(tweet.getIsDeleted())) {
+            log.warn("Tweet with ID {} is already deleted", tweetId);
+            throw new BusinessRuleValidationException("TWEET_ALREADY_DELETED", tweetId);
+        }
+
+        validateTweetOwnership(tweet, requestDto.userId());
     }
 
     /**

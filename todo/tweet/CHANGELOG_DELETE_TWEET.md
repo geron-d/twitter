@@ -165,3 +165,75 @@
 **Созданные артефакты:**
 - `services/tweet-api/src/main/java/com/twitter/dto/response/TweetResponseDto.java` - обновленный файл DTO
 
+### 16:30 — step #6 done — Реализация Validator для валидации удаления твита — автор: assistant
+
+Реализован метод validateForDelete в TweetValidator для полной валидации операции удаления. Выполнено:
+
+- **Создан DeleteTweetRequestDto:**
+  - Record с полем userId (UUID, @NotNull)
+  - @Schema аннотации для OpenAPI документации
+  - @Builder для совместимости
+  - Соответствует DESIGN_DELETE_TWEET.md
+
+- **Добавлен метод в интерфейс TweetValidator:**
+  - `validateForDelete(UUID tweetId, DeleteTweetRequestDto requestDto)`
+  - Полная JavaDoc документация с описанием проверок
+  - @throws для BusinessRuleValidationException
+
+- **Реализован метод в TweetValidatorImpl:**
+  - Проверка tweetId на null (TWEET_ID_NULL)
+  - Проверка существования твита через findById (TWEET_NOT_FOUND)
+  - Проверка состояния твита - не должен быть уже удален (TWEET_ALREADY_DELETED)
+  - Проверка прав доступа через validateTweetOwnership() (TWEET_ACCESS_DENIED)
+  - Логирование всех проверок
+
+- **Структура валидации:**
+  - Соответствует DESIGN_DELETE_TWEET.md
+  - Использует существующий метод validateTweetOwnership()
+  - Правильная обработка исключений с кодами ошибок
+  - Логирование для отладки
+
+**Реализованные изменения:**
+- Создан DeleteTweetRequestDto (Record с userId)
+- Добавлен метод validateForDelete в TweetValidator интерфейс
+- Реализован метод validateForDelete в TweetValidatorImpl
+- Обновлены импорты (DeleteTweetRequestDto)
+
+**Созданные артефакты:**
+- `services/tweet-api/src/main/java/com/twitter/dto/request/DeleteTweetRequestDto.java` - новый DTO для удаления
+- `services/tweet-api/src/main/java/com/twitter/validation/TweetValidator.java` - обновленный интерфейс
+- `services/tweet-api/src/main/java/com/twitter/validation/TweetValidatorImpl.java` - обновленная реализация
+
+### 16:40 — step #7 done — Реализация Service для удаления твита — автор: assistant
+
+Реализован метод deleteTweet в TweetService для выполнения soft delete операции. Выполнено:
+
+- **Добавлен метод в интерфейс TweetService:**
+  - `deleteTweet(UUID tweetId, DeleteTweetRequestDto requestDto)` - возвращает void
+  - Полная JavaDoc документация с описанием операций
+  - @throws для BusinessRuleValidationException
+  - Описание транзакционности и бизнес-правил
+
+- **Реализован метод в TweetServiceImpl:**
+  - Использует @Transactional для обеспечения транзакционности
+  - Вызывает tweetValidator.validateForDelete() для полной валидации
+  - Получает твит из БД после валидации (гарантированно существует)
+  - Вызывает tweet.softDelete() для установки флагов удаления
+  - Сохраняет изменения через saveAndFlush()
+  - Возвращает void (ответ 204 No Content)
+
+- **Структура метода:**
+  - Соответствует паттерну других методов сервиса (validateForUpdate, createTweet)
+  - Правильная обработка транзакций
+  - Использование entity метода softDelete() для бизнес-логики
+  - Сохранение через saveAndFlush для немедленной синхронизации с БД
+
+**Реализованные изменения:**
+- Добавлен метод deleteTweet в TweetService интерфейс
+- Реализован метод deleteTweet в TweetServiceImpl
+- Обновлены импорты (DeleteTweetRequestDto)
+
+**Созданные артефакты:**
+- `services/tweet-api/src/main/java/com/twitter/service/TweetService.java` - обновленный интерфейс
+- `services/tweet-api/src/main/java/com/twitter/service/TweetServiceImpl.java` - обновленная реализация
+
