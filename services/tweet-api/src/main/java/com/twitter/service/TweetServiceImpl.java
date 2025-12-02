@@ -54,7 +54,7 @@ public class TweetServiceImpl implements TweetService {
     @Override
     @Transactional(readOnly = true)
     public Optional<TweetResponseDto> getTweetById(UUID tweetId) {
-        return tweetRepository.findById(tweetId)
+        return tweetRepository.findByIdAndIsDeletedFalse(tweetId)
             .map(tweetMapper::toResponseDto);
     }
 

@@ -237,3 +237,66 @@
 - `services/tweet-api/src/main/java/com/twitter/service/TweetService.java` - обновленный интерфейс
 - `services/tweet-api/src/main/java/com/twitter/service/TweetServiceImpl.java` - обновленная реализация
 
+### 16:50 — step #8 done — Обновление getTweetById для исключения удаленных твитов — автор: assistant
+
+Обновлен метод getTweetById в TweetServiceImpl для исключения удаленных твитов из результатов. Выполнено:
+
+- **Изменение метода getTweetById:**
+  - Заменен `tweetRepository.findById(tweetId)` на `tweetRepository.findByIdAndIsDeletedFalse(tweetId)`
+  - Теперь метод возвращает только активные (не удаленные) твиты
+  - Удаленные твиты автоматически исключаются из результатов запроса
+
+- **Поведение метода:**
+  - Если твит существует и не удален - возвращается Optional с TweetResponseDto
+  - Если твит не существует или удален - возвращается Optional.empty()
+  - Controller обрабатывает Optional.empty() как 404 Not Found
+
+- **Структура изменения:**
+  - Минимальное изменение кода (одна строка)
+  - Соответствует стандартам проекта
+  - Обратная совместимость сохранена (метод возвращает тот же тип)
+
+**Реализованные изменения:**
+- Обновлен метод getTweetById в TweetServiceImpl для использования findByIdAndIsDeletedFalse()
+
+**Созданные артефакты:**
+- `services/tweet-api/src/main/java/com/twitter/service/TweetServiceImpl.java` - обновленный файл Service
+
+### 17:00 — step #9 done — Реализация Controller для эндпоинта DELETE /api/v1/tweets/{tweetId} — автор: assistant
+
+Реализован эндпоинт DELETE в TweetController для удаления твитов. Выполнено:
+
+- **Добавлен метод в интерфейс TweetApi:**
+  - `deleteTweet(UUID tweetId, DeleteTweetRequestDto deleteTweetRequest)` - возвращает ResponseEntity<Void>
+  - Полная OpenAPI документация с @Operation (summary, description)
+  - @ApiResponses для всех возможных ответов:
+    - 204 No Content - успешное удаление
+    - 404 Not Found - твит не найден или уже удален (2 примера)
+    - 409 Conflict - доступ запрещен (не автор твита)
+    - 400 Bad Request - ошибки валидации (2 примера: некорректный UUID, отсутствует userId)
+  - @Parameter для описания параметров
+  - JavaDoc с описанием метода, параметров и исключений
+
+- **Добавлен метод в TweetController:**
+  - @DeleteMapping("/{tweetId}") - маппинг на DELETE /api/v1/tweets/{tweetId}
+  - @LoggableRequest - автоматическое логирование запросов/ответов
+  - @Valid для валидации DeleteTweetRequestDto через Bean Validation
+  - Вызывает tweetService.deleteTweet(tweetId, deleteTweetRequest)
+  - Возвращает ResponseEntity.noContent().build() (204 No Content)
+  - Импорты: DeleteTweetRequestDto, @DeleteMapping
+
+- **Структура метода:**
+  - Соответствует паттерну других методов контроллера
+  - Использует @LoggableRequest для логирования
+  - Валидация через @Valid и Bean Validation
+  - Обработка исключений через GlobalExceptionHandler (автоматически)
+
+**Реализованные изменения:**
+- Добавлен метод deleteTweet в TweetApi интерфейс с полной OpenAPI документацией
+- Добавлен метод deleteTweet в TweetController с @DeleteMapping и @LoggableRequest
+- Обновлены импорты (DeleteTweetRequestDto, @DeleteMapping)
+
+**Созданные артефакты:**
+- `services/tweet-api/src/main/java/com/twitter/controller/TweetApi.java` - обновленный интерфейс
+- `services/tweet-api/src/main/java/com/twitter/controller/TweetController.java` - обновленный контроллер
+

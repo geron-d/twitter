@@ -1,6 +1,8 @@
 package com.twitter.controller;
 
+import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.dto.request.CreateTweetRequestDto;
+import com.twitter.dto.request.DeleteTweetRequestDto;
 import com.twitter.dto.request.UpdateTweetRequestDto;
 import com.twitter.dto.response.TweetResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -380,5 +382,138 @@ public interface TweetApi {
         UUID tweetId,
         @Parameter(description = "Tweet data for update", required = true)
         UpdateTweetRequestDto updateTweetRequest);
+
+    /**
+     * Deletes a tweet by performing soft delete.
+     * <p>
+     * Only the tweet author can delete their tweet. The method performs validation
+     * on the request data, checks tweet existence, verifies authorization, and
+     * performs soft delete by setting isDeleted flag and deletedAt timestamp.
+     *
+     * @param tweetId            the unique identifier of the tweet to delete (UUID format)
+     * @param deleteTweetRequest DTO containing userId for authorization check
+     * @return ResponseEntity with HTTP 204 status if deletion is successful
+     * @throws BusinessRuleValidationException if tweet doesn't exist, is already deleted, or access denied
+     */
+    @Operation(
+        summary = "Delete tweet",
+        description = "Deletes a tweet by performing soft delete. " +
+            "Only the tweet author can delete their tweet. " +
+            "The method performs validation on the request data, checks tweet existence, " +
+            "verifies authorization, and performs soft delete by setting isDeleted flag " +
+            "and deletedAt timestamp. The tweet data is preserved in the database " +
+            "for analytics and recovery purposes."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "204",
+            description = "Tweet deleted successfully"
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Tweet not found or already deleted",
+            content = @Content(
+                mediaType = "application/problem+json",
+                examples = {
+                    @ExampleObject(
+                        name = "Tweet Not Found",
+                        summary = "Tweet does not exist",
+                        value = """
+                            {
+                              "type": "https://example.com/errors/business-rule-validation",
+                              "title": "Business Rule Validation Error",
+                              "status": 404,
+                              "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+                              "ruleName": "TWEET_NOT_FOUND",
+                              "context": "123e4567-e89b-12d3-a456-426614174000",
+                              "timestamp": "2025-01-27T15:45:00Z"
+                            }
+                            """
+                    ),
+                    @ExampleObject(
+                        name = "Tweet Already Deleted",
+                        summary = "Tweet is already soft deleted",
+                        value = """
+                            {
+                              "type": "https://example.com/errors/business-rule-validation",
+                              "title": "Business Rule Validation Error",
+                              "status": 404,
+                              "detail": "Business rule 'TWEET_ALREADY_DELETED' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+                              "ruleName": "TWEET_ALREADY_DELETED",
+                              "context": "123e4567-e89b-12d3-a456-426614174000",
+                              "timestamp": "2025-01-27T15:45:00Z"
+                            }
+                            """
+                    )
+                }
+            )
+        ),
+        @ApiResponse(
+            responseCode = "409",
+            description = "Business rule violation - Access denied",
+            content = @Content(
+                mediaType = "application/problem+json",
+                examples = @ExampleObject(
+                    name = "Access Denied Error",
+                    summary = "User is not the tweet author",
+                    value = """
+                        {
+                          "type": "https://example.com/errors/business-rule-validation",
+                          "title": "Business Rule Validation Error",
+                          "status": 409,
+                          "detail": "Business rule 'TWEET_ACCESS_DENIED' violated for context: Only the tweet author can delete their tweet",
+                          "ruleName": "TWEET_ACCESS_DENIED",
+                          "context": "Only the tweet author can delete their tweet",
+                          "timestamp": "2025-01-27T15:45:00Z"
+                        }
+                        """
+                )
+            )
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Validation error",
+            content = @Content(
+                mediaType = "application/problem+json",
+                examples = {
+                    @ExampleObject(
+                        name = "Invalid UUID Format Error",
+                        summary = "Invalid tweet ID format",
+                        value = """
+                            {
+                              "type": "https://example.com/errors/validation-error",
+                              "title": "Validation Error",
+                              "status": 400,
+                              "detail": "Invalid UUID format for tweetId parameter",
+                              "timestamp": "2025-01-27T15:45:00Z"
+                            }
+                            """
+                    ),
+                    @ExampleObject(
+                        name = "User ID Validation Error",
+                        summary = "User ID is null or invalid",
+                        value = """
+                            {
+                              "type": "https://example.com/errors/validation-error",
+                              "title": "Validation Error",
+                              "status": 400,
+                              "detail": "Validation failed: userId: User ID cannot be null",
+                              "timestamp": "2025-01-27T15:45:00Z"
+                            }
+                            """
+                    )
+                }
+            )
+        )
+    })
+    ResponseEntity<Void> deleteTweet(
+        @Parameter(
+            description = "Unique identifier of the tweet to delete",
+            required = true,
+            example = "123e4567-e89b-12d3-a456-426614174000"
+        )
+        UUID tweetId,
+        @Parameter(description = "Tweet deletion request with userId for authorization", required = true)
+        DeleteTweetRequestDto deleteTweetRequest);
 }
 

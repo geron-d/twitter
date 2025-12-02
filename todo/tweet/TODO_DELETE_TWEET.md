@@ -46,10 +46,14 @@
   acceptance: "Метод deleteTweet добавлен в TweetService и TweetServiceImpl, использует @Transactional, вызывает валидацию и soft delete"
   done: "Добавлен метод deleteTweet в TweetService интерфейс и TweetServiceImpl. Метод использует @Transactional, вызывает validateForDelete для валидации, получает твит из БД, вызывает softDelete() на entity, сохраняет изменения через saveAndFlush. Возвращает void (ответ 204 No Content). Код соответствует стандартам проекта."
   artifacts: "services/tweet-api/src/main/java/com/twitter/service/TweetService.java, services/tweet-api/src/main/java/com/twitter/service/TweetServiceImpl.java"
-- [ ] (P1) #8: Обновление getTweetById — Исключить удаленные твиты из результатов
+- [x] (P1) [2025-01-27 16:50] #8: Обновление getTweetById — Исключить удаленные твиты из результатов
   acceptance: "Метод getTweetById обновлен для использования findByIdAndNotDeleted() вместо findById()"
-- [ ] (P1) #9: Реализация Controller — Добавить эндпоинт DELETE /api/v1/tweets/{tweetId}
+  done: "Обновлен метод getTweetById в TweetServiceImpl для использования findByIdAndIsDeletedFalse() вместо findById(). Теперь удаленные твиты не возвращаются в результатах запроса."
+  artifacts: "services/tweet-api/src/main/java/com/twitter/service/TweetServiceImpl.java"
+- [x] (P1) [2025-01-27 17:00] #9: Реализация Controller — Добавить эндпоинт DELETE /api/v1/tweets/{tweetId}
   acceptance: "Метод deleteTweet добавлен в TweetController с @LoggableRequest, возвращает ResponseEntity.noContent()"
+  done: "Добавлен метод deleteTweet в TweetApi интерфейс с полной OpenAPI документацией (@Operation, @ApiResponses для 204, 404, 409, 400). Добавлен метод deleteTweet в TweetController с @DeleteMapping, @LoggableRequest, @Valid для валидации. Метод вызывает tweetService.deleteTweet() и возвращает ResponseEntity.noContent().build()."
+  artifacts: "services/tweet-api/src/main/java/com/twitter/controller/TweetApi.java, services/tweet-api/src/main/java/com/twitter/controller/TweetController.java"
 
 ### Документация кода (JavaDoc)
 - [ ] (P1) #10: JavaDoc для всех классов — Обновить JavaDoc для всех измененных классов
