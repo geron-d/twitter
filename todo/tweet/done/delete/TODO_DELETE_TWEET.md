@@ -106,8 +106,10 @@
   artifacts: "postman/tweet-api/twitter-tweet-api.postman_collection.json"
 
 ### Проверка соответствия стандартам
-- [ ] (P1) #20: Проверка соответствия стандартам — Проверить все стандарты проекта
+- [x] (P1) [2025-01-27 19:00] #20: Проверка соответствия стандартам — Проверить все стандарты проекта
   acceptance: "Все стандарты проверены, код соответствует требованиям STANDART_CODE.md, STANDART_PROJECT.md, STANDART_TEST.md, STANDART_JAVADOC.md, STANDART_SWAGGER.md, STANDART_README.md, STANDART_POSTMAN.md"
+  done: "Выполнена финальная проверка соответствия всех стандартов проекта. Проверены: STANDART_CODE.md (структура пакетов, именование, Java 24, Spring Boot 3.5.5), STANDART_PROJECT.md (@LoggableRequest на всех методах контроллера, @Valid для валидации, GlobalExceptionHandler), STANDART_TEST.md (unit и integration тесты с правильными паттернами именования), STANDART_JAVADOC.md (@author geron, @version 1.0 на всех классах), STANDART_SWAGGER.md (полная OpenAPI документация), STANDART_README.md (полное описание DELETE эндпоинта), STANDART_POSTMAN.md (запрос DELETE с примерами ответов). Все стандарты соблюдены."
+  artifacts: "Все измененные файлы соответствуют стандартам проекта"
 
 ## Assumptions
 - Soft delete означает установку флага isDeleted = true и установку deletedAt = текущее время
@@ -149,13 +151,13 @@
 - Ссылки на стандарты:
   - [Архитектура сервиса](../TWEET_API_ARCHITECTURE.md)
   - [План разработки](../TWEET_API_COMMON_2.md)
-  - [Стандарты кода](../../standards/STANDART_CODE.md)
-  - [Стандарты проекта](../../standards/STANDART_PROJECT.md)
-  - [Стандарты тестирования](../../standards/STANDART_TEST.md)
-  - [Стандарты JavaDoc](../../standards/STANDART_JAVADOC.md)
-  - [Стандарты Swagger](../../standards/STANDART_SWAGGER.md)
-  - [Стандарты README](../../standards/STANDART_README.md)
-  - [Стандарты Postman](../../standards/STANDART_POSTMAN.md)
+  - [Стандарты кода](../../../../standards/STANDART_CODE.md)
+  - [Стандарты проекта](../../../../standards/STANDART_PROJECT.md)
+  - [Стандарты тестирования](../../../../standards/STANDART_TEST.md)
+  - [Стандарты JavaDoc](../../../../standards/STANDART_JAVADOC.md)
+  - [Стандарты Swagger](../../../../standards/STANDART_SWAGGER.md)
+  - [Стандарты README](../../../../standards/STANDART_README.md)
+  - [Стандарты Postman](../../../../standards/STANDART_POSTMAN.md)
 
 
 

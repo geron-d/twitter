@@ -632,3 +632,72 @@
 **Обновленные артефакты:**
 - `postman/tweet-api/twitter-tweet-api.postman_collection.json` - добавлен запрос DELETE с примерами ответов
 
+### 19:00 — step #20 done — Финальная проверка соответствия стандартам проекта — автор: assistant
+
+Выполнена финальная проверка соответствия всех стандартов проекта для реализованной функциональности DELETE твита. Проверено:
+
+- **STANDART_CODE.md:**
+  - ✅ Структура пакетов соответствует стандарту (controller, service, repository, validation, dto, entity)
+  - ✅ Именование классов и методов соответствует Java conventions (PascalCase для классов, camelCase для методов)
+  - ✅ Использование Java 24 и Spring Boot 3.5.5
+  - ✅ Использование Lombok (@Data, @Builder, @RequiredArgsConstructor)
+  - ✅ Использование MapStruct для маппинга
+  - ✅ Правильная структура DTO (Records)
+
+- **STANDART_PROJECT.md:**
+  - ✅ @LoggableRequest используется на всех методах контроллера, включая deleteTweet
+  - ✅ @Valid используется для валидации DeleteTweetRequestDto
+  - ✅ GlobalExceptionHandler автоматически обрабатывает все исключения
+  - ✅ Использование BusinessRuleValidationException для бизнес-правил
+  - ✅ Использование FormatValidationException для ошибок формата
+  - ✅ Правильная обработка исключений через common-lib
+
+- **STANDART_TEST.md:**
+  - ✅ Unit тесты используют паттерн именования methodName_WhenCondition_ShouldExpectedResult
+  - ✅ Использованы @Nested классы для группировки тестов
+  - ✅ Использованы Mockito для мокирования зависимостей
+  - ✅ Использованы AssertJ для assertions
+  - ✅ Integration тесты используют @SpringBootTest, @AutoConfigureWebMvc, @Transactional
+  - ✅ Все сценарии покрыты тестами (успешные и ошибочные)
+
+- **STANDART_JAVADOC.md:**
+  - ✅ Все классы имеют @author geron и @version 1.0
+  - ✅ Все public методы имеют JavaDoc с описанием
+  - ✅ Custom query methods (softDeleteById) документированы
+  - ✅ Entity методы (softDelete, isActive) имеют подробное описание
+  - ✅ DTO параметры документированы через @param
+  - ✅ Использованы <p> теги для форматирования
+
+- **STANDART_SWAGGER.md:**
+  - ✅ Метод deleteTweet в TweetApi имеет @Operation с summary и description
+  - ✅ @ApiResponses для всех статусов (204, 404, 409, 400) с примерами
+  - ✅ @Parameter для описания параметров
+  - ✅ TweetResponseDto имеет @Schema на уровне класса и полей
+  - ✅ Все примеры используют реалистичные данные
+  - ✅ Ошибки следуют RFC 7807 Problem Details формату
+
+- **STANDART_README.md:**
+  - ✅ README обновлен с описанием DELETE эндпоинта
+  - ✅ Добавлен в таблицу эндпоинтов
+  - ✅ Детальное описание с примерами запросов и ответов
+  - ✅ Обновлены разделы: Основные возможности, Бизнес-логика, Слой валидации, Работа с базой данных, Примеры использования
+  - ✅ Все описания на русском языке
+  - ✅ Использованы правильные форматы для HTTP, JSON, bash
+
+- **STANDART_POSTMAN.md:**
+  - ✅ Запрос "delete tweet" добавлен в коллекцию
+  - ✅ Имя запроса в lowercase с пробелами
+  - ✅ Использованы переменные окружения ({{baseUrl}}, {{tweetId}}, {{userId}})
+  - ✅ Добавлены примеры для всех сценариев (204, 404, 409, 400)
+  - ✅ Примеры ответов следуют RFC 7807 Problem Details формату
+  - ✅ Обновлено описание коллекции
+
+**Результат проверки:**
+Все стандарты проекта соблюдены. Код, тесты, документация и Postman коллекция соответствуют требованиям всех стандартов проекта.
+
+**Проверенные файлы:**
+- Все измененные файлы в services/tweet-api/src/main/java/com/twitter/
+- Все тестовые файлы в services/tweet-api/src/test/java/com/twitter/
+- services/tweet-api/README.md
+- postman/tweet-api/twitter-tweet-api.postman_collection.json
+
