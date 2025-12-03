@@ -56,10 +56,14 @@
   artifacts: "services/tweet-api/src/main/java/com/twitter/controller/TweetApi.java, services/tweet-api/src/main/java/com/twitter/controller/TweetController.java"
 
 ### Документация кода (JavaDoc)
-- [ ] (P1) #10: JavaDoc для всех классов — Обновить JavaDoc для всех измененных классов
+- [x] (P1) [2025-01-27 17:15] #10: JavaDoc для всех классов — Обновить JavaDoc для всех измененных классов
   acceptance: "Все public классы и методы имеют JavaDoc с @author geron, @version 1.0"
-- [ ] (P1) #11: JavaDoc для DTO — Обновить JavaDoc для TweetResponseDto (если добавлены поля)
+  done: "Проверены все измененные классы на соответствие стандартам JavaDoc. Все классы имеют @author geron и @version 1.0. Добавлен JavaDoc для метода softDeleteById в TweetRepository (custom query method). Улучшен JavaDoc для методов softDelete() и isActive() в Tweet Entity с подробным описанием поведения и идемпотентности."
+  artifacts: "services/tweet-api/src/main/java/com/twitter/repository/TweetRepository.java, services/tweet-api/src/main/java/com/twitter/entity/Tweet.java"
+- [x] (P1) [2025-01-27 17:20] #11: JavaDoc для DTO — Обновить JavaDoc для TweetResponseDto (если добавлены поля)
   acceptance: "TweetResponseDto имеет JavaDoc с @param для всех компонентов"
+  done: "Проверен и улучшен JavaDoc для TweetResponseDto. Все параметры record документированы через @param (включая isDeleted и deletedAt, добавленные в шаге #5). Улучшено описание класса с использованием <p> тегов согласно стандартам. JavaDoc соответствует STANDART_JAVADOC.md."
+  artifacts: "services/tweet-api/src/main/java/com/twitter/dto/response/TweetResponseDto.java"
 
 ### Тестирование
 - [ ] (P1) #12: Unit тесты для Service — Тесты для метода deleteTweet

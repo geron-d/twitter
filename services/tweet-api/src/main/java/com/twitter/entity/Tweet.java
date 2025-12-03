@@ -100,6 +100,12 @@ public class Tweet {
 
     /**
      * Performs soft delete by setting isDeleted flag and deletedAt timestamp.
+     * <p>
+     * This method marks the tweet as deleted without removing it from the database.
+     * It sets the isDeleted flag to true and records the current timestamp in deletedAt.
+     * <p>
+     * After soft delete, the tweet will not be returned by standard query methods
+     * that filter out deleted tweets (e.g., findByIdAndIsDeletedFalse).
      */
     public void softDelete() {
         this.isDeleted = true;
@@ -108,6 +114,11 @@ public class Tweet {
 
     /**
      * Checks if the tweet is active (not deleted).
+     * <p>
+     * This method returns true if the tweet has not been soft deleted, false otherwise.
+     * A tweet is considered active when isDeleted is false or null.
+     *
+     * @return true if the tweet is active (not deleted), false otherwise
      */
     public boolean isActive() {
         return !Boolean.TRUE.equals(isDeleted);

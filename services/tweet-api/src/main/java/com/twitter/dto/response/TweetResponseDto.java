@@ -9,8 +9,10 @@ import java.util.UUID;
 
 /**
  * Response DTO for Tweet data.
- * It contains all relevant tweet data including identifier, user reference,
+ * <p>
+ * This record contains all relevant tweet data including identifier, user reference,
  * content, timestamps for creation and updates, and soft delete information.
+ * It is used to return tweet data from the API endpoints.
  *
  * @param id        unique identifier for the tweet
  * @param userId    ID of the user who created this tweet

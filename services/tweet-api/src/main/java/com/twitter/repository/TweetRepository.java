@@ -22,6 +22,12 @@ public interface TweetRepository extends JpaRepository<Tweet, UUID> {
 
     Optional<Tweet> findByIdAndIsDeletedFalse(UUID id);
 
+    /**
+     * Performs soft delete on a tweet by setting isDeleted flag and deletedAt timestamp.
+     *
+     * @param id        the unique identifier of the tweet to soft delete
+     * @param deletedAt the timestamp when the tweet was deleted
+     */
     @Modifying
     @Query("UPDATE Tweet t SET t.isDeleted = true, t.deletedAt = :deletedAt WHERE t.id = :id")
     void softDeleteById(@Param("id") UUID id, @Param("deletedAt") LocalDateTime deletedAt);

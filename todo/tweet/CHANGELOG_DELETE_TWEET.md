@@ -300,3 +300,65 @@
 - `services/tweet-api/src/main/java/com/twitter/controller/TweetApi.java` - обновленный интерфейс
 - `services/tweet-api/src/main/java/com/twitter/controller/TweetController.java` - обновленный контроллер
 
+### 17:15 — step #10 done — Обновление JavaDoc для всех измененных классов — автор: assistant
+
+Проверены и обновлены JavaDoc для всех измененных классов согласно стандартам проекта. Выполнено:
+
+- **Проверка всех измененных классов:**
+  - Tweet Entity - JavaDoc соответствует стандартам (@author geron, @version 1.0)
+  - TweetRepository - JavaDoc соответствует стандартам
+  - TweetResponseDto - JavaDoc соответствует стандартам
+  - DeleteTweetRequestDto - JavaDoc соответствует стандартам
+  - TweetValidator и TweetValidatorImpl - JavaDoc соответствует стандартам
+  - TweetService и TweetServiceImpl - JavaDoc соответствует стандартам
+  - TweetController и TweetApi - JavaDoc соответствует стандартам
+
+- **Добавлен JavaDoc для метода softDeleteById в TweetRepository:**
+  - Custom query method с @Query требует JavaDoc согласно стандартам
+  - Добавлено описание метода, параметров и поведения
+  - Указано, что это bulk update операция с требованием транзакции
+
+- **Улучшен JavaDoc для методов в Tweet Entity:**
+  - Метод softDelete() - добавлено подробное описание поведения, идемпотентности, влияния на запросы
+  - Метод isActive() - добавлено описание возвращаемого значения и использования
+
+- **Соответствие стандартам:**
+  - Все классы имеют @author geron и @version 1.0
+  - Все public методы имеют JavaDoc
+  - Derived query methods (findByIdAndIsDeletedFalse) не документированы (self-documenting)
+  - Custom query methods (softDeleteById) документированы
+  - Entity методы имеют подробное описание
+
+**Реализованные изменения:**
+- Добавлен JavaDoc для метода softDeleteById в TweetRepository
+- Улучшен JavaDoc для методов softDelete() и isActive() в Tweet Entity
+
+**Созданные артефакты:**
+- `services/tweet-api/src/main/java/com/twitter/repository/TweetRepository.java` - обновленный файл Repository
+- `services/tweet-api/src/main/java/com/twitter/entity/Tweet.java` - обновленный файл Entity
+
+### 17:20 — step #11 done — Обновление JavaDoc для TweetResponseDto — автор: assistant
+
+Проверен и улучшен JavaDoc для TweetResponseDto согласно стандартам проекта. Выполнено:
+
+- **Проверка JavaDoc для TweetResponseDto:**
+  - Все параметры record документированы через @param (id, userId, content, createdAt, updatedAt, isDeleted, deletedAt)
+  - Поля isDeleted и deletedAt, добавленные в шаге #5, уже были документированы
+  - @author geron и @version 1.0 присутствуют
+
+- **Улучшение описания класса:**
+  - Добавлен <p> тег для разделения параграфов согласно стандартам
+  - Улучшено описание назначения DTO
+  - Указано, что DTO используется для возврата данных из API эндпоинтов
+
+- **Соответствие стандартам:**
+  - Все компоненты record документированы через @param
+  - Использованы <p> теги для форматирования
+  - JavaDoc соответствует STANDART_JAVADOC.md
+
+**Реализованные изменения:**
+- Улучшено описание класса TweetResponseDto с использованием <p> тегов
+
+**Созданные артефакты:**
+- `services/tweet-api/src/main/java/com/twitter/dto/response/TweetResponseDto.java` - обновленный файл DTO
+
