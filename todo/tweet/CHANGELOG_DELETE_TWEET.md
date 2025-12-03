@@ -362,3 +362,98 @@
 **Созданные артефакты:**
 - `services/tweet-api/src/main/java/com/twitter/dto/response/TweetResponseDto.java` - обновленный файл DTO
 
+### 17:30 — step #12 done — Unit тесты для метода deleteTweet в TweetService — автор: assistant
+
+Добавлены unit тесты для метода deleteTweet в TweetServiceImplTest. Выполнено:
+
+- **Добавлен вложенный класс DeleteTweetTests:**
+  - @Nested класс для группировки тестов метода deleteTweet
+  - @BeforeEach метод для инициализации тестовых данных
+  - Тестовые данные: testTweetId, testUserId, deleteRequestDto, existingTweet
+
+- **Тесты для успешного удаления:**
+  - `deleteTweet_WithValidData_ShouldPerformSoftDelete` - проверяет, что isDeleted становится true и deletedAt устанавливается
+  - `deleteTweet_WithValidData_ShouldCallEachDependencyExactlyOnce` - проверяет вызовы всех зависимостей в правильном порядке
+
+- **Тесты для ошибочных сценариев:**
+  - `deleteTweet_WhenTweetNotFound_ShouldThrowBusinessRuleValidationException` - проверяет исключение TWEET_NOT_FOUND
+  - `deleteTweet_WhenAccessDenied_ShouldThrowBusinessRuleValidationException` - проверяет исключение TWEET_ACCESS_DENIED
+  - `deleteTweet_WhenTweetAlreadyDeleted_ShouldThrowBusinessRuleValidationException` - проверяет исключение TWEET_ALREADY_DELETED
+
+- **Соответствие стандартам:**
+  - Использован паттерн именования methodName_WhenCondition_ShouldExpectedResult
+  - Использованы @Nested классы для группировки тестов
+  - Использованы Mockito для мокирования зависимостей
+  - Использованы AssertJ для assertions
+  - Все тесты изолированы и не требуют Spring Context
+
+**Реализованные изменения:**
+- Добавлен вложенный класс DeleteTweetTests с 5 тестами
+- Добавлены импорты DeleteTweetRequestDto
+- Все сценарии deleteTweet покрыты unit тестами
+
+**Созданные артефакты:**
+- `services/tweet-api/src/test/java/com/twitter/service/TweetServiceImplTest.java` - обновленный файл тестов
+
+### 17:40 — step #13 done — Unit тесты для метода validateForDelete в TweetValidator — автор: assistant
+
+Добавлены unit тесты для метода validateForDelete в TweetValidatorImplTest. Выполнено:
+
+- **Добавлен вложенный класс ValidateForDeleteTests:**
+  - @Nested класс для группировки тестов метода validateForDelete
+  - Тестовые данные: tweetId, authorUserId, differentUserId, requestDto, existingTweet
+
+- **Тесты для успешной валидации:**
+  - `validateForDelete_WhenValidData_ShouldCompleteWithoutExceptions` - проверяет, что валидация проходит успешно при корректных данных
+
+- **Тесты для ошибочных сценариев:**
+  - `validateForDelete_WhenTweetIdIsNull_ShouldThrowBusinessRuleValidationException` - проверяет исключение TWEET_ID_NULL
+  - `validateForDelete_WhenTweetNotFound_ShouldThrowBusinessRuleValidationException` - проверяет исключение TWEET_NOT_FOUND
+  - `validateForDelete_WhenTweetAlreadyDeleted_ShouldThrowBusinessRuleValidationException` - проверяет исключение TWEET_ALREADY_DELETED
+  - `validateForDelete_WhenUserIsNotAuthor_ShouldThrowBusinessRuleValidationException` - проверяет исключение TWEET_ACCESS_DENIED
+
+- **Соответствие стандартам:**
+  - Использован паттерн именования methodName_WhenCondition_ShouldExpectedResult
+  - Использованы @Nested классы для группировки тестов
+  - Использованы Mockito для мокирования зависимостей
+  - Использованы AssertJ для assertions (assertThatCode, assertThatThrownBy, satisfies)
+  - Все тесты изолированы и не требуют Spring Context
+  - Проверяются не только типы исключений, но и их содержимое (ruleName, context)
+
+**Реализованные изменения:**
+- Добавлен вложенный класс ValidateForDeleteTests с 5 тестами
+- Добавлены импорты DeleteTweetRequestDto
+- Все сценарии validateForDelete покрыты unit тестами
+
+**Созданные артефакты:**
+- `services/tweet-api/src/test/java/com/twitter/validation/TweetValidatorImplTest.java` - обновленный файл тестов
+
+### 17:50 — step #14 done — Unit тесты для getTweetById с проверкой исключения удаленных твитов — автор: assistant
+
+Обновлены unit тесты для метода getTweetById в TweetServiceImplTest. Выполнено:
+
+- **Обновление существующих тестов:**
+  - Заменен `findById` на `findByIdAndIsDeletedFalse` во всех тестах класса GetTweetByIdTests
+  - Обновлены тесты: getTweetById_WhenTweetExists_ShouldReturnOptionalWithTweetResponseDto, getTweetById_WhenTweetDoesNotExist_ShouldReturnEmptyOptional, getTweetById_WhenTweetExists_ShouldCallRepositoryAndMapper, getTweetById_WhenTweetDoesNotExist_ShouldCallRepositoryOnly
+  - Тесты теперь соответствуют реальной реализации метода (используется findByIdAndIsDeletedFalse)
+
+- **Добавлен новый тест:**
+  - `getTweetById_WhenTweetIsDeleted_ShouldReturnEmptyOptional` - проверяет, что удаленные твиты не возвращаются
+  - Метод возвращает Optional.empty() для удаленных твитов
+  - Проверяется, что используется findByIdAndIsDeletedFalse (который автоматически исключает удаленные твиты)
+  - Проверяется, что mapper не вызывается для удаленных твитов
+
+- **Соответствие стандартам:**
+  - Использован паттерн именования methodName_WhenCondition_ShouldExpectedResult
+  - Использованы Mockito для мокирования зависимостей
+  - Использованы AssertJ для assertions
+  - Все тесты изолированы и не требуют Spring Context
+
+**Реализованные изменения:**
+- Обновлены 4 существующих теста для использования findByIdAndIsDeletedFalse
+- Добавлен 1 новый тест для проверки исключения удаленных твитов
+- Все тесты теперь соответствуют реальной реализации метода
+
+**Созданные артефакты:**
+- `services/tweet-api/src/test/java/com/twitter/service/TweetServiceImplTest.java` - обновленный файл тестов
+

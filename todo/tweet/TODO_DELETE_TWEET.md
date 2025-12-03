@@ -66,12 +66,18 @@
   artifacts: "services/tweet-api/src/main/java/com/twitter/dto/response/TweetResponseDto.java"
 
 ### Тестирование
-- [ ] (P1) #12: Unit тесты для Service — Тесты для метода deleteTweet
+- [x] (P1) [2025-01-27 17:30] #12: Unit тесты для Service — Тесты для метода deleteTweet
   acceptance: "Все сценарии deleteTweet покрыты unit тестами: успешное удаление, твит не найден, доступ запрещен"
-- [ ] (P1) #13: Unit тесты для Validator — Тесты для метода validateForDelete
+  done: "Добавлены unit тесты для метода deleteTweet в TweetServiceImplTest. Покрыты все сценарии: успешное удаление (проверка установки isDeleted и deletedAt), проверка вызовов зависимостей, твит не найден (TWEET_NOT_FOUND), доступ запрещен (TWEET_ACCESS_DENIED), твит уже удален (TWEET_ALREADY_DELETED). Тесты соответствуют стандартам проекта и используют паттерн methodName_WhenCondition_ShouldExpectedResult."
+  artifacts: "services/tweet-api/src/test/java/com/twitter/service/TweetServiceImplTest.java"
+- [x] (P1) [2025-01-27 17:40] #13: Unit тесты для Validator — Тесты для метода validateForDelete
   acceptance: "Все сценарии validateForDelete покрыты unit тестами: успешная валидация, твит не найден, доступ запрещен, твит уже удален"
-- [ ] (P1) #14: Unit тесты для getTweetById — Тесты для проверки исключения удаленных твитов
+  done: "Добавлены unit тесты для метода validateForDelete в TweetValidatorImplTest. Покрыты все сценарии: успешная валидация, tweetId is null (TWEET_ID_NULL), твит не найден (TWEET_NOT_FOUND), твит уже удален (TWEET_ALREADY_DELETED), доступ запрещен (TWEET_ACCESS_DENIED). Тесты соответствуют стандартам проекта и используют паттерн methodName_WhenCondition_ShouldExpectedResult."
+  artifacts: "services/tweet-api/src/test/java/com/twitter/validation/TweetValidatorImplTest.java"
+- [x] (P1) [2025-01-27 17:50] #14: Unit тесты для getTweetById — Тесты для проверки исключения удаленных твитов
   acceptance: "Тесты проверяют, что удаленные твиты не возвращаются в getTweetById"
+  done: "Обновлены существующие тесты для getTweetById: заменен findById на findByIdAndIsDeletedFalse во всех тестах. Добавлен новый тест getTweetById_WhenTweetIsDeleted_ShouldReturnEmptyOptional, который проверяет, что удаленные твиты не возвращаются (метод возвращает Optional.empty()). Все тесты теперь соответствуют реальной реализации метода."
+  artifacts: "services/tweet-api/src/test/java/com/twitter/service/TweetServiceImplTest.java"
 - [ ] (P2) #15: Integration тесты для Controller — Тесты для эндпоинта DELETE
   acceptance: "Все сценарии DELETE эндпоинта покрыты integration тестами: 204 No Content, 404 Not Found, 409 Conflict (доступ запрещен)"
 
