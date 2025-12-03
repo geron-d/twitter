@@ -84,18 +84,26 @@
   artifacts: "services/tweet-api/src/test/java/com/twitter/controller/TweetControllerTest.java"
 
 ### Swagger/OpenAPI документация
-- [ ] (P1) #16: OpenAPI interface (TweetApi.java) — Добавить метод deleteTweet с @Operation и @ApiResponses
+- [x] (P1) [2025-01-27 18:15] #16: OpenAPI interface (TweetApi.java) — Добавить метод deleteTweet с @Operation и @ApiResponses
   acceptance: "Метод deleteTweet добавлен в TweetApi с полной OpenAPI документацией: summary, description, @ApiResponses для 204, 404, 409, 400"
-- [ ] (P1) #17: DTO Schema аннотации — Обновить @Schema для TweetResponseDto (если добавлены поля)
+  done: "Метод deleteTweet уже реализован в TweetApi (шаг #9) с полной OpenAPI документацией: @Operation с summary и description, @ApiResponses для всех статусов (204, 404, 409, 400) с примерами в @ExampleObject, @Parameter для параметров. Документация соответствует STANDART_SWAGGER.md."
+  artifacts: "services/tweet-api/src/main/java/com/twitter/controller/TweetApi.java"
+- [x] (P1) [2025-01-27 18:15] #17: DTO Schema аннотации — Обновить @Schema для TweetResponseDto (если добавлены поля)
   acceptance: "TweetResponseDto имеет @Schema на уровне класса и полей с учетом STANDART_SWAGGER.md"
+  done: "TweetResponseDto имеет полную @Schema документацию: @Schema на уровне класса с name, description и example (включая поля isDeleted и deletedAt), @Schema на каждом поле с описанием, example, format (для UUID и date-time), nullable для опциональных полей. Все соответствует STANDART_SWAGGER.md."
+  artifacts: "services/tweet-api/src/main/java/com/twitter/dto/response/TweetResponseDto.java"
 
 ### Обновление README
-- [ ] (P2) #18: Обновление README.md — Добавить описание эндпоинта DELETE в раздел REST API
+- [x] (P2) [2025-01-27 18:30] #18: Обновление README.md — Добавить описание эндпоинта DELETE в раздел REST API
   acceptance: "README обновлен с описанием DELETE /api/v1/tweets/{tweetId}, добавлено в таблицу эндпоинтов и детальное описание"
+  done: "Обновлен README.md: добавлен DELETE эндпоинт в таблицу эндпоинтов, добавлено детальное описание DELETE эндпоинта (параметры, валидация, бизнес-правила, ответы, примеры ошибок), обновлен раздел 'Основные возможности' (добавлено удаление твитов), обновлен раздел 'Бизнес-логика' (добавлен метод deleteTweet), обновлен раздел 'Слой валидации' (добавлена валидация для DELETE), обновлен раздел 'Работа с базой данных' (добавлены поля isDeleted и deletedAt), добавлен пример использования DELETE в раздел 'Примеры использования'. Все соответствует STANDART_README.md."
+  artifacts: "services/tweet-api/README.md"
 
 ### Postman коллекции
-- [ ] (P2) #19: Обновление Postman коллекции — Добавить запрос "delete tweet"
+- [x] (P2) [2025-01-27 18:45] #19: Обновление Postman коллекции — Добавить запрос "delete tweet"
   acceptance: "Добавлен запрос delete tweet с примерами ответов: 204 No Content, 404 Not Found, 409 Conflict, обновлены переменные окружения"
+  done: "Добавлен запрос 'delete tweet' в Postman коллекцию: метод DELETE, путь {{baseUrl}}/api/v1/tweets/{{tweetId}}, тело запроса с userId, полное описание метода. Добавлены примеры ответов: 204 No Content (успешное удаление), 404 Not Found (твит не найден), 404 Not Found (твит уже удален), 409 Conflict (доступ запрещен), 400 Bad Request (null userId). Обновлено описание коллекции с упоминанием удаления твитов. Все соответствует STANDART_POSTMAN.md."
+  artifacts: "postman/tweet-api/twitter-tweet-api.postman_collection.json"
 
 ### Проверка соответствия стандартам
 - [ ] (P1) #20: Проверка соответствия стандартам — Проверить все стандарты проекта

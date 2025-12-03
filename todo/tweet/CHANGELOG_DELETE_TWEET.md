@@ -492,3 +492,143 @@
 **Созданные артефакты:**
 - `services/tweet-api/src/test/java/com/twitter/controller/TweetControllerTest.java` - обновленный файл тестов
 
+### 18:15 — step #16 done — Проверка OpenAPI документации для метода deleteTweet — автор: assistant
+
+Проверена OpenAPI документация для метода deleteTweet в TweetApi. Выполнено:
+
+- **Проверка метода deleteTweet в TweetApi:**
+  - Метод уже реализован в шаге #9 с полной OpenAPI документацией
+  - @Operation с summary ("Delete tweet") и подробным description
+  - @ApiResponses для всех возможных статусов:
+    - 204 No Content - успешное удаление (без тела ответа)
+    - 404 Not Found - твит не найден или уже удален (2 примера: TWEET_NOT_FOUND, TWEET_ALREADY_DELETED)
+    - 409 Conflict - доступ запрещен (TWEET_ACCESS_DENIED)
+    - 400 Bad Request - ошибки валидации (2 примера: некорректный UUID, null userId)
+  - @Parameter для описания параметров (tweetId, deleteTweetRequest)
+  - Все примеры используют @ExampleObject с реалистичными данными
+  - JavaDoc с описанием метода, параметров и исключений
+
+- **Соответствие стандартам:**
+  - Документация соответствует STANDART_SWAGGER.md
+  - Все требования acceptance criteria выполнены
+  - Примеры соответствуют реальному поведению API
+  - Использованы правильные форматы (RFC 7807 Problem Details для ошибок)
+
+**Проверенные артефакты:**
+- `services/tweet-api/src/main/java/com/twitter/controller/TweetApi.java` - метод deleteTweet с полной OpenAPI документацией
+
+### 18:15 — step #17 done — Проверка @Schema аннотаций для TweetResponseDto — автор: assistant
+
+Проверены @Schema аннотации для TweetResponseDto согласно стандартам Swagger. Выполнено:
+
+- **Проверка @Schema на уровне класса:**
+  - @Schema с name = "TweetResponse"
+  - description с описанием назначения DTO
+  - example с полным JSON примером, включая поля isDeleted и deletedAt
+  - Пример соответствует реальной структуре ответа
+
+- **Проверка @Schema на уровне полей:**
+  - Все поля имеют @Schema аннотации:
+    - id, userId - с format = "uuid" и example
+    - content - с maxLength = 280 и example
+    - createdAt, updatedAt, deletedAt - с format = "date-time" и example
+    - isDeleted - с example и nullable = true
+    - deletedAt - с nullable = true и format = "date-time"
+  - Все описания полей понятны и информативны
+  - Форматы соответствуют типам данных
+
+- **Соответствие стандартам:**
+  - Документация соответствует STANDART_SWAGGER.md
+  - Все требования acceptance criteria выполнены
+  - Поля isDeleted и deletedAt, добавленные в шаге #5, полностью документированы
+  - Использованы правильные форматы (uuid, date-time)
+  - Nullable поля правильно помечены
+
+**Проверенные артефакты:**
+- `services/tweet-api/src/main/java/com/twitter/dto/response/TweetResponseDto.java` - полная @Schema документация
+
+### 18:30 — step #18 done — Обновление README.md с описанием DELETE эндпоинта — автор: assistant
+
+Обновлен README.md для tweet-api с полным описанием DELETE эндпоинта. Выполнено:
+
+- **Обновление раздела 'Основные возможности':**
+  - Добавлена возможность "Удаление твитов (soft delete) с проверкой прав автора"
+
+- **Обновление таблицы эндпоинтов:**
+  - Добавлен DELETE эндпоинт в таблицу с описанием: "Удалить твит (soft delete)"
+  - Указан метод `DELETE`, путь `/{tweetId}`, тело запроса `DeleteTweetRequestDto`, ответ "-" (204 No Content)
+
+- **Добавление детального описания DELETE эндпоинта:**
+  - Полное описание эндпоинта с HTTP методом и путем
+  - Описание параметров пути (tweetId)
+  - Описание тела запроса с примером JSON
+  - Описание валидации (userId, tweetId)
+  - Описание бизнес-правил (только автор может удалить, soft delete, данные сохраняются)
+  - Описание всех возможных ответов (204, 400, 404, 409)
+  - Примеры всех типов ошибок с JSON ответами
+
+- **Обновление раздела 'Бизнес-логика':**
+  - Добавлен метод `deleteTweet` в список методов TweetService
+  - Описана логика метода (валидация, получение твита, soft delete, сохранение)
+
+- **Обновление раздела 'Слой валидации':**
+  - Добавлен подраздел "Удаление твита (DELETE)" с описанием всех этапов валидации:
+    - Проверка tweetId на null
+    - Проверка существования твита
+    - Проверка состояния твита (не должен быть уже удален)
+    - Проверка прав автора
+
+- **Обновление раздела 'Работа с базой данных':**
+  - Добавлены поля `is_deleted` и `deleted_at` в таблицу tweets
+  - Добавлено описание Soft Delete функциональности с указанием индексов и поведения
+
+- **Обновление раздела 'Примеры использования':**
+  - Добавлен пример curl запроса для удаления твита
+  - Добавлены примеры ответов (204 No Content, 409 Conflict, 404 Not Found)
+
+- **Соответствие стандартам:**
+  - Все описания на русском языке
+  - Следование формату из STANDART_README.md
+  - Использованы правильные форматы для HTTP запросов, JSON, bash команд
+  - Все примеры соответствуют реальному поведению API
+
+**Обновленные артефакты:**
+- `services/tweet-api/README.md` - полное описание DELETE эндпоинта во всех разделах
+
+### 18:45 — step #19 done — Обновление Postman коллекции с запросом delete tweet — автор: assistant
+
+Добавлен запрос DELETE для удаления твита в Postman коллекцию. Выполнено:
+
+- **Добавлен запрос 'delete tweet':**
+  - Метод: DELETE
+  - Путь: `{{baseUrl}}/api/v1/tweets/{{tweetId}}`
+  - Тело запроса: `DeleteTweetRequestDto` с полем `userId` (использует переменную `{{userId}}`)
+  - Заголовки: Content-Type: application/json, Accept: application/json
+  - Полное описание метода с упоминанием soft delete, проверки прав автора, валидации
+
+- **Добавлены примеры ответов:**
+  - `tweet deleted` (204 No Content) - успешное удаление, пустое тело ответа
+  - `tweet not found error` (404 Not Found) - твит не найден (TWEET_NOT_FOUND)
+  - `tweet already deleted error` (404 Not Found) - твит уже удален (TWEET_ALREADY_DELETED)
+  - `access denied error` (409 Conflict) - доступ запрещен (TWEET_ACCESS_DENIED)
+  - `validation error - null userId` (400 Bad Request) - ошибка валидации userId
+
+- **Структура примеров ответов:**
+  - Все примеры содержат originalRequest с полной копией запроса
+  - Правильные статус-коды и заголовки Content-Type
+  - Ошибки следуют RFC 7807 Problem Details формату
+  - Использованы реалистичные UUID и временные метки
+
+- **Обновление описания коллекции:**
+  - Добавлено упоминание "Tweet deletion (soft delete) with authorization checks" в список возможностей API
+  - Описание соответствует реальной функциональности
+
+- **Соответствие стандартам:**
+  - Имя запроса в lowercase с пробелами: "delete tweet"
+  - Использованы переменные окружения ({{baseUrl}}, {{tweetId}}, {{userId}})
+  - Все примеры соответствуют реальному поведению API
+  - Структура соответствует STANDART_POSTMAN.md
+
+**Обновленные артефакты:**
+- `postman/tweet-api/twitter-tweet-api.postman_collection.json` - добавлен запрос DELETE с примерами ответов
+

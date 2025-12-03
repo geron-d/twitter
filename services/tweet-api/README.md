@@ -11,6 +11,7 @@
 - ✅ Создание твитов с валидацией контента
 - ✅ Получение твита по уникальному идентификатору
 - ✅ Обновление твитов с проверкой прав автора
+- ✅ Удаление твитов (soft delete) с проверкой прав автора
 - ✅ Интеграция с users-api для проверки существования пользователей
 - ✅ Валидация данных (длина контента 1-280 символов)
 - ✅ OpenAPI/Swagger документация
@@ -110,11 +111,12 @@ http://localhost:8082/api/v1/tweets
 
 ### Эндпоинты
 
-| Метод  | Путь          | Описание                      | Тело запроса            | Ответ              |
-|--------|---------------|-------------------------------|-------------------------|--------------------|
-| `POST` | `/`           | Создать новый твит            | `CreateTweetRequestDto` | `TweetResponseDto` |
-| `GET`  | `/{tweetId}`  | Получить твит по ID            | -                       | `TweetResponseDto` |
-| `PUT`  | `/{tweetId}`  | Обновить твит                 | `UpdateTweetRequestDto` | `TweetResponseDto` |
+| Метод    | Путь          | Описание                      | Тело запроса            | Ответ              |
+|----------|---------------|-------------------------------|-------------------------|--------------------|
+| `POST`   | `/`           | Создать новый твит            | `CreateTweetRequestDto` | `TweetResponseDto` |
+| `GET`    | `/{tweetId}`  | Получить твит по ID            | -                       | `TweetResponseDto` |
+| `PUT`    | `/{tweetId}`  | Обновить твит                 | `UpdateTweetRequestDto` | `TweetResponseDto` |
+| `DELETE` | `/{tweetId}`  | Удалить твит (soft delete)    | `DeleteTweetRequestDto` | -                  |
 
 ### Детальное описание эндпоинтов
 
@@ -319,6 +321,101 @@ Content-Type: application/json
 }
 ```
 
+#### 4. Удалить твит
+
+```http
+DELETE /api/v1/tweets/{tweetId}
+Content-Type: application/json
+```
+
+**Параметры пути:**
+
+- `tweetId` - обязательный, UUID существующего твита
+
+**Тело запроса:**
+
+```json
+{
+  "userId": "123e4567-e89b-12d3-a456-426614174000"
+}
+```
+
+**Валидация:**
+
+- `userId` - обязательное, UUID автора твита (используется для проверки прав)
+- `tweetId` - обязательный, должен быть валидным UUID форматом
+
+**Бизнес-правила:**
+
+- Только автор твита может удалить свой твит
+- Твит должен существовать в системе и не быть уже удаленным
+- Выполняется soft delete (мягкое удаление) - данные сохраняются в БД
+
+**Ответы:**
+
+- `204 No Content` - твит успешно удален (без тела ответа)
+- `400 Bad Request` - ошибка валидации (некорректный UUID, отсутствует userId)
+- `404 Not Found` - твит не найден или уже удален
+- `409 Conflict` - доступ запрещен (пользователь не является автором)
+
+**Пример успешного ответа (204 No Content):**
+
+Ответ не содержит тела, только HTTP статус 204.
+
+**Пример ошибки валидации userId (400 Bad Request):**
+
+```json
+{
+  "type": "https://example.com/errors/validation-error",
+  "title": "Validation Error",
+  "status": 400,
+  "detail": "Validation failed: userId: User ID cannot be null",
+  "timestamp": "2025-01-27T15:45:00Z"
+}
+```
+
+**Пример ошибки твит не найден (404 Not Found):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 404,
+  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+  "ruleName": "TWEET_NOT_FOUND",
+  "context": "123e4567-e89b-12d3-a456-426614174000",
+  "timestamp": "2025-01-27T15:45:00Z"
+}
+```
+
+**Пример ошибки твит уже удален (404 Not Found):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 404,
+  "detail": "Business rule 'TWEET_ALREADY_DELETED' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+  "ruleName": "TWEET_ALREADY_DELETED",
+  "context": "123e4567-e89b-12d3-a456-426614174000",
+  "timestamp": "2025-01-27T15:45:00Z"
+}
+```
+
+**Пример ошибки доступа запрещен (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'TWEET_ACCESS_DENIED' violated for context: Only the tweet author can delete their tweet",
+  "ruleName": "TWEET_ACCESS_DENIED",
+  "context": "Only the tweet author can delete their tweet",
+  "timestamp": "2025-01-27T15:45:00Z"
+}
+```
+
 ## OpenAPI/Swagger Документация
 
 ### Обзор
@@ -402,6 +499,16 @@ open http://localhost:8082/swagger-ui.html
         - Сохранение в БД
         - Маппинг сущности в DTO ответа
 
+4. **`deleteTweet(UUID tweetId, DeleteTweetRequestDto requestDto)`**
+    - Удаляет твит (soft delete)
+    - Возвращает `void` (ответ 204 No Content)
+    - Логика:
+        - Валидация запроса (существование твита, права автора, состояние твита)
+        - Получение твита из БД
+        - Вызов метода `softDelete()` на сущности (устанавливает isDeleted = true и deletedAt = текущее время)
+        - Сохранение изменений в БД
+        - Возврат без тела ответа
+
 ### Ключевые бизнес-правила:
 
 1. **Валидация контента:**
@@ -423,6 +530,13 @@ open http://localhost:8082/swagger-ui.html
     - Все входящие данные валидируются
     - Используется Jakarta Validation
     - Кастомная валидация для бизнес-правил
+
+5. **Удаление твитов (Soft Delete):**
+    - Только автор твита может удалить свой твит
+    - Выполняется soft delete - данные сохраняются в БД
+    - Устанавливается флаг `isDeleted = true` и временная метка `deletedAt`
+    - Удаленные твиты не возвращаются в обычных запросах (getTweetById)
+    - Статистика (лайки, ретвиты) сохраняется при удалении
 
 ## Слой валидации
 
@@ -517,6 +631,26 @@ open http://localhost:8082/swagger-ui.html
     - Проверка, что контент не пустой после trim
     - При ошибках выбрасывается `FormatValidationException`
 
+#### Удаление твита (DELETE)
+
+Выполняется многоэтапная валидация:
+
+1. **Проверка tweetId:**
+    - Проверка, что `tweetId` не равен `null`
+    - При отсутствии выбрасывается `BusinessRuleValidationException` с правилом `TWEET_ID_NULL`
+
+2. **Проверка существования твита:**
+    - Поиск твита в БД по UUID
+    - При отсутствии твита выбрасывается `BusinessRuleValidationException` с правилом `TWEET_NOT_FOUND`
+
+3. **Проверка состояния твита:**
+    - Проверка, что твит не был уже удален (`isDeleted = false`)
+    - При попытке удалить уже удаленный твит выбрасывается `BusinessRuleValidationException` с правилом `TWEET_ALREADY_DELETED`
+
+4. **Проверка прав автора:**
+    - Сравнение `userId` из запроса с `userId` твита
+    - При несовпадении выбрасывается `BusinessRuleValidationException` с правилом `TWEET_ACCESS_DENIED`
+
 ## Работа с базой данных
 
 ### Таблица tweets
@@ -528,6 +662,8 @@ open http://localhost:8082/swagger-ui.html
 | `content`    | VARCHAR(280) | NOT NULL              | Содержимое твита                      |
 | `created_at` | TIMESTAMP    | NOT NULL              | Время создания                        |
 | `updated_at` | TIMESTAMP    | NOT NULL              | Время последнего обновления           |
+| `is_deleted` | BOOLEAN      | NOT NULL, DEFAULT false | Флаг мягкого удаления                |
+| `deleted_at` | TIMESTAMP    | NULL                  | Время мягкого удаления                |
 
 ### Ограничения базы данных
 
@@ -543,6 +679,12 @@ open http://localhost:8082/swagger-ui.html
 
 3. **Автоматическое обновление updated_at:**
     - Триггер `update_tweets_updated_at` автоматически обновляет `updated_at` при изменении записи
+
+4. **Soft Delete (мягкое удаление):**
+    - Поле `is_deleted` используется для пометки удаленных твитов (по умолчанию `false`)
+    - Поле `deleted_at` хранит временную метку удаления (NULL для активных твитов)
+    - Удаленные твиты не возвращаются в обычных запросах (используется `findByIdAndIsDeletedFalse()`)
+    - Индекс `idx_tweets_is_deleted` для оптимизации запросов активных твитов
 
 ## Интеграция с users-api
 
@@ -695,6 +837,48 @@ curl -X PUT http://localhost:8082/api/v1/tweets/123e4567-e89b-12d3-a456-42661417
   "ruleName": "TWEET_ACCESS_DENIED",
   "context": "Only the tweet author can update their tweet",
   "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+### Удаление твита
+
+```bash
+curl -X DELETE http://localhost:8082/api/v1/tweets/123e4567-e89b-12d3-a456-426614174000 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "userId": "987e6543-e21b-43d2-b654-321987654321"
+  }'
+```
+
+**Ответ (204 No Content):**
+
+Ответ не содержит тела, только HTTP статус 204.
+
+**Ответ при отсутствии прав (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'TWEET_ACCESS_DENIED' violated for context: Only the tweet author can delete their tweet",
+  "ruleName": "TWEET_ACCESS_DENIED",
+  "context": "Only the tweet author can delete their tweet",
+  "timestamp": "2025-01-27T15:45:00Z"
+}
+```
+
+**Ответ при отсутствии твита (404 Not Found):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 404,
+  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+  "ruleName": "TWEET_NOT_FOUND",
+  "context": "123e4567-e89b-12d3-a456-426614174000",
+  "timestamp": "2025-01-27T15:45:00Z"
 }
 ```
 
