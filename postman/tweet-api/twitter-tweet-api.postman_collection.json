@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "twitter-tweet-api-collection",
 		"name": "twitter",
-		"description": "REST API for tweet management in the Twitter microservices system.\n\nThis API provides comprehensive tweet management capabilities including:\n- Tweet creation with content validation\n- User existence validation via users-api integration\n- Content length validation (1-280 characters)\n- Business rule enforcement\n\n## Authentication\nCurrently, the API does not require authentication for basic operations.\nFuture versions will implement JWT-based authentication.\n\n## Rate Limiting\nAPI requests are subject to rate limiting to ensure system stability.\nPlease refer to response headers for current rate limit information.\n\n## Error Handling\nThe API uses standard HTTP status codes and follows RFC 7807 Problem Details\nfor error responses, providing detailed information about validation failures\nand business rule violations.",
+		"description": "REST API for tweet management in the Twitter microservices system.\n\nThis API provides comprehensive tweet management capabilities including:\n- Tweet creation with content validation\n- Tweet retrieval by ID\n- Tweet update with authorization checks\n- Tweet deletion (soft delete) with authorization checks\n- User existence validation via users-api integration\n- Content length validation (1-280 characters)\n- Business rule enforcement\n\n## Authentication\nCurrently, the API does not require authentication for basic operations.\nFuture versions will implement JWT-based authentication.\n\n## Rate Limiting\nAPI requests are subject to rate limiting to ensure system stability.\nPlease refer to response headers for current rate limit information.\n\n## Error Handling\nThe API uses standard HTTP status codes and follows RFC 7807 Problem Details\nfor error responses, providing detailed information about validation failures\nand business rule violations.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "twitter-tweet-api"
 	},
@@ -637,6 +637,293 @@
 							],
 							"cookie": [],
 							"body": "{\n  \"type\": \"https://example.com/errors/business-rule-validation\",\n  \"title\": \"Business Rule Validation Error\",\n  \"status\": 409,\n  \"detail\": \"Business rule 'TWEET_ACCESS_DENIED' violated for context: Only the tweet author can update their tweet\",\n  \"ruleName\": \"TWEET_ACCESS_DENIED\",\n  \"context\": \"Only the tweet author can update their tweet\",\n  \"timestamp\": \"2025-01-27T15:30:00Z\"\n}"
+						}
+					]
+				},
+				{
+					"name": "delete tweet",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": \"{{userId}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tweets/{{tweetId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tweets",
+								"{{tweetId}}"
+							]
+						},
+						"description": "Deletes a tweet by performing soft delete. Only the tweet author can delete their tweet. The method performs validation on the request data, checks tweet existence, verifies authorization, and performs soft delete by setting isDeleted flag and deletedAt timestamp. The tweet data is preserved in the database for analytics and recovery purposes."
+					},
+					"response": [
+						{
+							"name": "tweet deleted",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userId\": \"123e4567-e89b-12d3-a456-426614174000\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/tweets/123e4567-e89b-12d3-a456-426614174000",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"tweets",
+										"123e4567-e89b-12d3-a456-426614174000"
+									]
+								}
+							},
+							"status": "No Content",
+							"code": 204,
+							"_postman_previewlanguage": "text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "tweet not found error",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userId\": \"123e4567-e89b-12d3-a456-426614174000\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/tweets/00000000-0000-0000-0000-000000000000",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"tweets",
+										"00000000-0000-0000-0000-000000000000"
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/problem+json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"type\": \"https://example.com/errors/business-rule-validation\",\n  \"title\": \"Business Rule Validation Error\",\n  \"status\": 404,\n  \"detail\": \"Business rule 'TWEET_NOT_FOUND' violated for context: 00000000-0000-0000-0000-000000000000\",\n  \"ruleName\": \"TWEET_NOT_FOUND\",\n  \"context\": \"00000000-0000-0000-0000-000000000000\",\n  \"timestamp\": \"2025-01-27T15:45:00Z\"\n}"
+						},
+						{
+							"name": "tweet already deleted error",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userId\": \"123e4567-e89b-12d3-a456-426614174000\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/tweets/123e4567-e89b-12d3-a456-426614174000",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"tweets",
+										"123e4567-e89b-12d3-a456-426614174000"
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/problem+json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"type\": \"https://example.com/errors/business-rule-validation\",\n  \"title\": \"Business Rule Validation Error\",\n  \"status\": 404,\n  \"detail\": \"Business rule 'TWEET_ALREADY_DELETED' violated for context: 123e4567-e89b-12d3-a456-426614174000\",\n  \"ruleName\": \"TWEET_ALREADY_DELETED\",\n  \"context\": \"123e4567-e89b-12d3-a456-426614174000\",\n  \"timestamp\": \"2025-01-27T15:45:00Z\"\n}"
+						},
+						{
+							"name": "access denied error",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userId\": \"987e6543-e21b-43d2-b654-321987654321\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/tweets/123e4567-e89b-12d3-a456-426614174000",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"tweets",
+										"123e4567-e89b-12d3-a456-426614174000"
+									]
+								}
+							},
+							"status": "Conflict",
+							"code": 409,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/problem+json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"type\": \"https://example.com/errors/business-rule-validation\",\n  \"title\": \"Business Rule Validation Error\",\n  \"status\": 409,\n  \"detail\": \"Business rule 'TWEET_ACCESS_DENIED' violated for context: Only the tweet author can delete their tweet\",\n  \"ruleName\": \"TWEET_ACCESS_DENIED\",\n  \"context\": \"Only the tweet author can delete their tweet\",\n  \"timestamp\": \"2025-01-27T15:45:00Z\"\n}"
+						},
+						{
+							"name": "validation error - null userId",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userId\": null\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/tweets/123e4567-e89b-12d3-a456-426614174000",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"tweets",
+										"123e4567-e89b-12d3-a456-426614174000"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/problem+json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"type\": \"https://example.com/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"Validation failed: userId: User ID cannot be null\",\n  \"timestamp\": \"2025-01-27T15:45:00Z\"\n}"
 						}
 					]
 				}

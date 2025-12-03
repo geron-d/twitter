@@ -19,6 +19,7 @@ import java.util.UUID;
  * <p>
  * Maps to the 'tweets' table with all necessary fields and constraints.
  * This entity represents a tweet created by a user in the Twitter system.
+ * Supports soft delete functionality through isDeleted flag and deletedAt timestamp.
  *
  * @author geron
  * @version 1.0
@@ -73,6 +74,19 @@ public class Tweet {
     private LocalDateTime updatedAt;
 
     /**
+     * Flag indicating whether the tweet has been soft deleted.
+     */
+    @Column(name = "is_deleted", nullable = false)
+    @Builder.Default
+    private Boolean isDeleted = false;
+
+    /**
+     * Timestamp when the tweet was soft deleted.
+     */
+    @Column(name = "deleted_at", nullable = true)
+    private LocalDateTime deletedAt;
+
+    /**
      * Custom validation method to ensure content is not just whitespace.
      * This complements the database CHECK constraint.
      */
@@ -82,5 +96,31 @@ public class Tweet {
         if (content != null && content.trim().isEmpty()) {
             throw new IllegalArgumentException("Tweet content cannot be empty or contain only whitespace");
         }
+    }
+
+    /**
+     * Performs soft delete by setting isDeleted flag and deletedAt timestamp.
+     * <p>
+     * This method marks the tweet as deleted without removing it from the database.
+     * It sets the isDeleted flag to true and records the current timestamp in deletedAt.
+     * <p>
+     * After soft delete, the tweet will not be returned by standard query methods
+     * that filter out deleted tweets (e.g., findByIdAndIsDeletedFalse).
+     */
+    public void softDelete() {
+        this.isDeleted = true;
+        this.deletedAt = LocalDateTime.now();
+    }
+
+    /**
+     * Checks if the tweet is active (not deleted).
+     * <p>
+     * This method returns true if the tweet has not been soft deleted, false otherwise.
+     * A tweet is considered active when isDeleted is false or null.
+     *
+     * @return true if the tweet is active (not deleted), false otherwise
+     */
+    public boolean isActive() {
+        return !Boolean.TRUE.equals(isDeleted);
     }
 }

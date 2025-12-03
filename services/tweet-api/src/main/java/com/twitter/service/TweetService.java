@@ -3,6 +3,7 @@ package com.twitter.service;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.FormatValidationException;
 import com.twitter.dto.request.CreateTweetRequestDto;
+import com.twitter.dto.request.DeleteTweetRequestDto;
 import com.twitter.dto.request.UpdateTweetRequestDto;
 import com.twitter.dto.response.TweetResponseDto;
 
@@ -71,4 +72,23 @@ public interface TweetService {
      * @throws BusinessRuleValidationException if tweetId is null, tweet doesn't exist, or access denied (user is not the tweet author)
      */
     TweetResponseDto updateTweet(UUID tweetId, UpdateTweetRequestDto requestDto);
+
+    /**
+     * Deletes a tweet by performing soft delete.
+     * <p>
+     * This method performs the following operations:
+     * 1. Validates the delete request (tweet existence, state check, authorization)
+     * 2. Retrieves the tweet from the database
+     * 3. Performs soft delete by setting isDeleted flag and deletedAt timestamp
+     * 4. Saves the updated tweet to the database
+     * <p>
+     * The method is transactional, ensuring data consistency. Only the tweet author
+     * can delete their tweet. The tweet data is preserved in the database for analytics
+     * and recovery purposes. Returns void as the response is 204 No Content.
+     *
+     * @param tweetId    the unique identifier of the tweet to delete
+     * @param requestDto the tweet deletion request containing userId for authorization check
+     * @throws BusinessRuleValidationException if tweetId is null, tweet doesn't exist, is already deleted, or access denied
+     */
+    void deleteTweet(UUID tweetId, DeleteTweetRequestDto requestDto);
 }

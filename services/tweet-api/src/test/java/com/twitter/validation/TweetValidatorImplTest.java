@@ -3,6 +3,7 @@ package com.twitter.validation;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.FormatValidationException;
 import com.twitter.dto.request.CreateTweetRequestDto;
+import com.twitter.dto.request.DeleteTweetRequestDto;
 import com.twitter.dto.request.UpdateTweetRequestDto;
 import com.twitter.entity.Tweet;
 import com.twitter.gateway.UserGateway;
@@ -611,6 +612,136 @@ class TweetValidatorImplTest {
 
             verify(tweetRepository, times(1)).findById(tweetId);
             verify(validator, never()).validate(any());
+        }
+    }
+
+    @Nested
+    class ValidateForDeleteTests {
+
+        @Test
+        void validateForDelete_WhenValidData_ShouldCompleteWithoutExceptions() {
+            UUID tweetId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+            UUID authorUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174001");
+            DeleteTweetRequestDto requestDto = DeleteTweetRequestDto.builder()
+                .userId(authorUserId)
+                .build();
+
+            Tweet existingTweet = Tweet.builder()
+                .id(tweetId)
+                .userId(authorUserId)
+                .content("Tweet to be deleted")
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .isDeleted(false)
+                .build();
+
+            when(tweetRepository.findById(tweetId)).thenReturn(Optional.of(existingTweet));
+
+            assertThatCode(() -> tweetValidator.validateForDelete(tweetId, requestDto))
+                .doesNotThrowAnyException();
+
+            verify(tweetRepository, times(1)).findById(tweetId);
+        }
+
+        @Test
+        void validateForDelete_WhenTweetIdIsNull_ShouldThrowBusinessRuleValidationException() {
+            UUID authorUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174001");
+            DeleteTweetRequestDto requestDto = DeleteTweetRequestDto.builder()
+                .userId(authorUserId)
+                .build();
+
+            assertThatThrownBy(() -> tweetValidator.validateForDelete(null, requestDto))
+                .isInstanceOf(BusinessRuleValidationException.class)
+                .satisfies(exception -> {
+                    BusinessRuleValidationException ex = (BusinessRuleValidationException) exception;
+                    assertThat(ex.getRuleName()).isEqualTo("TWEET_ID_NULL");
+                    assertThat(ex.getContext()).isEqualTo("Tweet ID cannot be null");
+                });
+
+            verify(tweetRepository, never()).findById(any());
+        }
+
+        @Test
+        void validateForDelete_WhenTweetNotFound_ShouldThrowBusinessRuleValidationException() {
+            UUID tweetId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+            UUID authorUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174001");
+            DeleteTweetRequestDto requestDto = DeleteTweetRequestDto.builder()
+                .userId(authorUserId)
+                .build();
+
+            when(tweetRepository.findById(tweetId)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> tweetValidator.validateForDelete(tweetId, requestDto))
+                .isInstanceOf(BusinessRuleValidationException.class)
+                .satisfies(exception -> {
+                    BusinessRuleValidationException ex = (BusinessRuleValidationException) exception;
+                    assertThat(ex.getRuleName()).isEqualTo("TWEET_NOT_FOUND");
+                    assertThat(ex.getContext()).isEqualTo(tweetId);
+                });
+
+            verify(tweetRepository, times(1)).findById(tweetId);
+        }
+
+        @Test
+        void validateForDelete_WhenTweetAlreadyDeleted_ShouldThrowBusinessRuleValidationException() {
+            UUID tweetId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+            UUID authorUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174001");
+            DeleteTweetRequestDto requestDto = DeleteTweetRequestDto.builder()
+                .userId(authorUserId)
+                .build();
+
+            Tweet deletedTweet = Tweet.builder()
+                .id(tweetId)
+                .userId(authorUserId)
+                .content("Already deleted tweet")
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .isDeleted(true)
+                .deletedAt(LocalDateTime.now())
+                .build();
+
+            when(tweetRepository.findById(tweetId)).thenReturn(Optional.of(deletedTweet));
+
+            assertThatThrownBy(() -> tweetValidator.validateForDelete(tweetId, requestDto))
+                .isInstanceOf(BusinessRuleValidationException.class)
+                .satisfies(exception -> {
+                    BusinessRuleValidationException ex = (BusinessRuleValidationException) exception;
+                    assertThat(ex.getRuleName()).isEqualTo("TWEET_ALREADY_DELETED");
+                    assertThat(ex.getContext()).isEqualTo(tweetId);
+                });
+
+            verify(tweetRepository, times(1)).findById(tweetId);
+        }
+
+        @Test
+        void validateForDelete_WhenUserIsNotAuthor_ShouldThrowBusinessRuleValidationException() {
+            UUID tweetId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+            UUID authorUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174001");
+            UUID differentUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174002");
+            DeleteTweetRequestDto requestDto = DeleteTweetRequestDto.builder()
+                .userId(differentUserId)
+                .build();
+
+            Tweet existingTweet = Tweet.builder()
+                .id(tweetId)
+                .userId(authorUserId)
+                .content("Tweet to be deleted")
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .isDeleted(false)
+                .build();
+
+            when(tweetRepository.findById(tweetId)).thenReturn(Optional.of(existingTweet));
+
+            assertThatThrownBy(() -> tweetValidator.validateForDelete(tweetId, requestDto))
+                .isInstanceOf(BusinessRuleValidationException.class)
+                .satisfies(exception -> {
+                    BusinessRuleValidationException ex = (BusinessRuleValidationException) exception;
+                    assertThat(ex.getRuleName()).isEqualTo("TWEET_ACCESS_DENIED");
+                    assertThat(ex.getContext()).isEqualTo("Only the tweet author can update their tweet");
+                });
+
+            verify(tweetRepository, times(1)).findById(tweetId);
         }
     }
 }

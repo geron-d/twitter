@@ -1,6 +1,7 @@
 package com.twitter.service;
 
 import com.twitter.dto.request.CreateTweetRequestDto;
+import com.twitter.dto.request.DeleteTweetRequestDto;
 import com.twitter.dto.request.UpdateTweetRequestDto;
 import com.twitter.dto.response.TweetResponseDto;
 import com.twitter.entity.Tweet;
@@ -53,7 +54,7 @@ public class TweetServiceImpl implements TweetService {
     @Override
     @Transactional(readOnly = true)
     public Optional<TweetResponseDto> getTweetById(UUID tweetId) {
-        return tweetRepository.findById(tweetId)
+        return tweetRepository.findByIdAndIsDeletedFalse(tweetId)
             .map(tweetMapper::toResponseDto);
     }
 
@@ -71,5 +72,20 @@ public class TweetServiceImpl implements TweetService {
         tweetMapper.updateTweetFromUpdateDto(requestDto, tweet);
         Tweet updatedTweet = tweetRepository.saveAndFlush(tweet);
         return tweetMapper.toResponseDto(updatedTweet);
+    }
+
+    /**
+     * @see TweetService#deleteTweet
+     */
+    @Override
+    @Transactional
+    public void deleteTweet(UUID tweetId, DeleteTweetRequestDto requestDto) {
+        tweetValidator.validateForDelete(tweetId, requestDto);
+
+        Tweet tweet = tweetRepository.findById(tweetId)
+            .orElseThrow(() -> new IllegalStateException("Tweet not found after validation"));
+
+        tweet.softDelete();
+        tweetRepository.saveAndFlush(tweet);
     }
 }

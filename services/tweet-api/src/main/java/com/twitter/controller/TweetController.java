@@ -2,6 +2,7 @@ package com.twitter.controller;
 
 import com.twitter.common.aspect.LoggableRequest;
 import com.twitter.dto.request.CreateTweetRequestDto;
+import com.twitter.dto.request.DeleteTweetRequestDto;
 import com.twitter.dto.request.UpdateTweetRequestDto;
 import com.twitter.dto.response.TweetResponseDto;
 import com.twitter.service.TweetService;
@@ -10,13 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
@@ -70,6 +65,19 @@ public class TweetController implements TweetApi {
         @RequestBody @Valid UpdateTweetRequestDto updateTweetRequest) {
         TweetResponseDto updatedTweet = tweetService.updateTweet(tweetId, updateTweetRequest);
         return ResponseEntity.ok(updatedTweet);
+    }
+
+    /**
+     * @see TweetApi#deleteTweet
+     */
+    @LoggableRequest
+    @DeleteMapping("/{tweetId}")
+    @Override
+    public ResponseEntity<Void> deleteTweet(
+        @PathVariable("tweetId") UUID tweetId,
+        @RequestBody @Valid DeleteTweetRequestDto deleteTweetRequest) {
+        tweetService.deleteTweet(tweetId, deleteTweetRequest);
+        return ResponseEntity.noContent().build();
     }
 }
 

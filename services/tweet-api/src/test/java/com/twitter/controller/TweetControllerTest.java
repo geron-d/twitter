@@ -2,6 +2,7 @@ package com.twitter.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.twitter.dto.request.CreateTweetRequestDto;
+import com.twitter.dto.request.DeleteTweetRequestDto;
 import com.twitter.dto.request.UpdateTweetRequestDto;
 import com.twitter.dto.response.TweetResponseDto;
 import com.twitter.entity.Tweet;
@@ -23,6 +24,7 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -271,6 +273,33 @@ public class TweetControllerTest extends BaseIntegrationTest {
             mockMvc.perform(get("/api/v1/tweets/{tweetId}", testTweetId))
                 .andExpect(status().isNotFound());
         }
+
+        @Test
+        void getTweetById_WhenTweetIsDeleted_ShouldReturn404NotFound() throws Exception {
+            String content = "Tweet to be deleted";
+            Tweet savedTweet = createAndSaveTweet(testUserId, content);
+            testTweetId = savedTweet.getId();
+
+            mockMvc.perform(get("/api/v1/tweets/{tweetId}", testTweetId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(testTweetId.toString()));
+
+            DeleteTweetRequestDto deleteRequest = DeleteTweetRequestDto.builder()
+                .userId(testUserId)
+                .build();
+
+            mockMvc.perform(delete("/api/v1/tweets/{tweetId}", testTweetId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(deleteRequest)))
+                .andExpect(status().isNoContent());
+
+            Tweet deletedTweet = tweetRepository.findById(testTweetId).orElseThrow();
+            assertThat(deletedTweet.getIsDeleted()).isTrue();
+            assertThat(deletedTweet.getDeletedAt()).isNotNull();
+
+            mockMvc.perform(get("/api/v1/tweets/{tweetId}", testTweetId))
+                .andExpect(status().isNotFound());
+        }
     }
 
     @Nested
@@ -400,6 +429,95 @@ public class TweetControllerTest extends BaseIntegrationTest {
                 .getStatus();
 
             assertThat(status).isGreaterThanOrEqualTo(400);
+        }
+    }
+
+    @Nested
+    class DeleteTweetTests {
+
+        private UUID testUserId;
+        private UUID testTweetId;
+
+        @BeforeEach
+        void setUp() {
+            testUserId = UUID.randomUUID();
+        }
+
+        @Test
+        void deleteTweet_WithValidData_ShouldReturn204NoContent() throws Exception {
+            String content = "Tweet to be deleted";
+            Tweet savedTweet = createAndSaveTweet(testUserId, content);
+            testTweetId = savedTweet.getId();
+
+            DeleteTweetRequestDto request = DeleteTweetRequestDto.builder()
+                .userId(testUserId)
+                .build();
+
+            mockMvc.perform(delete("/api/v1/tweets/{tweetId}", testTweetId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNoContent());
+
+            Tweet deletedTweet = tweetRepository.findById(testTweetId).orElseThrow();
+            assertThat(deletedTweet.getIsDeleted()).isTrue();
+            assertThat(deletedTweet.getDeletedAt()).isNotNull();
+        }
+
+        @Test
+        void deleteTweet_WhenTweetDoesNotExist_ShouldReturn409Conflict() throws Exception {
+            testTweetId = UUID.randomUUID();
+            DeleteTweetRequestDto request = DeleteTweetRequestDto.builder()
+                .userId(testUserId)
+                .build();
+
+            mockMvc.perform(delete("/api/v1/tweets/{tweetId}", testTweetId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.type").exists())
+                .andExpect(jsonPath("$.ruleName").value("TWEET_NOT_FOUND"));
+        }
+
+        @Test
+        void deleteTweet_WhenUserIsNotAuthor_ShouldReturn409Conflict() throws Exception {
+            String content = "Tweet to be deleted";
+            Tweet savedTweet = createAndSaveTweet(testUserId, content);
+            testTweetId = savedTweet.getId();
+
+            UUID differentUserId = UUID.randomUUID();
+            DeleteTweetRequestDto request = DeleteTweetRequestDto.builder()
+                .userId(differentUserId)
+                .build();
+
+            mockMvc.perform(delete("/api/v1/tweets/{tweetId}", testTweetId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.type").exists())
+                .andExpect(jsonPath("$.ruleName").value("TWEET_ACCESS_DENIED"));
+
+            Tweet tweet = tweetRepository.findById(testTweetId).orElseThrow();
+            assertThat(tweet.getIsDeleted()).isFalse();
+            assertThat(tweet.getDeletedAt()).isNull();
+        }
+
+        @Test
+        void deleteTweet_WithNullUserId_ShouldReturn400BadRequest() throws Exception {
+            String content = "Tweet to be deleted";
+            Tweet savedTweet = createAndSaveTweet(testUserId, content);
+            testTweetId = savedTweet.getId();
+
+            DeleteTweetRequestDto request = DeleteTweetRequestDto.builder()
+                .userId(null)
+                .build();
+
+            mockMvc.perform(delete("/api/v1/tweets/{tweetId}", testTweetId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+
+            Tweet tweet = tweetRepository.findById(testTweetId).orElseThrow();
+            assertThat(tweet.getIsDeleted()).isFalse();
         }
     }
 }

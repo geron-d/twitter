@@ -3,6 +3,7 @@ package com.twitter.service;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.FormatValidationException;
 import com.twitter.dto.request.CreateTweetRequestDto;
+import com.twitter.dto.request.DeleteTweetRequestDto;
 import com.twitter.dto.request.UpdateTweetRequestDto;
 import com.twitter.dto.response.TweetResponseDto;
 import com.twitter.entity.Tweet;
@@ -147,7 +148,7 @@ class TweetServiceImplTest {
 
         @Test
         void getTweetById_WhenTweetExists_ShouldReturnOptionalWithTweetResponseDto() {
-            when(tweetRepository.findById(testTweetId)).thenReturn(Optional.of(foundTweet));
+            when(tweetRepository.findByIdAndIsDeletedFalse(testTweetId)).thenReturn(Optional.of(foundTweet));
             when(tweetMapper.toResponseDto(foundTweet)).thenReturn(responseDto);
 
             Optional<TweetResponseDto> result = tweetService.getTweetById(testTweetId);
@@ -163,7 +164,7 @@ class TweetServiceImplTest {
 
         @Test
         void getTweetById_WhenTweetDoesNotExist_ShouldReturnEmptyOptional() {
-            when(tweetRepository.findById(testTweetId)).thenReturn(Optional.empty());
+            when(tweetRepository.findByIdAndIsDeletedFalse(testTweetId)).thenReturn(Optional.empty());
 
             Optional<TweetResponseDto> result = tweetService.getTweetById(testTweetId);
 
@@ -172,23 +173,34 @@ class TweetServiceImplTest {
 
         @Test
         void getTweetById_WhenTweetExists_ShouldCallRepositoryAndMapper() {
-            when(tweetRepository.findById(testTweetId)).thenReturn(Optional.of(foundTweet));
+            when(tweetRepository.findByIdAndIsDeletedFalse(testTweetId)).thenReturn(Optional.of(foundTweet));
             when(tweetMapper.toResponseDto(foundTweet)).thenReturn(responseDto);
 
             tweetService.getTweetById(testTweetId);
 
-            verify(tweetRepository, times(1)).findById(eq(testTweetId));
+            verify(tweetRepository, times(1)).findByIdAndIsDeletedFalse(eq(testTweetId));
             verify(tweetMapper, times(1)).toResponseDto(eq(foundTweet));
             verifyNoMoreInteractions(tweetRepository, tweetMapper);
         }
 
         @Test
         void getTweetById_WhenTweetDoesNotExist_ShouldCallRepositoryOnly() {
-            when(tweetRepository.findById(testTweetId)).thenReturn(Optional.empty());
+            when(tweetRepository.findByIdAndIsDeletedFalse(testTweetId)).thenReturn(Optional.empty());
 
             tweetService.getTweetById(testTweetId);
 
-            verify(tweetRepository, times(1)).findById(eq(testTweetId));
+            verify(tweetRepository, times(1)).findByIdAndIsDeletedFalse(eq(testTweetId));
+            verifyNoInteractions(tweetMapper);
+        }
+
+        @Test
+        void getTweetById_WhenTweetIsDeleted_ShouldReturnEmptyOptional() {
+            when(tweetRepository.findByIdAndIsDeletedFalse(testTweetId)).thenReturn(Optional.empty());
+
+            Optional<TweetResponseDto> result = tweetService.getTweetById(testTweetId);
+
+            assertThat(result).isEmpty();
+            verify(tweetRepository, times(1)).findByIdAndIsDeletedFalse(eq(testTweetId));
             verifyNoInteractions(tweetMapper);
         }
     }
@@ -312,6 +324,118 @@ class TweetServiceImplTest {
             verify(tweetMapper, never()).updateTweetFromUpdateDto(any(), any());
             verify(tweetRepository, never()).saveAndFlush(any());
             verify(tweetMapper, never()).toResponseDto(any());
+        }
+    }
+
+    @Nested
+    class DeleteTweetTests {
+
+        private UUID testTweetId;
+        private UUID testUserId;
+        private DeleteTweetRequestDto deleteRequestDto;
+        private Tweet existingTweet;
+
+        @BeforeEach
+        void setUp() {
+            testTweetId = UUID.fromString("223e4567-e89b-12d3-a456-426614174001");
+            testUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+
+            deleteRequestDto = DeleteTweetRequestDto.builder()
+                .userId(testUserId)
+                .build();
+
+            existingTweet = Tweet.builder()
+                .id(testTweetId)
+                .userId(testUserId)
+                .content("Tweet to be deleted")
+                .createdAt(LocalDateTime.of(2024, 1, 15, 10, 30, 0))
+                .updatedAt(LocalDateTime.of(2024, 1, 15, 10, 30, 0))
+                .isDeleted(false)
+                .build();
+        }
+
+        @Test
+        void deleteTweet_WithValidData_ShouldPerformSoftDelete() {
+            doNothing().when(tweetValidator).validateForDelete(testTweetId, deleteRequestDto);
+            when(tweetRepository.findById(testTweetId)).thenReturn(Optional.of(existingTweet));
+            when(tweetRepository.saveAndFlush(any(Tweet.class))).thenAnswer(invocation -> {
+                Tweet tweet = invocation.getArgument(0);
+                return tweet;
+            });
+
+            tweetService.deleteTweet(testTweetId, deleteRequestDto);
+
+            assertThat(existingTweet.getIsDeleted()).isTrue();
+            assertThat(existingTweet.getDeletedAt()).isNotNull();
+        }
+
+        @Test
+        void deleteTweet_WithValidData_ShouldCallEachDependencyExactlyOnce() {
+            doNothing().when(tweetValidator).validateForDelete(testTweetId, deleteRequestDto);
+            when(tweetRepository.findById(testTweetId)).thenReturn(Optional.of(existingTweet));
+            when(tweetRepository.saveAndFlush(any(Tweet.class))).thenReturn(existingTweet);
+
+            tweetService.deleteTweet(testTweetId, deleteRequestDto);
+
+            verify(tweetValidator, times(1)).validateForDelete(eq(testTweetId), eq(deleteRequestDto));
+            verify(tweetRepository, times(1)).findById(eq(testTweetId));
+            verify(tweetRepository, times(1)).saveAndFlush(eq(existingTweet));
+            assertThat(existingTweet.getIsDeleted()).isTrue();
+            assertThat(existingTweet.getDeletedAt()).isNotNull();
+        }
+
+        @Test
+        void deleteTweet_WhenTweetNotFound_ShouldThrowBusinessRuleValidationException() {
+            BusinessRuleValidationException businessException = new BusinessRuleValidationException(
+                "TWEET_NOT_FOUND",
+                testTweetId
+            );
+            doThrow(businessException)
+                .when(tweetValidator).validateForDelete(testTweetId, deleteRequestDto);
+
+            assertThatThrownBy(() -> tweetService.deleteTweet(testTweetId, deleteRequestDto))
+                .isInstanceOf(BusinessRuleValidationException.class)
+                .isEqualTo(businessException);
+
+            verify(tweetValidator, times(1)).validateForDelete(eq(testTweetId), eq(deleteRequestDto));
+            verify(tweetRepository, never()).findById(any());
+            verify(tweetRepository, never()).saveAndFlush(any());
+        }
+
+        @Test
+        void deleteTweet_WhenAccessDenied_ShouldThrowBusinessRuleValidationException() {
+            BusinessRuleValidationException businessException = new BusinessRuleValidationException(
+                "TWEET_ACCESS_DENIED",
+                "Only the tweet author can delete their tweet"
+            );
+            doThrow(businessException)
+                .when(tweetValidator).validateForDelete(testTweetId, deleteRequestDto);
+
+            assertThatThrownBy(() -> tweetService.deleteTweet(testTweetId, deleteRequestDto))
+                .isInstanceOf(BusinessRuleValidationException.class)
+                .isEqualTo(businessException);
+
+            verify(tweetValidator, times(1)).validateForDelete(eq(testTweetId), eq(deleteRequestDto));
+            verify(tweetRepository, never()).findById(any());
+            verify(tweetRepository, never()).saveAndFlush(any());
+        }
+
+        @Test
+        void deleteTweet_WhenTweetAlreadyDeleted_ShouldThrowBusinessRuleValidationException() {
+            BusinessRuleValidationException businessException = new BusinessRuleValidationException(
+                "TWEET_ALREADY_DELETED",
+                testTweetId
+            );
+            doThrow(businessException)
+                .when(tweetValidator).validateForDelete(testTweetId, deleteRequestDto);
+
+            assertThatThrownBy(() -> tweetService.deleteTweet(testTweetId, deleteRequestDto))
+                .isInstanceOf(BusinessRuleValidationException.class)
+                .isEqualTo(businessException);
+
+            verify(tweetValidator, times(1)).validateForDelete(eq(testTweetId), eq(deleteRequestDto));
+            verify(tweetRepository, never()).findById(any());
+            verify(tweetRepository, never()).saveAndFlush(any());
         }
     }
 }
