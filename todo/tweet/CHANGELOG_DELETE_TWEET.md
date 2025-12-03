@@ -457,3 +457,38 @@
 **Созданные артефакты:**
 - `services/tweet-api/src/test/java/com/twitter/service/TweetServiceImplTest.java` - обновленный файл тестов
 
+### 18:00 — step #15 done — Integration тесты для эндпоинта DELETE в TweetController — автор: assistant
+
+Добавлены integration тесты для эндпоинта DELETE в TweetControllerTest. Выполнено:
+
+- **Добавлен вложенный класс DeleteTweetTests:**
+  - @Nested класс для группировки тестов эндпоинта DELETE
+  - @BeforeEach метод для инициализации testUserId
+  - Тестовые данные: testUserId, testTweetId
+
+- **Тесты для успешного удаления:**
+  - `deleteTweet_WithValidData_ShouldReturn204NoContent` - проверяет успешное удаление с возвратом 204 No Content
+  - Проверяет, что твит действительно soft deleted в БД (isDeleted = true, deletedAt не null)
+
+- **Тесты для ошибочных сценариев:**
+  - `deleteTweet_WhenTweetDoesNotExist_ShouldReturn409Conflict` - проверяет 409 Conflict с ruleName TWEET_NOT_FOUND (соответствует реальному поведению GlobalExceptionHandler, который возвращает 409 для всех BusinessRuleValidationException)
+  - `deleteTweet_WhenUserIsNotAuthor_ShouldReturn409Conflict` - проверяет 409 Conflict с ruleName TWEET_ACCESS_DENIED и что твит не удален
+  - `deleteTweet_WithNullUserId_ShouldReturn400BadRequest` - проверяет 400 Bad Request при null userId
+
+- **Соответствие стандартам:**
+  - Использован паттерн именования methodName_WhenCondition_ShouldExpectedResult
+  - Использованы @Nested классы для группировки тестов
+  - Использован MockMvc для тестирования REST эндпоинтов
+  - Использован @SpringBootTest, @AutoConfigureWebMvc, @Transactional
+  - Проверяются HTTP статусы, JSON пути, состояние БД
+  - Тесты используют реальную БД через Testcontainers
+
+**Реализованные изменения:**
+- Добавлен вложенный класс DeleteTweetTests с 4 тестами
+- Добавлены импорты DeleteTweetRequestDto и delete из MockMvcRequestBuilders
+- Все сценарии DELETE эндпоинта покрыты integration тестами
+- Исправлен тест deleteTweet_WhenTweetDoesNotExist для ожидания 409 Conflict вместо 404 Not Found (соответствует реальному поведению GlobalExceptionHandler)
+
+**Созданные артефакты:**
+- `services/tweet-api/src/test/java/com/twitter/controller/TweetControllerTest.java` - обновленный файл тестов
+
