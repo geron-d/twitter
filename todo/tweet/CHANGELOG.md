@@ -147,6 +147,60 @@
 - Консистентность: следует паттернам из UserController.findAll() для пагинированных эндпоинтов
 - Файл: `services/tweet-api/src/main/java/com/twitter/controller/TweetController.java`
 
+### 15:45 — step #10 done — Unit тесты для TweetServiceImpl.getUserTweets — автор: assistant
+
+Добавлены unit тесты для метода getUserTweets в TweetServiceImpl:
+- Добавлен @Nested класс GetUserTweetsTests в TweetServiceImplTest
+- Импорты: добавлены `org.springframework.data.domain.Page`, `org.springframework.data.domain.PageImpl`, `org.springframework.data.domain.PageRequest`, `org.springframework.data.domain.Pageable`, `java.util.List`
+- Создано 6 тестов, покрывающих все сценарии:
+  1. getUserTweets_WhenTweetsExist_ShouldReturnPageWithTweets - успешное получение твитов (2 твита) с проверкой результата и метаданных пагинации
+  2. getUserTweets_WhenNoTweetsExist_ShouldReturnEmptyPage - пустой список твитов с проверкой метаданных пагинации
+  3. getUserTweets_WithPagination_ShouldReturnCorrectPage - пагинация (вторая страница) с проверкой корректности страницы
+  4. getUserTweets_WhenTweetsExist_ShouldCallRepositoryAndMapper - проверка взаимодействий с зависимостями (repository и mapper)
+  5. getUserTweets_WhenNoTweetsExist_ShouldCallRepositoryOnly - проверка, что mapper не вызывается при пустом списке
+  6. getUserTweets_ShouldPreservePaginationMetadata - проверка сохранения метаданных пагинации (totalElements, totalPages, number, size)
+- Все тесты используют:
+  - AssertJ (assertThat) для проверок результата и метаданных пагинации
+  - Mockito (when, verify) для моков и проверки взаимодействий
+  - PageImpl для создания Page объектов с метаданными пагинации
+- Проверяются:
+  - Результат (content, totalElements, number, size, totalPages)
+  - Взаимодействия с зависимостями (tweetRepository, tweetMapper)
+  - Сохранение метаданных пагинации через Page.map()
+- Соответствие стандартам: структурированы с @Nested классами, именование соответствует паттерну methodName_WhenCondition_ShouldExpectedResult, используются AssertJ и Mockito (STANDART_TEST.md)
+- Консистентность: следует паттернам из существующих тестов (CreateTweetTests, GetTweetByIdTests, UpdateTweetTests, DeleteTweetTests)
+- Файл: `services/tweet-api/src/test/java/com/twitter/service/TweetServiceImplTest.java`
+
+### 16:00 — step #11 done — Integration тесты для TweetController.getUserTweets — автор: assistant
+
+Добавлены integration тесты для эндпоинта GET /api/v1/tweets/user/{userId}:
+- Добавлен @Nested класс GetUserTweetsTests в TweetControllerTest
+- Создано 8 тестов, покрывающих все сценарии:
+  1. getUserTweets_WhenTweetsExist_ShouldReturn200Ok - успешное получение твитов (3 твита) с проверкой структуры PagedModel и метаданных пагинации
+  2. getUserTweets_WhenNoTweetsExist_ShouldReturn200OkWithEmptyList - пустой список твитов с проверкой метаданных пагинации (totalElements=0, totalPages=0)
+  3. getUserTweets_WithPagination_ShouldReturnCorrectPage - пагинация (первая страница, size=10) с проверкой корректности страницы и метаданных
+  4. getUserTweets_WithSecondPage_ShouldReturnSecondPage - пагинация (вторая страница) с проверкой корректности страницы
+  5. getUserTweets_WithInvalidUserIdFormat_ShouldReturn400BadRequest - неверный формат UUID для userId
+  6. getUserTweets_WithSizeExceedingMax_ShouldReturn400BadRequest - превышение максимального размера страницы (size=200 > 100)
+  7. getUserTweets_ShouldExcludeDeletedTweets - исключение удаленных твитов (soft delete) из результатов
+  8. getUserTweets_ShouldSortByCreatedAtDesc - проверка сортировки по createdAt DESC (новые первыми)
+  9. getUserTweets_WithDefaultPagination_ShouldUseDefaultValues - проверка дефолтных значений пагинации (page=0, size=20)
+- Все тесты используют:
+  - MockMvc для тестирования REST эндпоинта
+  - AssertJ (assertThat) для проверок результата и метаданных пагинации
+  - ObjectMapper для парсинга JSON ответов
+  - jsonPath для проверки структуры PagedModel
+- Проверяются:
+  - Статус-коды (200 OK для успешных запросов, 400 Bad Request для ошибок валидации)
+  - Структура PagedModel (content, page с метаданными)
+  - Метаданные пагинации (size, number, totalElements, totalPages)
+  - Исключение удаленных твитов (isDeleted = false)
+  - Сортировка по createdAt DESC (новые первыми)
+  - Дефолтные значения пагинации
+- Соответствие стандартам: структурированы с @Nested классами, именование соответствует паттерну methodName_WhenCondition_ShouldExpectedResult, используются MockMvc и TestContainers (STANDART_TEST.md)
+- Консистентность: следует паттернам из существующих тестов (CreateTweetTests, GetTweetByIdTests, UpdateTweetTests, DeleteTweetTests)
+- Файл: `services/tweet-api/src/test/java/com/twitter/controller/TweetControllerTest.java`
+
 ### 15:15 — step #8 done — JavaDoc для Service метода getUserTweets — автор: assistant
 
 Улучшен JavaDoc для метода getUserTweets в TweetService:

@@ -118,11 +118,13 @@
   note: "JavaDoc для метода getUserTweets в TweetController уже присутствует с @see TweetApi#getUserTweets. Это соответствует стандартам проекта: для методов контроллера, которые реализуют интерфейс и делегируют логику, используется @see для ссылки на интерфейс. Полная документация находится в TweetApi интерфейсе. Соответствует стандартам проекта (STANDART_JAVADOC.md) и консистентен с другими методами контроллера (createTweet, getTweetById, updateTweet, deleteTweet)"
 
 ### Тестирование
-- [ ] (P1) #10: Unit тесты для TweetServiceImpl.getUserTweets — Покрыть метод unit тестами
+- [x] (P1) [2025-01-27 15:45] #10: Unit тесты для TweetServiceImpl.getUserTweets — Покрыть метод unit тестами
   acceptance: "Unit тесты созданы для всех сценариев: успешное получение, пользователь не найден, пустой список, пагинация"
+  note: "Добавлен @Nested класс GetUserTweetsTests в TweetServiceImplTest с 6 тестами: успешное получение твитов (2 твита), пустой список, пагинация (вторая страница), проверка взаимодействий с зависимостями, проверка сохранения метаданных пагинации. Используются PageImpl для создания Page объектов, AssertJ для проверок, Mockito для моков. Соответствует стандартам проекта (STANDART_TEST.md) и консистентен с существующими тестами (CreateTweetTests, GetTweetByIdTests)"
   
-- [ ] (P2) #11: Integration тесты для TweetController.getUserTweets — Покрыть эндпоинт integration тестами
+- [x] (P2) [2025-01-27 16:00] #11: Integration тесты для TweetController.getUserTweets — Покрыть эндпоинт integration тестами
   acceptance: "Integration тесты созданы для всех статус-кодов (200, 400, 404), проверка пагинации, валидации"
+  note: "Добавлен @Nested класс GetUserTweetsTests в TweetControllerTest с 8 тестами: успешное получение твитов (200 OK), пустой список (200 OK), пагинация (первая и вторая страницы), неверный формат UUID (400 Bad Request), превышение максимального размера страницы (400 Bad Request), исключение удаленных твитов, сортировка по createdAt DESC, дефолтные значения пагинации. Используются MockMvc, AssertJ, проверка структуры PagedModel, метаданных пагинации. Соответствует стандартам проекта (STANDART_TEST.md) и консистентен с существующими тестами"
 
 ### Swagger/OpenAPI документация
 - [ ] (P1) #12: OpenAPI аннотации для getUserTweets — Добавить полную OpenAPI документацию

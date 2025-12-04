@@ -17,13 +17,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -436,6 +442,136 @@ class TweetServiceImplTest {
             verify(tweetValidator, times(1)).validateForDelete(eq(testTweetId), eq(deleteRequestDto));
             verify(tweetRepository, never()).findById(any());
             verify(tweetRepository, never()).saveAndFlush(any());
+        }
+    }
+
+    @Nested
+    class GetUserTweetsTests {
+
+        private UUID testUserId;
+        private Pageable pageable;
+        private Tweet tweet1;
+        private Tweet tweet2;
+        private TweetResponseDto responseDto1;
+        private TweetResponseDto responseDto2;
+
+        @BeforeEach
+        void setUp() {
+            testUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+
+            UUID tweetId1 = UUID.fromString("223e4567-e89b-12d3-a456-426614174001");
+            UUID tweetId2 = UUID.fromString("323e4567-e89b-12d3-a456-426614174002");
+
+            tweet1 = Tweet.builder()
+                .id(tweetId1)
+                .userId(testUserId)
+                .content("First tweet")
+                .createdAt(LocalDateTime.of(2024, 1, 15, 10, 30, 0))
+                .updatedAt(LocalDateTime.of(2024, 1, 15, 10, 30, 0))
+                .isDeleted(false)
+                .build();
+
+            tweet2 = Tweet.builder()
+                .id(tweetId2)
+                .userId(testUserId)
+                .content("Second tweet")
+                .createdAt(LocalDateTime.of(2024, 1, 14, 9, 15, 0))
+                .updatedAt(LocalDateTime.of(2024, 1, 14, 9, 15, 0))
+                .isDeleted(false)
+                .build();
+
+            responseDto1 = TweetResponseDto.builder()
+                .id(tweetId1)
+                .userId(testUserId)
+                .content("First tweet")
+                .createdAt(LocalDateTime.of(2024, 1, 15, 10, 30, 0))
+                .updatedAt(LocalDateTime.of(2024, 1, 15, 10, 30, 0))
+                .isDeleted(false)
+                .deletedAt(null)
+                .build();
+
+            responseDto2 = TweetResponseDto.builder()
+                .id(tweetId2)
+                .userId(testUserId)
+                .content("Second tweet")
+                .createdAt(LocalDateTime.of(2024, 1, 14, 9, 15, 0))
+                .updatedAt(LocalDateTime.of(2024, 1, 14, 9, 15, 0))
+                .isDeleted(false)
+                .deletedAt(null)
+                .build();
+
+            pageable = PageRequest.of(0, 20);
+        }
+
+        @Test
+        void getUserTweets_WhenTweetsExist_ShouldReturnPageWithTweets() {
+            List<Tweet> tweets = List.of(tweet1, tweet2);
+            Page<Tweet> tweetPage = new PageImpl<>(tweets, pageable, 2);
+
+            when(tweetRepository.findByUserIdAndIsDeletedFalseOrderByCreatedAtDesc(eq(testUserId), eq(pageable)))
+                .thenReturn(tweetPage);
+            when(tweetMapper.toResponseDto(tweet1)).thenReturn(responseDto1);
+            when(tweetMapper.toResponseDto(tweet2)).thenReturn(responseDto2);
+
+            Page<TweetResponseDto> result = tweetService.getUserTweets(testUserId, pageable);
+
+            assertThat(result).isNotNull();
+            assertThat(result.getContent()).hasSize(2);
+            assertThat(result.getContent()).containsExactly(responseDto1, responseDto2);
+            assertThat(result.getTotalElements()).isEqualTo(2);
+            assertThat(result.getNumber()).isEqualTo(0);
+            assertThat(result.getSize()).isEqualTo(20);
+            assertThat(result.getTotalPages()).isEqualTo(1);
+        }
+
+        @Test
+        void getUserTweets_WhenNoTweetsExist_ShouldReturnEmptyPage() {
+            Page<Tweet> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+
+            when(tweetRepository.findByUserIdAndIsDeletedFalseOrderByCreatedAtDesc(eq(testUserId), eq(pageable)))
+                .thenReturn(emptyPage);
+
+            Page<TweetResponseDto> result = tweetService.getUserTweets(testUserId, pageable);
+
+            assertThat(result).isNotNull();
+            assertThat(result.getContent()).isEmpty();
+            assertThat(result.getTotalElements()).isEqualTo(0);
+            assertThat(result.getNumber()).isEqualTo(0);
+            assertThat(result.getSize()).isEqualTo(20);
+            assertThat(result.getTotalPages()).isEqualTo(0);
+        }
+
+        @Test
+        void getUserTweets_WhenTweetsExist_ShouldCallRepositoryAndMapper() {
+            List<Tweet> tweets = List.of(tweet1, tweet2);
+            Page<Tweet> tweetPage = new PageImpl<>(tweets, pageable, 2);
+
+            when(tweetRepository.findByUserIdAndIsDeletedFalseOrderByCreatedAtDesc(eq(testUserId), eq(pageable)))
+                .thenReturn(tweetPage);
+            when(tweetMapper.toResponseDto(tweet1)).thenReturn(responseDto1);
+            when(tweetMapper.toResponseDto(tweet2)).thenReturn(responseDto2);
+
+            tweetService.getUserTweets(testUserId, pageable);
+
+            verify(tweetRepository, times(1))
+                .findByUserIdAndIsDeletedFalseOrderByCreatedAtDesc(eq(testUserId), eq(pageable));
+            verify(tweetMapper, times(1)).toResponseDto(eq(tweet1));
+            verify(tweetMapper, times(1)).toResponseDto(eq(tweet2));
+            verifyNoMoreInteractions(tweetRepository, tweetMapper);
+        }
+
+        @Test
+        void getUserTweets_WhenNoTweetsExist_ShouldCallRepositoryOnly() {
+            Page<Tweet> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+
+            when(tweetRepository.findByUserIdAndIsDeletedFalseOrderByCreatedAtDesc(eq(testUserId), eq(pageable)))
+                .thenReturn(emptyPage);
+
+            tweetService.getUserTweets(testUserId, pageable);
+
+            verify(tweetRepository, times(1))
+                .findByUserIdAndIsDeletedFalseOrderByCreatedAtDesc(eq(testUserId), eq(pageable));
+            verifyNoInteractions(tweetMapper);
         }
     }
 }
