@@ -16,7 +16,6 @@ import java.time.Instant;
 
 /**
  * Global exception handler for centralized error processing in Twitter microservices.
- *
  * <p>
  * This handler provides unified error response formatting using Spring's ProblemDetail
  * and handles various types of validation and business rule exceptions. It ensures
@@ -44,7 +43,6 @@ public class GlobalExceptionHandler {
 
     /**
      * Default constructor for GlobalExceptionHandler.
-     *
      * <p>
      * This constructor creates a new instance of GlobalExceptionHandler.
      * The handler is automatically registered with Spring's exception handling
@@ -57,12 +55,6 @@ public class GlobalExceptionHandler {
 
     /**
      * Handles Spring's ResponseStatusException and converts it to ProblemDetail.
-     *
-     * <p>
-     * This method processes ResponseStatusException instances that are thrown
-     * when specific HTTP status codes need to be returned. It extracts the status
-     * code and reason from the exception and creates a standardized ProblemDetail
-     * response with additional metadata.
      *
      * <p>Response format:</p>
      * <pre>
@@ -97,12 +89,6 @@ public class GlobalExceptionHandler {
     /**
      * Handles general RuntimeException instances and converts them to ProblemDetail.
      *
-     * <p>
-     * This method serves as a catch-all for unexpected runtime exceptions that
-     * are not handled by more specific exception handlers. It creates a generic
-     * internal server error response to prevent sensitive information leakage
-     * while providing useful debugging information in development environments.
-     *
      * <p>Response format:</p>
      * <pre>
      * {
@@ -132,11 +118,6 @@ public class GlobalExceptionHandler {
     /**
      * Handles Bean Validation constraint violations and converts them to ProblemDetail.
      *
-     * <p>
-     * This method processes ConstraintViolationException instances that are thrown
-     * when Bean Validation constraints are violated. It provides detailed information
-     * about validation failures to help clients understand what needs to be corrected.
-     *
      * <p>Response format:</p>
      * <pre>
      * {
@@ -165,12 +146,6 @@ public class GlobalExceptionHandler {
 
     /**
      * Handles uniqueness validation exceptions and converts them to ProblemDetail.
-     *
-     * <p>
-     * This method processes UniquenessValidationException instances that are thrown
-     * when duplicate data is detected (e.g., duplicate email addresses, usernames).
-     * It provides specific information about which field caused the conflict and
-     * what value was duplicated.
      *
      * <p>Response format:</p>
      * <pre>
@@ -205,12 +180,6 @@ public class GlobalExceptionHandler {
     /**
      * Handles business rule validation exceptions and converts them to ProblemDetail.
      *
-     * <p>
-     * This method processes BusinessRuleValidationException instances that are thrown
-     * when business logic constraints are violated (e.g., attempting to deactivate
-     * the last administrator, invalid role changes). It provides context about
-     * which business rule was violated and the specific circumstances.
-     *
      * <p>Response format:</p>
      * <pre>
      * {
@@ -244,12 +213,6 @@ public class GlobalExceptionHandler {
     /**
      * Handles format validation exceptions and converts them to ProblemDetail.
      *
-     * <p>
-     * This method processes FormatValidationException instances that are thrown
-     * when data format constraints are violated (e.g., invalid JSON structure,
-     * malformed email addresses, invalid date formats). It provides specific
-     * information about which field failed validation and what constraint was violated.
-     *
      * <p>Response format:</p>
      * <pre>
      * {
@@ -282,12 +245,6 @@ public class GlobalExceptionHandler {
 
     /**
      * Handles general validation exceptions and converts them to ProblemDetail.
-     *
-     * <p>
-     * This method serves as a fallback handler for ValidationException instances
-     * that are not handled by more specific validation exception handlers. It
-     * provides general validation error information while maintaining consistency
-     * with the overall error response format.
      *
      * <p>Response format:</p>
      * <pre>

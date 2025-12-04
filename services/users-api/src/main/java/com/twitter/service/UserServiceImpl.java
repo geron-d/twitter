@@ -1,13 +1,11 @@
 package com.twitter.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.twitter.common.enums.UserRole;
+import com.twitter.common.enums.UserStatus;
 import com.twitter.dto.*;
 import com.twitter.dto.filter.UserFilter;
 import com.twitter.entity.User;
-import com.twitter.common.enums.UserRole;
-import com.twitter.common.enums.UserStatus;
-import com.twitter.common.exception.validation.BusinessRuleValidationException;
-import com.twitter.common.exception.validation.ValidationException;
 import com.twitter.mapper.UserMapper;
 import com.twitter.repository.UserRepository;
 import com.twitter.util.PasswordUtil;
@@ -48,14 +46,7 @@ public class UserServiceImpl implements UserService {
     private final PatchDtoFactory patchDtoFactory;
 
     /**
-     * Retrieves a user by their unique identifier.
-     * <p>
-     * This method performs a database lookup and returns the user data
-     * if found. Returns an empty Optional if the user does not exist
-     * or has been deactivated.
-     *
-     * @param id the unique identifier of the user
-     * @return Optional containing user data or empty if not found
+     * @see UserService#getUserById
      */
     @Override
     public Optional<UserResponseDto> getUserById(UUID id) {
@@ -63,15 +54,7 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * Retrieves a paginated list of users with applied filters.
-     * <p>
-     * This method uses JPA specifications for dynamic filtering based on
-     * the provided criteria. It supports filtering by name, role, and status
-     * with full pagination support.
-     *
-     * @param userFilter filter criteria for user search
-     * @param pageable   pagination parameters (page size, page number, sorting)
-     * @return Page containing filtered users with pagination metadata
+     * @see UserService#findAll
      */
     @Override
     public Page<UserResponseDto> findAll(UserFilter userFilter, Pageable pageable) {
@@ -80,16 +63,7 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * Creates a new user in the system.
-     * <p>
-     * This method performs comprehensive data validation, sets the default
-     * status to ACTIVE and role to USER, and securely hashes the password
-     * using PBKDF2 with a random salt.
-     *
-     * @param userRequest DTO containing user data for creation
-     * @return the created user data
-     * @throws ValidationException        if data validation fails
-     * @throws ResponseStatusException    if password hashing fails
+     * @see UserService#createUser
      */
     @Override
     public UserResponseDto createUser(UserRequestDto userRequest) {
@@ -106,17 +80,7 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * Updates an existing user's data.
-     * <p>
-     * This method performs data validation excluding the current user from
-     * uniqueness checks. It updates the password only if provided in the
-     * request and maintains data integrity throughout the process.
-     *
-     * @param id          the unique identifier of the user
-     * @param userDetails DTO containing new user data
-     * @return Optional containing updated user data or empty if user not found
-     * @throws ValidationException     if data validation fails
-     * @throws ResponseStatusException if password hashing fails
+     * @see UserService#updateUser
      */
     @Override
     public Optional<UserResponseDto> updateUser(UUID id, UserUpdateDto userDetails) {
@@ -135,16 +99,7 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * Performs a partial update of user data using JSON Patch.
-     * <p>
-     * This method performs two-stage validation: JSON structure validation
-     * and business rule validation. It applies changes only to specified
-     * fields while preserving other user data.
-     *
-     * @param id        the unique identifier of the user
-     * @param patchNode JSON data for partial update
-     * @return Optional containing updated user data or empty if user not found
-     * @throws ValidationException if JSON structure or business rule validation fails
+     * @see UserService#patchUser
      */
     @Override
     public Optional<UserResponseDto> patchUser(UUID id, JsonNode patchNode) {
@@ -164,15 +119,7 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * Deactivates a user by setting their status to INACTIVE.
-     * <p>
-     * This method performs business rule validation to prevent deactivation
-     * of the last active administrator. It logs successful deactivation
-     * for audit purposes.
-     *
-     * @param id the unique identifier of the user
-     * @return Optional containing deactivated user data or empty if user not found
-     * @throws BusinessRuleValidationException if attempting to deactivate the last active administrator
+     * @see UserService#inactivateUser
      */
     @Override
     public Optional<UserResponseDto> inactivateUser(UUID id) {
@@ -187,16 +134,7 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * Updates the role of a user in the system.
-     * <p>
-     * This method performs business rule validation to prevent role changes
-     * for the last active administrator. It logs role changes with both
-     * old and new role information for audit purposes.
-     *
-     * @param id         the unique identifier of the user
-     * @param roleUpdate DTO containing the new user role
-     * @return Optional containing updated user data or empty if user not found
-     * @throws BusinessRuleValidationException if attempting to change the last active administrator's role
+     * @see UserService#updateUserRole
      */
     @Override
     public Optional<UserResponseDto> updateUserRole(UUID id, UserRoleUpdateDto roleUpdate) {
@@ -212,6 +150,18 @@ public class UserServiceImpl implements UserService {
             log.info("User role updated for ID {}: {} -> {}", id, oldRole, newRole);
             return userMapper.toUserResponseDto(updatedUser);
         });
+    }
+
+    /**
+     * @see UserService#existsById
+     */
+    @Override
+    public boolean existsById(UUID id) {
+        if (id == null) {
+            return false;
+        }
+
+        return userRepository.existsById(id);
     }
 
     /**

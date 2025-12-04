@@ -1,0 +1,58 @@
+# Gradle build files
+build/
+.gradle/
+gradle/
+gradlew
+gradlew.bat
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+tmp/
+
+# Test files
+src/test/
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+
+# Documentation
+*.md
+docs/
+
+# Configuration files that shouldn't be in container
+.env
+.env.local
+.env.*.local
+
+# Node modules (if any)
+node_modules/
+
+# Package files
+package*.json
+yarn.lock

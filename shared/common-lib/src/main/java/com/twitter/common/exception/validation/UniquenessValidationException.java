@@ -5,7 +5,6 @@ import lombok.Getter;
 
 /**
  * Exception thrown when uniqueness validation fails due to duplicate data.
- *
  * <p>
  * This exception is thrown when attempting to create or update entities with
  * values that already exist in the system for fields that must be unique.
@@ -19,34 +18,6 @@ import lombok.Getter;
  *   <li>Supports custom error messages for specific scenarios</li>
  *   <li>Enables cause chaining for debugging complex validation failures</li>
  * </ul>
- *
- * <p>Common use cases:</p>
- * <ul>
- *   <li>Email address uniqueness during user registration</li>
- *   <li>Username uniqueness in user profiles</li>
- * </ul>
- *
- * <p>Example usage:</p>
- * <pre>{@code
- * // Check email uniqueness
- * if (userRepository.existsByEmail(email)) {
- *     throw new UniquenessValidationException("email", email);
- * }
- *
- * // Check username uniqueness
- * if (userRepository.existsByUsername(username)) {
- *     throw new UniquenessValidationException("username", username);
- * }
- *
- * // Custom message with cause chaining
- * try {
- *     userRepository.save(user);
- * } catch (DataIntegrityViolationException e) {
- *     throw new UniquenessValidationException(
- *         "Failed to save user due to uniqueness constraint", e
- *     );
- * }
- * }</pre>
  *
  * @author geron
  * @version 1.0
@@ -71,7 +42,6 @@ public class UniquenessValidationException extends ValidationException {
 
     /**
      * The name of the field that caused the uniqueness violation.
-     *
      * <p>
      * This field identifies which specific field (e.g., "email", "username")
      * contains the duplicate value. It is used by the GlobalExceptionHandler to
@@ -86,7 +56,6 @@ public class UniquenessValidationException extends ValidationException {
 
     /**
      * The duplicate value that caused the uniqueness violation.
-     *
      * <p>
      * This field contains the actual value that was found to be duplicate
      * in the system. It helps with debugging and provides context for
@@ -101,18 +70,10 @@ public class UniquenessValidationException extends ValidationException {
 
     /**
      * Constructs a new uniqueness validation exception with field details.
-     *
      * <p>
      * This constructor creates an exception with specific information about
      * which field caused the uniqueness violation and what value was duplicated.
      * It automatically generates a descriptive error message.
-     *
-     * <p>Example:</p>
-     * <pre>{@code
-     * if (userRepository.existsByEmail(email)) {
-     *     throw new UniquenessValidationException("email", email);
-     * }
-     * }</pre>
      *
      * @param fieldName  the name of the field that caused the conflict
      * @param fieldValue the duplicate value that triggered the conflict
@@ -125,18 +86,10 @@ public class UniquenessValidationException extends ValidationException {
 
     /**
      * Constructs a new uniqueness validation exception with a custom message.
-     *
      * <p>
      * This constructor allows specifying a custom error message for specific
      * uniqueness validation scenarios. The fieldName and fieldValue will be
      * set to null, indicating that specific field information is not available.
-     *
-     * <p>Example:</p>
-     * <pre>{@code
-     * throw new UniquenessValidationException(
-     *     "The provided email address is already registered in the system"
-     * );
-     * }</pre>
      *
      * @param message the custom error message describing the uniqueness violation
      */
@@ -148,23 +101,11 @@ public class UniquenessValidationException extends ValidationException {
 
     /**
      * Constructs a new uniqueness validation exception with a custom message and cause.
-     *
      * <p>
      * This constructor allows wrapping another exception while providing context
      * about the uniqueness validation failure. This is useful when uniqueness
      * validation errors occur as a result of other exceptions (e.g., database
      * constraint violations).
-     *
-     * <p>Example:</p>
-     * <pre>{@code
-     * try {
-     *     userRepository.save(user);
-     * } catch (DataIntegrityViolationException e) {
-     *     throw new UniquenessValidationException(
-     *         "Failed to save user due to uniqueness constraint violation", e
-     *     );
-     * }
-     * }</pre>
      *
      * @param message the custom error message describing the uniqueness violation
      * @param cause   the underlying cause that led to this exception
@@ -177,7 +118,6 @@ public class UniquenessValidationException extends ValidationException {
 
     /**
      * Returns the validation type for this exception.
-     *
      * <p>
      * This method identifies this exception as a uniqueness validation error,
      * enabling the GlobalExceptionHandler to provide appropriate error handling

@@ -18,14 +18,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
  *   <li><strong>ADMIN</strong> - Full system administration access</li>
  * </ul>
  *
- * <p>Common use cases:</p>
- * <ul>
- *   <li>Access control and permission management</li>
- *   <li>Content moderation and user management</li>
- *   <li>System administration and configuration</li>
- *   <li>Business rule validation (e.g., last admin protection)</li>
- * </ul>
- *
  * @author geron
  * @version 1.0
  */
@@ -53,8 +45,6 @@ public enum UserRole {
      *   <li>Access to administrative dashboards</li>
      *   <li>Role assignment and permission management</li>
      * </ul>
-     *
-     * <p>Example usage:</p>
      */
     ADMIN,
 
@@ -75,8 +65,6 @@ public enum UserRole {
      *   <li>Access to moderation tools and reports</li>
      *   <li>User support and assistance</li>
      * </ul>
-     *
-     * <p>Example usage:</p>
      */
     MODERATOR,
 

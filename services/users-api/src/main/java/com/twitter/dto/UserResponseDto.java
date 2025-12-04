@@ -14,16 +14,16 @@ import java.util.UUID;
  * to clients. It excludes sensitive fields like password hash and salt for
  * security purposes while providing all necessary user data for display.
  *
+ * @param id        unique identifier for the user
+ * @param login     user's login name
+ * @param firstName user's first name
+ * @param lastName  user's last name
+ * @param email     user's email address
+ * @param status    current status of the user account
+ * @param role      user's role in the system
+ * @param createdAt date and time when the user account was created
  * @author geron
  * @version 1.0
- * @param id unique identifier for the user
- * @param login user's login name
- * @param firstName user's first name
- * @param lastName user's last name
- * @param email user's email address
- * @param status current status of the user account
- * @param role user's role in the system
- * @param createdAt date and time when the user account was created
  */
 @Schema(
     name = "UserResponse",
@@ -46,7 +46,7 @@ public record UserResponseDto(
      * Unique identifier for the user.
      * <p>
      * This field contains the UUID that uniquely identifies the user
-     * in the system and is used for API operations.
+     * in the system .
      */
     @Schema(
         description = "Unique identifier for the user",
@@ -57,9 +57,6 @@ public record UserResponseDto(
 
     /**
      * User's login name.
-     * <p>
-     * This field contains the unique login name used for authentication
-     * and display purposes.
      */
     @Schema(
         description = "User's unique login name",
@@ -71,8 +68,7 @@ public record UserResponseDto(
     /**
      * User's first name.
      * <p>
-     * This field contains the user's given name and may be null
-     * if not provided during registration.
+     * May be null if not provided during registration.
      */
     @Schema(
         description = "User's first name (optional)",
@@ -85,8 +81,7 @@ public record UserResponseDto(
     /**
      * User's last name.
      * <p>
-     * This field contains the user's family name and may be null
-     * if not provided during registration.
+     * May be null if not provided during registration.
      */
     @Schema(
         description = "User's last name (optional)",
@@ -98,9 +93,6 @@ public record UserResponseDto(
 
     /**
      * User's email address.
-     * <p>
-     * This field contains the unique email address used for
-     * communication and account recovery.
      */
     @Schema(
         description = "User's unique email address",
@@ -112,8 +104,7 @@ public record UserResponseDto(
     /**
      * Current status of the user account.
      * <p>
-     * This field indicates whether the user account is active or inactive
-     * and affects the user's ability to access the system.
+     * Affects the user's ability to access the system.
      */
     @Schema(
         description = "Current status of the user account",
@@ -137,10 +128,6 @@ public record UserResponseDto(
 
     /**
      * Date and time when the user account was created.
-     * <p>
-     * This field contains the timestamp when the user account was originally
-     * created in the system. It is automatically set during user creation
-     * and cannot be modified afterwards.
      */
     @Schema(
         description = "Date and time when the user account was created",

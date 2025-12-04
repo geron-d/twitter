@@ -1,0 +1,1528 @@
+# Tweet API Service - Архитектурный документ
+
+## Meta
+- **project**: twitter-tweet-api
+- **document_type**: Architecture Document
+- **version**: 1.0
+- **created_date**: 2025-01-27
+- **status**: Draft
+- **analyst**: AI Assistant
+
+## Executive Summary
+
+Tweet API Service является ключевым компонентом Twitter-подобной платформы, обеспечивающим функциональность создания, управления и взаимодействия с твитами. Сервис построен на основе микросервисной архитектуры с использованием Spring Boot и PostgreSQL, обеспечивая высокую производительность, надежность и масштабируемость.
+
+### Ключевые архитектурные решения
+1. **Микросервисная архитектура** с четким разделением ответственности
+2. **RESTful API** с стандартизированными DTO и обработкой ошибок
+3. **UUID идентификаторы** для поддержки распределенных систем
+4. **Soft delete** для сохранения истории без потери производительности
+5. **Дениormalized счетчики** для оптимизации частых запросов
+6. **Comprehensive validation** с Bean Validation и кастомными валидаторами
+7. **Circuit breaker pattern** для надежной интеграции с внешними сервисами
+8. **Многоуровневая система кэширования** для оптимизации производительности
+9. **Гибкая система пагинации** (Offset, Cursor, Hybrid подходы)
+10. **Централизованная система бизнес-правил** с мониторингом и аудитом
+
+## 1. Обзор системы
+
+### 1.1 Назначение сервиса
+Tweet API Service предоставляет REST API для:
+- Создания, чтения, обновления и удаления твитов
+- Социальных взаимодействий (лайки, ретвиты)
+- Получения твитов пользователей и ленты новостей
+- Управления списками взаимодействий
+
+### 1.2 Основные входные и выходные данные
+
+#### Входные данные:
+- **Создание твита**: content (max 280 символов), user_id
+- **Обновление твита**: tweet_id, новый content
+- **Социальные действия**: tweet_id, user_id
+- **Запросы данных**: user_id, pagination параметры
+
+#### Выходные данные:
+- **Твиты**: полная информация с метаданными
+- **Списки твитов**: пагинированные результаты
+- **Статистика**: количество лайков, ретвитов
+- **Статусы операций**: HTTP статусы и сообщения об ошибках
+
+## 2. Анализ функциональных требований
+
+### 2.1 Основные операции с твитами
+
+#### CRUD операции:
+- **Создание твита** (POST /api/v1/tweets)
+  - Входные данные: content (max 280 символов), user_id
+  - Выходные данные: созданный твит с ID, временными метками
+  - Валидация: длина контента, существование пользователя
+  
+- **Получение твита** (GET /api/v1/tweets/{tweetId})
+  - Входные данные: tweet_id
+  - Выходные данные: полная информация о твите
+  - Обработка: проверка существования, soft delete
+  
+- **Обновление твита** (PUT /api/v1/tweets/{tweetId})
+  - Входные данные: tweet_id, новый content
+  - Выходные данные: обновленный твит
+  - Ограничения: только автор может редактировать
+  
+- **Удаление твита** (DELETE /api/v1/tweets/{tweetId})
+  - Входные данные: tweet_id
+  - Выходные данные: статус операции
+  - Реализация: soft delete с отметкой времени
+
+#### Социальные функции:
+- **Лайк/анлайк твита** (POST/DELETE /api/v1/tweets/{tweetId}/like)
+  - Уникальность: один пользователь = один лайк
+  - Атомарность: транзакционное выполнение
+  
+- **Ретвит/анретвит** (POST/DELETE /api/v1/tweets/{tweetId}/retweet)
+  - Аналогично лайкам с уникальностью
+  - Возможность добавления комментария к ретвиту
+
+#### Получение данных:
+- **Твиты пользователя** (GET /api/v1/tweets/user/{userId})
+  - Пагинация: offset/limit параметры
+  - Сортировка: по дате создания (DESC)
+  - Фильтрация: исключение удаленных твитов
+  
+- **Лента новостей** (GET /api/v1/tweets/timeline/{userId})
+  - Сложность: требует интеграции с follow-service
+  - Оптимизация: кэширование, индексы
+  
+- **Списки взаимодействий** (GET /api/v1/tweets/{tweetId}/likes|retweets)
+  - Пагинация для больших списков
+  - Информация о пользователях через users-api
+
+### 2.2 Бизнес-правила и ограничения
+
+#### Ограничения контента:
+- Максимальная длина твита: 280 символов
+- Поддержка Unicode символов
+- Запрет на пустой контент
+- Валидация на XSS и вредоносный контент
+
+#### Правила доступа:
+- Только автор может редактировать/удалять твит
+- Все пользователи могут читать публичные твиты
+- Проверка существования пользователя через users-api
+
+#### Ограничения производительности:
+- Максимум 1 лайк/ретвит на пользователя на твит
+- Атомарные операции для социальных функций
+- Batch операции для множественных запросов
+
+## 3. Архитектурные компоненты
+
+### 3.1 Слоистая архитектура
+
+#### Controller Layer
+- **REST API endpoints** с OpenAPI документацией и Swagger UI
+- **RESTful архитектура** с четким разделением ресурсов и HTTP методов
+- **TweetController** с реализацией TweetApi интерфейса
+- **Валидация входных данных** через Bean Validation и кастомные валидаторы
+- **Обработка HTTP статусов** и стандартизированных ошибок
+- **Request/Response mapping** через стандартизированные DTO структуры
+- **Пагинация** с offset-based стратегией (максимум 100 элементов на страницу)
+- **Автоматическое логирование** через @LoggableRequest из shared-lib
+- **Централизованная обработка ошибок** через GlobalExceptionHandler
+
+#### Service Layer
+- **Бизнес-логика** и правила домена
+- **TweetService** интерфейс с TweetServiceImpl реализацией
+- **Транзакционность** через @Transactional с правильными уровнями изоляции
+- **Интеграция с внешними сервисами** через Circuit Breaker и Fallback
+- **Валидация бизнес-правил** перед операциями
+- **Кэширование** для оптимизации производительности
+- **Типизированные исключения** для обработки ошибок
+- **Координация операций** между различными компонентами
+- **Обработка ошибок** и исключений
+
+#### Repository Layer
+- **Доступ к данным** через Spring Data JPA
+- **TweetRepository, LikeRepository, RetweetRepository** интерфейсы
+- **JPA Entities** с оптимизированными индексами и валидацией
+- **Кастомные запросы** для сложных операций через @Query
+- **Specification паттерн** для динамических запросов
+- **Batch операции** для оптимизации производительности
+- **Soft delete** поддержка с временными метками
+- **Денормализация** статистики для быстрых запросов
+
+### 3.2 Бизнес-логика и транзакции
+
+#### Основные операции с твитами
+- **Создание твита**: валидация входных данных, проверка пользователя через users-api, проверка статуса пользователя, создание и сохранение твита
+- **Получение твита**: поиск по ID с исключением удаленных твитов (@Transactional(readOnly = true))
+- **Обновление твита**: проверка прав автора, валидация обновления, обновление данных и сохранение
+- **Удаление твита**: soft delete с сохранением статистики
+
+#### Социальные функции
+- **Лайк твита**: проверка существования твита и пользователя, проверка на самолайк, проверка дублирования, создание лайка, обновление счетчика
+- **Убрать лайк**: поиск лайка, удаление, обновление счетчика
+- **Ретвит**: проверка существования твита и пользователя, проверка на саморетвит, проверка дублирования, создание ретвита, обновление счетчика
+
+#### Получение данных
+- **Твиты пользователя**: проверка существования пользователя, получение твитов с пагинацией, преобразование в DTO
+- **Лента новостей**: проверка существования пользователя, получение подписок через follow-service, получение твитов с пагинацией
+
+#### Уровни изоляции транзакций
+- **READ_COMMITTED** для операций чтения (@Transactional(readOnly = true))
+- **REPEATABLE_READ** для операций создания (@Transactional)
+- **SERIALIZABLE** для социальных функций (предотвращение дублирования)
+
+#### Правила создания твитов
+- **TweetCreationRules** - валидация всех бизнес-правил для создания твитов
+- **validateUserExists** - проверка существования пользователя через UsersApiClient с fallback при ошибках API
+- **validateUserStatus** - проверка статуса пользователя (ACTIVE, INACTIVE, BANNED)
+- **validateContentRules** - валидация контента через ContentValidationService
+- **validateRateLimiting** - проверка ограничений частоты создания твитов
+- **validateSpamRules** - проверка на спам через SpamDetectionService
+
+#### Правила обновления твитов
+- **TweetUpdateRules** - валидация всех бизнес-правил для обновления твитов
+- **validateOwnership** - проверка прав автора на обновление твита
+- **validateUpdateTimeLimit** - ограничение времени обновления (максимум 7 дней)
+- **validateUpdateFrequency** - ограничение частоты обновлений (максимум 10 в час)
+- **TimeBasedRules** - правила на основе времени для разных операций
+
+#### Правила социальных действий
+- **LikeRules** - валидация всех бизнес-правил для лайков
+- **validateSelfLike** - запрет лайков собственных твитов
+- **validateDuplicateLike** - проверка дублирования лайков
+- **validateLikeTimeLimit** - ограничение времени лайков (максимум 30 дней)
+- **RetweetRules** - валидация всех бизнес-правил для ретвитов
+- **validateSelfRetweet** - запрет ретвитов собственных твитов
+- **validateDuplicateRetweet** - проверка дублирования ретвитов
+- **validateRetweetTimeLimit** - ограничение времени ретвитов (максимум 30 дней)
+- **validateRetweetComment** - валидация комментариев ретвитов
+
+#### Правила контроля доступа и защиты от злоупотреблений
+- **AuthorizationRules** - валидация правил авторизации для операций с твитами
+- **validateCreateAuthorization** - проверка прав на создание твитов (статус ACTIVE, роль не BANNED)
+- **validateUpdateAuthorization** - проверка прав на обновление твитов (модераторы и админы могут обновлять любые твиты)
+- **validateDeleteAuthorization** - проверка прав на удаление твитов (модераторы и админы могут удалять любые твиты)
+- **RoleBasedRules** - валидация ролевого доступа для операций с твитами
+- **validateModerateRoleAccess** - только модераторы и админы могут выполнять операции модерации
+- **validateAdminRoleAccess** - только админы могут выполнять административные операции
+
+#### Защита от злоупотреблений
+- **AbuseDetectionRules** - обнаружение паттернов злоупотреблений в поведении пользователей
+- **detectCreationAbuse** - обнаружение чрезмерного создания твитов, дублирования контента, спам паттернов
+- **detectLikeAbuse** - обнаружение чрезмерного лайкания, like bombing (лайки одному пользователю)
+- **detectRetweetAbuse** - обнаружение чрезмерного ретвитования, retweet bombing
+- **detectUpdateAbuse** - обнаружение чрезмерного обновления твитов
+- **UserBlockingRules** - правила блокировки пользователей за злоупотребления
+- **shouldBlockUser** - проверка необходимости блокировки пользователя
+- **blockUser** - блокировка пользователя за злоупотребления
+- **restrictUser** - временное ограничение действий пользователя
+
+#### Rate Limiting и Spam Detection
+- **RateLimitingRules** - правила ограничения частоты для создания твитов и социальных действий
+- **validateTweetCreationRateLimit** - ограничение частоты создания твитов (максимум 10 в час)
+- **validateSocialActionRateLimit** - ограничение частоты социальных действий (лайки, ретвиты, ответы)
+- **SpamDetectionRules** - обнаружение спам паттернов в контенте твитов
+- **detectSpam** - проверка на спам паттерны (чрезмерное повторение, спам ключевые слова, чрезмерные ссылки, упоминания)
+- **checkUserSpamPatterns** - проверка паттернов спама пользователя (чрезмерное постинг, дублирование контента)
+
+#### Централизованная система бизнес-правил
+- **TweetBusinessRulesManager** - централизованное управление всеми бизнес-правилами
+- **validateCreateRules** - валидация всех правил для создания твитов
+- **validateUpdateRules** - валидация всех правил для обновления твитов
+- **validateDeleteRules** - валидация всех правил для удаления твитов
+- **validateLikeRules** - валидация всех правил для лайков
+- **validateRetweetRules** - валидация всех правил для ретвитов
+- **BusinessRulesProperties** - конфигурация бизнес-правил (rate limiting, time-based rules, abuse detection, spam detection)
+
+#### Мониторинг и аудит бизнес-правил
+- **BusinessRulesMetrics** - метрики бизнес-правил (violation counters, validation duration, abuse detection)
+- **BusinessRulesAuditLogger** - аудит нарушений бизнес-правил и обнаружения злоупотреблений
+- **logRuleViolation** - логирование нарушений бизнес-правил для аудита
+- **logAbuseDetection** - логирование обнаружения злоупотреблений
+- **recordRuleViolation** - запись метрик нарушений правил
+- **recordAbuseDetection** - запись метрик обнаружения злоупотреблений
+
+#### Многоуровневая система бизнес-правил
+- **Data Integrity Rules** - правила целостности данных (проверка существования пользователей, твитов, уникальность действий)
+- **Access Control Rules** - правила контроля доступа (авторство, роли пользователей, статус аккаунта)
+- **Business Logic Rules** - правила бизнес-логики (временные ограничения, частотные лимиты, возраст твитов)
+- **Security Rules** - правила безопасности (санитизация контента, защита от XSS, валидация входных данных)
+- **Anti-Abuse Rules** - правила защиты от злоупотреблений (обнаружение спама, rate limiting, блокировка пользователей)
+- **Fail Fast принцип** - проверка правил на самом раннем этапе
+- **Separation of Concerns** - разделение разных типов правил
+- **Consistency** - единообразные сообщения об ошибках
+- **Security First** - приоритет безопасности над удобством
+- **Audit Trail** - логирование всех нарушений правил
+
+### 3.3 JPA Entities и структура данных
+
+#### Tweet Entity
+- **UUID идентификатор** с автогенерацией
+- **userId, content** основные поля твита
+- **createdAt, updatedAt** временные метки
+- **isDeleted, deletedAt** поддержка soft delete
+- **likesCount, retweetsCount, repliesCount** денормализованные счетчики
+- **statsUpdatedAt** метка обновления статистики
+- **Бизнес-методы**: isActive(), softDelete(), incrementLikesCount(), decrementLikesCount()
+
+#### Like Entity
+- **UUID идентификатор** с автогенерацией
+- **tweetId, userId** связь с твитом и пользователем
+- **createdAt** временная метка создания
+- **Уникальное ограничение** на пару (tweetId, userId)
+- **Бизнес-методы**: isByUser(), isForTweet()
+
+#### Retweet Entity
+- **UUID идентификатор** с автогенерацией
+- **tweetId, userId** связь с твитом и пользователем
+- **comment** опциональный комментарий к ретвиту
+- **createdAt** временная метка создания
+- **Уникальное ограничение** на пару (tweetId, userId)
+- **Бизнес-методы**: isByUser(), isForTweet(), hasComment()
+
+#### Индексы для производительности
+- **idx_tweets_user_id_created_at** для твитов пользователя
+- **idx_tweets_created_at** для временной сортировки
+- **idx_tweets_is_deleted** для фильтрации удаленных
+- **idx_tweets_likes_count** для сортировки по популярности
+- **idx_likes_tweet_id, idx_likes_user_id** для лайков
+- **idx_retweets_tweet_id, idx_retweets_user_id** для ретвитов
+
+#### DTO/Mapper Layer
+- **Стандартизированные DTO структуры** для Request/Response
+- **Record-based DTOs** для неизменяемости и краткости кода
+- **MapStruct** для автоматического маппинга между слоями
+- **TweetMapper, LikeMapper, RetweetMapper** интерфейсы
+- **Comprehensive validation** через Bean Validation и кастомные валидаторы
+- **OpenAPI аннотации** для автоматической документации API
+- **Группы валидации** для разных операций (Create, Update, Patch)
+- **Типизированные Error DTOs** для консистентной обработки ошибок
+- **Стандартизированные ответы** с metadata и graceful error handling
+- **API versioning** через URL path (/api/v1/)
+
+### 3.4 Repository интерфейсы и кастомные запросы
+
+#### TweetRepository
+- **findByIdAndNotDeleted()** - поиск активного твита по ID
+- **findByUserIdAndNotDeletedOrderByCreatedAtDesc()** - твиты пользователя с пагинацией
+- **findByUserIdInAndNotDeletedOrderByCreatedAtDesc()** - твиты множественных пользователей для ленты
+- **incrementLikesCount(), decrementLikesCount()** - обновление счетчиков лайков
+- **incrementRetweetsCount(), decrementRetweetsCount()** - обновление счетчиков ретвитов
+- **countByUserIdAndNotDeleted()** - подсчет твитов пользователя
+- **findTopTweetsByEngagement()** - топ твиты по популярности
+- **findByContentContainingAndNotDeleted()** - поиск по содержимому
+- **softDeleteById(), softDeleteByUserId()** - массовое soft delete
+
+#### LikeRepository
+- **findByTweetIdAndUserId()** - поиск лайка пользователя для твита
+- **findByTweetIdOrderByCreatedAtDesc()** - лайки твита с пагинацией
+- **findByUserIdOrderByCreatedAtDesc()** - лайки пользователя с пагинацией
+- **countByTweetId(), countByUserId()** - подсчет лайков
+- **existsByTweetIdAndUserId()** - проверка существования лайка
+- **deleteByTweetId(), deleteByUserId()** - массовое удаление лайков
+- **findUserIdsByTweetId()** - пользователи, лайкнувшие твит
+
+#### RetweetRepository
+- **findByTweetIdAndUserId()** - поиск ретвита пользователя для твита
+- **findByTweetIdOrderByCreatedAtDesc()** - ретвиты твита с пагинацией
+- **findByUserIdOrderByCreatedAtDesc()** - ретвиты пользователя с пагинацией
+- **countByTweetId(), countByUserId()** - подсчет ретвитов
+- **existsByTweetIdAndUserId()** - проверка существования ретвита
+- **findByTweetIdWithComments()** - ретвиты с комментариями
+- **deleteByTweetId(), deleteByUserId()** - массовое удаление ретвитов
+- **findUserIdsByTweetId()** - пользователи, ретвитнувшие твит
+
+#### Specification паттерн для динамических запросов
+- **TweetSpecification** класс с методами для динамических запросов
+- **hasUserId(), isNotDeleted()** - базовые фильтры
+- **hasContentContaining()** - поиск по содержимому
+- **createdAfter(), createdBefore()** - фильтрация по времени
+- **hasMinLikesCount(), hasMinRetweetsCount()** - фильтрация по статистике
+- **orderByCreatedAtDesc(), orderByEngagementDesc()** - сортировка
+
+### 3.5 Request/Response DTOs и структура данных
+
+#### Request DTOs
+- **CreateTweetRequestDto** - content (1-280 символов), userId с валидацией @NotBlank, @Size, @Pattern
+- **UpdateTweetRequestDto** - content (1-280 символов), userId с аналогичной валидацией
+- **LikeTweetRequestDto** - userId для лайка твита
+- **RetweetRequestDto** - userId и опциональный comment (до 280 символов)
+
+#### Response DTOs
+- **TweetResponseDto** - id, userId, content, createdAt, updatedAt, isDeleted, stats (TweetStatsDto)
+- **TweetStatsDto** - likesCount, retweetsCount, repliesCount с валидацией @Min(0)
+- **LikeResponseDto** - id, tweetId, userId, createdAt
+- **RetweetResponseDto** - id, tweetId, userId, comment, createdAt
+
+#### Error DTOs
+- **ErrorResponseDto** - error (ErrorInfoDto), meta (ResponseMetaDto)
+- **ErrorInfoDto** - code, message, details (Map<String, Object>)
+- **ValidationErrorResponseDto** - error с деталями валидации, meta
+- **ResponseMetaDto** - timestamp, requestId для трассировки
+
+#### OpenAPI документация
+- **@Schema аннотации** для всех DTO с примерами и описаниями
+- **requiredMode** для указания обязательных полей
+- **format** для типов данных (uuid, date-time)
+- **minLength, maxLength** для ограничений длины
+- **example** для примеров значений
+
+### 3.6 MapStruct мапперы и преобразование данных
+
+#### TweetMapper
+- **toTweet(CreateTweetRequestDto)** - создание Entity из Request DTO с игнорированием системных полей
+- **toTweetResponseDto(Tweet)** - преобразование Entity в Response DTO с вложенной статистикой
+- **updateTweetFromUpdateDto(UpdateTweetRequestDto, @MappingTarget Tweet)** - обновление Entity из Update DTO
+- **toTweetStats(Tweet)** - кастомный метод для преобразования статистики
+- **toTweetResponseDtoList(List<Tweet>)** - маппинг списков твитов
+- **toTweetResponseDtoPage(Page<Tweet>)** - маппинг пагинированных результатов
+
+#### LikeMapper
+- **toLike(LikeTweetRequestDto, UUID tweetId)** - создание Like Entity с tweetId
+- **toLikeResponseDto(Like)** - преобразование Like Entity в Response DTO
+- **toLikeWithTweetId(LikeTweetRequestDto, UUID tweetId)** - кастомный маппер с tweetId
+- **toLikeResponseDtoList(List<Like>)** - маппинг списков лайков
+- **toLikeResponseDtoPage(Page<Like>)** - маппинг пагинированных лайков
+
+#### RetweetMapper
+- **toRetweet(RetweetRequestDto, UUID tweetId)** - создание Retweet Entity с tweetId
+- **toRetweetResponseDto(Retweet)** - преобразование Retweet Entity в Response DTO
+- **toRetweetWithTweetId(RetweetRequestDto, UUID tweetId)** - кастомный маппер с tweetId и comment
+- **toRetweetResponseDtoList(List<Retweet>)** - маппинг списков ретвитов
+- **toRetweetResponseDtoPage(Page<Retweet>)** - маппинг пагинированных ретвитов
+
+#### Конфигурация MapStruct
+- **@Mapper(componentModel = "spring")** для интеграции с Spring
+- **@Mapping(target = "field", ignore = true)** для игнорирования полей при маппинге
+- **@MappingTarget** для обновления существующих объектов
+- **@Named** для кастомных методов маппинга
+- **default методы** для сложной логики маппинга
+
+#### Конфигурация системы кэширования
+
+#### Bean Validation аннотации
+- **@NotBlank** для проверки непустых строк
+- **@Size(min, max)** для ограничения длины строк
+- **@Pattern** для проверки регулярных выражений
+- **@NotNull** для проверки непустых значений
+- **@Min(value)** для проверки минимальных значений
+- **@Valid** для каскадной валидации вложенных объектов
+
+#### Кастомные валидаторы
+- **@UserExists** - проверка существования пользователя через UsersApiClient
+- **UserExistsValidator** - реализация валидатора с fallback при ошибках API
+- **@NoSelfAction** - проверка на самодействия (лайк/ретвит собственного твита)
+- **NoSelfActionValidator** - реализация с рефлексией для разных DTO типов
+
+#### Группы валидации
+- **ValidationGroups.Create** - для операций создания
+- **ValidationGroups.Update** - для операций обновления
+- **ValidationGroups.Patch** - для операций частичного обновления
+- **Использование групп** в @Validated аннотациях контроллеров
+
+#### Обработка ошибок валидации
+- **MethodArgumentNotValidException** - обработка ошибок валидации в контроллерах
+- **ValidationErrorResponseDto** - структурированный ответ с деталями ошибок
+- **FieldError** - информация о конкретных полях с ошибками
+- **BindingResult** - результат валидации с детальной информацией
+
+### 3.8 Оптимизация и производительность
+
+#### Многоуровневая архитектура кэширования
+- **HTTP Cache** - кэширование на уровне HTTP заголовков с Cache-Control, ETag, Last-Modified
+- **Application Cache** - кэширование на уровне приложения (Redis) с JSON сериализацией и TTL
+- **Database Cache** - кэширование на уровне БД (PostgreSQL) с query cache и connection pooling
+- **CDN Cache** - кэширование на уровне CDN (будущее) для статического контента
+- **Cache-Aside Pattern** - приложение управляет кэшем
+- **Write-Through Pattern** - запись в кэш и БД одновременно
+- **Write-Behind Pattern** - асинхронная запись в БД
+- **TTL-based Expiration** - время жизни кэша
+- **Event-driven Invalidation** - инвалидация по событиям
+
+#### Стратегии кэширования по типам данных
+- **Static Data** - редко изменяемые данные (пользователи, настройки) с длительным TTL
+- **Semi-Static Data** - периодически изменяемые данные (твиты, статистика) со средним TTL
+- **Dynamic Data** - часто изменяемые данные (лайки, ретвиты) с коротким TTL
+- **Real-time Data** - данные в реальном времени (активность пользователей) без кэширования
+
+#### Redis кэширование
+- **RedisCacheConfig** - конфигурация Redis с JSON сериализацией и TTL
+- **RedisTemplate** - шаблон для работы с Redis с Jackson2JsonRedisSerializer
+- **CacheManager** - менеджер кэшей с конфигурацией для разных типов данных
+- **cacheConfiguration** - конфигурация кэшей с TTL и сериализацией
+- **TweetCacheService** - сервис для кэширования твитов
+- **cacheTweet** - кэширование твита с @CachePut
+- **getCachedTweet** - получение кэшированного твита с @Cacheable
+- **cacheUserTweets** - кэширование твитов пользователя с пагинацией
+- **getCachedUserTweets** - получение кэшированных твитов пользователя
+- **cacheTimeline** - кэширование ленты новостей
+- **getCachedTimeline** - получение кэшированной ленты новостей
+- **cacheTweetStatistics** - кэширование статистики твита
+- **getCachedTweetStatistics** - получение кэшированной статистики
+- **invalidateTweet** - инвалидация кэша твита с @CacheEvict
+- **invalidateUserTweets** - инвалидация кэша твитов пользователя
+- **invalidateTimeline** - инвалидация кэша ленты новостей
+- **invalidateTweetStatistics** - инвалидация кэша статистики
+
+#### User Profile Cache Service
+- **UserProfileCacheService** - сервис для кэширования профилей пользователей
+- **cacheUserProfile** - кэширование профиля пользователя с @CachePut
+- **getCachedUserProfile** - получение кэшированного профиля с @Cacheable
+- **cacheUserExists** - кэширование проверки существования пользователя
+- **getCachedUserExists** - получение кэшированной проверки существования
+- **invalidateUserProfile** - инвалидация кэша профиля с @CacheEvict
+- **invalidateAllUserCaches** - инвалидация всех кэшей пользователя
+
+#### Инвалидация кэша
+- **CacheInvalidationService** - сервис для инвалидации кэша по событиям
+- **handleTweetCreated** - инвалидация кэша при создании твита (@EventListener)
+- **handleTweetUpdated** - инвалидация кэша при обновлении твита
+- **handleTweetDeleted** - инвалидация кэша при удалении твита
+- **handleTweetLiked** - инвалидация кэша статистики при лайке
+- **handleTweetRetweeted** - инвалидация кэша статистики при ретвите
+- **handleUserProfileUpdated** - инвалидация кэша профиля при обновлении
+- **handleUserDeactivated** - инвалидация всех кэшей при деактивации пользователя
+- **invalidateFollowerTimelines** - инвалидация кэша лент подписчиков
+- **invalidateAllCaches** - инвалидация всех кэшей (для обслуживания)
+- **invalidateCachesByPattern** - инвалидация кэшей по паттерну
+
+#### Cache Events
+- **TweetCreatedEvent** - событие создания твита
+- **TweetUpdatedEvent** - событие обновления твита
+- **TweetDeletedEvent** - событие удаления твита
+- **TweetLikedEvent** - событие лайка твита
+- **TweetRetweetedEvent** - событие ретвита твита
+- **UserProfileUpdatedEvent** - событие обновления профиля пользователя
+- **UserDeactivatedEvent** - событие деактивации пользователя
+
+#### Структура пакетов системы кэширования
+- `cache/http/` - HTTP кэширование
+- `cache/redis/` - Redis кэширование
+- `cache/service/` - сервисы кэширования
+- `cache/event/` - события кэширования
+- `cache/metrics/` - метрики кэширования
+- `cache/config/` - конфигурация кэширования
+- `cache/health/` - проверка здоровья кэша
+
+#### Конфигурация системы кэширования
+- `app.cache.enabled` - включение/выключение кэширования
+- `app.cache.ttl.tweetCacheSeconds` - TTL для кэша твитов (300 секунд)
+- `app.cache.ttl.userProfileCacheSeconds` - TTL для кэша профилей (600 секунд)
+- `app.cache.ttl.timelineCacheSeconds` - TTL для кэша лент (30 секунд)
+- `app.cache.ttl.statisticsCacheSeconds` - TTL для кэша статистики (60 секунд)
+- `app.cache.ttl.userTweetsCacheSeconds` - TTL для кэша твитов пользователя (120 секунд)
+- `app.cache.ttl.userExistsCacheSeconds` - TTL для кэша существования пользователя (300 секунд)
+- `app.cache.redis.host` - хост Redis (localhost)
+- `app.cache.redis.port` - порт Redis (6379)
+- `app.cache.redis.password` - пароль Redis
+- `app.cache.redis.database` - база данных Redis (0)
+- `app.cache.redis.timeout` - таймаут подключения (2000 мс)
+- `app.cache.redis.maxConnections` - максимальное количество соединений (10)
+- `app.cache.redis.maxIdleConnections` - максимальное количество неактивных соединений (5)
+- `app.cache.redis.minIdleConnections` - минимальное количество неактивных соединений (1)
+- `app.cache.http.enableETag` - включение ETag заголовков
+- `app.cache.http.enableLastModified` - включение Last-Modified заголовков
+
+#### Конфигурация системы пагинации
+- **Многостратегическая пагинация** - Offset-based, Cursor-based и Hybrid подходы
+- **Offset-based Pagination** - для статических списков с произвольным доступом к страницам
+- **Cursor-based Pagination** - для динамических данных с высокой производительностью и консистентностью
+- **Hybrid Pagination** - комбинация подходов с автоматическим выбором стратегии
+- **Классификация данных по стратегиям**:
+  - **Статические данные (OFFSET)** - список пользователей, административные списки, справочные данные
+  - **Динамические данные (CURSOR)** - лента новостей, твиты пользователя, лайки и ретвиты
+  - **Смешанные данные (HYBRID)** - поиск по твитам, фильтрованные списки
+
+#### Offset-based пагинация
+- **OffsetPaginationService** - сервис для offset-based пагинации
+- **getTweets** - получение твитов с пагинацией (page, size, sort)
+- **getTweetsByUser** - получение твитов пользователя с пагинацией
+- **getTweetsWithFilter** - получение твитов с фильтрацией и пагинацией
+- **adjustPageSize** - корректировка размера страницы в пределах лимитов
+- **OffsetPaginationResponse** - ответ с метаданными пагинации
+- **OffsetPaginationMetadata** - метаданные (size, number, totalElements, totalPages, first, last, hasNext, hasPrevious)
+
+#### Cursor-based пагинация
+- **CursorPaginationService** - сервис для cursor-based пагинации
+- **getTweets** - получение твитов с курсором (cursor, size, direction)
+- **getTweetsByUser** - получение твитов пользователя с курсором
+- **getTimeline** - получение ленты новостей с курсором
+- **getTweetsForward** - получение твитов вперед от курсора
+- **getTweetsBackward** - получение твитов назад от курсора
+- **getTweetsInitial** - получение начальных твитов
+- **getNextCursor** - получение курсора для следующей страницы
+- **getPreviousCursor** - получение курсора для предыдущей страницы
+- **encodeCursor** - кодирование курсора в Base64
+- **parseCursor** - парсинг курсора из Base64
+- **CursorPaginationResponse** - ответ с метаданными курсорной пагинации
+- **CursorPaginationMetadata** - метаданные (size, hasNext, hasPrevious, nextCursor, previousCursor)
+
+#### Оптимизированные запросы
+- **Custom Repository Queries** - оптимизированные запросы для пагинации
+- **findAllByIsDeletedFalse** - получение всех твитов с пагинацией
+- **findByUserIdAndIsDeletedFalse** - получение твитов пользователя с пагинацией
+- **findByIdLessThanAndIsDeletedFalseOrderByIdDesc** - cursor-based запрос вперед
+- **findByIdGreaterThanAndIsDeletedFalseOrderByIdAsc** - cursor-based запрос назад
+- **findByUserIdAndIdLessThanAndIsDeletedFalseOrderByIdDesc** - cursor-based запрос пользователя вперед
+- **findByUserIdAndIdGreaterThanAndIsDeletedFalseOrderByIdAsc** - cursor-based запрос пользователя назад
+- **findTimelineInitial** - получение начальной ленты новостей
+- **findTimelineForward** - получение ленты новостей вперед
+- **findTimelineBackward** - получение ленты новостей назад
+- **findTweetSummaries** - получение кратких данных твитов с проекцией
+- **findTweetSummariesByUser** - получение кратких данных твитов пользователя
+- **countByUserIdAndIsDeletedFalse** - подсчет твитов пользователя
+- **countByIsDeletedFalse** - подсчет всех твитов
+- **existsByIdAndIsDeletedFalse** - проверка существования твита
+- **existsByUserIdAndIsDeletedFalse** - проверка существования твитов пользователя
+
+#### Query Optimization Service
+- **QueryOptimizationService** - сервис оптимизации запросов
+- **executeOptimizedQuery** - выполнение оптимизированного запроса
+- **determineOptimizationStrategy** - определение стратегии оптимизации
+- **executeWithProjection** - выполнение с проекцией для уменьшения передачи данных
+- **executeWithIndexHint** - выполнение с подсказками индексов
+- **executeWithBatchLoading** - выполнение с batch loading для больших наборов данных
+- **executeWithCache** - выполнение с кэшированием для часто используемых данных
+- **executeStandard** - стандартное выполнение без оптимизации
+- **estimateResultSize** - оценка размера результата для принятия решений об оптимизации
+- **QueryOptimizationStrategy** - enum стратегий (USE_PROJECTION, USE_INDEX_HINT, USE_BATCH_LOADING, USE_CACHE, STANDARD)
+- **QueryType** - enum типов запросов (TWEETS, USER_TWEETS, TIMELINE, POPULAR_TWEETS)
+
+#### Обработка больших объемов данных
+- **LargeDatasetHandler** - обработчик больших наборов данных
+- **streamLargeDataset** - обработка с streaming для больших наборов данных
+- **parallelLargeDataset** - обработка с параллельным выполнением
+- **chunkLargeDataset** - обработка с разбиением на чанки
+- **getTotalCount** - получение общего количества для больших наборов данных
+- **Stream.iterate** - итерация по батчам данных
+- **IntStream.range().parallel()** - параллельная обработка батчей
+- **streamingBatchSize** - размер батча для streaming
+- **parallelBatchSize** - размер батча для параллельной обработки
+
+#### Мониторинг и метрики пагинации
+- **PaginationMetricsService** - сервис для сбора метрик пагинации
+- **recordPaginationRequest** - запись метрик запроса пагинации (strategy, queryType, pageSize, executionTime)
+- **recordPaginationPerformance** - запись метрик производительности (strategy, queryType, resultSize, totalElements)
+- **recordPaginationError** - запись метрик ошибок пагинации (strategy, queryType, errorType)
+- **Timer** - измерение времени выполнения запросов пагинации
+- **Counter** - подсчет количества запросов пагинации
+- **Gauge** - измерение размера результата и общего количества элементов
+- **Tags** - теги для метрик (strategy, query_type, page_size, error_type)
+
+#### Конфигурация пагинации
+- **PaginationProperties** - конфигурация пагинации через @ConfigurationProperties
+- **enabled** - включение/выключение функций пагинации
+- **Defaults** - настройки по умолчанию
+- **defaultPageSize** - размер страницы по умолчанию (20)
+- **defaultStrategy** - стратегия по умолчанию (CURSOR)
+- **defaultSort** - сортировка по умолчанию (createdAt DESC)
+- **Limits** - лимиты пагинации
+- **maxPageSize** - максимальный размер страницы (100)
+- **minPageSize** - минимальный размер страницы (1)
+- **offsetThreshold** - порог для переключения на cursor-based (1000)
+- **Optimization** - настройки оптимизации
+- **projectionThreshold** - порог для использования проекции (1000)
+- **batchThreshold** - порог для batch loading (500)
+- **enableQueryOptimization** - включение оптимизации запросов
+- **enableIndexHints** - включение подсказок индексов
+- **Performance** - настройки производительности
+- **streamingBatchSize** - размер батча для streaming (1000)
+- **parallelBatchSize** - размер батча для параллельной обработки (500)
+- **maxConcurrentQueries** - максимальное количество одновременных запросов (10)
+- **queryTimeout** - таймаут запроса (30 секунд)
+
+#### Структура пакетов системы пагинации
+- `pagination/offset/` - offset-based пагинация
+- `pagination/cursor/` - cursor-based пагинация
+- `pagination/hybrid/` - hybrid пагинация
+- `pagination/optimization/` - оптимизация запросов
+- `pagination/handler/` - обработка больших объемов данных
+- `pagination/metrics/` - метрики пагинации
+- `pagination/config/` - конфигурация пагинации
+- `pagination/response/` - ответы пагинации
+
+#### Конфигурация JPA/Hibernate
+- **batch_size: 20** для batch операций
+- **order_inserts: true** для оптимизации вставок
+- **order_updates: true** для оптимизации обновлений
+- **batch_versioned_data: true** для версионированных данных
+- **open-in-view: false** для предотвращения LazyInitializationException
+
+#### Мониторинг производительности
+- **format_sql: true** для форматирования SQL запросов
+- **show_sql: false** в production для производительности
+- **Индексы** для оптимизации частых запросов
+- **Статистика** использования индексов через PostgreSQL
+- **Стандартизированные ответы** с метаданными (timestamp, requestId)
+- **Graceful error handling** с детальными кодами ошибок
+- **Versioning** для обратной совместимости API
+
+### 3.9 Модель данных
+
+#### Архитектурные принципы проектирования
+- **UUID идентификаторы** для поддержки распределенных систем
+- **Soft delete** с временными метками для сохранения истории
+- **Дениormalized счетчики** для оптимизации частых запросов статистики
+- **Составные индексы** для ускорения сложных запросов
+- **Автоматические триггеры** для поддержания целостности данных
+
+#### Основные сущности
+- **tweets** - основная таблица твитов с метаданными и статистикой
+- **tweet_likes** - таблица лайков с уникальностью на пользователя
+- **tweet_retweets** - таблица ретвитов с возможностью комментариев
+- **tweet_replies** - таблица ответов на твиты
+
+#### Стратегия индексации
+- **Составные индексы** для основных запросов (user_id + created_at)
+- **Full-text search** индексы для поиска по содержимому
+- **Специализированные индексы** для аналитических запросов
+- **Партиционированные индексы** для больших объемов данных
+
+#### Автоматизация и целостность
+- **Триггеры** для автоматического обновления счетчиков лайков/ретвитов/ответов
+- **Представления** для оптимизированных запросов и консистентности данных
+- **Ограничения** для валидации бизнес-правил на уровне БД
+- **Cascade удаление** для поддержания ссылочной целостности
+
+### 3.10 REST API Design
+
+#### Архитектурные принципы API
+- **RESTful архитектура** с четким разделением ресурсов
+- **HTTP методы** соответствуют операциям (GET, POST, PUT, DELETE)
+- **Статус коды** отражают результат операции
+- **Версионирование** через URL path (/api/v1/)
+- **Консистентность** в именовании и структуре
+
+#### Структура API endpoints
+
+**Основные операции с твитами:**
+- `POST /api/v1/tweets` - Создание твита (HttpStatus.CREATED, @Valid валидация)
+- `GET /api/v1/tweets/{tweetId}` - Получение твита по ID (Optional pattern, 404 при отсутствии)
+- `PUT /api/v1/tweets/{tweetId}` - Обновление твита (только автор, авторизация в Service Layer)
+- `DELETE /api/v1/tweets/{tweetId}` - Удаление твита (soft delete, ResponseEntity.noContent())
+
+**Операции с пользователями:**
+- `GET /api/v1/tweets/user/{userId}` - Твиты пользователя с пагинацией (@PageableDefault, PagedModel)
+- `GET /api/v1/tweets/timeline/{userId}` - Лента новостей пользователя (сложная бизнес-логика в Service Layer)
+
+**Социальные функции:**
+- `POST /api/v1/tweets/{tweetId}/like` - Лайк твита (вложенные ресурсы, проверка дублирования)
+- `DELETE /api/v1/tweets/{tweetId}/like` - Убрать лайк (ResponseEntity.noContent())
+- `POST /api/v1/tweets/{tweetId}/retweet` - Ретвит с комментарием (HttpStatus.CREATED)
+- `DELETE /api/v1/tweets/{tweetId}/retweet` - Убрать ретвит (ResponseEntity.noContent())
+
+**Получение статистики и списков:**
+- `GET /api/v1/tweets/{tweetId}/likes` - Список пользователей, лайкнувших твит (PagedModel)
+- `GET /api/v1/tweets/{tweetId}/retweets` - Список пользователей, ретвитнувших твит (PagedModel)
+
+#### Реализация контроллеров
+- **TweetController** implements TweetApi интерфейс
+- **@RestController** с @RequestMapping("/api/v1/tweets")
+- **@RequiredArgsConstructor** для автоматической инъекции зависимостей
+- **@LoggableRequest** на всех методах для автоматического логирования
+- **Делегирование бизнес-логики** в TweetService
+- **Optional pattern** для обработки отсутствующих данных
+
+#### Параметры пагинации
+- **page**: номер страницы (начиная с 0, по умолчанию 0)
+- **size**: размер страницы (1-100, по умолчанию 20)
+- **Пример**: `?page=0&size=20`
+
+#### HTTP статус коды
+- **200 OK**: Успешное получение данных
+- **201 Created**: Успешное создание ресурса (твит, лайк, ретвит)
+- **204 No Content**: Успешное удаление без возврата данных
+- **400 Bad Request**: Ошибки валидации или некорректные данные
+- **401 Unauthorized**: Отсутствие аутентификации
+- **403 Forbidden**: Недостаточно прав (не автор твита)
+- **404 Not Found**: Ресурс не найден (твит, пользователь)
+- **409 Conflict**: Конфликт состояния (дублирование лайка/ретвита)
+- **500 Internal Server Error**: Внутренняя ошибка сервера
+- **503 Service Unavailable**: Внешний сервис недоступен
+
+#### Стандартизированные ответы
+- **Успешные ответы**: структура с data и meta полями
+- **Ошибки**: детальные коды ошибок с контекстом
+- **Пагинация**: стандартная структура с метаданными
+- **Метаданные**: timestamp, requestId для трассировки
+
+#### OpenAPI интеграция
+- **TweetApi интерфейс** с @Operation и @ApiResponses аннотациями
+- **DTO с @Schema аннотациями** для детальной документации
+- **TweetApiOpenApiConfig** для конфигурации OpenAPI
+- **Swagger UI** с настройками отображения и фильтрации
+- **SpringDoc OpenAPI** для автоматической генерации документации
+- **Примеры запросов/ответов** в @Schema аннотациях
+
+#### Основные DTO структуры
+
+**Request DTOs:**
+- `CreateTweetRequest`: content (1-280 символов), userId
+- `UpdateTweetRequest`: content (1-280 символов)
+- `LikeTweetRequest`: userId
+- `RetweetRequest`: userId, comment (опционально, до 280 символов)
+
+**Response DTOs:**
+- `TweetResponse`: полная информация о твите с статистикой и автором
+- `TweetListResponse`: список твитов с пагинацией
+- `LikeResponse`: информация о лайке
+- `RetweetResponse`: информация о ретвите
+- `PaginationInfo`: метаданные пагинации (page, size, totalElements, totalPages)
+
+**Error DTOs:**
+- `ErrorResponse`: стандартная структура ошибки с кодом и сообщением
+- `ValidationErrorResponse`: детали ошибок валидации
+- `ResponseMeta`: метаданные ответа (timestamp, requestId)
+
+#### Валидация и бизнес-правила
+
+**Правила создания твита:**
+- Контент не может быть пустым или состоять только из пробелов
+- Максимальная длина контента: 280 символов
+- Пользователь должен существовать в users-api
+- Твит не может быть создан от имени несуществующего пользователя
+
+**Правила обновления твита:**
+- Только автор может обновлять твит
+- Удаленные твиты нельзя обновлять
+- Новый контент должен соответствовать правилам валидации
+
+**Правила удаления твита:**
+- Только автор может удалять твит
+- Удаление выполняется как soft delete
+- Статистика (лайки, ретвиты) сохраняется
+
+**Правила социальных действий:**
+- Пользователь не может лайкнуть/ретвитнуть свой твит
+- Один пользователь может лайкнуть твит только один раз
+- Один пользователь может ретвитнуть твит только один раз
+- При удалении твита все связанные действия помечаются как неактивные
+
+**Технические правила валидации:**
+- **Bean Validation** для базовой валидации полей (@NotBlank, @Size, @Pattern)
+- **Кастомные валидаторы** для бизнес-правил (@UserExists, @NoSelfAction)
+- **Группы валидации** для разных операций (@Validated(CreateGroup.class))
+- **Валидация UUID** через @NotNull и @Valid аннотации
+- **Обработка ошибок валидации** через @ExceptionHandler(MethodArgumentNotValidException.class)
+
+#### Кастомные валидаторы и санитизация контента
+- **@UserExists** - проверка существования пользователя через UsersApiClient с fallback при ошибках API
+- **@NoSelfAction** - проверка на самодействия (лайк/ретвит собственного твита) с рефлексией для разных DTO типов
+- **@TweetExists** - проверка существования твита через TweetRepository с учетом soft delete
+- **@TweetAccess** - проверка прав доступа к твиту для операций обновления/удаления
+- **ContentSanitizer** - санитизация контента для защиты от XSS атак (удаление HTML тегов, script тегов, javascript: протоколов)
+- **ContentValidationService** - валидация и санитизация твитов и комментариев ретвитов
+- **ContentValidationResult** - структура результата валидации контента с флагом валидности и сообщением об ошибке
+- **Spam detection** - обнаружение потенциального спама через регулярные выражения
+
+#### Обработка ошибок валидации и мониторинг
+- **TweetValidationException** - специализированное исключение для ошибок валидации твитов
+- **ContentValidationException** - исключение для ошибок валидации контента
+- **TweetValidationExceptionHandler** - обработчик ошибок валидации с ConstraintViolationException и MethodArgumentNotValidException
+- **ValidationErrorResponse** - структурированный ответ с деталями ошибок валидации
+- **ValidationMetrics** - метрики валидации (success/failure counters, duration timer)
+- **ValidationMetricsAspect** - AOP аспект для автоматического сбора метрик валидации
+- **ValidationConfig** - конфигурация валидации с Validator, MessageSource, LocalValidatorFactoryBean
+- **ValidationProperties** - настройки валидации (maxTweetLength, maxCommentLength, enableSanitization, enableSpamDetection)
+
+#### Интеграция с shared/common-lib
+- **ValidationException** - базовый класс для всех ошибок валидации из shared/common-lib
+- **ValidationType** - типизация ошибок валидации (FORMAT, BUSINESS_RULE, UNIQUENESS)
+- **GlobalExceptionHandler** - централизованная обработка ошибок из shared/common-lib
+- **LoggableRequestAspect** - логирование валидационных ошибок из shared/common-lib
+- **FormatValidationException** - ошибки формата данных
+- **BusinessRuleValidationException** - ошибки бизнес-правил
+- **UniquenessValidationException** - ошибки уникальности
+
+#### Централизованная валидация
+- **TweetValidator** интерфейс для централизованной валидации всех операций с твитами
+- **TweetValidatorImpl** реализация с комплексной валидацией (Bean Validation + бизнес-правила + контент)
+- **validateForCreate** - валидация создания твита (контент, пользователь, санитизация)
+- **validateForUpdate** - валидация обновления твита (существование, доступ, возраст твита)
+- **validateForDelete** - валидация удаления твита (существование, права доступа)
+- **validateForLike** - валидация лайка (существование твита, самолайк, дублирование)
+- **validateForRetweet** - валидация ретвита (существование твита, самортвит, дублирование, комментарий)
+
+#### Многоуровневая система валидации
+- **DTO Level Validation** - Bean Validation аннотации на уровне DTO (@NotBlank, @Size, @Pattern, @NotNull, @Valid)
+- **Service Level Validation** - Бизнес-правила и кастомная валидация через TweetValidator
+- **Entity Level Validation** - Валидация на уровне JPA Entity с @Column constraints
+- **Database Level Validation** - Constraints на уровне БД (unique constraints, foreign keys)
+- **Fail Fast принцип** - валидация на самом раннем этапе
+- **Separation of Concerns** - разделение технической и бизнес валидации
+- **Consistency** - единообразные сообщения об ошибках
+- **Security First** - приоритет безопасности над удобством
+
+#### Стандартные коды ошибок
+- **VALIDATION_ERROR**: Ошибки валидации входных данных
+- **INTERNAL_SERVER_ERROR**: Внутренняя ошибка сервера
+- **TWEET_NOT_FOUND**: Твит не найден
+- **TWEET_ALREADY_DELETED**: Твит уже удален
+- **TWEET_ACCESS_DENIED**: Недостаточно прав для операции с твитом
+- **USER_NOT_FOUND**: Пользователь не найден
+- **USER_SERVICE_UNAVAILABLE**: Сервис пользователей недоступен
+- **LIKE_ALREADY_EXISTS**: Лайк уже существует
+- **LIKE_NOT_FOUND**: Лайк не найден
+- **RETWEET_ALREADY_EXISTS**: Ретвит уже существует
+- **RETWEET_NOT_FOUND**: Ретвит не найден
+- **SELF_ACTION_NOT_ALLOWED**: Самодействие не разрешено
+- **INVALID_PAGE_NUMBER**: Некорректный номер страницы
+- **INVALID_PAGE_SIZE**: Некорректный размер страницы
+
+### 3.11 Архитектурные паттерны
+
+#### Repository Pattern
+- Абстракция доступа к данным
+- Единообразный интерфейс для разных источников данных
+- Легкое тестирование через моки
+
+#### DTO Pattern
+- Изоляция внутренней модели от внешнего API
+- Контроль над передаваемыми данными
+- Версионирование API без изменения внутренней модели
+
+#### Service Layer Pattern
+- Инкапсуляция бизнес-логики
+- Транзакционность операций
+- Переиспользование логики между контроллерами
+
+#### Dependency Injection
+- Слабая связанность компонентов
+- Легкое тестирование и мокирование
+- Конфигурируемость через Spring
+
+### 3.12 Конфигурация системы
+
+#### Конфигурация MapStruct
+
+### 4.1 Основные технологии
+- **Spring Boot 3.5.5**: основной фреймворк
+- **Java 24**: язык программирования
+- **PostgreSQL**: реляционная база данных
+- **JPA/Hibernate**: ORM для работы с БД
+
+### 4.2 Дополнительные библиотеки
+- **MapStruct**: маппинг объектов
+- **Spring Web**: REST API
+- **Spring Data JPA**: репозитории
+- **Spring Validation**: валидация данных
+- **Spring Actuator**: мониторинг и метрики
+
+### 4.3 Инфраструктура
+- **Docker**: контейнеризация
+- **Docker Compose**: оркестрация сервисов
+- **Gradle**: сборка проекта
+- **JUnit 5**: unit тестирование
+- **TestContainers**: интеграционное тестирование
+
+### 4.4 Shared/Common-lib компоненты
+
+#### LoggableRequestAspect
+- **Автоматическое логирование** HTTP запросов и ответов через AOP
+- **Скрытие чувствительных данных** через hideFields параметр
+- **AOP интеграция** с @LoggableRequest аннотацией
+- **Структурированное логирование** с детальной информацией
+- **Конфигурируемость** через аннотацию параметры
+
+#### Система исключений
+- **ValidationException** (абстрактное базовое исключение)
+- **UniquenessValidationException** для проверки уникальности данных
+- **BusinessRuleValidationException** для нарушений бизнес-правил
+- **FormatValidationException** для ошибок формата данных
+- **ValidationType enum** для классификации типов валидации
+- **GlobalExceptionHandler** для централизованной обработки ошибок
+
+#### GlobalExceptionHandler
+- **RFC 7807 Problem Details** стандарт для ответов об ошибках
+- **Централизованная обработка** всех типов исключений
+- **Консистентные ответы** для всех сервисов
+- **Автоматическое логирование** ошибок
+- **HTTP статус коды**: 400 Bad Request, 409 Conflict, 500 Internal Server Error
+
+#### Стандартизированная обработка ошибок
+- **TweetErrorCode** - иерархия кодов ошибок для всех операций
+- **TweetErrorResponse** - базовая структура ответа об ошибке в формате RFC 7807 Problem Details
+- **ValidationErrorResponse** - специализированная структура для ошибок валидации с деталями полей
+- **BusinessRuleErrorResponse** - специализированная структура для нарушений бизнес-правил с контекстом
+- **ProblemDetail** - стандартизированный формат ответов об ошибках с полями type, title, status, detail, code, context, timestamp, requestId, instance
+
+#### Типизированные исключения
+- **TweetException** - базовый класс для всех tweet-specific исключений с контекстом и метаданными
+- **TweetNotFoundException** - исключение для случаев, когда твит не найден
+- **TweetAccessDeniedException** - исключение для случаев отказа в доступе к твиту
+- **TweetRateLimitExceededException** - исключение для случаев превышения лимитов частоты
+- **SpamDetectedException** - исключение для случаев обнаружения спама
+- **addContext** - метод для добавления контекстной информации к исключениям
+- **getHttpStatus** - метод для получения HTTP статус кода
+- **getErrorTypeUri** - метод для получения URI типа ошибки
+- **toErrorResponse** - метод для преобразования исключения в ответ об ошибке
+
+#### Логирование и мониторинг ошибок
+- **ErrorLoggingService** - сервис для структурированного логирования ошибок
+- **logError** - метод для логирования ошибок с контекстом и метаданными
+- **ErrorLogEntry** - структура для записи информации об ошибке (timestamp, errorCode, errorMessage, exceptionType, requestMethod, requestUri, requestId, userId, userAgent, clientIp, stackTrace, context)
+- **shouldLogError** - метод для определения необходимости логирования ошибки на основе её серьёзности
+- **logStructuredError** - метод для структурированного логирования в JSON формате
+- **ErrorMetricsService** - сервис для сбора метрик ошибок
+- **recordError** - метод для записи метрик ошибок с тегами
+- **recordErrorResponseTime** - метод для записи времени ответа на ошибку
+- **recordUserError** - метод для записи метрик ошибок по пользователям
+- **recordEndpointError** - метод для записи метрик ошибок по эндпоинтам
+- **getErrorType** - метод для классификации типов ошибок (validation, not_found, access_denied, security, integration, internal, other)
+
+#### TweetGlobalExceptionHandler
+- **TweetGlobalExceptionHandler** - расширенный обработчик исключений для tweet-specific ошибок
+- **handleTweetException** - обработка TweetException с локализацией и метриками
+- **handleConstraintViolation** - обработка ConstraintViolationException с деталями валидации
+- **handleMethodArgumentNotValid** - обработка MethodArgumentNotValidException с деталями полей
+- **handleBusinessRuleValidation** - обработка BusinessRuleValidationException с контекстом правил
+- **handleIntegrationException** - обработка IntegrationException для ошибок интеграции
+- **handleCircuitBreakerOpen** - обработка CircuitBreakerOpenException с Retry-After заголовком
+- **handleTimeout** - обработка TimeoutException для таймаутов
+- **handleRuntimeException** - обработка неожиданных RuntimeException с защитой от утечки информации
+- **logError** - метод для логирования ошибок с контекстом запроса
+- **getRequestId** - извлечение ID запроса из заголовков
+- **getLocale** - определение языка пользователя из Accept-Language заголовка
+- **isDevelopmentEnvironment** - проверка среды разработки для отображения деталей ошибок
+
+#### Enums и утилиты
+- **UserRole** (ADMIN, MODERATOR, USER) для авторизации
+- **UserStatus** (ACTIVE, INACTIVE) для управления состоянием
+- **PasswordUtil** для работы с паролями
+- **PatchDtoFactory** для PATCH операций
+
+#### Паттерны использования
+- **@LoggableRequest** на методах контроллера для логирования
+- **Типизированные исключения** для разных типов ошибок
+- **@Enumerated(EnumType.STRING)** для сохранения enums в БД
+- **RequestContextHolder** для получения HTTP контекста
+- **Factory методы** для создания типичных исключений
+
+## 5. Интеграции с внешними сервисами
+
+### 5.1 Интеграция с users-api
+
+#### Архитектура users-api
+- **Слоистая архитектура**: controller → service → repository → entity
+- **Порт**: 8081, база данных PostgreSQL
+- **OpenAPI/Swagger** конфигурация с детальной документацией
+- **Actuator endpoints** для мониторинга (health, info, metrics, tracing)
+- **Структурированное логирование** с traceId/spanId для трассировки
+
+#### API контракты интеграции:
+- **GET /api/v1/users/{userId}** - получение пользователя по ID
+- **GET /api/v1/users/{userId}/exists** - проверка существования пользователя
+- **POST /api/v1/users/batch** - получение множественных пользователей по ID
+- **Стандартные HTTP статусы** (200, 404, 500) и обработка ошибок
+- **Contract testing** с Pact для проверки совместимости API
+
+#### HTTP клиент и интеграция
+- **UsersApiClient** интерфейс для взаимодействия с users-api
+- **UsersApiClientImpl** реализация с RestTemplate и обработкой ошибок
+- **Методы клиента**: getUserById, getUsersByIds, existsUser, isUserActive, getUserRole, getUserStatus, checkUsersActiveStatus
+- **Обработка ошибок**: HttpClientErrorException, HttpServerErrorException, ResourceAccessException
+- **Типизированные исключения**: UsersApiException для всех ошибок интеграции
+- **Timeout конфигурация** (5 секунд) для предотвращения зависания
+
+#### Текущие интеграции:
+- **Проверка существования пользователей** при создании твита, лайке/ретвите
+- **Получение информации о пользователях** для отображения в списках твитов
+- **Валидация пользователей** для всех операций через кастомные валидаторы
+- **Batch операции** для получения множественных пользователей
+
+#### Circuit Breaker и Fallback стратегии
+- **Circuit Breaker конфигурация**: failure-rate-threshold: 50%, wait-duration: 30s, sliding-window-size: 10, minimum-number-of-calls: 5
+- **Retry механизм**: max-attempts: 3, wait-duration: 1s, retry-exceptions: UsersApiException
+- **TimeLimiter**: timeout-duration: 5s для предотвращения зависания
+- **Fallback стратегии**: UsersApiFallbackService для graceful degradation
+- **Адаптивные стратегии**: в зависимости от состояния Circuit Breaker (CLOSED, OPEN, HALF_OPEN)
+- **Консервативный подход**: для критических операций предполагаем неактивного пользователя
+
+#### Архитектурные решения:
+- **HTTP REST API** для синхронной интеграции
+- **Circuit Breaker Pattern** для защиты от сбоев внешних сервисов
+- **Retry механизмы** с exponential backoff
+- **Timeout настройки** для предотвращения зависания
+- **Fallback стратегии** для graceful degradation
+
+#### Кэширование и производительность
+- **Caffeine кэш**: maximumSize: 1000, expireAfterWrite: 5m, expireAfterAccess: 2m
+- **@Cacheable** аннотации для getUserById, existsUser, isUserActive, getUserRole, getUserStatus
+- **@CacheEvict** для управления кэшем при обновлениях пользователей
+- **Кэшированные клиенты**: CachedUsersApiService для оптимизации производительности
+- **Batch кэширование**: для множественных пользователей
+
+#### Мониторинг и метрики
+- **UsersApiMetrics**: success/failure counters, response timer для observability
+- **UsersApiHealthIndicator**: проверка состояния интеграции с Circuit Breaker
+- **Circuit Breaker метрики**: мониторинг состояния (CLOSED, OPEN, HALF_OPEN)
+- **Prometheus метрики**: для alerting и мониторинга производительности
+- **Structured logging**: для трассировки запросов и ошибок интеграции
+
+#### Обработка ошибок интеграции:
+- **Детальные коды ошибок** (USER_NOT_FOUND, USER_SERVICE_UNAVAILABLE)
+- **Кэширование** информации о пользователях на 10 минут
+- **Graceful degradation** с ограниченной функциональностью
+- **Monitoring и alerting** для проблем интеграции
+- **Structured logging** для трассировки запросов
+
+#### Иерархия исключений интеграции
+- **IntegrationException** - базовое исключение для всех ошибок интеграции с внешними сервисами
+- **UsersApiIntegrationException** - специализированное исключение для users-api с factory методами
+- **CacheIntegrationException** - исключение для ошибок кэширования
+- **IntegrationErrorType** enum: CONNECTION_TIMEOUT, SERVICE_UNAVAILABLE, AUTHENTICATION_FAILED, AUTHORIZATION_FAILED, RATE_LIMIT_EXCEEDED, INVALID_RESPONSE, CIRCUIT_BREAKER_OPEN, RETRY_EXHAUSTED, UNKNOWN_ERROR
+- **Типизированные исключения** с контекстом (serviceName, operation, errorType)
+
+#### Fallback стратегии и Graceful Degradation
+- **FallbackStrategy** интерфейс для всех fallback стратегий с приоритизацией
+- **FallbackManager** для централизованного управления fallback стратегиями
+- **UserFallbackStrategy** - создание минимальной информации о пользователе
+- **ConservativeUserFallbackStrategy** - консервативный подход для критических операций
+- **UserExistsFallbackStrategy** - предполагаем существование пользователя
+- **UserActiveFallbackStrategy** - консервативный подход (предполагаем неактивного пользователя)
+
+#### Система деградации функциональности
+- **DegradationLevel** enum: NONE, MINIMAL, MODERATE, SEVERE, CRITICAL
+- **DegradationManager** для оценки и управления уровнями деградации
+- **AdaptiveUsersApiService** с адаптивными стратегиями в зависимости от уровня деградации
+- **Автоматическое определение уровня** на основе состояния Circuit Breaker и метрик
+- **Уведомления о изменении** уровня деградации для мониторинга
+
+#### Расширенное кэширование и мониторинг
+- **MultiLevelUserCacheService** - многоуровневое кэширование (L1/L2 Cache)
+- **SmartUserCacheService** - умное кэширование с TTL и инвалидацией
+- **CachedUserData** - структура для кэшированных данных с временными метками
+- **Адаптивный TTL** на основе типа пользователя (администраторы кэшируются дольше)
+- **Stale cache fallback** - использование устаревших данных при недоступности API
+
+#### Расширенные метрики интеграции
+- **AdvancedUsersApiMetrics** - детальные метрики (success/failure counters, response timer, fallback timer)
+- **Circuit Breaker метрики** - состояние, failure rate, open duration
+- **Cache метрики** - hit rate, size, eviction statistics
+- **Degradation метрики** - текущий уровень деградации
+- **DistributionSummary** - размер ответов, error rate over time
+
+#### Детальная диагностика здоровья
+- **DetailedUsersApiHealthIndicator** - расширенный health check с детальной диагностикой
+- **Многофакторная оценка** состояния (Circuit Breaker, деградация, response time)
+- **Кэш статистика** в health check (L1/L2 hit rate, size)
+- **API availability** проверка с измерением response time
+- **Автоматическое определение** общего состояния здоровья (UP, DEGRADED, DOWN)
+
+#### Расширенный GlobalExceptionHandler
+- **IntegrationExceptionHandler** для обработки исключений интеграции
+- **ProblemDetail** ответы в формате RFC 7807 с детальной информацией
+- **Автоматическое определение HTTP статусов** на основе типа ошибки
+- **Обработка Circuit Breaker исключений** (CallNotPermittedException)
+- **Обработка таймаутов** (TimeoutException) с соответствующими статусами
+- **Структурированное логирование** всех ошибок интеграции
+
+#### Консистентность архитектуры:
+- **Следование паттернам users-api** для единообразия
+- **Использование shared/common-lib** компонентов
+- **Аналогичная структура пакетов** и слоев
+- **Совместимые конфигурации** Spring Boot и OpenAPI
+
+#### Интеграция с users-api через Service Layer
+- **UsersApiClient** интерфейс для взаимодействия с users-api
+- **Circuit Breaker** для защиты от сбоев внешних сервисов
+- **Fallback стратегии** для graceful degradation при недоступности users-api
+- **Кэширование** информации о пользователях для оптимизации производительности
+- **Типизированные исключения** для обработки ошибок интеграции
+
+#### Circuit Breaker конфигурация
+- **failure-rate-threshold**: 50% для перехода в открытое состояние
+- **wait-duration-in-open-state**: 30 секунд перед попыткой восстановления
+- **sliding-window-size**: 10 запросов для анализа
+- **minimum-number-of-calls**: 5 минимальных вызовов для анализа
+- **permitted-number-of-calls-in-half-open-state**: 3 разрешенных вызова в полуоткрытом состоянии
+
+### 5.2 Будущие интеграции
+
+#### follow-service (планируется):
+- **Получение списка подписок** для ленты новостей
+- **Обновление лент** при изменении подписок
+- **Асинхронная обработка** через message queues
+
+#### timeline-service (планируется):
+- **Кэширование лент** для быстрого доступа
+- **Асинхронное обновление** при создании твитов
+- **Personalization** на основе поведения пользователя
+
+## 6. Нефункциональные требования
+
+### 6.1 Производительность
+- **Время ответа**: < 200ms для чтения, < 500ms для записи
+- **Пропускная способность**: 1000 RPS на чтение, 100 RPS на запись
+- **Database performance**: Query execution time < 100ms
+- **Cache hit rate**: > 80% для часто запрашиваемых данных
+
+### 6.2 Надежность и доступность
+- **Доступность**: 99.9% uptime
+- **Error rate**: < 0.1% для всех операций
+- **Recovery time**: < 5 минут для восстановления после сбоя
+- **Data consistency**: 100% для критических операций
+
+## 7. Риски и митигация
+
+### 7.1 Технические риски
+
+#### Производительность базы данных
+- **Риск**: Медленные запросы при росте объема данных
+- **Митигация**: Составные индексы, партиционирование таблиц, архивирование старых данных
+- **Мониторинг**: Время выполнения запросов, использование индексов, размер БД
+
+#### Высокая нагрузка на чтение
+- **Риск**: Перегрузка сервера при запросах ленты новостей
+- **Митигация**: Redis кэширование, CDN, оптимизированная пагинация, read replicas
+- **Мониторинг**: RPS, время ответа, hit rate кэша, использование CPU
+
+#### Проблемы интеграции
+- **Риск**: Каскадные сбои при недоступности users-api
+- **Митигация**: Circuit breaker pattern, retry механизмы, fallback стратегии
+- **Мониторинг**: Доступность внешних сервисов, время ответа, количество ошибок
+
+### 7.2 Бизнес-риски
+
+#### Потеря данных
+- **Риск**: Коррупция или потеря данных при сбоях
+- **Митигация**: Database replication, automated backups, ACID транзакции
+- **Мониторинг**: Целостность данных, успешность бэкапов, replication lag
+
+#### Безопасность
+- **Риск**: Несанкционированный доступ к данным
+- **Митигация**: Strong authentication, input validation, rate limiting
+- **Мониторинг**: Попытки несанкционированного доступа, подозрительная активность
+
+## 8. Критерии успешности и метрики
+
+### 8.1 Технические метрики
+- **Response time**: < 200ms для чтения, < 500ms для записи
+- **Throughput**: 1000 RPS для чтения, 100 RPS для записи
+- **Availability**: 99.9% uptime
+- **Error rate**: < 0.1% для всех операций
+
+### 8.2 Бизнес-метрики
+- **API success rate**: > 99.9%
+- **User satisfaction**: Measured through feedback
+- **Feature adoption**: Usage of new features
+- **Performance perception**: User-reported performance
+
+### 8.3 Операционные метрики
+- **Deployment frequency**: Weekly releases
+- **Lead time**: < 1 day from commit to production
+- **Mean time to recovery**: < 30 minutes
+- **Change failure rate**: < 5%
+
+## 9. Миграции и развертывание
+
+### 9.1 Стратегия миграций
+- **Создание схемы** tweet_api в PostgreSQL
+- **Поэтапное развертывание** таблиц, индексов и триггеров
+- **Версионирование миграций** для отслеживания изменений
+- **Rollback стратегии** для безопасного отката изменений
+
+## 10. Заключение
+
+### 10.1 Ключевые архитектурные решения
+1. **Микросервисная архитектура** с четким разделением ответственности
+2. **RESTful API** с стандартизированными DTO и обработкой ошибок
+3. **UUID идентификаторы** для поддержки распределенных систем
+4. **Soft delete** для сохранения истории без потери производительности
+5. **Дениormalized счетчики** для оптимизации частых запросов
+6. **Автоматические триггеры** для поддержания целостности данных
+7. **Comprehensive validation** с Bean Validation и кастомными валидаторами
+8. **Circuit breaker pattern** для надежной интеграции с внешними сервисами
+
+### 10.2 Консистентность с users-api
+
+#### Архитектурные принципы
+- **Слоистая архитектура**: controller → service → repository → entity
+- **Интерфейс-реализация** паттерн для всех слоев
+- **DTO паттерн** с использованием Java records
+- **MapStruct маппинг** для автоматической генерации мапперов
+- **Двухуровневая валидация** (DTO + бизнес-правила)
+
+#### Конфигурация и настройки
+- **Порт**: 8082 (следующий после users-api 8081)
+- **База данных**: та же PostgreSQL с отдельной схемой tweet_api
+- **OpenAPI конфигурация** аналогичная users-api
+- **Actuator endpoints** для мониторинга (health, info, metrics, tracing)
+- **Структурированное логирование** с traceId/spanId
+
+#### Использование shared/common-lib
+- **LoggableRequestAspect** для автоматического логирования HTTP запросов
+- **Система исключений** ValidationException и подклассы
+- **GlobalExceptionHandler** расширенный для tweet-specific ошибок
+- **Enums** для TweetStatus, TweetType если необходимо
+
+#### Интеграция shared-lib в tweet-api
+- **Зависимости**: `implementation project(':shared:common-lib')` в build.gradle
+- **Конфигурация**: `@Import(GlobalExceptionHandler.class)` в TweetApiConfig
+- **Логирование**: `@LoggableRequest(hideFields = {"password", "token"})` на контроллерах
+- **Валидация**: использование UniquenessValidationException для проверки уникальности
+- **Бизнес-правила**: BusinessRuleValidationException для tweet-specific правил
+
+#### Tweet-specific расширения
+- **TweetValidationException** extends ValidationException для специфичных случаев
+- **ContentValidationException** extends FormatValidationException для валидации контента
+- **TweetStatus enum** (ACTIVE, DELETED, HIDDEN) для управления состоянием твитов
+- **TweetType enum** (ORIGINAL, RETWEET, REPLY) для классификации типов твитов
+
+#### Обработка ошибок в Service Layer
+- **TweetNotFoundException** для отсутствующих твитов
+- **LikeNotFoundException** для отсутствующих лайков
+- **RetweetNotFoundException** для отсутствующих ретвитов
+- **UsersApiException** для ошибок интеграции с users-api
+- **TweetApiExceptionHandler** расширяет GlobalExceptionHandler для tweet-specific ошибок
+- **RFC 7807 Problem Details** для стандартизированных ответов об ошибках
+
+#### Архитектурные преимущества shared-lib
+- **Консистентность**: единообразные паттерны логирования и обработки ошибок
+- **Масштабируемость**: AOP-based компоненты с минимальным overhead
+- **Безопасность**: автоматическое скрытие чувствительных данных в логах
+- **Расширяемость**: возможность добавления tweet-specific компонентов
+- **RFC 7807 соответствие**: стандартизированные ответы об ошибках
+
+#### Структура пакетов Controller Layer
+- **TweetController.java** - основной контроллер с реализацией TweetApi
+- **TweetApi.java** - OpenAPI интерфейс с аннотациями
+- **dto/request/** - Request DTOs (CreateTweetRequestDto, UpdateTweetRequestDto, LikeTweetRequestDto)
+- **dto/response/** - Response DTOs (TweetResponseDto, LikeResponseDto, RetweetResponseDto)
+- **dto/error/** - Error DTOs (ErrorResponseDto, ValidationErrorResponseDto)
+- **validation/** - Кастомные валидаторы (UserExistsValidator, NoSelfActionValidator)
+
+#### Зависимости Controller Layer
+- **shared/common-lib** - LoggableRequestAspect, система исключений
+- **spring-boot-starter-web** - REST API функциональность
+- **spring-boot-starter-validation** - Bean Validation
+- **springdoc-openapi-starter-webmvc-ui** - OpenAPI/Swagger UI
+- **mapstruct** - автоматическая генерация мапперов
+
+#### Структура пакетов Service Layer
+- **TweetService.java** - интерфейс сервиса
+- **TweetServiceImpl.java** - реализация сервиса
+- **client/** - клиенты для внешних сервисов (UsersApiClient, UsersApiClientImpl, UsersApiFallbackService)
+- **exception/** - tweet-specific исключения (TweetNotFoundException, LikeNotFoundException, RetweetNotFoundException, UsersApiException)
+- **config/** - конфигурации (CircuitBreakerConfig, CacheConfig)
+
+#### Зависимости Service Layer
+- **shared/common-lib** - система исключений, валидация
+- **spring-boot-starter-data-jpa** - JPA/Hibernate функциональность
+- **spring-boot-starter-cache** - кэширование
+- **resilience4j-spring-boot2** - Circuit Breaker
+- **resilience4j-circuitbreaker** - Circuit Breaker функциональность
+- **mapstruct** - автоматическая генерация мапперов
+
+#### Структура пакетов Repository Layer
+- **TweetRepository.java** - основной репозиторий для твитов
+- **LikeRepository.java** - репозиторий для лайков
+- **RetweetRepository.java** - репозиторий для ретвитов
+- **impl/TweetRepositoryImpl.java** - кастомная реализация с batch операциями
+- **specification/TweetSpecification.java** - спецификации для динамических запросов
+- **entity/** - JPA Entities (Tweet.java, Like.java, Retweet.java)
+
+#### Зависимости Repository Layer
+- **spring-boot-starter-data-jpa** - Spring Data JPA функциональность
+- **postgresql** - PostgreSQL драйвер
+- **hibernate-core** - Hibernate ORM
+- **hibernate-validator** - Bean Validation
+- **spring-boot-starter-validation** - Spring Validation
+
+#### Структура пакетов DTO/Mapper Layer
+- **dto/request/** - Request DTOs (CreateTweetRequestDto, UpdateTweetRequestDto, LikeTweetRequestDto, RetweetRequestDto)
+- **dto/response/** - Response DTOs (TweetResponseDto, TweetStatsDto, LikeResponseDto, RetweetResponseDto)
+- **dto/error/** - Error DTOs (ErrorResponseDto, ErrorInfoDto, ValidationErrorResponseDto, ResponseMetaDto)
+- **dto/validation/** - Валидация (ValidationGroups, UserExists, UserExistsValidator, NoSelfAction, NoSelfActionValidator)
+- **mapper/** - MapStruct мапперы (TweetMapper, LikeMapper, RetweetMapper)
+
+#### Зависимости DTO/Mapper Layer
+- **spring-boot-starter-validation** - Bean Validation функциональность
+- **mapstruct** - MapStruct для автоматического маппинга
+- **swagger-annotations** - OpenAPI/Swagger аннотации
+- **mapstruct-processor** - процессор для генерации мапперов
+- **spring-boot-configuration-processor** - процессор конфигурации Spring Boot
+
+#### Структура пакетов системы валидации
+- **validation/annotation/** - кастомные аннотации валидации (@UserExists, @NoSelfAction, @TweetExists, @TweetAccess)
+- **validation/validator/** - кастомные валидаторы (UserExistsValidator, NoSelfActionValidator, TweetExistsValidator, TweetAccessValidator)
+- **validation/service/** - сервисы валидации (TweetValidator, TweetValidatorImpl, ContentValidationService)
+- **validation/sanitizer/** - санитизация контента (ContentSanitizer, ContentValidationResult)
+- **validation/config/** - конфигурация валидации (ValidationConfig, ValidationProperties)
+- **validation/metrics/** - метрики валидации (ValidationMetrics, ValidationMetricsAspect)
+- **validation/exception/** - исключения валидации (TweetValidationException, ContentValidationException)
+- **validation/handler/** - обработчики ошибок валидации (TweetValidationExceptionHandler)
+
+#### Зависимости системы валидации
+- **spring-boot-starter-validation** - Jakarta Bean Validation
+- **hibernate-validator** - реализация Bean Validation
+- **spring-boot-starter-aop** - AOP для метрик валидации
+- **micrometer-core** - метрики для мониторинга валидации
+- **spring-boot-configuration-processor** - обработка конфигурации
+- **spring-boot-starter-test** - тестирование валидации
+- **testcontainers** - интеграционные тесты с БД
+
+#### Структура пакетов системы бизнес-правил
+- **business/rules/creation/** - правила создания твитов (TweetCreationRules, RateLimitingRules, SpamDetectionRules)
+- **business/rules/update/** - правила обновления твитов (TweetUpdateRules, TimeBasedRules)
+- **business/rules/social/** - правила социальных действий (LikeRules, RetweetRules)
+- **business/rules/access/** - правила контроля доступа (AuthorizationRules, RoleBasedRules)
+- **business/rules/abuse/** - правила защиты от злоупотреблений (AbuseDetectionRules, UserBlockingRules)
+- **business/rules/manager/** - централизованное управление (TweetBusinessRulesManager)
+- **business/rules/config/** - конфигурация правил (BusinessRulesProperties)
+- **business/rules/metrics/** - метрики и аудит (BusinessRulesMetrics, BusinessRulesAuditLogger)
+
+#### Зависимости системы бизнес-правил
+- **spring-boot-starter-data-redis** - Redis для rate limiting и кэширования
+- **spring-boot-starter-validation** - Jakarta Bean Validation для валидации
+- **micrometer-core** - метрики для мониторинга бизнес-правил
+- **spring-boot-starter-aop** - AOP для аспектов мониторинга
+- **spring-boot-configuration-processor** - обработка конфигурации
+- **spring-boot-starter-test** - тестирование бизнес-правил
+- **testcontainers** - интеграционные тесты с Redis
+
+#### Структура пакетов системы обработки ошибок
+- **error/code/** - коды ошибок (TweetErrorCode, ErrorCodeMapping)
+- **error/response/** - структуры ответов об ошибках (TweetErrorResponse, ValidationErrorResponse, BusinessRuleErrorResponse)
+- **error/exception/** - исключения (TweetException, TweetNotFoundException, TweetAccessDeniedException, TweetRateLimitExceededException, SpamDetectedException)
+- **error/handler/** - обработчики ошибок (TweetGlobalExceptionHandler)
+- **error/localization/** - локализация (ErrorLocalizationService, messages_en.properties, messages_ru.properties)
+- **error/logging/** - логирование (ErrorLoggingService, ErrorLogEntry)
+- **error/metrics/** - метрики (ErrorMetricsService)
+- **error/config/** - конфигурация (ErrorHandlingProperties)
+
+#### Зависимости системы обработки ошибок
+- **spring-boot-starter-web** - для HTTP обработки ошибок
+- **spring-boot-starter-validation** - для обработки ошибок валидации
+- **micrometer-core** - для метрик ошибок
+- **spring-boot-starter-aop** - для AOP логирования
+- **spring-boot-configuration-processor** - для обработки конфигурации
+- **spring-boot-starter-test** - для тестирования обработки ошибок
+- **jackson-databind** - для JSON сериализации
+
+#### Конфигурация системы обработки ошибок
+- **app.error-handling.enabled**: true - включение системы обработки ошибок
+- **app.error-handling.includeStackTrace**: false - включение stack trace в ответы
+- **app.error-handling.includeExceptionDetails**: false - включение деталей исключений в ответы
+- **app.error-handling.defaultInternalErrorMessage**: "An unexpected error occurred" - сообщение по умолчанию для внутренних ошибок
+- **app.error-handling.responseFormat**: PROBLEM_DETAIL - формат ответов об ошибках
+- **app.error-handling.localization.enabled**: true - включение локализации
+- **app.error-handling.localization.supportedLocales**: ["en", "ru"] - поддерживаемые языки
+- **app.error-handling.localization.defaultLocale**: "en" - язык по умолчанию
+- **app.error-handling.logging.enabled**: true - включение логирования ошибок
+- **app.error-handling.logging.jsonFormat**: true - JSON формат логов
+- **app.error-handling.logging.includeStackTrace**: true - включение stack trace в логи
+- **app.error-handling.logging.logValidationErrors**: false - логирование ошибок валидации
+- **app.error-handling.logging.logSecurityErrors**: true - логирование ошибок безопасности
+- **app.error-handling.logging.logAllErrors**: false - логирование всех ошибок
+- **app.error-handling.metrics.enabled**: true - включение метрик ошибок
+- **app.error-handling.metrics.recordUserErrors**: true - запись метрик по пользователям
+- **app.error-handling.metrics.recordEndpointErrors**: true - запись метрик по эндпоинтам
+- **app.error-handling.metrics.recordResponseTimes**: true - запись времени ответа
+
+#### Конфигурация системы бизнес-правил
+- **app.business-rules.rate-limiting.maxTweetsPerHour**: 10 - максимальное количество твитов в час
+- **app.business-rules.rate-limiting.maxLikesPerHour**: 100 - максимальное количество лайков в час
+- **app.business-rules.rate-limiting.maxRetweetsPerHour**: 50 - максимальное количество ретвитов в час
+- **app.business-rules.time-based.maxUpdateAgeDays**: 7 - максимальный возраст твита для обновления
+- **app.business-rules.time-based.maxDeleteAgeDays**: 30 - максимальный возраст твита для удаления
+- **app.business-rules.time-based.maxLikeAgeDays**: 30 - максимальный возраст твита для лайка
+- **app.business-rules.time-based.maxRetweetAgeDays**: 30 - максимальный возраст твита для ретвита
+- **app.business-rules.abuse-detection.maxTweetsPerHour**: 20 - лимит для обнаружения злоупотреблений
+- **app.business-rules.abuse-detection.maxLikesPerHour**: 200 - лимит лайков для обнаружения злоупотреблений
+- **app.business-rules.abuse-detection.maxRetweetsPerHour**: 100 - лимит ретвитов для обнаружения злоупотреблений
+- **app.business-rules.spam-detection.spamKeywords**: ["free money", "click here", "spam", "scam", "win now"] - ключевые слова спама
+- **app.business-rules.spam-detection.maxLinksPerTweet**: 3 - максимальное количество ссылок в твите
+- **app.business-rules.spam-detection.maxMentionsPerTweet**: 5 - максимальное количество упоминаний в твите
+- **app.business-rules.spam-detection.enableSpamDetection**: true - включение обнаружения спама
+
+#### Конфигурация системы валидации
+- **app.validation.maxTweetLength**: 280 - максимальная длина твита
+- **app.validation.maxCommentLength**: 280 - максимальная длина комментария ретвита
+- **app.validation.enableSanitization**: true - включение санитизации контента
+- **app.validation.enableSpamDetection**: true - включение обнаружения спама
+- **app.validation.maxUpdateAgeDays**: 7 - максимальный возраст твита для обновления
+- **app.validation.enableDuplicatePrevention**: true - предотвращение дублирования действий
+- **spring.jpa.properties.hibernate.validator.apply_to_ddl**: false - отключение валидации на уровне DDL
+- **spring.jpa.properties.hibernate.validator.fail_fast**: true - быстрая остановка при первой ошибке валидации
+
+#### Структура пакетов интеграции с users-api
+- **integration/client/** - UsersApiClient, UsersApiClientImpl, CachedUsersApiService
+- **integration/fallback/** - UsersApiFallbackService, AdaptiveUsersApiService
+- **integration/config/** - CircuitBreakerConfig, CacheConfig, RestTemplateConfig
+- **integration/metrics/** - UsersApiMetrics, UsersApiHealthIndicator
+- **integration/dto/** - BatchUsersRequestDto, BatchUsersResponseDto
+- **integration/exception/** - UsersApiException для обработки ошибок интеграции
+
+#### Зависимости интеграции с users-api
+- **spring-boot-starter-web** - RestTemplate для HTTP клиента
+- **spring-boot-starter-cache** - кэширование с Caffeine
+- **spring-boot-starter-actuator** - мониторинг и health checks
+- **resilience4j-spring-boot2** - Circuit Breaker и Retry механизмы
+- **resilience4j-circuitbreaker** - Circuit Breaker функциональность
+- **resilience4j-retry** - Retry механизмы
+- **resilience4j-timelimiter** - Timeout конфигурация
+- **caffeine** - кэш провайдер
+- **micrometer-core** - метрики для мониторинга
+
+#### Структура пакетов обработки ошибок интеграции
+- **integration/exception/** - IntegrationException, UsersApiIntegrationException, CacheIntegrationException
+- **integration/fallback/** - FallbackStrategy, FallbackManager, UserFallbackStrategy, ConservativeUserFallbackStrategy, UserExistsFallbackStrategy, UserActiveFallbackStrategy
+- **integration/degradation/** - DegradationLevel, DegradationContext, DegradationManager, AdaptiveUsersApiService
+- **integration/cache/** - MultiLevelUserCacheService, SmartUserCacheService, CachedUserData
+- **integration/metrics/** - AdvancedUsersApiMetrics, DetailedUsersApiHealthIndicator
+- **integration/handler/** - IntegrationExceptionHandler
+
+#### Конфигурация обработки ошибок интеграции
+- **resilience4j.circuitbreaker**: failure-rate-threshold: 50%, wait-duration: 30s, sliding-window-size: 10, record-exceptions: UsersApiIntegrationException
+- **resilience4j.retry**: max-attempts: 3, wait-duration: 1s, retry-exceptions: UsersApiIntegrationException
+- **resilience4j.timelimiter**: timeout-duration: 5s
+- **spring.cache**: type: caffeine, maximumSize: 1000, expireAfterWrite: 5m, expireAfterAccess: 2m
+- **management.endpoints**: health, info, metrics, prometheus с детальной диагностикой
+- **users-api.fallback**: enabled: true, strategies: user-fallback, conservative-fallback
+- **users-api.degradation**: enabled: true, thresholds: moderate: 0.3, severe: 0.6, critical: 0.8
+
+#### Конфигурация интеграции с users-api
+- **resilience4j.circuitbreaker**: failure-rate-threshold: 50%, wait-duration: 30s, sliding-window-size: 10
+- **resilience4j.retry**: max-attempts: 3, wait-duration: 1s, retry-exceptions: UsersApiException
+- **resilience4j.timelimiter**: timeout-duration: 5s
+- **spring.cache**: type: caffeine, maximumSize: 1000, expireAfterWrite: 5m, expireAfterAccess: 2m
+- **users-api**: base-url, timeout, retry-attempts конфигурация
+
+### 10.3 Следующие шаги
+
+#### Этап 1: Базовая инфраструктура
+1. **Создание миграций** для схемы базы данных
+2. **Создание JPA Entities** (Tweet, Like, Retweet) с индексами
+3. **Реализация Repository интерфейсов** с кастомными запросами
+4. **Создание Request/Response DTOs** с OpenAPI аннотациями
+5. **Реализация MapStruct мапперов** (TweetMapper, LikeMapper, RetweetMapper)
+
+#### Этап 2: Бизнес-логика и валидация
+6. **Реализация TweetService** с бизнес-логикой
+7. **Создание кастомных валидаторов** (@UserExists, @NoSelfAction)
+8. **Реализация системы валидации** (TweetValidator, ContentValidationService)
+9. **Настройка системы бизнес-правил** (TweetBusinessRulesManager)
+
+#### Этап 3: REST API и контроллеры
+10. **Реализация TweetController** с TweetApi интерфейсом
+11. **Настройка OpenAPI конфигурации** и Swagger UI
+12. **Создание Error DTOs** для обработки ошибок
+13. **Настройка обработки ошибок** в контроллерах
+
+#### Этап 4: Интеграция и производительность
+14. **Реализация UsersApiClient** для интеграции с users-api
+15. **Настройка Circuit Breaker** и Retry механизмов
+16. **Настройка кэширования** с Redis
+17. **Реализация системы пагинации** (Offset, Cursor, Hybrid)
+
+#### Этап 5: Мониторинг и тестирование
+18. **Реализация мониторинга** и метрик
+19. **Настройка Contract Testing** с Pact
+20. **Тестирование производительности** и нагрузочное тестирование
+
+---
+
+*Документ создан: 2025-01-27*  
+*Версия: 1.0*  
+*Статус: Draft*

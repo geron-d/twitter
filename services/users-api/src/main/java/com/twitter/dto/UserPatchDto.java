@@ -30,17 +30,11 @@ public class UserPatchDto {
 
     /**
      * User's first name.
-     * <p>
-     * This field stores the user's given name and is optional.
-     * Used for personalization and display purposes.
      */
     private String firstName;
 
     /**
      * User's last name.
-     * <p>
-     * This field stores the user's family name and is optional.
-     * Used for personalization and display purposes.
      */
     private String lastName;
 
@@ -48,7 +42,6 @@ public class UserPatchDto {
      * Unique email address for the user.
      * <p>
      * This field must be unique across all users and is optional for updates.
-     * Used for communication and account recovery purposes.
      * Must be a valid email format if provided.
      */
     @Email(message = "Invalid email format")

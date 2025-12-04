@@ -29,8 +29,7 @@ public interface UserService {
     /**
      * Retrieves a user by their unique identifier.
      * <p>
-     * This method performs a database lookup and returns the user data
-     * if found. Returns an empty Optional if the user does not exist
+     * Returns an empty Optional if the user does not exist
      * or has been deactivated.
      *
      * @param id the unique identifier of the user
@@ -118,4 +117,12 @@ public interface UserService {
      * @throws BusinessRuleValidationException if attempting to change the last administrator's role
      */
     Optional<UserResponseDto> updateUserRole(UUID id, UserRoleUpdateDto roleUpdate);
+
+    /**
+     * Checks whether a user exists in the system by their unique identifier.
+     *
+     * @param id the unique identifier of the user to check
+     * @return true if the user exists, false otherwise
+     */
+    boolean existsById(UUID id);
 }
