@@ -545,40 +545,57 @@ public interface TweetApi {
             content = @Content(
                 mediaType = "application/json",
                 schema = @Schema(implementation = PagedModel.class),
-                examples = @ExampleObject(
-                    name = "Paginated Tweets",
-                    summary = "Example paginated response with tweets",
-                    value = """
-                        {
-                          "content": [
+                examples = {
+                    @ExampleObject(
+                        name = "Paginated Tweets",
+                        summary = "Example paginated response with tweets",
+                        value = """
                             {
-                              "id": "111e4567-e89b-12d3-a456-426614174000",
-                              "userId": "123e4567-e89b-12d3-a456-426614174000",
-                              "content": "This is my latest tweet!",
-                              "createdAt": "2025-01-27T15:30:00Z",
-                              "updatedAt": "2025-01-27T15:30:00Z",
-                              "isDeleted": false,
-                              "deletedAt": null
-                            },
-                            {
-                              "id": "222e4567-e89b-12d3-a456-426614174000",
-                              "userId": "123e4567-e89b-12d3-a456-426614174000",
-                              "content": "Another tweet from yesterday",
-                              "createdAt": "2025-01-26T10:15:00Z",
-                              "updatedAt": "2025-01-26T10:15:00Z",
-                              "isDeleted": false,
-                              "deletedAt": null
+                              "content": [
+                                {
+                                  "id": "111e4567-e89b-12d3-a456-426614174000",
+                                  "userId": "123e4567-e89b-12d3-a456-426614174000",
+                                  "content": "This is my latest tweet!",
+                                  "createdAt": "2025-01-27T15:30:00Z",
+                                  "updatedAt": "2025-01-27T15:30:00Z",
+                                  "isDeleted": false,
+                                  "deletedAt": null
+                                },
+                                {
+                                  "id": "222e4567-e89b-12d3-a456-426614174000",
+                                  "userId": "123e4567-e89b-12d3-a456-426614174000",
+                                  "content": "Another tweet from yesterday",
+                                  "createdAt": "2025-01-26T10:15:00Z",
+                                  "updatedAt": "2025-01-26T10:15:00Z",
+                                  "isDeleted": false,
+                                  "deletedAt": null
+                                }
+                              ],
+                              "page": {
+                                "size": 20,
+                                "number": 0,
+                                "totalElements": 150,
+                                "totalPages": 8
+                              }
                             }
-                          ],
-                          "page": {
-                            "size": 20,
-                            "number": 0,
-                            "totalElements": 150,
-                            "totalPages": 8
-                          }
-                        }
-                        """
-                )
+                            """
+                    ),
+                    @ExampleObject(
+                        name = "Empty Tweets List",
+                        summary = "Example response when user has no tweets",
+                        value = """
+                            {
+                              "content": [],
+                              "page": {
+                                "size": 20,
+                                "number": 0,
+                                "totalElements": 0,
+                                "totalPages": 0
+                              }
+                            }
+                            """
+                    )
+                }
             )
         )
     })

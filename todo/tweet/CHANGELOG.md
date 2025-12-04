@@ -244,3 +244,70 @@
 - Соответствие стандартам: использование @see для implementation methods согласно STANDART_JAVADOC.md
 - Файл: `services/tweet-api/src/main/java/com/twitter/controller/TweetController.java`
 
+### 16:15 — step #12 done — OpenAPI аннотации для getUserTweets — автор: assistant
+
+Добавлен пример для пустого списка твитов в OpenAPI документацию:
+- Добавлен второй пример "Empty Tweets List" в @ApiResponse для 200 OK
+- Используется массив examples = { @ExampleObject(...), @ExampleObject(...) } для нескольких примеров в одном статус-коде
+- Примеры:
+  1. "Paginated Tweets" - пример с твитами (2 твита, totalElements=150, totalPages=8)
+  2. "Empty Tweets List" - пример с пустым списком (content=[], totalElements=0, totalPages=0)
+- Полная OpenAPI документация включает:
+  - @Operation с summary и description (включая информацию о дефолтных значениях пагинации)
+  - @ApiResponses для 200 OK с двумя примерами (с твитами и пустой список)
+  - @Parameter для userId (required=true, example UUID) и pageable (required=false, description)
+  - @ExampleObject для всех сценариев (успешный ответ с данными и пустой список)
+- Соответствие стандартам: полная OpenAPI документация согласно STANDART_SWAGGER.md
+- Консистентность: следует паттернам из существующих методов (createTweet, getTweetById, updateTweet, deleteTweet)
+- Файл: `services/tweet-api/src/main/java/com/twitter/controller/TweetApi.java`
+
+### 16:30 — step #13 done — Обновление README.md — автор: assistant
+
+Обновлен README.md с документацией нового эндпоинта:
+- Добавлена новая возможность "Получение твитов пользователя с пагинацией" в раздел "Основные возможности"
+- Добавлен эндпоинт GET /user/{userId} в таблицу эндпоинтов (строка 5)
+- Добавлено детальное описание эндпоинта (раздел 4 "Получить твиты пользователя"):
+  - Параметры пути (userId) и запроса (page, size, sort)
+  - Валидация параметров
+  - Бизнес-правила (сортировка, исключение удаленных твитов, пагинация)
+  - HTTP статусы (200 OK, 400 Bad Request)
+  - Примеры успешных ответов (с твитами и пустой список)
+  - Примеры ошибок валидации (некорректный UUID, превышение размера страницы)
+- Обновлен раздел "Бизнес-логика":
+  - Добавлено описание метода getUserTweets в TweetService (метод 4)
+  - Добавлено бизнес-правило "Получение твитов пользователя" (правило 6) с описанием пагинации, сортировки, исключения удаленных твитов, дефолтных значений
+- Добавлены примеры использования с curl командами:
+  - Получение первой страницы (дефолтные значения)
+  - Получение второй страницы с кастомным размером
+  - Получение с кастомной сортировкой
+- Соответствие стандартам: полная документация согласно STANDART_README.md
+- Консистентность: следует структуре и стилю существующих эндпоинтов (createTweet, getTweetById, updateTweet, deleteTweet)
+- Файл: `services/tweet-api/README.md`
+
+### 16:45 — step #14 done — Обновление Postman коллекции — автор: assistant
+
+Добавлен запрос "get user tweets" в Postman коллекцию:
+- Добавлен запрос после "get tweet by id" и перед "update tweet (complete)"
+- Структура запроса:
+  - Имя: "get user tweets" (lowercase с пробелами, согласно STANDART_POSTMAN.md)
+  - HTTP метод: GET
+  - URL: {{baseUrl}}/api/v1/tweets/user/{{userId}}
+  - Query параметры: page (default: 0), size (default: 20, max: 100), sort (default: createdAt,DESC)
+  - Полное описание эндпоинта с информацией о пагинации, сортировке, исключении удаленных твитов
+- Примеры ответов для всех сценариев:
+  1. "user tweets retrieved" - успешный ответ с твитами (200 OK, application/json)
+  2. "empty tweets list" - пустой список твитов (200 OK, application/json)
+  3. "invalid uuid format error" - ошибка валидации UUID (400 Bad Request, application/problem+json)
+  4. "page size exceeds max error" - ошибка превышения размера страницы (400 Bad Request, application/problem+json)
+- Обновлено описание коллекции в info:
+  - Добавлена новая возможность "User tweets retrieval with pagination" в список возможностей API
+- Соответствие стандартам:
+  - Именование запросов: lowercase с пробелами
+  - Использование переменных: {{baseUrl}} и {{userId}}
+  - Полное описание для каждого запроса
+  - Примеры для всех статус-кодов (200, 400)
+  - Правильный Content-Type: application/json для успешных ответов, application/problem+json для ошибок
+  - RFC 7807 Problem Details для ошибок
+- Консистентность: следует структуре и стилю существующих запросов (create tweet, get tweet by id, update tweet, delete tweet)
+- Файл: `postman/tweet-api/twitter-tweet-api.postman_collection.json`
+
