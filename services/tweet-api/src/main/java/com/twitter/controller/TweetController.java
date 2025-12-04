@@ -9,6 +9,11 @@ import com.twitter.service.TweetService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -78,6 +83,19 @@ public class TweetController implements TweetApi {
         @RequestBody @Valid DeleteTweetRequestDto deleteTweetRequest) {
         tweetService.deleteTweet(tweetId, deleteTweetRequest);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * @see TweetApi#getUserTweets
+     */
+    @LoggableRequest
+    @GetMapping("/user/{userId}")
+    @Override
+    public PagedModel<TweetResponseDto> getUserTweets(
+        @PathVariable("userId") UUID userId,
+        @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<TweetResponseDto> tweets = tweetService.getUserTweets(userId, pageable);
+        return new PagedModel<>(tweets);
     }
 }
 

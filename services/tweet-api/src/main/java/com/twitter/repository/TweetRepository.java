@@ -1,6 +1,8 @@
 package com.twitter.repository;
 
 import com.twitter.entity.Tweet;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -21,6 +23,8 @@ import java.util.UUID;
 public interface TweetRepository extends JpaRepository<Tweet, UUID> {
 
     Optional<Tweet> findByIdAndIsDeletedFalse(UUID id);
+
+    Page<Tweet> findByUserIdAndIsDeletedFalseOrderByCreatedAtDesc(UUID userId, Pageable pageable);
 
     /**
      * Performs soft delete on a tweet by setting isDeleted flag and deletedAt timestamp.

@@ -10,6 +10,8 @@ import com.twitter.repository.TweetRepository;
 import com.twitter.validation.TweetValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -87,5 +89,15 @@ public class TweetServiceImpl implements TweetService {
 
         tweet.softDelete();
         tweetRepository.saveAndFlush(tweet);
+    }
+
+    /**
+     * @see TweetService#getUserTweets
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Page<TweetResponseDto> getUserTweets(UUID userId, Pageable pageable) {
+        return tweetRepository.findByUserIdAndIsDeletedFalseOrderByCreatedAtDesc(userId, pageable)
+            .map(tweetMapper::toResponseDto);
     }
 }
