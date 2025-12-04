@@ -311,3 +311,36 @@
 - Консистентность: следует структуре и стилю существующих запросов (create tweet, get tweet by id, update tweet, delete tweet)
 - Файл: `postman/tweet-api/twitter-tweet-api.postman_collection.json`
 
+### 17:00 — step #15 done — Проверка соответствия стандартам — автор: assistant
+
+Проведена полная проверка соответствия всех реализованных компонентов стандартам проекта:
+- Создан отчет STANDARDS_CHECK_REPORT.md с детальными результатами проверки
+- Проверено 7 стандартов проекта:
+  1. STANDART_CODE.md - ✅ Соответствует
+     - Derived Query Methods в Repository
+     - @Transactional(readOnly = true) для read-only операций
+     - Lombok, MapStruct, Spring Data JPA
+  2. STANDART_PROJECT.md - ✅ Соответствует
+     - @LoggableRequest для логирования запросов
+     - Исключения из common-lib
+  3. STANDART_TEST.md - ✅ Соответствует
+     - @Nested классы для структурирования тестов
+     - Mockito, AssertJ, MockMvc, TestContainers
+     - Покрытие всех сценариев
+  4. STANDART_JAVADOC.md - ✅ Соответствует
+     - Полный JavaDoc с @param, @return, @throws, @see
+     - @author и @version на уровне классов
+  5. STANDART_SWAGGER.md - ✅ Соответствует
+     - @Operation, @ApiResponses, @Parameter, @ExampleObject
+     - Документация на английском языке
+  6. STANDART_README.md - ✅ Соответствует
+     - Документация на русском языке
+     - Полная документация эндпоинта с примерами
+  7. STANDART_POSTMAN.md - ✅ Соответствует
+     - Именование lowercase с пробелами
+     - Использование переменных, примеры ответов
+- Итоговый результат: Все 7 стандартов соблюдены (7/7)
+- Все компоненты соответствуют стандартам проекта
+- Код готов к использованию в production
+- Файл: `todo/tweet/STANDARDS_CHECK_REPORT.md`
+

@@ -142,8 +142,9 @@
   note: "Добавлен запрос 'get user tweets' в Postman коллекцию после 'get tweet by id'. Запрос включает: GET метод, URL {{baseUrl}}/api/v1/tweets/user/{{userId}} с query параметрами (page, size, sort), полное описание эндпоинта, примеры ответов для всех сценариев: успешный ответ с твитами (200 OK), пустой список (200 OK), ошибка валидации UUID (400 Bad Request), ошибка превышения размера страницы (400 Bad Request). Обновлено описание коллекции в info, добавлена новая возможность 'User tweets retrieval with pagination'. Соответствует стандартам проекта (STANDART_POSTMAN.md): именование lowercase с пробелами, использование переменных {{baseUrl}} и {{userId}}, полное описание, примеры для всех статус-кодов, правильный Content-Type (application/json для успешных ответов, application/problem+json для ошибок)"
 
 ### Проверка соответствия стандартам
-- [ ] (P1) #15: Проверка соответствия стандартам — Проверить соответствие всем стандартам проекта
+- [x] (P1) [2025-01-27 17:00] #15: Проверка соответствия стандартам — Проверить соответствие всем стандартам проекта
   acceptance: "Все стандарты проверены, код соответствует требованиям STANDART_CODE.md, STANDART_PROJECT.md, STANDART_TEST.md, STANDART_JAVADOC.md, STANDART_SWAGGER.md, STANDART_README.md, STANDART_POSTMAN.md"
+  note: "Проведена полная проверка соответствия всех реализованных компонентов стандартам проекта. Создан отчет STANDARDS_CHECK_REPORT.md с детальными результатами проверки. Все 7 стандартов соблюдены: STANDART_CODE.md (Derived Query Methods, @Transactional, Lombok, MapStruct), STANDART_PROJECT.md (@LoggableRequest, исключения из common-lib), STANDART_TEST.md (@Nested классы, Mockito, AssertJ, MockMvc, TestContainers), STANDART_JAVADOC.md (полный JavaDoc с @param, @return, @throws, @see), STANDART_SWAGGER.md (@Operation, @ApiResponses, @Parameter, @ExampleObject), STANDART_README.md (русский язык, полная документация, примеры), STANDART_POSTMAN.md (lowercase с пробелами, переменные, примеры ответов). Все компоненты соответствуют стандартам проекта."
 
 ## Assumptions
 - Пользователь должен существовать в users-api для получения его твитов
@@ -176,14 +177,14 @@
 - Следовать паттернам из существующих эндпоинтов (getTweetById)
 - Использовать `PagedModel` из Spring HATEOAS для пагинированных ответов
 - Ссылки на стандарты:
-  - [STANDART_CODE.md](../../standards/STANDART_CODE.md)
-  - [STANDART_PROJECT.md](../../standards/STANDART_PROJECT.md)
-  - [STANDART_TEST.md](../../standards/STANDART_TEST.md)
-  - [STANDART_JAVADOC.md](../../standards/STANDART_JAVADOC.md)
-  - [STANDART_SWAGGER.md](../../standards/STANDART_SWAGGER.md)
-  - [STANDART_README.md](../../standards/STANDART_README.md)
-  - [STANDART_POSTMAN.md](../../standards/STANDART_POSTMAN.md)
+  - [STANDART_CODE.md](../../../../standards/STANDART_CODE.md)
+  - [STANDART_PROJECT.md](../../../../standards/STANDART_PROJECT.md)
+  - [STANDART_TEST.md](../../../../standards/STANDART_TEST.md)
+  - [STANDART_JAVADOC.md](../../../../standards/STANDART_JAVADOC.md)
+  - [STANDART_SWAGGER.md](../../../../standards/STANDART_SWAGGER.md)
+  - [STANDART_README.md](../../../../standards/STANDART_README.md)
+  - [STANDART_POSTMAN.md](../../../../standards/STANDART_POSTMAN.md)
 - Ссылки на архитектуру:
-  - [TWEET_API_ARCHITECTURE.md](TWEET_API_ARCHITECTURE.md)
-  - [TWEET_API_COMMON_2.md](TWEET_API_COMMON_2.md)
+  - [TWEET_API_ARCHITECTURE.md](../../TWEET_API_ARCHITECTURE.md)
+  - [TWEET_API_COMMON_2.md](../../TWEET_API_COMMON_2.md)
 
