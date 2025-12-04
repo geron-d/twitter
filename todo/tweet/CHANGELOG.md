@@ -147,3 +147,46 @@
 - Консистентность: следует паттернам из UserController.findAll() для пагинированных эндпоинтов
 - Файл: `services/tweet-api/src/main/java/com/twitter/controller/TweetController.java`
 
+### 15:15 — step #8 done — JavaDoc для Service метода getUserTweets — автор: assistant
+
+Улучшен JavaDoc для метода getUserTweets в TweetService:
+- TweetService интерфейс:
+  - Добавлено подробное описание операций (6 шагов) аналогично другим методам (createTweet, updateTweet)
+  - Улучшено описание возвращаемого значения с указанием метаданных пагинации
+  - JavaDoc содержит:
+    - @param для userId с описанием
+    - @param для pageable с описанием "pagination parameters (page, size, sorting)"
+    - @return с описанием "Page containing paginated list of tweets with metadata"
+    - @throws для FormatValidationException (userId is null or invalid)
+    - @throws для BusinessRuleValidationException (user doesn't exist, optional validation)
+- TweetServiceImpl:
+  - Используется @see TweetService#getUserTweets согласно стандартам проекта
+  - Полная документация находится в интерфейсе, реализация ссылается на интерфейс
+- @author и @version:
+  - Присутствуют на уровне класса TweetServiceImpl (@author geron, @version 1.0)
+  - Присутствуют на уровне интерфейса TweetService (@author geron, @version 1.0)
+  - Согласно стандартам, @author и @version не требуются для методов, только для классов/интерфейсов
+- Соответствие стандартам: полная JavaDoc документация согласно STANDART_JAVADOC.md
+- Консистентность: следует паттернам из других методов TweetService (createTweet, updateTweet, deleteTweet)
+- Файлы:
+  - `services/tweet-api/src/main/java/com/twitter/service/TweetService.java`
+  - `services/tweet-api/src/main/java/com/twitter/service/TweetServiceImpl.java`
+
+### 15:30 — step #9 done — JavaDoc для Controller метода getUserTweets — автор: assistant
+
+Проверен JavaDoc для метода getUserTweets в TweetController:
+- JavaDoc уже присутствует: `@see TweetApi#getUserTweets`
+- Соответствие стандартам:
+  - Для методов контроллера, которые реализуют интерфейс и делегируют логику, используется @see для ссылки на интерфейс
+  - Полная документация находится в TweetApi интерфейсе с OpenAPI аннотациями
+  - Это соответствует паттерну из STANDART_JAVADOC.md для implementation methods
+- Консистентность:
+  - Следует тому же паттерну, что и другие методы контроллера (createTweet, getTweetById, updateTweet, deleteTweet)
+  - Все методы контроллера используют @see для ссылки на TweetApi интерфейс
+- Обоснование:
+  - Метод getUserTweets просто делегирует вызов к TweetService и преобразует Page в PagedModel
+  - Дополнительная логика минимальна, поэтому полная JavaDoc не требуется
+  - Вся документация API находится в TweetApi интерфейсе с OpenAPI аннотациями
+- Соответствие стандартам: использование @see для implementation methods согласно STANDART_JAVADOC.md
+- Файл: `services/tweet-api/src/main/java/com/twitter/controller/TweetController.java`
+

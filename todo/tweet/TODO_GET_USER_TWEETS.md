@@ -109,11 +109,13 @@
   note: "Реализован метод getUserTweets в TweetController с @LoggableRequest, @GetMapping("/user/{userId}"), @PageableDefault(size=20, sort=\"createdAt\", direction=DESC) на параметре pageable, получением Page<TweetResponseDto> из TweetService и преобразованием в PagedModel через new PagedModel<>(tweets). Добавлены импорты Page, Pageable, Sort, PageableDefault, PagedModel. Соответствует стандартам проекта (STANDART_CODE.md, STANDART_PROJECT.md)"
 
 ### Документация кода (JavaDoc)
-- [ ] (P1) #8: JavaDoc для Service метода — Добавить JavaDoc для метода getUserTweets в TweetService
+- [x] (P1) [2025-01-27 15:15] #8: JavaDoc для Service метода — Добавить JavaDoc для метода getUserTweets в TweetService
   acceptance: "JavaDoc добавлен с @author geron, @version 1.0, @param, @return, @throws"
+  note: "Улучшен JavaDoc для метода getUserTweets в TweetService интерфейсе: добавлено подробное описание операций (6 шагов), улучшено описание возвращаемого значения. JavaDoc содержит @param для userId и pageable, @return с описанием Page, @throws для FormatValidationException и BusinessRuleValidationException. В TweetServiceImpl используется @see TweetService#getUserTweets согласно стандартам. @author и @version присутствуют на уровне класса/интерфейса. Соответствует стандартам проекта (STANDART_JAVADOC.md)"
   
-- [ ] (P1) #9: JavaDoc для Controller метода — Добавить JavaDoc для метода getUserTweets в TweetController
+- [x] (P1) [2025-01-27 15:30] #9: JavaDoc для Controller метода — Добавить JavaDoc для метода getUserTweets в TweetController
   acceptance: "JavaDoc добавлен с @see для ссылки на TweetApi#getUserTweets"
+  note: "JavaDoc для метода getUserTweets в TweetController уже присутствует с @see TweetApi#getUserTweets. Это соответствует стандартам проекта: для методов контроллера, которые реализуют интерфейс и делегируют логику, используется @see для ссылки на интерфейс. Полная документация находится в TweetApi интерфейсе. Соответствует стандартам проекта (STANDART_JAVADOC.md) и консистентен с другими методами контроллера (createTweet, getTweetById, updateTweet, deleteTweet)"
 
 ### Тестирование
 - [ ] (P1) #10: Unit тесты для TweetServiceImpl.getUserTweets — Покрыть метод unit тестами

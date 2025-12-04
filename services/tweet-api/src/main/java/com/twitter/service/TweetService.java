@@ -100,7 +100,7 @@ public interface TweetService {
      * The method is read-only and transactional, ensuring data consistency. Tweets are
      * sorted by creation date in descending order (newest first). Deleted tweets are
      * automatically excluded from the results. The Page object contains pagination
-     * metadata (totalElements, totalPages, etc.) that can be used by the controller
+     * metadata (totalElements, totalPages, number, size) that can be used by the controller
      * to create HATEOAS links.
      *
      * @param userId   the unique identifier of the user whose tweets to retrieve
