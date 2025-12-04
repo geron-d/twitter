@@ -10,6 +10,7 @@
 
 - ✅ Создание твитов с валидацией контента
 - ✅ Получение твита по уникальному идентификатору
+- ✅ Получение твитов пользователя с пагинацией
 - ✅ Обновление твитов с проверкой прав автора
 - ✅ Удаление твитов (soft delete) с проверкой прав автора
 - ✅ Интеграция с users-api для проверки существования пользователей
@@ -111,12 +112,13 @@ http://localhost:8082/api/v1/tweets
 
 ### Эндпоинты
 
-| Метод    | Путь          | Описание                      | Тело запроса            | Ответ              |
-|----------|---------------|-------------------------------|-------------------------|--------------------|
-| `POST`   | `/`           | Создать новый твит            | `CreateTweetRequestDto` | `TweetResponseDto` |
-| `GET`    | `/{tweetId}`  | Получить твит по ID            | -                       | `TweetResponseDto` |
-| `PUT`    | `/{tweetId}`  | Обновить твит                 | `UpdateTweetRequestDto` | `TweetResponseDto` |
-| `DELETE` | `/{tweetId}`  | Удалить твит (soft delete)    | `DeleteTweetRequestDto` | -                  |
+| Метод    | Путь              | Описание                      | Тело запроса            | Ответ                        |
+|----------|-------------------|-------------------------------|-------------------------|------------------------------|
+| `POST`   | `/`               | Создать новый твит            | `CreateTweetRequestDto` | `TweetResponseDto`           |
+| `GET`    | `/{tweetId}`      | Получить твит по ID            | -                       | `TweetResponseDto`           |
+| `GET`    | `/user/{userId}`  | Получить твиты пользователя   | -                       | `PagedModel<TweetResponseDto>`|
+| `PUT`    | `/{tweetId}`      | Обновить твит                 | `UpdateTweetRequestDto` | `TweetResponseDto`           |
+| `DELETE` | `/{tweetId}`      | Удалить твит (soft delete)    | `DeleteTweetRequestDto` | -                            |
 
 ### Детальное описание эндпоинтов
 
@@ -321,7 +323,88 @@ Content-Type: application/json
 }
 ```
 
-#### 4. Удалить твит
+#### 4. Получить твиты пользователя
+
+```http
+GET /api/v1/tweets/user/{userId}?page=0&size=20&sort=createdAt,DESC
+```
+
+**Параметры пути:**
+
+- `userId` - обязательный, UUID пользователя, чьи твиты нужно получить
+
+**Параметры запроса (query parameters):**
+
+- `page` - необязательный, номер страницы (по умолчанию 0)
+- `size` - необязательный, размер страницы (по умолчанию 20, максимум 100)
+- `sort` - необязательный, параметры сортировки (по умолчанию `createdAt,DESC`)
+
+**Валидация:**
+
+- `userId` - обязательный, должен быть валидным UUID форматом
+- `page` - должен быть >= 0
+- `size` - должен быть > 0 и <= 100
+- `sort` - должен быть валидным форматом сортировки Spring Data JPA
+
+**Бизнес-правила:**
+
+- Твиты сортируются по дате создания в порядке убывания (новые первыми)
+- Удаленные твиты (soft delete) исключаются из результатов
+- Поддерживается пагинация для работы с большими объемами данных
+
+**Ответы:**
+
+- `200 OK` - твиты успешно получены (может быть пустой список)
+- `400 Bad Request` - ошибка валидации (некорректный UUID, неверные параметры пагинации)
+
+**Пример успешного ответа (200 OK) с твитами:**
+
+```json
+{
+  "content": [
+    {
+      "id": "111e4567-e89b-12d3-a456-426614174000",
+      "userId": "123e4567-e89b-12d3-a456-426614174000",
+      "content": "This is my latest tweet!",
+      "createdAt": "2025-01-27T15:30:00Z",
+      "updatedAt": "2025-01-27T15:30:00Z",
+      "isDeleted": false,
+      "deletedAt": null
+    },
+    {
+      "id": "222e4567-e89b-12d3-a456-426614174000",
+      "userId": "123e4567-e89b-12d3-a456-426614174000",
+      "content": "Another tweet from yesterday",
+      "createdAt": "2025-01-26T10:15:00Z",
+      "updatedAt": "2025-01-26T10:15:00Z",
+      "isDeleted": false,
+      "deletedAt": null
+    }
+  ],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 150,
+    "totalPages": 8
+  }
+}
+```
+
+**Пример успешного ответа (200 OK) с пустым списком:**
+
+```json
+{
+  "content": [],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 0,
+    "totalPages": 0
+  }
+}
+```
+
+#### 5. Удалить твит
 
 ```http
 DELETE /api/v1/tweets/{tweetId}
@@ -499,7 +582,17 @@ open http://localhost:8082/swagger-ui.html
         - Сохранение в БД
         - Маппинг сущности в DTO ответа
 
-4. **`deleteTweet(UUID tweetId, DeleteTweetRequestDto requestDto)`**
+4. **`getUserTweets(UUID userId, Pageable pageable)`**
+    - Получает пагинированный список твитов пользователя
+    - Возвращает `Page<TweetResponseDto>`
+    - Логика:
+        - Получение твитов из БД по userId с фильтрацией (isDeleted = false)
+        - Сортировка по createdAt DESC (новые первыми)
+        - Применение пагинации (page, size, sort)
+        - Маппинг сущностей в DTO ответа
+        - Возврат Page с метаданными пагинации
+
+5. **`deleteTweet(UUID tweetId, DeleteTweetRequestDto requestDto)`**
     - Удаляет твит (soft delete)
     - Возвращает `void` (ответ 204 No Content)
     - Логика:
@@ -535,8 +628,15 @@ open http://localhost:8082/swagger-ui.html
     - Только автор твита может удалить свой твит
     - Выполняется soft delete - данные сохраняются в БД
     - Устанавливается флаг `isDeleted = true` и временная метка `deletedAt`
-    - Удаленные твиты не возвращаются в обычных запросах (getTweetById)
+    - Удаленные твиты не возвращаются в обычных запросах (getTweetById, getUserTweets)
     - Статистика (лайки, ретвиты) сохраняется при удалении
+
+6. **Получение твитов пользователя:**
+    - Поддержка пагинации для работы с большими объемами данных
+    - Сортировка по дате создания в порядке убывания (новые первыми)
+    - Автоматическое исключение удаленных твитов (isDeleted = false)
+    - Дефолтные значения пагинации: page=0, size=20, sort=createdAt,DESC
+    - Максимальный размер страницы: 100 элементов
 
 ## Слой валидации
 
@@ -800,6 +900,66 @@ curl -X GET http://localhost:8082/api/v1/tweets/123e4567-e89b-12d3-a456-42661417
   "status": 404,
   "detail": "Tweet with ID '123e4567-e89b-12d3-a456-426614174000' not found",
   "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+### Получение твитов пользователя
+
+```bash
+# Получить первую страницу (20 твитов по умолчанию)
+curl -X GET "http://localhost:8082/api/v1/tweets/user/123e4567-e89b-12d3-a456-426614174000"
+
+# Получить вторую страницу с размером 10
+curl -X GET "http://localhost:8082/api/v1/tweets/user/123e4567-e89b-12d3-a456-426614174000?page=1&size=10"
+
+# Получить с кастомной сортировкой
+curl -X GET "http://localhost:8082/api/v1/tweets/user/123e4567-e89b-12d3-a456-426614174000?sort=createdAt,ASC"
+```
+
+**Ответ (200 OK) с твитами:**
+
+```json
+{
+  "content": [
+    {
+      "id": "111e4567-e89b-12d3-a456-426614174000",
+      "userId": "123e4567-e89b-12d3-a456-426614174000",
+      "content": "This is my latest tweet!",
+      "createdAt": "2025-01-27T15:30:00Z",
+      "updatedAt": "2025-01-27T15:30:00Z",
+      "isDeleted": false,
+      "deletedAt": null
+    },
+    {
+      "id": "222e4567-e89b-12d3-a456-426614174000",
+      "userId": "123e4567-e89b-12d3-a456-426614174000",
+      "content": "Another tweet from yesterday",
+      "createdAt": "2025-01-26T10:15:00Z",
+      "updatedAt": "2025-01-26T10:15:00Z",
+      "isDeleted": false,
+      "deletedAt": null
+    }
+  ],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 150,
+    "totalPages": 8
+  }
+}
+```
+
+**Ответ (200 OK) с пустым списком:**
+
+```json
+{
+  "content": [],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 0,
+    "totalPages": 0
+  }
 }
 ```
 

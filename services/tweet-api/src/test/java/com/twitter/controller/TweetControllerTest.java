@@ -520,5 +520,122 @@ public class TweetControllerTest extends BaseIntegrationTest {
             assertThat(tweet.getIsDeleted()).isFalse();
         }
     }
+
+    @Nested
+    class GetUserTweetsTests {
+
+        private UUID testUserId;
+
+        @BeforeEach
+        void setUp() {
+            testUserId = UUID.randomUUID();
+        }
+
+        @Test
+        void getUserTweets_WhenTweetsExist_ShouldReturn200Ok() throws Exception {
+            createAndSaveTweet(testUserId, "First tweet");
+            createAndSaveTweet(testUserId, "Second tweet");
+            createAndSaveTweet(testUserId, "Third tweet");
+
+            mockMvc.perform(get("/api/v1/tweets/user/{userId}", testUserId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(3))
+                .andExpect(jsonPath("$.content[0].userId").value(testUserId.toString()))
+                .andExpect(jsonPath("$.content[0].content").exists())
+                .andExpect(jsonPath("$.page.size").value(20))
+                .andExpect(jsonPath("$.page.number").value(0))
+                .andExpect(jsonPath("$.page.totalElements").value(3))
+                .andExpect(jsonPath("$.page.totalPages").value(1));
+        }
+
+        @Test
+        void getUserTweets_WhenNoTweetsExist_ShouldReturn200OkWithEmptyList() throws Exception {
+            mockMvc.perform(get("/api/v1/tweets/user/{userId}", testUserId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(0))
+                .andExpect(jsonPath("$.page.size").value(20))
+                .andExpect(jsonPath("$.page.number").value(0))
+                .andExpect(jsonPath("$.page.totalElements").value(0))
+                .andExpect(jsonPath("$.page.totalPages").value(0));
+        }
+
+        @Test
+        void getUserTweets_ShouldExcludeDeletedTweets() throws Exception {
+            Tweet tweet1 = createAndSaveTweet(testUserId, "Active tweet");
+            Tweet tweet2 = createAndSaveTweet(testUserId, "Tweet to be deleted");
+
+            DeleteTweetRequestDto deleteRequest = DeleteTweetRequestDto.builder()
+                .userId(testUserId)
+                .build();
+
+            mockMvc.perform(delete("/api/v1/tweets/{tweetId}", tweet2.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(deleteRequest)))
+                .andExpect(status().isNoContent());
+
+            mockMvc.perform(get("/api/v1/tweets/user/{userId}", testUserId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.content[0].id").value(tweet1.getId().toString()))
+                .andExpect(jsonPath("$.page.totalElements").value(1));
+        }
+
+        @Test
+        void getUserTweets_ShouldSortByCreatedAtDesc() throws Exception {
+            Tweet tweet1 = createAndSaveTweet(testUserId, "First tweet");
+            Thread.sleep(10); // Ensure different timestamps
+            Tweet tweet2 = createAndSaveTweet(testUserId, "Second tweet");
+            Thread.sleep(10);
+            Tweet tweet3 = createAndSaveTweet(testUserId, "Third tweet");
+
+            String responseJson = mockMvc.perform(get("/api/v1/tweets/user/{userId}", testUserId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+            // Parse response to verify order
+            com.fasterxml.jackson.databind.JsonNode jsonNode = objectMapper.readTree(responseJson);
+            var content = jsonNode.get("content");
+            assertThat(content.isArray()).isTrue();
+            assertThat(content.size()).isEqualTo(3);
+            
+            // First tweet should be the newest (third tweet)
+            assertThat(content.get(0).get("id").asText()).isEqualTo(tweet3.getId().toString());
+            assertThat(content.get(0).get("content").asText()).isEqualTo("Third tweet");
+            
+            // Second tweet should be the middle one
+            assertThat(content.get(1).get("id").asText()).isEqualTo(tweet2.getId().toString());
+            assertThat(content.get(1).get("content").asText()).isEqualTo("Second tweet");
+            
+            // Last tweet should be the oldest (first tweet)
+            assertThat(content.get(2).get("id").asText()).isEqualTo(tweet1.getId().toString());
+            assertThat(content.get(2).get("content").asText()).isEqualTo("First tweet");
+        }
+
+        @Test
+        void getUserTweets_WithDefaultPagination_ShouldUseDefaultValues() throws Exception {
+            for (int i = 1; i <= 5; i++) {
+                createAndSaveTweet(testUserId, "Tweet " + i);
+            }
+
+            mockMvc.perform(get("/api/v1/tweets/user/{userId}", testUserId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(5))
+                .andExpect(jsonPath("$.page.size").value(20))
+                .andExpect(jsonPath("$.page.number").value(0))
+                .andExpect(jsonPath("$.page.totalElements").value(5))
+                .andExpect(jsonPath("$.page.totalPages").value(1));
+        }
+    }
 }
 

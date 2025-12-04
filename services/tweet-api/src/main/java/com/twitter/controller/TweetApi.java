@@ -14,6 +14,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.ConstraintViolationException;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
 
 import java.util.UUID;
@@ -145,7 +147,7 @@ public interface TweetApi {
      *
      * @param tweetId the unique identifier of the tweet (UUID format)
      * @return ResponseEntity containing tweet data with HTTP 200 status if found,
-     *         or HTTP 404 status if not found
+     * or HTTP 404 status if not found
      */
     @Operation(
         summary = "Get tweet by ID",
@@ -515,5 +517,96 @@ public interface TweetApi {
         UUID tweetId,
         @Parameter(description = "Tweet deletion request with userId for authorization", required = true)
         DeleteTweetRequestDto deleteTweetRequest);
+
+    /**
+     * Retrieves a paginated list of tweets for a specific user.
+     * <p>
+     * This endpoint retrieves all tweets created by a specific user with pagination support.
+     * Tweets are sorted by creation date in descending order (newest first). Deleted tweets
+     * (soft delete) are automatically excluded from the results. Supports pagination with
+     * page, size, and sort parameters.
+     *
+     * @param userId   the unique identifier of the user whose tweets to retrieve
+     * @param pageable pagination parameters (page, size, sorting)
+     * @return PagedModel containing paginated list of tweets with metadata and HATEOAS links
+     */
+    @Operation(
+        summary = "Get user tweets with pagination",
+        description = "Retrieves a paginated list of tweets for a specific user. " +
+            "Tweets are sorted by creation date in descending order (newest first). " +
+            "Deleted tweets (soft delete) are excluded from the results. " +
+            "Supports pagination with page, size, and sort parameters. " +
+            "Default pagination: page=0, size=20, sort=createdAt,DESC."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "User tweets retrieved successfully",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = PagedModel.class),
+                examples = {
+                    @ExampleObject(
+                        name = "Paginated Tweets",
+                        summary = "Example paginated response with tweets",
+                        value = """
+                            {
+                              "content": [
+                                {
+                                  "id": "111e4567-e89b-12d3-a456-426614174000",
+                                  "userId": "123e4567-e89b-12d3-a456-426614174000",
+                                  "content": "This is my latest tweet!",
+                                  "createdAt": "2025-01-27T15:30:00Z",
+                                  "updatedAt": "2025-01-27T15:30:00Z",
+                                  "isDeleted": false,
+                                  "deletedAt": null
+                                },
+                                {
+                                  "id": "222e4567-e89b-12d3-a456-426614174000",
+                                  "userId": "123e4567-e89b-12d3-a456-426614174000",
+                                  "content": "Another tweet from yesterday",
+                                  "createdAt": "2025-01-26T10:15:00Z",
+                                  "updatedAt": "2025-01-26T10:15:00Z",
+                                  "isDeleted": false,
+                                  "deletedAt": null
+                                }
+                              ],
+                              "page": {
+                                "size": 20,
+                                "number": 0,
+                                "totalElements": 150,
+                                "totalPages": 8
+                              }
+                            }
+                            """
+                    ),
+                    @ExampleObject(
+                        name = "Empty Tweets List",
+                        summary = "Example response when user has no tweets",
+                        value = """
+                            {
+                              "content": [],
+                              "page": {
+                                "size": 20,
+                                "number": 0,
+                                "totalElements": 0,
+                                "totalPages": 0
+                              }
+                            }
+                            """
+                    )
+                }
+            )
+        )
+    })
+    PagedModel<TweetResponseDto> getUserTweets(
+        @Parameter(
+            description = "Unique identifier of the user",
+            required = true,
+            example = "123e4567-e89b-12d3-a456-426614174000"
+        )
+        UUID userId,
+        @Parameter(description = "Pagination parameters (page, size, sorting)", required = false)
+        Pageable pageable);
 }
 

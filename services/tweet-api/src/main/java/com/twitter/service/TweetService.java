@@ -6,6 +6,8 @@ import com.twitter.dto.request.CreateTweetRequestDto;
 import com.twitter.dto.request.DeleteTweetRequestDto;
 import com.twitter.dto.request.UpdateTweetRequestDto;
 import com.twitter.dto.response.TweetResponseDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -91,4 +93,21 @@ public interface TweetService {
      * @throws BusinessRuleValidationException if tweetId is null, tweet doesn't exist, is already deleted, or access denied
      */
     void deleteTweet(UUID tweetId, DeleteTweetRequestDto requestDto);
+
+    /**
+     * Retrieves a paginated list of tweets for a specific user.
+     * <p>
+     * The method is read-only and transactional, ensuring data consistency. Tweets are
+     * sorted by creation date in descending order (newest first). Deleted tweets are
+     * automatically excluded from the results. The Page object contains pagination
+     * metadata (totalElements, totalPages, number, size) that can be used by the controller
+     * to create HATEOAS links.
+     *
+     * @param userId   the unique identifier of the user whose tweets to retrieve
+     * @param pageable pagination parameters (page, size, sorting)
+     * @return Page containing paginated list of tweets with metadata
+     * @throws FormatValidationException       if userId is null or invalid
+     * @throws BusinessRuleValidationException if user doesn't exist (optional validation)
+     */
+    Page<TweetResponseDto> getUserTweets(UUID userId, Pageable pageable);
 }
