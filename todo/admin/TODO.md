@@ -14,12 +14,13 @@
     - Определена структура ответа со статистикой
   - Выполнено: Создан документ ANALYSIS_DESIGN.md с полным анализом требований и проектированием API. Определены структуры DTO, параметры валидации, стратегия генерации данных с Datafaker, структура ответа со статистикой, интеграции с другими сервисами и обработка ошибок.
 
-- [ ] (P1) #2: Настройка Gradle модуля - добавить в settings.gradle, создать build.gradle с зависимостями (включая Datafaker)
+- [x] (P1) [2025-01-27] #2: Настройка Gradle модуля - добавить в settings.gradle, создать build.gradle с зависимостями (включая Datafaker)
   - Зависимости: нет
   - Acceptance criteria:
     - Модуль добавлен в settings.gradle
     - Создан build.gradle с всеми необходимыми зависимостями
     - Datafaker добавлен в dependencyManagement корневого build.gradle
+  - Выполнено: Модуль services:admin-script-api добавлен в settings.gradle. Создан build.gradle с зависимостями (Spring Boot, Spring Cloud OpenFeign, Datafaker, OpenAPI, Lombok, MapStruct, Testcontainers, WireMock). Datafaker версии 2.1.0 добавлен в dependencyManagement корневого build.gradle. Создана структура директорий модуля.
 
 - [ ] (P1) #3: Реализация DTO (Records) - GenerateUsersAndTweetsRequestDto и GenerateUsersAndTweetsResponseDto с валидацией и @Schema
   - Зависимости: #1

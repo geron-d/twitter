@@ -1,0 +1,95 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: admin-script-api
+  datasource:
+    url: jdbc:postgresql://localhost:5432/twitter
+    username: user
+    password: password
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    time-zone: UTC
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,tracing
+  endpoint:
+    health:
+      show-details: always
+  tracing:
+    sampling:
+      probability: 1.0
+
+logging:
+  level:
+    com.twitter: DEBUG
+    org.springframework.web: INFO
+    org.springframework.security: DEBUG
+    org.springframework.boot.autoconfigure: WARN
+    org.springframework.boot.context.embedded: WARN
+    org.springframework.boot.actuate: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${spring.application.name:} [%thread] %-5level [%X{traceId:-},%X{spanId:-}] %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${spring.application.name:} [%thread] %-5level [%X{traceId:-},%X{spanId:-}] %logger{36} - %msg%n"
+
+# Tweet API specific configuration
+app:
+  tweet:
+    max-content-length: 280
+  users-api:
+    base-url: http://localhost:8081
+  tweet-api:
+    base-url: http://localhost:8082
+
+# Feign configuration
+feign:
+  client:
+    config:
+      default:
+        connect-timeout: 2000
+        read-timeout: 5000
+        logger-level: basic
+  httpclient:
+    enabled: true
+
+# OpenAPI/Swagger configuration
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operations-sorter: method
+    tags-sorter: alpha
+    try-it-out-enabled: true
+    filter: true
+    display-request-duration: true
+    display-operation-id: true
+    default-models-expand-depth: 1
+    default-model-expand-depth: 1
+    doc-expansion: none
+    show-extensions: true
+    show-common-extensions: true
+    deep-linking: true
+    show-tags: true
+    show-operations: true
+    show-request-headers: true
+    show-response-headers: true
+    persist-authorization: true
+    layout: StandaloneLayout
+    config-url: /v3/api-docs/swagger-config
+    url: /v3/api-docs
+    urls:
+      - name: Admin Script API
+        url: /v3/api-docs
+        display-name: Twitter Admin Script API v1.0.0

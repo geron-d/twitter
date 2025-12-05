@@ -21,3 +21,25 @@
 - `todo/admin/TODO.md` - создан список задач
 - `todo/admin/ANALYSIS_DESIGN.md` - документ с анализом и проектированием
 
+### Step #2: Настройка Gradle модуля
+**Время:** 2025-01-27  
+**Автор:** assistant
+
+**Выполнено:**
+- Модуль `services:admin-script-api` добавлен в `settings.gradle`
+- Создан `build.gradle` для модуля admin-script-api с зависимостями:
+  - Spring Boot (Web, Validation, Data JPA, Actuator)
+  - Spring Cloud OpenFeign (для интеграции с другими сервисами)
+  - Datafaker (для генерации фейковых данных)
+  - OpenAPI/Swagger (для документации API)
+  - Lombok, MapStruct (для упрощения кода)
+  - Testcontainers, WireMock (для тестирования)
+- Datafaker версии 2.1.0 добавлен в `dependencyManagement` корневого `build.gradle`
+- Создана структура директорий модуля (src/main/java, src/main/resources, src/test/java, src/test/resources)
+
+**Артефакты:**
+- `settings.gradle` - обновлён (добавлен модуль)
+- `build.gradle` - обновлён (добавлен Datafaker в dependencyManagement)
+- `services/admin-script-api/build.gradle` - создан
+- `services/admin-script-api/src/` - создана структура директорий
+
