@@ -22,20 +22,22 @@
     - Datafaker добавлен в dependencyManagement корневого build.gradle
   - Выполнено: Модуль services:admin-script-api добавлен в settings.gradle. Создан build.gradle с зависимостями (Spring Boot, Spring Cloud OpenFeign, Datafaker, OpenAPI, Lombok, MapStruct, Testcontainers, WireMock). Datafaker версии 2.1.0 добавлен в dependencyManagement корневого build.gradle. Создана структура директорий модуля.
 
-- [ ] (P1) #3: Реализация DTO (Records) - GenerateUsersAndTweetsRequestDto и GenerateUsersAndTweetsResponseDto с валидацией и @Schema
+- [x] (P1) [2025-01-27] #3: Реализация DTO (Records) - GenerateUsersAndTweetsRequestDto и GenerateUsersAndTweetsResponseDto с валидацией и @Schema
   - Зависимости: #1
   - Acceptance criteria:
     - Создан GenerateUsersAndTweetsRequestDto с полями nUsers, nTweetsPerUser, lUsersForDeletion
     - Создан GenerateUsersAndTweetsResponseDto со статистикой и списками ID
     - Добавлены валидационные аннотации
     - Добавлены @Schema аннотации для Swagger
+  - Выполнено: Созданы все три DTO: GenerateUsersAndTweetsRequestDto (com.twitter.dto.request) с валидацией @NotNull, @Min, @Max и @Schema аннотациями, ScriptStatisticsDto (com.twitter.dto.response) со статистикой выполнения, GenerateUsersAndTweetsResponseDto (com.twitter.dto.response) со списками ID и статистикой. Все DTO содержат полную JavaDoc документацию (@author geron, @version 1.0), @Schema аннотации на уровне класса и полей, @Builder для request и response DTO.
 
-- [ ] (P1) #4: Реализация Feign Clients - UsersApiClient и TweetsApiClient для интеграции с другими сервисами
+- [x] (P1) [2025-01-27] #4: Реализация Feign Clients - UsersApiClient и TweetsApiClient для интеграции с другими сервисами
   - Зависимости: #1
   - Acceptance criteria:
     - Создан UsersApiClient с методом createUser
     - Создан TweetsApiClient с методами createTweet, deleteTweet, getUserTweets
     - Настроены URL и path для сервисов
+  - Выполнено: Создан UsersApiClient (com.twitter.client) с методом createUser для интеграции с users-api (POST /api/v1/users). Создан TweetsApiClient (com.twitter.client) с методами createTweet (POST /api/v1/tweets), deleteTweet (DELETE /api/v1/tweets/{tweetId}), getUserTweets (GET /api/v1/tweets/user/{userId}) для интеграции с tweet-api. Настроены URL через конфигурацию ${app.users-api.base-url} и ${app.tweet-api.base-url}. Созданы DTO для внешних API в пакете com.twitter.dto.external: UserRequestDto, UserResponseDto, CreateTweetRequestDto, DeleteTweetRequestDto, TweetResponseDto. Все Feign Clients содержат полную JavaDoc документацию (@author geron, @version 1.0).
 
 - [ ] (P1) #5: Реализация Gateways - UsersGateway и TweetsGateway с обработкой ошибок
   - Зависимости: #4
