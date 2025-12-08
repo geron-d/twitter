@@ -162,3 +162,62 @@
 **Артефакты:**
 - `services/admin-script-api/src/main/java/com/twitter/util/RandomDataGenerator.java` - создан
 
+### Step #7: Реализация Validator
+**Время:** 2025-01-27  
+**Автор:** assistant
+
+**Выполнено:**
+- Создан интерфейс `GenerateUsersAndTweetsValidator` в пакете `com.twitter.validation`:
+  - Метод `validateDeletionCount(GenerateUsersAndTweetsRequestDto requestDto, int usersWithTweetsCount)` - валидация параметров скрипта
+  - Метод проверяет бизнес-правило: lUsersForDeletion <= количество пользователей с твитами
+  - Выбрасывает BusinessRuleValidationException при нарушении правила
+- Создана реализация `GenerateUsersAndTweetsValidatorImpl` в пакете `com.twitter.validation`:
+  - Реализация метода validateDeletionCount с полной бизнес-логикой
+  - Валидация null для requestDto
+  - Обработка случая lUsersForDeletion = 0 (валидация проходит)
+  - Выброс BusinessRuleValidationException с понятным сообщением: "Cannot delete tweets from {l} users: only {actualCount} users have tweets"
+  - Логирование всех операций (debug для успешных, warn для ошибок)
+- Все классы используют стандартные аннотации: @Component, @RequiredArgsConstructor, @Slf4j
+- Все классы содержат полную JavaDoc документацию (@author geron, @version 1.0)
+- Все методы содержат JavaDoc с описанием параметров и исключений
+- Использованы исключения из common-lib (BusinessRuleValidationException)
+- Проверка линтера: ошибок не обнаружено
+
+**Артефакты:**
+- `services/admin-script-api/src/main/java/com/twitter/validation/GenerateUsersAndTweetsValidator.java` - создан
+- `services/admin-script-api/src/main/java/com/twitter/validation/GenerateUsersAndTweetsValidatorImpl.java` - создан
+
+### Step #8: Реализация Service
+**Время:** 2025-01-27  
+**Автор:** assistant
+
+**Выполнено:**
+- Создан интерфейс `GenerateUsersAndTweetsService` в пакете `com.twitter.service`:
+  - Метод `executeScript(GenerateUsersAndTweetsRequestDto requestDto) -> GenerateUsersAndTweetsResponseDto` - выполнение административного скрипта
+  - Метод выполняет полный цикл: создание пользователей, создание твитов, валидацию, удаление твитов
+- Создана реализация `GenerateUsersAndTweetsServiceImpl` в пакете `com.twitter.service`:
+  - **Шаг 1: Создание пользователей** - создание nUsers пользователей с рандомными данными через UsersGateway и RandomDataGenerator, обработка ошибок (логирование и добавление в errors, продолжение выполнения)
+  - **Шаг 2: Создание твитов** - создание nTweetsPerUser твитов для каждого успешно созданного пользователя через TweetsGateway и RandomDataGenerator, обработка ошибок
+  - **Шаг 3: Подсчёт пользователей с твитами** - получение твитов каждого пользователя через TweetsGateway.getUserTweets(), подсчёт usersWithTweets и usersWithoutTweets
+  - **Шаг 4: Валидация** - валидация lUsersForDeletion <= usersWithTweetsCount через GenerateUsersAndTweetsValidator
+  - **Шаг 5: Удаление твитов** - выбор l случайных пользователей с твитами (Collections.shuffle), для каждого пользователя: получение твитов, выбор случайного твита, удаление через TweetsGateway.deleteTweet(), обработка ошибок
+  - **Шаг 6: Сбор статистики** - подсчёт executionTimeMs, создание ScriptStatisticsDto и GenerateUsersAndTweetsResponseDto
+- Все частичные ошибки обрабатываются gracefully:
+  - Ошибки логируются с уровнем ERROR
+  - Ошибки добавляются в список errors в статистике
+  - Выполнение продолжается для максимизации успешных операций
+- Использованы все зависимости:
+  - UsersGateway для создания пользователей
+  - TweetsGateway для создания, получения и удаления твитов
+  - RandomDataGenerator для генерации всех рандомных данных
+  - GenerateUsersAndTweetsValidator для бизнес-валидации
+- Логирование всех этапов выполнения (info для основных шагов, debug для деталей, error для ошибок)
+- Все классы используют стандартные аннотации: @Service, @RequiredArgsConstructor, @Slf4j
+- Все классы содержат полную JavaDoc документацию (@author geron, @version 1.0)
+- Все методы содержат JavaDoc с описанием параметров и возвращаемых значений
+- Проверка линтера: ошибок не обнаружено
+
+**Артефакты:**
+- `services/admin-script-api/src/main/java/com/twitter/service/GenerateUsersAndTweetsService.java` - создан
+- `services/admin-script-api/src/main/java/com/twitter/service/GenerateUsersAndTweetsServiceImpl.java` - создан
+

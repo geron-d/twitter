@@ -55,19 +55,21 @@
     - Обеспечена уникальность login и email через timestamp/UUID
   - Выполнено: Создан RandomDataGenerator (com.twitter.util) с 6 методами генерации данных: generateLogin() - генерация уникального login с использованием name().firstName() и name().lastName() + timestamp/UUID, с обрезкой до 50 символов; generateEmail() - генерация уникального email с использованием internet().emailAddress() + timestamp; generateFirstName() и generateLastName() - генерация имен с использованием name().firstName() и name().lastName(); generatePassword() - генерация пароля (8-20 символов) с использованием комбинации name и number генераторов; generateTweetContent() - генерация контента твита (1-280 символов) с использованием lorem().sentence() или lorem().paragraph() с обрезкой до 280 символов. Все методы обеспечивают уникальность через timestamp/UUID где необходимо, соблюдают ограничения DTO (login: 3-50, password: 8-20, tweet: 1-280). Класс использует @Component, @Slf4j аннотации, содержит полную JavaDoc документацию (@author geron, @version 1.0). Проверка линтера: ошибок не обнаружено.
 
-- [ ] (P1) #7: Реализация Validator - GenerateUsersAndTweetsValidator для валидации параметров скрипта
+- [x] (P1) [2025-01-27] #7: Реализация Validator - GenerateUsersAndTweetsValidator для валидации параметров скрипта
   - Зависимости: #3
   - Acceptance criteria:
     - Создан интерфейс GenerateUsersAndTweetsValidator
     - Создана реализация GenerateUsersAndTweetsValidatorImpl
     - Валидация параметров (n > 0, l > 0, l <= количество пользователей с твитами)
+  - Выполнено: Создан интерфейс GenerateUsersAndTweetsValidator (com.twitter.validation) с методом validateDeletionCount для валидации параметров скрипта. Создана реализация GenerateUsersAndTweetsValidatorImpl (com.twitter.validation) с бизнес-валидацией: проверка, что lUsersForDeletion <= количество пользователей с твитами (после создания твитов), выброс BusinessRuleValidationException с понятным сообщением при нарушении. Валидатор обрабатывает случай lUsersForDeletion = 0 (валидация проходит). Все классы используют стандартные аннотации: @Component, @RequiredArgsConstructor, @Slf4j. Все классы содержат полную JavaDoc документацию (@author geron, @version 1.0). Проверка линтера: ошибок не обнаружено.
 
-- [ ] (P1) #8: Реализация Service - GenerateUsersAndTweetsService и GenerateUsersAndTweetsServiceImpl с бизнес-логикой выполнения скрипта
+- [x] (P1) [2025-01-27] #8: Реализация Service - GenerateUsersAndTweetsService и GenerateUsersAndTweetsServiceImpl с бизнес-логикой выполнения скрипта
   - Зависимости: #3, #5, #6, #7
   - Acceptance criteria:
     - Создан интерфейс GenerateUsersAndTweetsService
     - Создана реализация GenerateUsersAndTweetsServiceImpl
     - Реализована логика создания пользователей, твитов и удаления
+  - Выполнено: Создан интерфейс GenerateUsersAndTweetsService (com.twitter.service) с методом executeScript для выполнения административного скрипта. Создана реализация GenerateUsersAndTweetsServiceImpl (com.twitter.service) с полной бизнес-логикой: создание nUsers пользователей с рандомными данными через UsersGateway и RandomDataGenerator (с обработкой ошибок), создание nTweetsPerUser твитов для каждого пользователя через TweetsGateway и RandomDataGenerator (с обработкой ошибок), подсчёт usersWithTweets и usersWithoutTweets, валидация lUsersForDeletion через GenerateUsersAndTweetsValidator, выбор l случайных пользователей с твитами и удаление по 1 твиту у каждого (с обработкой ошибок), сбор статистики (totalUsersCreated, totalTweetsCreated, totalTweetsDeleted, usersWithTweets, usersWithoutTweets, executionTimeMs, errors). Все частичные ошибки обрабатываются gracefully (логируются и добавляются в errors, выполнение продолжается). Все классы используют стандартные аннотации: @Service, @RequiredArgsConstructor, @Slf4j. Все классы содержат полную JavaDoc документацию (@author geron, @version 1.0). Проверка линтера: ошибок не обнаружено.
 
 - [ ] (P1) #9: Реализация Controller - AdminScriptApi и AdminScriptController с REST endpoint для всех скриптов
   - Зависимости: #8
