@@ -39,19 +39,21 @@
     - Настроены URL и path для сервисов
   - Выполнено: Создан UsersApiClient (com.twitter.client) с методом createUser для интеграции с users-api (POST /api/v1/users). Создан TweetsApiClient (com.twitter.client) с методами createTweet (POST /api/v1/tweets), deleteTweet (DELETE /api/v1/tweets/{tweetId}), getUserTweets (GET /api/v1/tweets/user/{userId}) для интеграции с tweet-api. Настроены URL через конфигурацию ${app.users-api.base-url} и ${app.tweet-api.base-url}. Созданы DTO для внешних API в пакете com.twitter.dto.external: UserRequestDto, UserResponseDto, CreateTweetRequestDto, DeleteTweetRequestDto, TweetResponseDto. Все Feign Clients содержат полную JavaDoc документацию (@author geron, @version 1.0).
 
-- [ ] (P1) #5: Реализация Gateways - UsersGateway и TweetsGateway с обработкой ошибок
+- [x] (P1) [2025-01-27] #5: Реализация Gateways - UsersGateway и TweetsGateway с обработкой ошибок
   - Зависимости: #4
   - Acceptance criteria:
     - Создан UsersGateway с обработкой ошибок
     - Создан TweetsGateway с обработкой ошибок
     - Добавлено логирование
+  - Выполнено: Создан UsersGateway (com.twitter.gateway) с методом createUser для обёртки вызовов UsersApiClient с обработкой ошибок и логированием. Создан TweetsGateway (com.twitter.gateway) с методами createTweet, deleteTweet, getUserTweets для обёртки вызовов TweetsApiClient с обработкой ошибок и логированием. Все методы содержат валидацию входных параметров (null checks), обработку исключений через try-catch с логированием (debug для успешных операций, error для ошибок), пробрасывание исключений дальше для обработки в Service слое. Все Gateway классы содержат полную JavaDoc документацию (@author geron, @version 1.0), используют @Component, @RequiredArgsConstructor, @Slf4j аннотации. Проверка линтера: ошибок не обнаружено.
 
-- [ ] (P1) #6: Реализация RandomDataGenerator с использованием Datafaker - утилита для генерации рандомных данных пользователей и твитов
+- [x] (P1) [2025-01-27] #6: Реализация RandomDataGenerator с использованием Datafaker - утилита для генерации рандомных данных пользователей и твитов
   - Зависимости: #1, #2
   - Acceptance criteria:
     - Создан RandomDataGenerator с методами генерации данных
     - Используется Datafaker для генерации
     - Обеспечена уникальность login и email через timestamp/UUID
+  - Выполнено: Создан RandomDataGenerator (com.twitter.util) с 6 методами генерации данных: generateLogin() - генерация уникального login с использованием name().firstName() и name().lastName() + timestamp/UUID, с обрезкой до 50 символов; generateEmail() - генерация уникального email с использованием internet().emailAddress() + timestamp; generateFirstName() и generateLastName() - генерация имен с использованием name().firstName() и name().lastName(); generatePassword() - генерация пароля (8-20 символов) с использованием комбинации name и number генераторов; generateTweetContent() - генерация контента твита (1-280 символов) с использованием lorem().sentence() или lorem().paragraph() с обрезкой до 280 символов. Все методы обеспечивают уникальность через timestamp/UUID где необходимо, соблюдают ограничения DTO (login: 3-50, password: 8-20, tweet: 1-280). Класс использует @Component, @Slf4j аннотации, содержит полную JavaDoc документацию (@author geron, @version 1.0). Проверка линтера: ошибок не обнаружено.
 
 - [ ] (P1) #7: Реализация Validator - GenerateUsersAndTweetsValidator для валидации параметров скрипта
   - Зависимости: #3
