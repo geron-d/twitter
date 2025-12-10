@@ -221,3 +221,95 @@
 - `services/admin-script-api/src/main/java/com/twitter/service/GenerateUsersAndTweetsService.java` - создан
 - `services/admin-script-api/src/main/java/com/twitter/service/GenerateUsersAndTweetsServiceImpl.java` - создан
 
+### Step #9: Реализация Controller
+**Время:** 2025-01-27  
+**Автор:** assistant
+
+**Выполнено:**
+- Создан интерфейс `AdminScriptApi` в пакете `com.twitter.controller`:
+  - @Tag(name = "Admin Scripts", description = "API for executing administrative scripts in the Twitter system")
+  - Метод `generateUsersAndTweets(GenerateUsersAndTweetsRequestDto requestDto) -> ResponseEntity<GenerateUsersAndTweetsResponseDto>`
+  - @Operation с подробным описанием операции (summary, description с деталями всех шагов скрипта)
+  - @ApiResponses с тремя вариантами ответов:
+    - 200 OK - успешное выполнение с примером ответа
+    - 400 Bad Request - ошибки валидации (Bean Validation и Business Rule Validation) с примерами
+    - 500 Internal Server Error - внутренние ошибки сервера с примером
+  - @Parameter для request body с описанием параметров
+  - Полная JavaDoc документация (@author geron, @version 1.0)
+- Создан `AdminScriptController` в пакете `com.twitter.controller`:
+  - @RestController, @RequestMapping("/api/v1/admin-scripts"), @RequiredArgsConstructor
+  - Реализация интерфейса AdminScriptApi
+  - Метод `generateUsersAndTweets` с:
+    - @LoggableRequest для автоматического логирования запросов/ответов
+    - @PostMapping("/generate-users-and-tweets")
+    - @RequestBody @Valid для валидации входных данных
+    - Вызов GenerateUsersAndTweetsService.executeScript()
+    - Логирование начала и завершения выполнения скрипта
+    - Возврат ResponseEntity.ok(response)
+  - Полная JavaDoc документация (@author geron, @version 1.0)
+- Все классы соответствуют стандартам проекта (STANDART_SWAGGER.md, STANDART_CODE.md)
+- Проверка линтера: ошибок не обнаружено
+
+**Артефакты:**
+- `services/admin-script-api/src/main/java/com/twitter/controller/AdminScriptApi.java` - создан
+- `services/admin-script-api/src/main/java/com/twitter/controller/AdminScriptController.java` - создан
+
+### Step #10: Реализация Config
+**Время:** 2025-01-27  
+**Автор:** assistant
+
+**Выполнено:**
+- Создан `OpenApiConfig` в пакете `com.twitter.config`:
+  - @Configuration для Spring конфигурации
+  - @Bean метод `adminScriptApiOpenAPI()` для создания OpenAPI спецификации
+  - Настройка Info с:
+    - title: "Twitter Admin Script API"
+    - description: подробное описание API (возможности, аутентификация, rate limiting, обработка ошибок)
+    - version: "1.0.0"
+  - Настройка Server с:
+    - url: "http://localhost:8083" (порт согласно TODO.md)
+    - description: "Local development server"
+  - Полная JavaDoc документация (@author geron, @version 1.0)
+- Создан `FeignConfig` в пакете `com.twitter.config`:
+  - @Configuration для Spring конфигурации
+  - @EnableFeignClients(basePackages = "com.twitter.client") для активации Feign клиентов
+  - Сканирование пакета com.twitter.client для поиска Feign Client интерфейсов
+  - Полная JavaDoc документация (@author geron, @version 1.0)
+- Все классы соответствуют стандартам проекта (STANDART_SWAGGER.md, STANDART_CODE.md)
+- Проверка линтера: ошибок не обнаружено
+
+**Артефакты:**
+- `services/admin-script-api/src/main/java/com/twitter/config/OpenApiConfig.java` - создан
+- `services/admin-script-api/src/main/java/com/twitter/config/FeignConfig.java` - создан
+
+### Step #11: Создание application.yml
+**Время:** 2025-01-27  
+**Автор:** assistant
+
+**Выполнено:**
+- Обновлён `application.yml` в `services/admin-script-api/src/main/resources/`:
+  - **Server configuration**: порт 8083 (согласно TODO.md)
+  - **Spring application**: name=admin-script-api
+  - **App configuration**:
+    - `app.users-api.base-url: http://localhost:8081` - URL для users-api сервиса
+    - `app.tweet-api.base-url: http://localhost:8082` - URL для tweet-api сервиса
+  - **Feign configuration**:
+    - `feign.client.config.default.connect-timeout: 2000` - таймаут подключения
+    - `feign.client.config.default.read-timeout: 5000` - таймаут чтения
+    - `feign.client.config.default.logger-level: basic` - уровень логирования
+    - `feign.httpclient.enabled: true` - включение Apache HttpClient
+  - **SpringDoc/Swagger configuration**: полная настройка Swagger UI (path, enabled, operations-sorter, tags-sorter, try-it-out-enabled, display-request-duration, и т.д.)
+  - **Management endpoints**: health, info, metrics, tracing с детальными настройками
+  - **Logging configuration**: уровни логирования для com.twitter (DEBUG), Spring Web (INFO), Spring Security (DEBUG), паттерны для console и file
+  - Удалена лишняя секция `app.tweet.max-content-length` (не относится к admin-script-api)
+- Исправлен `application-docker.yml`:
+  - Исправлена ошибка в `app.tweet-api.base-url`: было `http://users-api:8082`, стало `http://tweet-api:8082`
+  - Удалена лишняя секция `app.tweet.max-content-length`
+  - Настроены правильные Docker hostnames для users-api и tweet-api
+- Все настройки соответствуют стандартам проекта и требованиям acceptance criteria
+- Конфигурация совместима с Feign Clients (UsersApiClient, TweetsApiClient)
+
+**Артефакты:**
+- `services/admin-script-api/src/main/resources/application.yml` - обновлён
+- `services/admin-script-api/src/main/resources/application-docker.yml` - исправлен
+

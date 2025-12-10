@@ -42,10 +42,8 @@ logging:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${spring.application.name:} [%thread] %-5level [%X{traceId:-},%X{spanId:-}] %logger{36} - %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${spring.application.name:} [%thread] %-5level [%X{traceId:-},%X{spanId:-}] %logger{36} - %msg%n"
 
-# Tweet API specific configuration
+# Admin Script API specific configuration
 app:
-  tweet:
-    max-content-length: 280
   users-api:
     base-url: http://localhost:8081
   tweet-api:
