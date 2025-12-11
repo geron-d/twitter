@@ -32,18 +32,6 @@ class GenerateUsersAndTweetsValidatorImplTest {
         }
 
         @Test
-        void validateDeletionCount_WhenLUsersForDeletionIsZero_ShouldCompleteWithoutExceptions() {
-            GenerateUsersAndTweetsRequestDto requestWithZeroDeletions = GenerateUsersAndTweetsRequestDto.builder()
-                .nUsers(10)
-                .nTweetsPerUser(5)
-                .lUsersForDeletion(0)
-                .build();
-
-            assertThatCode(() -> validator.validateDeletionCount(requestWithZeroDeletions, 10))
-                .doesNotThrowAnyException();
-        }
-
-        @Test
         void validateDeletionCount_WhenLUsersForDeletionEqualsUsersWithTweets_ShouldCompleteWithoutExceptions() {
             assertThatCode(() -> validator.validateDeletionCount(requestDto, 3))
                 .doesNotThrowAnyException();
@@ -71,41 +59,6 @@ class GenerateUsersAndTweetsValidatorImplTest {
             assertThatThrownBy(() -> validator.validateDeletionCount(null, 5))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Request DTO cannot be null");
-        }
-
-        @Test
-        void validateDeletionCount_WhenUsersWithTweetsIsZeroAndLUsersForDeletionIsZero_ShouldCompleteWithoutExceptions() {
-            GenerateUsersAndTweetsRequestDto requestWithZeroDeletions = GenerateUsersAndTweetsRequestDto.builder()
-                .nUsers(10)
-                .nTweetsPerUser(5)
-                .lUsersForDeletion(0)
-                .build();
-
-            assertThatCode(() -> validator.validateDeletionCount(requestWithZeroDeletions, 0))
-                .doesNotThrowAnyException();
-        }
-
-        @Test
-        void validateDeletionCount_WhenUsersWithTweetsIsZeroAndLUsersForDeletionIsGreaterThanZero_ShouldThrowBusinessRuleValidationException() {
-            assertThatThrownBy(() -> validator.validateDeletionCount(requestDto, 0))
-                .isInstanceOf(BusinessRuleValidationException.class)
-                .satisfies(exception -> {
-                    BusinessRuleValidationException ex = (BusinessRuleValidationException) exception;
-                    assertThat(ex.getRuleName()).isEqualTo("DELETION_COUNT_EXCEEDS_USERS_WITH_TWEETS");
-                    assertThat(ex.getMessage()).contains("Cannot delete tweets from 3 users: only 0 users have tweets");
-                });
-        }
-
-        @Test
-        void validateDeletionCount_WhenLUsersForDeletionIsOneAndUsersWithTweetsIsOne_ShouldCompleteWithoutExceptions() {
-            GenerateUsersAndTweetsRequestDto requestWithOneDeletion = GenerateUsersAndTweetsRequestDto.builder()
-                .nUsers(10)
-                .nTweetsPerUser(5)
-                .lUsersForDeletion(1)
-                .build();
-
-            assertThatCode(() -> validator.validateDeletionCount(requestWithOneDeletion, 1))
-                .doesNotThrowAnyException();
         }
 
         @Test

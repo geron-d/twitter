@@ -22,13 +22,6 @@ class RandomDataGeneratorTest {
     class GenerateLoginTests {
 
         @Test
-        void generateLogin_ShouldReturnNonNullString() {
-            String login = randomDataGenerator.generateLogin();
-
-            assertThat(login).isNotNull();
-        }
-
-        @Test
         void generateLogin_ShouldReturnStringWithValidLength() {
             String login = randomDataGenerator.generateLogin();
 
@@ -113,13 +106,6 @@ class RandomDataGeneratorTest {
     class GenerateFirstNameTests {
 
         @Test
-        void generateFirstName_ShouldReturnNonNullString() {
-            String firstName = randomDataGenerator.generateFirstName();
-
-            assertThat(firstName).isNotNull();
-        }
-
-        @Test
         void generateFirstName_ShouldReturnNonEmptyString() {
             String firstName = randomDataGenerator.generateFirstName();
 
@@ -143,13 +129,6 @@ class RandomDataGeneratorTest {
     class GenerateLastNameTests {
 
         @Test
-        void generateLastName_ShouldReturnNonNullString() {
-            String lastName = randomDataGenerator.generateLastName();
-
-            assertThat(lastName).isNotNull();
-        }
-
-        @Test
         void generateLastName_ShouldReturnNonEmptyString() {
             String lastName = randomDataGenerator.generateLastName();
 
@@ -171,13 +150,6 @@ class RandomDataGeneratorTest {
 
     @Nested
     class GeneratePasswordTests {
-
-        @Test
-        void generatePassword_ShouldReturnNonNullString() {
-            String password = randomDataGenerator.generatePassword();
-
-            assertThat(password).isNotNull();
-        }
 
         @Test
         void generatePassword_ShouldReturnStringWithValidLength() {
@@ -211,25 +183,11 @@ class RandomDataGeneratorTest {
     class GenerateTweetContentTests {
 
         @Test
-        void generateTweetContent_ShouldReturnNonNullString() {
-            String content = randomDataGenerator.generateTweetContent();
-
-            assertThat(content).isNotNull();
-        }
-
-        @Test
         void generateTweetContent_ShouldReturnStringWithValidLength() {
             String content = randomDataGenerator.generateTweetContent();
 
             assertThat(content.length()).isGreaterThanOrEqualTo(1);
             assertThat(content.length()).isLessThanOrEqualTo(280);
-        }
-
-        @Test
-        void generateTweetContent_ShouldReturnNonEmptyString() {
-            String content = randomDataGenerator.generateTweetContent();
-
-            assertThat(content).isNotEmpty();
         }
 
         @Test
