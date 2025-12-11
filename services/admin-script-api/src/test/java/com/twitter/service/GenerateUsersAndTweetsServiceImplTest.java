@@ -6,7 +6,6 @@ import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.dto.external.*;
 import com.twitter.dto.request.GenerateUsersAndTweetsRequestDto;
 import com.twitter.dto.response.GenerateUsersAndTweetsResponseDto;
-import com.twitter.dto.response.ScriptStatisticsDto;
 import com.twitter.gateway.TweetsGateway;
 import com.twitter.gateway.UsersGateway;
 import com.twitter.util.RandomDataGenerator;
@@ -147,10 +146,8 @@ class GenerateUsersAndTweetsServiceImplTest {
             when(randomDataGenerator.generateLastName()).thenReturn("Doe", "Smith");
             when(randomDataGenerator.generatePassword()).thenReturn("password123", "password456");
 
-            UserResponseDto userResponse2 = new UserResponseDto(
-                userId2, "user2", "Jane", "Smith", "user2@test.com",
-                UserStatus.ACTIVE, UserRole.USER, LocalDateTime.now()
-            );
+            UserResponseDto userResponse2 = new UserResponseDto(userId2, "user2", "Jane",
+                "Smith", "user2@test.com", UserStatus.ACTIVE, UserRole.USER, LocalDateTime.now());
 
             when(usersGateway.createUser(any(UserRequestDto.class)))
                 .thenThrow(new RuntimeException("User creation failed"))
@@ -162,7 +159,7 @@ class GenerateUsersAndTweetsServiceImplTest {
             assertThat(result.createdUsers()).hasSize(1);
             assertThat(result.createdUsers()).containsExactly(userId2);
             assertThat(result.statistics().errors()).isNotEmpty();
-            assertThat(result.statistics().errors().get(0)).contains("Failed to create user");
+            assertThat(result.statistics().errors().getFirst()).contains("Failed to create user");
 
             verify(usersGateway, times(2)).createUser(any(UserRequestDto.class));
         }
@@ -176,24 +173,20 @@ class GenerateUsersAndTweetsServiceImplTest {
             when(randomDataGenerator.generatePassword()).thenReturn("password123");
             when(randomDataGenerator.generateTweetContent()).thenReturn("Tweet 1", "Tweet 2");
 
-            UserResponseDto userResponse1 = new UserResponseDto(
-                userId1, "user1", "John", "Doe", "user1@test.com",
-                UserStatus.ACTIVE, UserRole.USER, LocalDateTime.now()
-            );
+            UserResponseDto userResponse1 = new UserResponseDto(userId1, "user1", "John", "Doe",
+                "user1@test.com", UserStatus.ACTIVE, UserRole.USER, LocalDateTime.now());
 
             when(usersGateway.createUser(any(UserRequestDto.class))).thenReturn(userResponse1);
 
-            TweetResponseDto tweetResponse1 = new TweetResponseDto(
-                tweetId1, userId1, "Tweet 1", LocalDateTime.now(), LocalDateTime.now(), false, null
-            );
+            TweetResponseDto tweetResponse1 = new TweetResponseDto(tweetId1, userId1, "Tweet 1",
+                LocalDateTime.now(), LocalDateTime.now(), false, null);
 
             when(tweetsGateway.createTweet(any(CreateTweetRequestDto.class)))
                 .thenReturn(tweetResponse1)
                 .thenThrow(new RuntimeException("Tweet creation failed"));
 
-            Page<TweetResponseDto> user1TweetsPage = new PageImpl<>(
-                List.of(tweetResponse1), PageRequest.of(0, 1000), 1
-            );
+            Page<TweetResponseDto> user1TweetsPage = new PageImpl<>(List.of(tweetResponse1),
+                PageRequest.of(0, 1000), 1);
 
             when(tweetsGateway.getUserTweets(eq(userId1), any(Pageable.class))).thenReturn(user1TweetsPage);
 
@@ -211,7 +204,7 @@ class GenerateUsersAndTweetsServiceImplTest {
             assertThat(result.createdUsers()).hasSize(1);
             assertThat(result.createdTweets()).hasSize(1);
             assertThat(result.statistics().errors()).isNotEmpty();
-            assertThat(result.statistics().errors().get(0)).contains("Failed to create tweet");
+            assertThat(result.statistics().errors().getFirst()).contains("Failed to create tweet");
 
             verify(tweetsGateway, times(2)).createTweet(any(CreateTweetRequestDto.class));
         }
@@ -225,22 +218,18 @@ class GenerateUsersAndTweetsServiceImplTest {
             when(randomDataGenerator.generatePassword()).thenReturn("password123");
             when(randomDataGenerator.generateTweetContent()).thenReturn("Tweet 1");
 
-            UserResponseDto userResponse1 = new UserResponseDto(
-                userId1, "user1", "John", "Doe", "user1@test.com",
-                UserStatus.ACTIVE, UserRole.USER, LocalDateTime.now()
-            );
+            UserResponseDto userResponse1 = new UserResponseDto(userId1, "user1", "John", "Doe",
+                "user1@test.com", UserStatus.ACTIVE, UserRole.USER, LocalDateTime.now());
 
             when(usersGateway.createUser(any(UserRequestDto.class))).thenReturn(userResponse1);
 
-            TweetResponseDto tweetResponse1 = new TweetResponseDto(
-                tweetId1, userId1, "Tweet 1", LocalDateTime.now(), LocalDateTime.now(), false, null
-            );
+            TweetResponseDto tweetResponse1 = new TweetResponseDto(tweetId1, userId1, "Tweet 1",
+                LocalDateTime.now(), LocalDateTime.now(), false, null);
 
             when(tweetsGateway.createTweet(any(CreateTweetRequestDto.class))).thenReturn(tweetResponse1);
 
-            Page<TweetResponseDto> user1TweetsPage = new PageImpl<>(
-                List.of(tweetResponse1), PageRequest.of(0, 1000), 1
-            );
+            Page<TweetResponseDto> user1TweetsPage = new PageImpl<>(List.of(tweetResponse1),
+                PageRequest.of(0, 1000), 1);
 
             when(tweetsGateway.getUserTweets(eq(userId1), any(Pageable.class))).thenReturn(user1TweetsPage);
 
@@ -271,22 +260,18 @@ class GenerateUsersAndTweetsServiceImplTest {
             when(randomDataGenerator.generatePassword()).thenReturn("password123");
             when(randomDataGenerator.generateTweetContent()).thenReturn("Tweet 1");
 
-            UserResponseDto userResponse1 = new UserResponseDto(
-                userId1, "user1", "John", "Doe", "user1@test.com",
-                UserStatus.ACTIVE, UserRole.USER, LocalDateTime.now()
-            );
+            UserResponseDto userResponse1 = new UserResponseDto(userId1, "user1", "John", "Doe",
+                "user1@test.com", UserStatus.ACTIVE, UserRole.USER, LocalDateTime.now());
 
             when(usersGateway.createUser(any(UserRequestDto.class))).thenReturn(userResponse1);
 
-            TweetResponseDto tweetResponse1 = new TweetResponseDto(
-                tweetId1, userId1, "Tweet 1", LocalDateTime.now(), LocalDateTime.now(), false, null
-            );
+            TweetResponseDto tweetResponse1 = new TweetResponseDto(tweetId1, userId1, "Tweet 1",
+                LocalDateTime.now(), LocalDateTime.now(), false, null);
 
             when(tweetsGateway.createTweet(any(CreateTweetRequestDto.class))).thenReturn(tweetResponse1);
 
-            Page<TweetResponseDto> user1TweetsPage = new PageImpl<>(
-                List.of(tweetResponse1), PageRequest.of(0, 1000), 1
-            );
+            Page<TweetResponseDto> user1TweetsPage = new PageImpl<>(List.of(tweetResponse1),
+                PageRequest.of(0, 1000), 1);
 
             when(tweetsGateway.getUserTweets(eq(userId1), any(Pageable.class))).thenReturn(user1TweetsPage);
 
