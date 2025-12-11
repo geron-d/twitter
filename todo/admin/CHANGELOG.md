@@ -313,3 +313,35 @@
 - `services/admin-script-api/src/main/resources/application.yml` - обновлён
 - `services/admin-script-api/src/main/resources/application-docker.yml` - исправлен
 
+### Step #12: JavaDoc документация
+**Время:** 2025-01-27  
+**Автор:** assistant
+
+**Выполнено:**
+- Проверена и дополнена JavaDoc документация для всех public классов и методов в admin-script-api
+- Добавлен JavaDoc для `Application.java`:
+  - Класс-уровневая документация с описанием назначения сервиса
+  - Метод `main` с @param для параметра args
+  - Полная документация согласно STANDART_JAVADOC.md
+- Проверены все остальные классы на наличие полной JavaDoc документации:
+  - **Controllers**: AdminScriptApi, AdminScriptController - имеют полную документацию ✓
+  - **Services**: GenerateUsersAndTweetsService, GenerateUsersAndTweetsServiceImpl - имеют полную документацию ✓
+  - **Gateways**: UsersGateway, TweetsGateway - имеют полную документацию с @param, @return, @throws ✓
+  - **Clients**: UsersApiClient, TweetsApiClient - имеют полную документацию ✓
+  - **Validators**: GenerateUsersAndTweetsValidator, GenerateUsersAndTweetsValidatorImpl - имеют полную документацию ✓
+  - **Utils**: RandomDataGenerator - имеет полную документацию для всех методов ✓
+  - **DTOs**: все DTO (Request, Response, External) - имеют полную документацию с @param для всех компонентов ✓
+  - **Config**: OpenApiConfig, FeignConfig - имеют полную документацию ✓
+- Все классы содержат обязательные теги:
+  - @author geron ✓
+  - @version 1.0 ✓
+- Все public методы содержат:
+  - @param для всех параметров ✓
+  - @return для возвращаемых значений ✓
+  - @throws для исключений (где применимо) ✓
+- Все классы соответствуют стандартам STANDART_JAVADOC.md
+- Проверка линтера: ошибок не обнаружено
+
+**Артефакты:**
+- `services/admin-script-api/src/main/java/com/twitter/Application.java` - добавлен JavaDoc
+

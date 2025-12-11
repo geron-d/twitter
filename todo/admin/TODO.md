@@ -95,13 +95,14 @@
     - Настроены Feign настройки
   - Выполнено: Обновлён application.yml с полной конфигурацией: server.port=8083, spring.application.name=admin-script-api, app.users-api.base-url=http://localhost:8081, app.tweet-api.base-url=http://localhost:8082, feign.client.config.default (connect-timeout: 2000, read-timeout: 5000, logger-level: basic), feign.httpclient.enabled=true, springdoc настройки для Swagger UI, management endpoints (health, info, metrics, tracing), logging настройки. Исправлен application-docker.yml: исправлена ошибка в tweet-api.base-url (было http://users-api:8082, стало http://tweet-api:8082), удалена лишняя секция app.tweet.max-content-length. Все настройки соответствуют стандартам проекта и требованиям acceptance criteria.
 
-- [ ] (P2) #12: JavaDoc документация - добавить JavaDoc для всех public классов и методов
+- [x] (P2) [2025-01-27] #12: JavaDoc документация - добавить JavaDoc для всех public классов и методов
   - Зависимости: #9, #8, #7, #6
   - Acceptance criteria:
     - JavaDoc для всех public классов
     - JavaDoc для всех public методов
     - @author geron, @version 1.0
     - @param, @return, @throws для всех методов
+  - Выполнено: Проверена и дополнена JavaDoc документация для всех public классов и методов в admin-script-api. Добавлен JavaDoc для Application.java (класс и метод main с @param). Проверены все остальные классы: все имеют полную JavaDoc документацию с @author geron, @version 1.0, @param для всех параметров, @return для возвращаемых значений, @throws для исключений. Все классы соответствуют стандартам STANDART_JAVADOC.md. Проверка линтера: ошибок не обнаружено.
 
 - [ ] (P2) #13: Unit тесты - GenerateUsersAndTweetsServiceImplTest, GenerateUsersAndTweetsValidatorImplTest, RandomDataGeneratorTest (с использованием Datafaker)
   - Зависимости: #8, #7, #6
