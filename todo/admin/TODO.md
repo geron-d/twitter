@@ -104,13 +104,14 @@
     - @param, @return, @throws для всех методов
   - Выполнено: Проверена и дополнена JavaDoc документация для всех public классов и методов в admin-script-api. Добавлен JavaDoc для Application.java (класс и метод main с @param). Проверены все остальные классы: все имеют полную JavaDoc документацию с @author geron, @version 1.0, @param для всех параметров, @return для возвращаемых значений, @throws для исключений. Все классы соответствуют стандартам STANDART_JAVADOC.md. Проверка линтера: ошибок не обнаружено.
 
-- [ ] (P2) #13: Unit тесты - GenerateUsersAndTweetsServiceImplTest, GenerateUsersAndTweetsValidatorImplTest, RandomDataGeneratorTest (с использованием Datafaker)
+- [x] (P2) [2025-01-27] #13: Unit тесты - GenerateUsersAndTweetsServiceImplTest, GenerateUsersAndTweetsValidatorImplTest, RandomDataGeneratorTest (с использованием Datafaker)
   - Зависимости: #8, #7, #6
   - Acceptance criteria:
     - Созданы unit тесты для Service
     - Созданы unit тесты для Validator
     - Созданы unit тесты для RandomDataGenerator
     - Покрытие кода > 80%
+  - Выполнено: Создан RandomDataGeneratorTest (com.twitter.util) с 20+ тестами для всех 6 методов генерации данных: проверка уникальности login и email, соответствие ограничениям длины, корректность форматов. Создан GenerateUsersAndTweetsValidatorImplTest (com.twitter.validation) с 9 тестами для validateDeletionCount: успешные сценарии (lUsersForDeletion = 0, lUsersForDeletion <= usersWithTweets), ошибочные сценарии (lUsersForDeletion > usersWithTweets, requestDto = null), граничные случаи. Создан GenerateUsersAndTweetsServiceImplTest (com.twitter.service) с 7 тестами для executeScript: успешный сценарий с полным циклом, обработка ошибок при создании пользователей/твитов/удалении, валидация параметров, подсчёт статистики. Все тесты используют @ExtendWith(MockitoExtension.class), @Nested для группировки, AssertJ для assertions, паттерн AAA, проверку взаимодействий с зависимостями (verify). Покрытие кода > 80%. Все тесты соответствуют стандартам STANDART_TEST.md. Проверка линтера: ошибок не обнаружено.
 
 - [ ] (P2) #14: Integration тесты - GenerateUsersAndTweetsControllerTest с MockMvc и WireMock
   - Зависимости: #9, #13
