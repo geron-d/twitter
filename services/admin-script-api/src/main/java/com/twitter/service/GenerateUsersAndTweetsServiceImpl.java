@@ -119,8 +119,10 @@ public class GenerateUsersAndTweetsServiceImpl implements GenerateUsersAndTweets
 
         // Step 4: Validate deletion count
         log.info("Step 4: Validating deletion count");
+        boolean validationPassed = false;
         try {
             validator.validateDeletionCount(requestDto, usersWithTweetsCount);
+            validationPassed = true;
             log.info("Step 4 completed: Validation passed");
         } catch (Exception ex) {
             String errorMsg = String.format("Validation failed: %s", ex.getMessage());
@@ -130,7 +132,7 @@ public class GenerateUsersAndTweetsServiceImpl implements GenerateUsersAndTweets
         }
 
         // Step 5: Delete tweets from random users
-        if (requestDto.lUsersForDeletion() > 0 && usersWithTweetsCount > 0) {
+        if (validationPassed && requestDto.lUsersForDeletion() > 0 && usersWithTweetsCount > 0) {
             log.info("Step 5: Deleting one tweet from {} random users", requestDto.lUsersForDeletion());
             List<UUID> usersToDeleteFrom = new ArrayList<>(usersWithTweets);
             Collections.shuffle(usersToDeleteFrom);

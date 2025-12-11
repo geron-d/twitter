@@ -303,14 +303,10 @@ class GenerateUsersAndTweetsServiceImplTest {
             when(randomDataGenerator.generateLastName()).thenReturn("Doe", "Smith");
             when(randomDataGenerator.generatePassword()).thenReturn("password123", "password456");
 
-            UserResponseDto userResponse1 = new UserResponseDto(
-                userId1, "user1", "John", "Doe", "user1@test.com",
-                UserStatus.ACTIVE, UserRole.USER, LocalDateTime.now()
-            );
-            UserResponseDto userResponse2 = new UserResponseDto(
-                userId2, "user2", "Jane", "Smith", "user2@test.com",
-                UserStatus.ACTIVE, UserRole.USER, LocalDateTime.now()
-            );
+            UserResponseDto userResponse1 = new UserResponseDto(userId1, "user1", "John", "Doe",
+                "user1@test.com", UserStatus.ACTIVE, UserRole.USER, LocalDateTime.now());
+            UserResponseDto userResponse2 = new UserResponseDto(userId2, "user2", "Jane",
+                "Smith", "user2@test.com", UserStatus.ACTIVE, UserRole.USER, LocalDateTime.now());
 
             when(usersGateway.createUser(any(UserRequestDto.class)))
                 .thenReturn(userResponse1, userResponse2);
@@ -318,9 +314,8 @@ class GenerateUsersAndTweetsServiceImplTest {
             when(tweetsGateway.createTweet(any(CreateTweetRequestDto.class)))
                 .thenThrow(new RuntimeException("Tweet creation failed"));
 
-            Page<TweetResponseDto> emptyTweetsPage = new PageImpl<>(
-                List.of(), PageRequest.of(0, 1000), 0
-            );
+            Page<TweetResponseDto> emptyTweetsPage = new PageImpl<>(List.of(),
+                PageRequest.of(0, 1000), 0);
 
             when(tweetsGateway.getUserTweets(any(UUID.class), any(Pageable.class)))
                 .thenReturn(emptyTweetsPage);
