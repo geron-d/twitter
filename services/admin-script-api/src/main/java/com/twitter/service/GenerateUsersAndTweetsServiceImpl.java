@@ -141,7 +141,7 @@ public class GenerateUsersAndTweetsServiceImpl implements GenerateUsersAndTweets
                 try {
                     Pageable pageable = PageRequest.of(0, 1000);
                     Page<TweetResponseDto> userTweets = tweetsGateway.getUserTweets(userId, pageable);
-                    List<TweetResponseDto> tweetsList = userTweets.getContent();
+                    List<TweetResponseDto> tweetsList = new ArrayList<>(userTweets.getContent());
 
                     if (!tweetsList.isEmpty()) {
                         // Select random tweet

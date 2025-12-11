@@ -87,50 +87,34 @@ class GenerateUsersAndTweetsServiceImplTest {
             when(randomDataGenerator.generatePassword()).thenReturn("password123", "password456");
             when(randomDataGenerator.generateTweetContent()).thenReturn("Tweet 1", "Tweet 2", "Tweet 3", "Tweet 4");
 
-            UserResponseDto userResponse1 = new UserResponseDto(
-                userId1, "user1", "John", "Doe", "user1@test.com",
-                UserStatus.ACTIVE, UserRole.USER, LocalDateTime.now()
-            );
-            UserResponseDto userResponse2 = new UserResponseDto(
-                userId2, "user2", "Jane", "Smith", "user2@test.com",
-                UserStatus.ACTIVE, UserRole.USER, LocalDateTime.now()
-            );
+            UserResponseDto userResponse1 = new UserResponseDto(userId1, "user1", "John", "Doe",
+                "user1@test.com", UserStatus.ACTIVE, UserRole.USER, LocalDateTime.now());
+            UserResponseDto userResponse2 = new UserResponseDto(userId2, "user2", "Jane", "Smith",
+                "user2@test.com", UserStatus.ACTIVE, UserRole.USER, LocalDateTime.now());
 
-            when(usersGateway.createUser(any(UserRequestDto.class)))
-                .thenReturn(userResponse1, userResponse2);
+            when(usersGateway.createUser(any(UserRequestDto.class))).thenReturn(userResponse1, userResponse2);
 
-            TweetResponseDto tweetResponse1 = new TweetResponseDto(
-                tweetId1, userId1, "Tweet 1", LocalDateTime.now(), LocalDateTime.now(), false, null
-            );
-            TweetResponseDto tweetResponse2 = new TweetResponseDto(
-                tweetId2, userId1, "Tweet 2", LocalDateTime.now(), LocalDateTime.now(), false, null
-            );
-            TweetResponseDto tweetResponse3 = new TweetResponseDto(
-                tweetId3, userId2, "Tweet 3", LocalDateTime.now(), LocalDateTime.now(), false, null
-            );
-            TweetResponseDto tweetResponse4 = new TweetResponseDto(
-                tweetId4, userId2, "Tweet 4", LocalDateTime.now(), LocalDateTime.now(), false, null
-            );
+            TweetResponseDto tweetResponse1 = new TweetResponseDto(tweetId1, userId1, "Tweet 1",
+                LocalDateTime.now(), LocalDateTime.now(), false, null);
+            TweetResponseDto tweetResponse2 = new TweetResponseDto(tweetId2, userId1, "Tweet 2",
+                LocalDateTime.now(), LocalDateTime.now(), false, null);
+            TweetResponseDto tweetResponse3 = new TweetResponseDto(tweetId3, userId2, "Tweet 3",
+                LocalDateTime.now(), LocalDateTime.now(), false, null);
+            TweetResponseDto tweetResponse4 = new TweetResponseDto(tweetId4, userId2, "Tweet 4",
+                LocalDateTime.now(), LocalDateTime.now(), false, null);
 
             when(tweetsGateway.createTweet(any(CreateTweetRequestDto.class)))
                 .thenReturn(tweetResponse1, tweetResponse2, tweetResponse3, tweetResponse4);
 
-            Page<TweetResponseDto> user1TweetsPage = new PageImpl<>(
-                List.of(tweetResponse1, tweetResponse2), PageRequest.of(0, 1000), 2
-            );
-            Page<TweetResponseDto> user2TweetsPage = new PageImpl<>(
-                List.of(tweetResponse3, tweetResponse4), PageRequest.of(0, 1000), 2
-            );
-
-            when(tweetsGateway.getUserTweets(eq(userId1), any(Pageable.class))).thenReturn(user1TweetsPage);
-            when(tweetsGateway.getUserTweets(eq(userId2), any(Pageable.class))).thenReturn(user2TweetsPage);
-
-            doNothing().when(validator).validateDeletionCount(any(), eq(2));
+            List<TweetResponseDto> user1TweetsList = new ArrayList<>(List.of(tweetResponse1, tweetResponse2));
+            List<TweetResponseDto> user2TweetsList = new ArrayList<>(List.of(tweetResponse3, tweetResponse4));
 
             when(tweetsGateway.getUserTweets(eq(userId1), any(Pageable.class)))
-                .thenReturn(user1TweetsPage)
-                .thenReturn(user1TweetsPage);
+                .thenAnswer(_ -> new PageImpl<>(user1TweetsList, PageRequest.of(0, 1000), 2));
+            when(tweetsGateway.getUserTweets(eq(userId2), any(Pageable.class)))
+                .thenAnswer(_ -> new PageImpl<>(user2TweetsList, PageRequest.of(0, 1000), 2));
 
+            doNothing().when(validator).validateDeletionCount(any(), eq(2));
             doNothing().when(tweetsGateway).deleteTweet(any(UUID.class), any(DeleteTweetRequestDto.class));
 
             GenerateUsersAndTweetsResponseDto result = service.executeScript(requestDto);
