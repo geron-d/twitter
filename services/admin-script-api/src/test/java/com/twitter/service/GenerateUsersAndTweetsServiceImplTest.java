@@ -341,6 +341,12 @@ class GenerateUsersAndTweetsServiceImplTest {
 
         @Test
         void executeScript_WhenDeletionFails_ShouldContinueAndAddError() {
+            GenerateUsersAndTweetsRequestDto testRequestDto = GenerateUsersAndTweetsRequestDto.builder()
+                .nUsers(1)
+                .nTweetsPerUser(1)
+                .lUsersForDeletion(1)
+                .build();
+
             when(randomDataGenerator.generateLogin()).thenReturn("user1");
             when(randomDataGenerator.generateEmail()).thenReturn("user1@test.com");
             when(randomDataGenerator.generateFirstName()).thenReturn("John");
@@ -348,38 +354,33 @@ class GenerateUsersAndTweetsServiceImplTest {
             when(randomDataGenerator.generatePassword()).thenReturn("password123");
             when(randomDataGenerator.generateTweetContent()).thenReturn("Tweet 1");
 
-            UserResponseDto userResponse1 = new UserResponseDto(
-                userId1, "user1", "John", "Doe", "user1@test.com",
-                UserStatus.ACTIVE, UserRole.USER, LocalDateTime.now()
-            );
+            UserResponseDto userResponse1 = new UserResponseDto(userId1, "user1", "John", "Doe",
+                "user1@test.com",UserStatus.ACTIVE, UserRole.USER, LocalDateTime.now());
 
             when(usersGateway.createUser(any(UserRequestDto.class))).thenReturn(userResponse1);
 
-            TweetResponseDto tweetResponse1 = new TweetResponseDto(
-                tweetId1, userId1, "Tweet 1", LocalDateTime.now(), LocalDateTime.now(), false, null
-            );
+            TweetResponseDto tweetResponse1 = new TweetResponseDto(tweetId1, userId1, "Tweet 1",
+                LocalDateTime.now(), LocalDateTime.now(), false, null);
 
             when(tweetsGateway.createTweet(any(CreateTweetRequestDto.class))).thenReturn(tweetResponse1);
 
-            Page<TweetResponseDto> user1TweetsPage = new PageImpl<>(
-                List.of(tweetResponse1), PageRequest.of(0, 1000), 1
-            );
+            List<TweetResponseDto> user1TweetsList = new ArrayList<>(List.of(tweetResponse1));
 
             when(tweetsGateway.getUserTweets(eq(userId1), any(Pageable.class)))
-                .thenReturn(user1TweetsPage)
-                .thenReturn(user1TweetsPage);
+                .thenAnswer(_ -> new PageImpl<>(user1TweetsList, PageRequest.of(0, 1000), 1))
+                .thenAnswer(_ -> new PageImpl<>(user1TweetsList, PageRequest.of(0, 1000), 1));
 
             doNothing().when(validator).validateDeletionCount(any(), eq(1));
 
             doThrow(new RuntimeException("Deletion failed"))
                 .when(tweetsGateway).deleteTweet(any(UUID.class), any(DeleteTweetRequestDto.class));
 
-            GenerateUsersAndTweetsResponseDto result = service.executeScript(requestDto);
+            GenerateUsersAndTweetsResponseDto result = service.executeScript(testRequestDto);
 
             assertThat(result).isNotNull();
             assertThat(result.deletedTweets()).isEmpty();
             assertThat(result.statistics().errors()).isNotEmpty();
-            assertThat(result.statistics().errors().get(0)).contains("Failed to delete tweet");
+            assertThat(result.statistics().errors().getFirst()).contains("Failed to delete tweet");
 
             verify(tweetsGateway, times(1)).deleteTweet(any(UUID.class), any(DeleteTweetRequestDto.class));
         }
