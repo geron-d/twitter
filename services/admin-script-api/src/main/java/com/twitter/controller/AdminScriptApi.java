@@ -52,36 +52,66 @@ public interface AdminScriptApi {
             content = @Content(
                 mediaType = "application/json",
                 schema = @Schema(implementation = GenerateUsersAndTweetsResponseDto.class),
-                examples = @ExampleObject(
-                    name = "Successful Execution",
-                    summary = "Example successful script execution",
-                    value = """
-                        {
-                          "createdUsers": [
-                            "123e4567-e89b-12d3-a456-426614174000",
-                            "223e4567-e89b-12d3-a456-426614174001",
-                            "323e4567-e89b-12d3-a456-426614174002"
-                          ],
-                          "createdTweets": [
-                            "423e4567-e89b-12d3-a456-426614174003",
-                            "523e4567-e89b-12d3-a456-426614174004",
-                            "623e4567-e89b-12d3-a456-426614174005"
-                          ],
-                          "deletedTweets": [
-                            "423e4567-e89b-12d3-a456-426614174003"
-                          ],
-                          "statistics": {
-                            "totalUsersCreated": 3,
-                            "totalTweetsCreated": 15,
-                            "totalTweetsDeleted": 1,
-                            "usersWithTweets": 3,
-                            "usersWithoutTweets": 0,
-                            "executionTimeMs": 1234,
-                            "errors": []
-                          }
-                        }
-                        """
-                )
+                examples = {
+                    @ExampleObject(
+                        name = "Successful Execution",
+                        summary = "Example successful script execution",
+                        value = """
+                            {
+                              "createdUsers": [
+                                "123e4567-e89b-12d3-a456-426614174000",
+                                "223e4567-e89b-12d3-a456-426614174001",
+                                "323e4567-e89b-12d3-a456-426614174002"
+                              ],
+                              "createdTweets": [
+                                "423e4567-e89b-12d3-a456-426614174003",
+                                "523e4567-e89b-12d3-a456-426614174004",
+                                "623e4567-e89b-12d3-a456-426614174005"
+                              ],
+                              "deletedTweets": [
+                                "423e4567-e89b-12d3-a456-426614174003"
+                              ],
+                              "statistics": {
+                                "totalUsersCreated": 3,
+                                "totalTweetsCreated": 15,
+                                "totalTweetsDeleted": 1,
+                                "usersWithTweets": 3,
+                                "usersWithoutTweets": 0,
+                                "executionTimeMs": 1234,
+                                "errors": []
+                              }
+                            }
+                            """
+                    ),
+                    @ExampleObject(
+                        name = "Execution with Partial Errors",
+                        summary = "Example execution with some errors in statistics",
+                        value = """
+                            {
+                              "createdUsers": [
+                                "123e4567-e89b-12d3-a456-426614174000",
+                                "223e4567-e89b-12d3-a456-426614174001"
+                              ],
+                              "createdTweets": [
+                                "423e4567-e89b-12d3-a456-426614174003",
+                                "523e4567-e89b-12d3-a456-426614174004"
+                              ],
+                              "deletedTweets": [],
+                              "statistics": {
+                                "totalUsersCreated": 2,
+                                "totalTweetsCreated": 10,
+                                "totalTweetsDeleted": 0,
+                                "usersWithTweets": 2,
+                                "usersWithoutTweets": 0,
+                                "executionTimeMs": 856,
+                                "errors": [
+                                  "Validation failed: Business rule 'DELETION_COUNT_EXCEEDS_USERS_WITH_TWEETS' violated for context: Cannot delete tweets from 5 users: only 2 users have tweets"
+                                ]
+                              }
+                            }
+                            """
+                    )
+                }
             )
         ),
         @ApiResponse(

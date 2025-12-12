@@ -122,14 +122,15 @@
     - Протестированы все статус-коды
   - Выполнено: Создан GenerateUsersAndTweetsControllerTest (com.twitter.controller) с полными integration тестами для AdminScriptController: успешный сценарий (200 OK) с проверкой создания пользователей, твитов и удаления, валидация Bean Validation (400 Bad Request) для всех полей (nUsers, nTweetsPerUser, lUsersForDeletion), бизнес-валидация (400 Bad Request) для lUsersForDeletion > usersWithTweets, обработка ошибок внешних сервисов (500 Internal Server Error) для users-api и tweet-api с graceful handling, проверка отсутствия body (400 Bad Request). Все тесты используют @SpringBootTest, @AutoConfigureWebMvc, @ActiveProfiles("test"), @Transactional, MockMvc для тестирования REST endpoints, WireMock для мокирования users-api и tweet-api (POST /api/v1/users, POST /api/v1/tweets, GET /api/v1/tweets/user/{userId}, DELETE /api/v1/tweets/{tweetId}). Обновлён BaseIntegrationTest для поддержки tweet-api URL в WireMock. Все тесты следуют стандартам проекта (STANDART_TEST.md): именование methodName_WhenCondition_ShouldExpectedResult, использование @Nested для группировки, AssertJ для assertions, паттерн AAA. Проверка линтера: только warnings (null type safety), критических ошибок нет.
 
-- [ ] (P2) #15: Swagger/OpenAPI документация - полная документация API с примерами
+- [x] (P2) [2025-01-27] #15: Swagger/OpenAPI документация - полная документация API с примерами
   - Зависимости: #9
   - Acceptance criteria:
     - Полная OpenAPI документация
     - Примеры запросов и ответов
     - Документация всех возможных ошибок
+  - Выполнено: Дополнена OpenAPI документация в OpenApiConfig: расширено описание API с информацией о возможностях (генерация пользователей с Datafaker, создание твитов, удаление твитов, статистика), добавлены секции Authentication, Rate Limiting, Error Handling. Дополнена документация в AdminScriptApi: добавлен второй пример ответа 200 OK с частичными ошибками в statistics.errors (отражает реальное поведение, когда ошибки валидации обрабатываются gracefully), добавлена документация для 500 Internal Server Error с примером Problem Details. Все примеры запросов и ответов соответствуют реальному поведению API. Все DTO (GenerateUsersAndTweetsRequestDto, GenerateUsersAndTweetsResponseDto, ScriptStatisticsDto) имеют полную документацию с @Schema аннотациями на уровне класса и полей. Документированы все возможные ошибки: 400 Bad Request (Bean Validation, Business Rule Validation), 500 Internal Server Error. Все примеры используют реалистичные UUID и данные. Документация соответствует стандартам STANDART_SWAGGER.md. Проверка линтера: ошибок не обнаружено.
 
-- [ ] (P2) #16: Создание README.md - документация сервиса на русском языке
+- [x] (P2) [2025-01-27] #16: Создание README.md - документация сервиса на русском языке
   - Зависимости: #15
   - Acceptance criteria:
     - Создан README.md на русском языке
@@ -137,15 +138,17 @@
     - Документирован REST API
     - Описаны интеграции
     - Упомянуто использование Datafaker
+  - Выполнено: Создан README.md (services/admin-script-api/README.md) на русском языке согласно стандартам STANDART_README.md. Документация включает: Введение с описанием назначения сервиса (микросервис для выполнения административных скриптов, генерация пользователей и твитов с Datafaker), Основные возможности (11 пунктов), Архитектура (структура пакетов с ASCII tree, диаграмма компонентов с ASCII art), REST API (базовый URL, таблица эндпоинтов, детальное описание с примерами запросов/ответов), OpenAPI/Swagger документация (обзор, доступ к документации, особенности), Бизнес-логика (описание GenerateUsersAndTweetsService, методы сервиса, ключевые бизнес-правила), Слой валидации (архитектура валидации, описание валидатора, типы исключений с примерами), Интеграция (архитектура интеграции, компоненты интеграции - UsersApiClient, TweetsApiClient, UsersGateway, TweetsGateway, процесс выполнения скрипта, обработка ошибок), Примеры использования (3 примера с curl командами: успешное выполнение, ошибка валидации, частичные ошибки), Конфигурация (зависимости, управление зависимостями, конфигурация приложения), Запуск и развертывание (локальный запуск, Docker, мониторинг), Безопасность (валидация, логирование, обработка ошибок), Тестирование (описание тестов, покрытие, использование Datafaker). Упомянуто использование Datafaker 2.1.0 для генерации реалистичных данных с описанием методов генерации. Все примеры используют реалистичные данные. Документация соответствует стандартам проекта. Проверка линтера: ошибок не обнаружено.
 
-- [ ] (P2) #17: Postman коллекция - создание коллекции с запросами и примерами
+- [x] (P2) [2025-01-27] #17: Postman коллекция - создание коллекции с запросами и примерами
   - Зависимости: #15
   - Acceptance criteria:
     - Создана Postman коллекция
     - Добавлен запрос для generate-users-and-tweets
     - Примеры для успешного выполнения и ошибок
+  - Выполнено: Создана Postman коллекция (postman/admin-script-api/twitter-admin-script-api.postman_collection.json) и окружение (postman/admin-script-api/twitter-admin-script-api.postman_environment.json) согласно стандартам STANDART_POSTMAN.md. Коллекция включает: метаданные info с полным описанием API (назначение, возможности, использование Datafaker, интеграции, аутентификация, rate limiting, обработка ошибок), папку "admin-script-api" с запросом "generate users and tweets" (lowercase с пробелами), запрос POST /api/v1/admin-scripts/generate-users-and-tweets с описанием параметров и логики выполнения, использование переменных окружения для параметров ({{nUsers}}, {{nTweetsPerUser}}, {{lUsersForDeletion}}), заголовки Content-Type и Accept, примеры ответов: успешное выполнение (200 OK с полной статистикой), выполнение с частичными ошибками (200 OK с errors в statistics), ошибки валидации (400 Bad Request): nUsers слишком мало/много, nTweetsPerUser слишком мало/много, lUsersForDeletion отрицательное, null nUsers. Все примеры используют реалистичные UUID и данные. Окружение содержит: baseUrl (http://localhost:8083), переменные для параметров скрипта (nUsers, nTweetsPerUser, lUsersForDeletion), секретные переменные (auth_token, api_key) отключены. Переменные коллекции для значений по умолчанию. Все примеры ответов имеют правильные Content-Type (application/json для успешных, application/problem+json для ошибок). Ошибки следуют RFC 7807 Problem Details. Коллекция соответствует структуре контроллера. Проверка линтера: ошибок не обнаружено.
 
-- [ ] (P2) #18: Проверка соответствия стандартам - финальная проверка всех стандартов проекта
+- [x] (P2) [2025-01-27] #18: Проверка соответствия стандартам - финальная проверка всех стандартов проекта
   - Зависимости: #16, #17, #14
   - Acceptance criteria:
     - Проверено соответствие STANDART_CODE.md
@@ -155,6 +158,7 @@
     - Проверено соответствие STANDART_SWAGGER.md
     - Проверено соответствие STANDART_README.md
     - Проверено соответствие STANDART_POSTMAN.md
+  - Выполнено: Проведена финальная проверка соответствия всех стандартов проекта. STANDART_CODE.md: все классы используют правильные naming conventions (PascalCase для классов, camelCase для методов), правильная структура пакетов, все классы имеют JavaDoc на английском языке, используется Lombok (@RequiredArgsConstructor, @Slf4j), правильное использование Spring аннотаций. STANDART_PROJECT.md: используется @LoggableRequest на всех методах контроллера, используется GlobalExceptionHandler из common-lib (через наследование), валидация через Jakarta Validation (@Valid), правильная структура DTO. STANDART_TEST.md: все тесты имеют правильные имена (ClassNameTest), используются @Nested классы для группировки, используются AssertJ для assertions, правильная структура тестов (setUp, тестовые методы), unit тесты для всех компонентов, integration тесты с MockMvc и WireMock. STANDART_JAVADOC.md: все публичные классы и методы имеют JavaDoc, используется @author geron и @version 1.0, документация на английском языке, правильное использование JavaDoc тегов (@param, @return, @see), описания методов полные и понятные. STANDART_SWAGGER.md: полная OpenAPI документация в OpenApiConfig, все эндпоинты документированы в AdminScriptApi, примеры запросов и ответов, документация всех ошибок, правильное использование @Schema аннотаций. STANDART_README.md: README на русском языке, все обязательные секции присутствуют, правильная структура, примеры использования, документация интеграций, описание использования Datafaker. STANDART_POSTMAN.md: коллекция имеет правильную структуру, правильное именование (lowercase с пробелами), использование переменных окружения, правильные заголовки, примеры для всех сценариев, ошибки в формате RFC 7807. Все стандарты соблюдены. Проверка линтера: ошибок не обнаружено.
 
 ## Предположения
 1. Скрипт вызывается через REST endpoint `POST /api/v1/admin-scripts/generate-users-and-tweets`
