@@ -2,16 +2,10 @@ package com.twitter.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
-import com.twitter.common.enums.UserRole;
-import com.twitter.common.enums.UserStatus;
-import com.twitter.dto.external.CreateTweetRequestDto;
-import com.twitter.dto.external.TweetResponseDto;
-import com.twitter.dto.external.UserRequestDto;
-import com.twitter.dto.external.UserResponseDto;
 import com.twitter.dto.request.GenerateUsersAndTweetsRequestDto;
 import com.twitter.dto.response.GenerateUsersAndTweetsResponseDto;
 import com.twitter.testconfig.BaseIntegrationTest;
-import com.twitter.testconfig.WireMockStubHelper;
+import com.twitter.testconfig.GenerateUsersAndTweetsTestStubBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -24,11 +18,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -49,11 +38,13 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
 
     private MockMvc mockMvc;
     private WireMockServer wireMockServer;
+    private GenerateUsersAndTweetsTestStubBuilder stubBuilder;
 
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
         wireMockServer = getWireMockServer();
+        stubBuilder = new GenerateUsersAndTweetsTestStubBuilder(wireMockServer, objectMapper);
     }
 
 
@@ -84,65 +75,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
 
             GenerateUsersAndTweetsRequestDto request = createValidRequest(nUsers, nTweetsPerUser, lUsersForDeletion);
 
-            List<UUID> userIds = new ArrayList<>();
-            for (int i = 0; i < nUsers; i++) {
-                UUID userId = UUID.randomUUID();
-                userIds.add(userId);
-
-                UserRequestDto userRequest = UserRequestDto.builder()
-                    .login("user" + i)
-                    .firstName("First" + i)
-                    .lastName("Last" + i)
-                    .email("user" + i + "@example.com")
-                    .password("password123")
-                    .build();
-
-                UserResponseDto userResponse = new UserResponseDto(
-                    userId,
-                    "user" + i,
-                    "First" + i,
-                    "Last" + i,
-                    "user" + i + "@example.com",
-                    UserStatus.ACTIVE,
-                    UserRole.USER,
-                    LocalDateTime.now()
-                );
-
-                WireMockStubHelper.setupCreateUserStub(wireMockServer, objectMapper, userRequest, userResponse);
-            }
-
-            List<UUID> tweetIds = new ArrayList<>();
-            for (UUID userId : userIds) {
-                List<TweetResponseDto> userTweets = new ArrayList<>();
-                for (int j = 0; j < nTweetsPerUser; j++) {
-                    UUID tweetId = UUID.randomUUID();
-                    tweetIds.add(tweetId);
-
-                    CreateTweetRequestDto createTweetRequest = CreateTweetRequestDto.builder()
-                        .userId(userId)
-                        .content("Tweet content " + j)
-                        .build();
-
-                    TweetResponseDto tweetResponse = new TweetResponseDto(
-                        tweetId,
-                        userId,
-                        "Tweet content " + j,
-                        LocalDateTime.now(),
-                        LocalDateTime.now(),
-                        false,
-                        null
-                    );
-
-                    WireMockStubHelper.setupCreateTweetStub(wireMockServer, objectMapper, createTweetRequest, tweetResponse);
-                    userTweets.add(tweetResponse);
-                }
-
-                WireMockStubHelper.setupGetUserTweetsStub(wireMockServer, objectMapper, userId, userTweets);
-            }
-
-            if (!tweetIds.isEmpty()) {
-                WireMockStubHelper.setupDeleteTweetStub(wireMockServer, tweetIds.getFirst());
-            }
+            stubBuilder.setupFullScenario(nUsers, nTweetsPerUser, lUsersForDeletion);
 
             String responseJson = mockMvc.perform(post("/api/v1/admin-scripts/generate-users-and-tweets")
                     .contentType(MediaType.APPLICATION_JSON)
@@ -228,59 +161,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
 
             GenerateUsersAndTweetsRequestDto request = createValidRequest(nUsers, nTweetsPerUser, lUsersForDeletion);
 
-            List<UUID> userIds = new ArrayList<>();
-            for (int i = 0; i < nUsers; i++) {
-                UUID userId = UUID.randomUUID();
-                userIds.add(userId);
-
-                UserRequestDto userRequest = UserRequestDto.builder()
-                    .login("user" + i)
-                    .firstName("First" + i)
-                    .lastName("Last" + i)
-                    .email("user" + i + "@example.com")
-                    .password("password123")
-                    .build();
-
-                UserResponseDto userResponse = new UserResponseDto(
-                    userId,
-                    "user" + i,
-                    "First" + i,
-                    "Last" + i,
-                    "user" + i + "@example.com",
-                    UserStatus.ACTIVE,
-                    UserRole.USER,
-                    LocalDateTime.now()
-                );
-
-                WireMockStubHelper.setupCreateUserStub(wireMockServer, objectMapper, userRequest, userResponse);
-            }
-
-            for (UUID userId : userIds) {
-                List<TweetResponseDto> userTweets = new ArrayList<>();
-                for (int j = 0; j < nTweetsPerUser; j++) {
-                    UUID tweetId = UUID.randomUUID();
-
-                    CreateTweetRequestDto createTweetRequest = CreateTweetRequestDto.builder()
-                        .userId(userId)
-                        .content("Tweet content " + j)
-                        .build();
-
-                    TweetResponseDto tweetResponse = new TweetResponseDto(
-                        tweetId,
-                        userId,
-                        "Tweet content " + j,
-                        LocalDateTime.now(),
-                        LocalDateTime.now(),
-                        false,
-                        null
-                    );
-
-                    WireMockStubHelper.setupCreateTweetStub(wireMockServer, objectMapper, createTweetRequest, tweetResponse);
-                    userTweets.add(tweetResponse);
-                }
-
-                WireMockStubHelper.setupGetUserTweetsStub(wireMockServer, objectMapper, userId, userTweets);
-            }
+            stubBuilder.setupFullScenario(nUsers, nTweetsPerUser, 0);
 
             String responseJson = mockMvc.perform(post("/api/v1/admin-scripts/generate-users-and-tweets")
                     .contentType(MediaType.APPLICATION_JSON)
@@ -307,7 +188,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
 
             GenerateUsersAndTweetsRequestDto request = createValidRequest(nUsers, nTweetsPerUser, lUsersForDeletion);
 
-            WireMockStubHelper.setupCreateUserStubWithError(wireMockServer, 500);
+            stubBuilder.setupUserCreationError(500);
 
             String responseJson = mockMvc.perform(post("/api/v1/admin-scripts/generate-users-and-tweets")
                     .contentType(MediaType.APPLICATION_JSON)
@@ -331,29 +212,8 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
 
             GenerateUsersAndTweetsRequestDto request = createValidRequest(nUsers, nTweetsPerUser, lUsersForDeletion);
 
-            UUID userId = UUID.randomUUID();
-            UserRequestDto userRequest = UserRequestDto.builder()
-                .login("user1")
-                .firstName("First1")
-                .lastName("Last1")
-                .email("user1@example.com")
-                .password("password123")
-                .build();
-
-            UserResponseDto userResponse = new UserResponseDto(
-                userId,
-                "user1",
-                "First1",
-                "Last1",
-                "user1@example.com",
-                UserStatus.ACTIVE,
-                UserRole.USER,
-                LocalDateTime.now()
-            );
-
-            WireMockStubHelper.setupCreateUserStub(wireMockServer, objectMapper, userRequest, userResponse);
-
-            WireMockStubHelper.setupCreateTweetStubWithError(wireMockServer, 500);
+            stubBuilder.setupUsersStubs(nUsers);
+            stubBuilder.setupTweetCreationError(500);
 
             String responseJson = mockMvc.perform(post("/api/v1/admin-scripts/generate-users-and-tweets")
                     .contentType(MediaType.APPLICATION_JSON)
