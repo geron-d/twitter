@@ -11,14 +11,13 @@ import com.twitter.dto.external.UserResponseDto;
 import com.twitter.dto.request.GenerateUsersAndTweetsRequestDto;
 import com.twitter.dto.response.GenerateUsersAndTweetsResponseDto;
 import com.twitter.testconfig.BaseIntegrationTest;
+import com.twitter.testconfig.WireMockStubHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -35,13 +34,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.delete;
-import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 
 @SpringBootTest
 @AutoConfigureWebMvc
@@ -62,117 +54,6 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
         wireMockServer = getWireMockServer();
-    }
-
-    /**
-     * Sets up WireMock stub for creating a user.
-     *
-     * @param userRequest  the user request DTO
-     * @param userResponse the user response DTO to return
-     */
-    private void setupCreateUserStub(UserRequestDto userRequest, UserResponseDto userResponse) {
-        try {
-            String responseBody = objectMapper.writeValueAsString(userResponse);
-
-            wireMockServer.stubFor(
-                com.github.tomakehurst.wiremock.client.WireMock.post(urlEqualTo("/api/v1/users"))
-                    .willReturn(aResponse()
-                        .withStatus(201)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(responseBody))
-            );
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to setup create user stub", e);
-        }
-    }
-
-    /**
-     * Sets up WireMock stub for creating a user with error response.
-     *
-     * @param statusCode the HTTP status code to return
-     */
-    private void setupCreateUserStubWithError(int statusCode) {
-        wireMockServer.stubFor(
-            com.github.tomakehurst.wiremock.client.WireMock.post(urlEqualTo("/api/v1/users"))
-                .willReturn(aResponse()
-                    .withStatus(statusCode)
-                    .withHeader("Content-Type", "application/json")
-                    .withBody("{\"error\":\"Internal Server Error\"}"))
-        );
-    }
-
-    /**
-     * Sets up WireMock stub for creating a tweet.
-     *
-     * @param createTweetRequest the tweet request DTO
-     * @param tweetResponse      the tweet response DTO to return
-     */
-    private void setupCreateTweetStub(CreateTweetRequestDto createTweetRequest, TweetResponseDto tweetResponse) {
-        try {
-            String responseBody = objectMapper.writeValueAsString(tweetResponse);
-
-            wireMockServer.stubFor(
-                com.github.tomakehurst.wiremock.client.WireMock.post(urlEqualTo("/api/v1/tweets"))
-                    .withRequestBody(matchingJsonPath("$.userId", equalTo(createTweetRequest.userId().toString())))
-                    .willReturn(aResponse()
-                        .withStatus(201)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(responseBody))
-            );
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to setup create tweet stub", e);
-        }
-    }
-
-    /**
-     * Sets up WireMock stub for creating a tweet with error response.
-     *
-     * @param statusCode the HTTP status code to return
-     */
-    private void setupCreateTweetStubWithError(int statusCode) {
-        wireMockServer.stubFor(
-            com.github.tomakehurst.wiremock.client.WireMock.post(urlEqualTo("/api/v1/tweets"))
-                .willReturn(aResponse()
-                    .withStatus(statusCode)
-                    .withHeader("Content-Type", "application/json")
-                    .withBody("{\"error\":\"Internal Server Error\"}"))
-        );
-    }
-
-    /**
-     * Sets up WireMock stub for getting user tweets.
-     *
-     * @param userId the user ID
-     * @param tweets list of tweets to return
-     */
-    private void setupGetUserTweetsStub(UUID userId, List<TweetResponseDto> tweets) {
-        try {
-            PageImpl<TweetResponseDto> page = new PageImpl<>(tweets, PageRequest.of(0, 20), tweets.size());
-            String responseBody = objectMapper.writeValueAsString(page);
-
-            wireMockServer.stubFor(
-                get(urlPathEqualTo("/api/v1/tweets/user/" + userId))
-                    .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(responseBody))
-            );
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to setup getUserTweets stub", e);
-        }
-    }
-
-    /**
-     * Sets up WireMock stub for deleting a tweet.
-     *
-     * @param tweetId the tweet ID to delete
-     */
-    private void setupDeleteTweetStub(UUID tweetId) {
-        wireMockServer.stubFor(
-            delete(urlEqualTo("/api/v1/tweets/" + tweetId))
-                .willReturn(aResponse()
-                    .withStatus(204))
-        );
     }
 
 
@@ -227,7 +108,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
                     LocalDateTime.now()
                 );
 
-                setupCreateUserStub(userRequest, userResponse);
+                WireMockStubHelper.setupCreateUserStub(wireMockServer, objectMapper, userRequest, userResponse);
             }
 
             List<UUID> tweetIds = new ArrayList<>();
@@ -252,15 +133,15 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
                         null
                     );
 
-                    setupCreateTweetStub(createTweetRequest, tweetResponse);
+                    WireMockStubHelper.setupCreateTweetStub(wireMockServer, objectMapper, createTweetRequest, tweetResponse);
                     userTweets.add(tweetResponse);
                 }
 
-                setupGetUserTweetsStub(userId, userTweets);
+                WireMockStubHelper.setupGetUserTweetsStub(wireMockServer, objectMapper, userId, userTweets);
             }
 
             if (!tweetIds.isEmpty()) {
-                setupDeleteTweetStub(tweetIds.getFirst());
+                WireMockStubHelper.setupDeleteTweetStub(wireMockServer, tweetIds.getFirst());
             }
 
             String responseJson = mockMvc.perform(post("/api/v1/admin-scripts/generate-users-and-tweets")
@@ -371,7 +252,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
                     LocalDateTime.now()
                 );
 
-                setupCreateUserStub(userRequest, userResponse);
+                WireMockStubHelper.setupCreateUserStub(wireMockServer, objectMapper, userRequest, userResponse);
             }
 
             for (UUID userId : userIds) {
@@ -394,11 +275,11 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
                         null
                     );
 
-                    setupCreateTweetStub(createTweetRequest, tweetResponse);
+                    WireMockStubHelper.setupCreateTweetStub(wireMockServer, objectMapper, createTweetRequest, tweetResponse);
                     userTweets.add(tweetResponse);
                 }
 
-                setupGetUserTweetsStub(userId, userTweets);
+                WireMockStubHelper.setupGetUserTweetsStub(wireMockServer, objectMapper, userId, userTweets);
             }
 
             String responseJson = mockMvc.perform(post("/api/v1/admin-scripts/generate-users-and-tweets")
@@ -426,7 +307,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
 
             GenerateUsersAndTweetsRequestDto request = createValidRequest(nUsers, nTweetsPerUser, lUsersForDeletion);
 
-            setupCreateUserStubWithError(500);
+            WireMockStubHelper.setupCreateUserStubWithError(wireMockServer, 500);
 
             String responseJson = mockMvc.perform(post("/api/v1/admin-scripts/generate-users-and-tweets")
                     .contentType(MediaType.APPLICATION_JSON)
@@ -470,9 +351,9 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
                 LocalDateTime.now()
             );
 
-            setupCreateUserStub(userRequest, userResponse);
+            WireMockStubHelper.setupCreateUserStub(wireMockServer, objectMapper, userRequest, userResponse);
 
-            setupCreateTweetStubWithError(500);
+            WireMockStubHelper.setupCreateTweetStubWithError(wireMockServer, 500);
 
             String responseJson = mockMvc.perform(post("/api/v1/admin-scripts/generate-users-and-tweets")
                     .contentType(MediaType.APPLICATION_JSON)
