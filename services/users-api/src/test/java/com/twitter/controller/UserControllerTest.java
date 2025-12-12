@@ -1,12 +1,12 @@
 package com.twitter.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.twitter.dto.UserRequestDto;
+import com.twitter.common.dto.request.UserRequestDto;
+import com.twitter.common.enums.UserRole;
+import com.twitter.common.enums.UserStatus;
 import com.twitter.dto.UserRoleUpdateDto;
 import com.twitter.dto.UserUpdateDto;
 import com.twitter.entity.User;
-import com.twitter.common.enums.UserRole;
-import com.twitter.common.enums.UserStatus;
 import com.twitter.repository.UserRepository;
 import com.twitter.testconfig.BaseIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,8 +25,8 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.List;
 import java.util.UUID;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -1147,7 +1147,7 @@ public class UserControllerTest extends BaseIntegrationTest {
                 .andExpect(status().isConflict())
                 .andExpect(content().contentType("application/problem+json"))
                 .andExpect(jsonPath("$.title").value("Business Rule Validation Error"))
-                .andExpect(jsonPath("$.detail").value("Business rule 'LAST_ADMIN_ROLE_CHANGE' violated for context: userId=" + lastAdmin.getId() +", newRole=" + roleUpdate.role()));
+                .andExpect(jsonPath("$.detail").value("Business rule 'LAST_ADMIN_ROLE_CHANGE' violated for context: userId=" + lastAdmin.getId() + ", newRole=" + roleUpdate.role()));
         }
 
         @Test

@@ -1,10 +1,10 @@
 package com.twitter.controller;
 
+import com.twitter.common.dto.request.CreateTweetRequestDto;
+import com.twitter.common.dto.request.DeleteTweetRequestDto;
+import com.twitter.common.dto.response.TweetResponseDto;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
-import com.twitter.dto.request.CreateTweetRequestDto;
-import com.twitter.dto.request.DeleteTweetRequestDto;
 import com.twitter.dto.request.UpdateTweetRequestDto;
-import com.twitter.dto.response.TweetResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;

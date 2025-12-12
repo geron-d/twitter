@@ -3,10 +3,10 @@ package com.twitter.testconfig;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
-import com.twitter.dto.external.CreateTweetRequestDto;
-import com.twitter.dto.external.TweetResponseDto;
-import com.twitter.dto.external.UserRequestDto;
-import com.twitter.dto.external.UserResponseDto;
+import com.twitter.common.dto.request.CreateTweetRequestDto;
+import com.twitter.common.dto.request.UserRequestDto;
+import com.twitter.common.dto.response.TweetResponseDto;
+import com.twitter.common.dto.response.UserResponseDto;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
@@ -100,10 +100,10 @@ public final class WireMockStubHelper {
      * This method configures a stub for POST /api/v1/tweets endpoint that matches
      * the request by userId and returns the provided tweet response with HTTP status 201 Created.
      *
-     * @param wireMockServer    the WireMock server instance
-     * @param objectMapper      the ObjectMapper for JSON serialization
+     * @param wireMockServer     the WireMock server instance
+     * @param objectMapper       the ObjectMapper for JSON serialization
      * @param createTweetRequest the tweet request DTO (used for matching userId in request body)
-     * @param tweetResponse     the tweet response DTO to return
+     * @param tweetResponse      the tweet response DTO to return
      * @throws RuntimeException if JSON serialization fails
      */
     public static void setupCreateTweetStub(

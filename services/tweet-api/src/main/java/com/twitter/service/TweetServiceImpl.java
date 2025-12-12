@@ -1,9 +1,9 @@
 package com.twitter.service;
 
-import com.twitter.dto.request.CreateTweetRequestDto;
-import com.twitter.dto.request.DeleteTweetRequestDto;
+import com.twitter.common.dto.request.CreateTweetRequestDto;
+import com.twitter.common.dto.request.DeleteTweetRequestDto;
+import com.twitter.common.dto.response.TweetResponseDto;
 import com.twitter.dto.request.UpdateTweetRequestDto;
-import com.twitter.dto.response.TweetResponseDto;
 import com.twitter.entity.Tweet;
 import com.twitter.mapper.TweetMapper;
 import com.twitter.repository.TweetRepository;

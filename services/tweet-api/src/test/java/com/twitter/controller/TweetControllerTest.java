@@ -1,10 +1,10 @@
 package com.twitter.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.twitter.dto.request.CreateTweetRequestDto;
-import com.twitter.dto.request.DeleteTweetRequestDto;
+import com.twitter.common.dto.request.CreateTweetRequestDto;
+import com.twitter.common.dto.request.DeleteTweetRequestDto;
+import com.twitter.common.dto.response.TweetResponseDto;
 import com.twitter.dto.request.UpdateTweetRequestDto;
-import com.twitter.dto.response.TweetResponseDto;
 import com.twitter.entity.Tweet;
 import com.twitter.repository.TweetRepository;
 import com.twitter.testconfig.BaseIntegrationTest;
@@ -24,10 +24,7 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -55,7 +52,7 @@ public class TweetControllerTest extends BaseIntegrationTest {
     /**
      * Creates a valid CreateTweetRequestDto for testing.
      *
-     * @param userId the user ID
+     * @param userId  the user ID
      * @param content the tweet content
      * @return CreateTweetRequestDto instance
      */
@@ -212,7 +209,7 @@ public class TweetControllerTest extends BaseIntegrationTest {
                 .andReturn()
                 .getResponse()
                 .getStatus();
-            
+
             assertThat(status).isGreaterThanOrEqualTo(400);
             assertThat(getTweetCount()).isEqualTo(0);
         }
@@ -606,15 +603,15 @@ public class TweetControllerTest extends BaseIntegrationTest {
             var content = jsonNode.get("content");
             assertThat(content.isArray()).isTrue();
             assertThat(content.size()).isEqualTo(3);
-            
+
             // First tweet should be the newest (third tweet)
             assertThat(content.get(0).get("id").asText()).isEqualTo(tweet3.getId().toString());
             assertThat(content.get(0).get("content").asText()).isEqualTo("Third tweet");
-            
+
             // Second tweet should be the middle one
             assertThat(content.get(1).get("id").asText()).isEqualTo(tweet2.getId().toString());
             assertThat(content.get(1).get("content").asText()).isEqualTo("Second tweet");
-            
+
             // Last tweet should be the oldest (first tweet)
             assertThat(content.get(2).get("id").asText()).isEqualTo(tweet1.getId().toString());
             assertThat(content.get(2).get("content").asText()).isEqualTo("First tweet");

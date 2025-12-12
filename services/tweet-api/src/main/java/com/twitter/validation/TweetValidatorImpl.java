@@ -1,9 +1,9 @@
 package com.twitter.validation;
 
+import com.twitter.common.dto.request.CreateTweetRequestDto;
+import com.twitter.common.dto.request.DeleteTweetRequestDto;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.FormatValidationException;
-import com.twitter.dto.request.CreateTweetRequestDto;
-import com.twitter.dto.request.DeleteTweetRequestDto;
 import com.twitter.dto.request.UpdateTweetRequestDto;
 import com.twitter.entity.Tweet;
 import com.twitter.gateway.UserGateway;
@@ -120,8 +120,8 @@ public class TweetValidatorImpl implements TweetValidator {
     /**
      * Validates that the user performing the update is the tweet author.
      *
-     * @param tweet   the tweet to validate
-     * @param userId  the user ID performing the update
+     * @param tweet  the tweet to validate
+     * @param userId the user ID performing the update
      * @throws BusinessRuleValidationException if user is not the tweet author
      */
     private void validateTweetOwnership(Tweet tweet, UUID userId) {

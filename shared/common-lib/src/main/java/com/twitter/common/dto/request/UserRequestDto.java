@@ -1,9 +1,10 @@
-package com.twitter.dto;
+package com.twitter.common.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 
 /**
  * Data Transfer Object for user creation requests.
@@ -33,6 +34,7 @@ import jakarta.validation.constraints.Size;
         }
         """
 )
+@Builder
 public record UserRequestDto(
 
     /**
@@ -107,3 +109,4 @@ public record UserRequestDto(
     String password
 ) {
 }
+

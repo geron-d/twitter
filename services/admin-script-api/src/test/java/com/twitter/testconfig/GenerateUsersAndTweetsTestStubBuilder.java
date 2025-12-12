@@ -2,19 +2,15 @@ package com.twitter.testconfig;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
+import com.twitter.common.dto.request.CreateTweetRequestDto;
+import com.twitter.common.dto.request.UserRequestDto;
+import com.twitter.common.dto.response.TweetResponseDto;
+import com.twitter.common.dto.response.UserResponseDto;
 import com.twitter.common.enums.UserRole;
 import com.twitter.common.enums.UserStatus;
-import com.twitter.dto.external.CreateTweetRequestDto;
-import com.twitter.dto.external.TweetResponseDto;
-import com.twitter.dto.external.UserRequestDto;
-import com.twitter.dto.external.UserResponseDto;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Builder class for setting up WireMock stubs in GenerateUsersAndTweetsControllerTest.
@@ -235,7 +231,7 @@ public final class GenerateUsersAndTweetsTestStubBuilder {
      * </ul>
      *
      * @param nUsers          number of users to create
-     * @param nTweetsPerUser number of tweets per user
+     * @param nTweetsPerUser  number of tweets per user
      * @param nTweetsToDelete number of tweets to delete (deletes first N tweets from the list)
      * @return TestStubData containing the generated user IDs and tweet IDs
      */

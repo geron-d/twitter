@@ -1,8 +1,8 @@
 package com.twitter.client;
 
-import com.twitter.dto.external.CreateTweetRequestDto;
-import com.twitter.dto.external.DeleteTweetRequestDto;
-import com.twitter.dto.external.TweetResponseDto;
+import com.twitter.common.dto.request.CreateTweetRequestDto;
+import com.twitter.common.dto.request.DeleteTweetRequestDto;
+import com.twitter.common.dto.response.TweetResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.data.domain.Page;

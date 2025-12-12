@@ -1,8 +1,8 @@
 package com.twitter.mapper;
 
+import com.twitter.common.dto.request.UserRequestDto;
+import com.twitter.common.dto.response.UserResponseDto;
 import com.twitter.dto.UserPatchDto;
-import com.twitter.dto.UserRequestDto;
-import com.twitter.dto.UserResponseDto;
 import com.twitter.dto.UserUpdateDto;
 import com.twitter.entity.User;
 import org.mapstruct.Mapper;

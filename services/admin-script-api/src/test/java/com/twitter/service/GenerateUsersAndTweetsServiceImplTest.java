@@ -1,9 +1,13 @@
 package com.twitter.service;
 
+import com.twitter.common.dto.request.CreateTweetRequestDto;
+import com.twitter.common.dto.request.DeleteTweetRequestDto;
+import com.twitter.common.dto.request.UserRequestDto;
+import com.twitter.common.dto.response.TweetResponseDto;
+import com.twitter.common.dto.response.UserResponseDto;
 import com.twitter.common.enums.UserRole;
 import com.twitter.common.enums.UserStatus;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
-import com.twitter.dto.external.*;
 import com.twitter.dto.request.GenerateUsersAndTweetsRequestDto;
 import com.twitter.dto.response.GenerateUsersAndTweetsResponseDto;
 import com.twitter.gateway.TweetsGateway;
