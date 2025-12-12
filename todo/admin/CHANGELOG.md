@@ -393,3 +393,50 @@
 - `services/admin-script-api/src/test/java/com/twitter/validation/GenerateUsersAndTweetsValidatorImplTest.java` - создан
 - `services/admin-script-api/src/test/java/com/twitter/service/GenerateUsersAndTweetsServiceImplTest.java` - создан
 
+### Step #14: Integration тесты
+**Время:** 2025-01-27  
+**Автор:** assistant
+
+**Выполнено:**
+- Создан `GenerateUsersAndTweetsControllerTest` в пакете `com.twitter.controller`:
+  - Integration тесты для AdminScriptController с полным Spring контекстом
+  - Использование @SpringBootTest, @AutoConfigureWebMvc, @ActiveProfiles("test"), @Transactional
+  - MockMvc для тестирования REST endpoints
+  - WireMock для мокирования внешних сервисов (users-api и tweet-api)
+- **Тесты для успешного сценария (200 OK)**:
+  - Полный цикл выполнения скрипта: создание пользователей, создание твитов, удаление твитов
+  - Проверка структуры ответа (createdUsers, createdTweets, deletedTweets, statistics)
+  - Проверка статистики (totalUsersCreated, totalTweetsCreated, totalTweetsDeleted)
+- **Тесты для Bean Validation (400 Bad Request)**:
+  - nUsers: null, < 1, > 1000
+  - nTweetsPerUser: < 1, > 100
+  - lUsersForDeletion: < 0
+- **Тесты для Business Rule Validation (400 Bad Request)**:
+  - lUsersForDeletion > usersWithTweets (проверка бизнес-правила)
+  - Проверка типа исключения и ruleName (DELETION_COUNT_EXCEEDS_USERS_WITH_TWEETS)
+- **Тесты для обработки ошибок внешних сервисов (500 Internal Server Error)**:
+  - Ошибки users-api при создании пользователей (graceful handling)
+  - Ошибки tweet-api при создании твитов (graceful handling)
+  - Проверка, что ошибки добавляются в statistics.errors
+- **Тесты для отсутствия body (400 Bad Request)**:
+  - Проверка обработки запроса без body
+- **WireMock stubs**:
+  - POST /api/v1/users - создание пользователей (201 Created, 500 Internal Server Error)
+  - POST /api/v1/tweets - создание твитов (201 Created, 500 Internal Server Error)
+  - GET /api/v1/tweets/user/{userId} - получение твитов пользователя (200 OK с Page<TweetResponseDto>)
+  - DELETE /api/v1/tweets/{tweetId} - удаление твитов (204 No Content)
+- Обновлён `BaseIntegrationTest`:
+  - Добавлена настройка `app.tweet-api.base-url` для WireMock (использует тот же порт, что и users-api)
+- Все тесты следуют стандартам проекта (STANDART_TEST.md):
+  - Именование: `methodName_WhenCondition_ShouldExpectedResult`
+  - Использование @Nested для группировки тестов
+  - Использование AssertJ для assertions
+  - Паттерн AAA (Arrange-Act-Assert)
+  - Проверка всех успешных и ошибочных сценариев
+- Всего создано 10+ тестов, покрывающих все статус-коды (200, 400, 500)
+- Проверка линтера: только warnings (null type safety), критических ошибок нет
+
+**Артефакты:**
+- `services/admin-script-api/src/test/java/com/twitter/controller/GenerateUsersAndTweetsControllerTest.java` - создан
+- `services/admin-script-api/src/test/java/com/twitter/testconfig/BaseIntegrationTest.java` - обновлён (добавлена поддержка tweet-api URL)
+

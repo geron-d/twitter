@@ -113,13 +113,14 @@
     - Покрытие кода > 80%
   - Выполнено: Создан RandomDataGeneratorTest (com.twitter.util) с 20+ тестами для всех 6 методов генерации данных: проверка уникальности login и email, соответствие ограничениям длины, корректность форматов. Создан GenerateUsersAndTweetsValidatorImplTest (com.twitter.validation) с 9 тестами для validateDeletionCount: успешные сценарии (lUsersForDeletion = 0, lUsersForDeletion <= usersWithTweets), ошибочные сценарии (lUsersForDeletion > usersWithTweets, requestDto = null), граничные случаи. Создан GenerateUsersAndTweetsServiceImplTest (com.twitter.service) с 7 тестами для executeScript: успешный сценарий с полным циклом, обработка ошибок при создании пользователей/твитов/удалении, валидация параметров, подсчёт статистики. Все тесты используют @ExtendWith(MockitoExtension.class), @Nested для группировки, AssertJ для assertions, паттерн AAA, проверку взаимодействий с зависимостями (verify). Покрытие кода > 80%. Все тесты соответствуют стандартам STANDART_TEST.md. Проверка линтера: ошибок не обнаружено.
 
-- [ ] (P2) #14: Integration тесты - GenerateUsersAndTweetsControllerTest с MockMvc и WireMock
+- [x] (P2) [2025-01-27] #14: Integration тесты - GenerateUsersAndTweetsControllerTest с MockMvc и WireMock
   - Зависимости: #9, #13
   - Acceptance criteria:
     - Создан integration тест для Controller
     - Использован MockMvc
     - Использован WireMock для мокирования внешних сервисов
     - Протестированы все статус-коды
+  - Выполнено: Создан GenerateUsersAndTweetsControllerTest (com.twitter.controller) с полными integration тестами для AdminScriptController: успешный сценарий (200 OK) с проверкой создания пользователей, твитов и удаления, валидация Bean Validation (400 Bad Request) для всех полей (nUsers, nTweetsPerUser, lUsersForDeletion), бизнес-валидация (400 Bad Request) для lUsersForDeletion > usersWithTweets, обработка ошибок внешних сервисов (500 Internal Server Error) для users-api и tweet-api с graceful handling, проверка отсутствия body (400 Bad Request). Все тесты используют @SpringBootTest, @AutoConfigureWebMvc, @ActiveProfiles("test"), @Transactional, MockMvc для тестирования REST endpoints, WireMock для мокирования users-api и tweet-api (POST /api/v1/users, POST /api/v1/tweets, GET /api/v1/tweets/user/{userId}, DELETE /api/v1/tweets/{tweetId}). Обновлён BaseIntegrationTest для поддержки tweet-api URL в WireMock. Все тесты следуют стандартам проекта (STANDART_TEST.md): именование methodName_WhenCondition_ShouldExpectedResult, использование @Nested для группировки, AssertJ для assertions, паттерн AAA. Проверка линтера: только warnings (null type safety), критических ошибок нет.
 
 - [ ] (P2) #15: Swagger/OpenAPI документация - полная документация API с примерами
   - Зависимости: #9
