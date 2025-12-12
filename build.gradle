@@ -60,6 +60,9 @@ subprojects {
             dependency 'org.postgresql:postgresql:42.7.7'
 
             dependency 'org.wiremock:wiremock-standalone:3.13.1'
+            
+            // Datafaker for generating fake data
+            dependency 'net.datafaker:datafaker:2.5.3'
         }
     }
 }

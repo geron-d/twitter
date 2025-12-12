@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: admin-script-api-test
+  datasource:
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+# Настройка users-api для интеграционных тестов (будет переопределено через WireMock)
+app:
+  users-api:
+    base-url: http://localhost:${wiremock.server.port:8089}
+  tweet-api:
+    base-url: http://localhost:${wiremock.server.port:8090}
+
+# Feign configuration для тестов
+feign:
+  client:
+    config:
+      default:
+        connect-timeout: 2000
+        read-timeout: 5000
+        logger-level: full
+  httpclient:
+    enabled: true
+
+# Настройки логирования для тестов
+logging:
+  level:
+    com.twitter: DEBUG
+    org.springframework.web: INFO
+    org.springframework.test: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    com.github.tomakehurst.wiremock: INFO

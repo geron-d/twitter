@@ -109,6 +109,43 @@ services:
       retries: 3
       start_period: 60s
 
+  # Admin Script API Service
+  admin-script-api:
+    build:
+      context: .
+      dockerfile: services/admin-script-api/Dockerfile
+    container_name: twitter-admin-script-api
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/twitter
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      SPRING_JPA_SHOW_SQL: false
+      LOGGING_LEVEL_COM_TWITTER: DEBUG
+      LOGGING_LEVEL_ORG_HIBERNATE_SQL: DEBUG
+    depends_on:
+      postgres:
+        condition: service_healthy
+      users-api:
+        condition: service_healthy
+      tweet-api:
+        condition: service_healthy
+    networks:
+      - twitter-network
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
 volumes:
   postgres_data:
     driver: local

@@ -11,5 +11,6 @@ include 'shared:database'
 
 include 'services:users-api'
 include 'services:tweet-api'
+include 'services:admin-script-api'
 
 

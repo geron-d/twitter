@@ -1,0 +1,482 @@
+{
+	"info": {
+		"_postman_id": "twitter-admin-script-api-collection",
+		"name": "twitter",
+		"description": "REST API for executing administrative scripts in the Twitter microservices system.\n\nThis API provides comprehensive administrative script execution capabilities including:\n- Generating multiple users with random data using Datafaker library\n- Creating tweets for generated users with random content\n- Deleting tweets from random users for testing purposes\n- Comprehensive execution statistics and error reporting\n- Integration with users-api and tweet-api services\n- Graceful error handling with partial error reporting\n\n## Authentication\nCurrently, the API does not require authentication for basic operations.\nFuture versions will implement JWT-based authentication for security.\n\n## Rate Limiting\nAPI requests are subject to rate limiting to ensure system stability.\nPlease refer to response headers for current rate limit information.\n\n## Error Handling\nThe API uses standard HTTP status codes and follows RFC 7807 Problem Details\nfor error responses, providing detailed information about validation failures\nand business rule violations. Partial errors during script execution are\ncollected and returned in the statistics.errors field.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "twitter-admin-script-api"
+	},
+	"item": [
+		{
+			"name": "admin-script-api",
+			"description": "API for executing administrative scripts in the Twitter system",
+			"item": [
+				{
+					"name": "generate users and tweets",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nUsers\": {{nUsers}},\n  \"nTweetsPerUser\": {{nTweetsPerUser}},\n  \"lUsersForDeletion\": {{lUsersForDeletion}}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/admin-scripts/generate-users-and-tweets",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"admin-scripts",
+								"generate-users-and-tweets"
+							]
+						},
+						"description": "Executes an administrative script that creates multiple users with random data, adds tweets for each user, and deletes one tweet from a specified number of random users. Parameters: nUsers (1-1000), nTweetsPerUser (1-100), lUsersForDeletion (0+, must not exceed number of users with tweets). The script uses Datafaker library for generating realistic test data. All errors during execution are collected and returned in statistics.errors field."
+					},
+					"response": [
+						{
+							"name": "script executed successfully",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"nUsers\": 5,\n  \"nTweetsPerUser\": 3,\n  \"lUsersForDeletion\": 2\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/admin-scripts/generate-users-and-tweets",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"admin-scripts",
+										"generate-users-and-tweets"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"createdUsers\": [\n    \"123e4567-e89b-12d3-a456-426614174000\",\n    \"223e4567-e89b-12d3-a456-426614174001\",\n    \"323e4567-e89b-12d3-a456-426614174002\",\n    \"423e4567-e89b-12d3-a456-426614174003\",\n    \"523e4567-e89b-12d3-a456-426614174004\"\n  ],\n  \"createdTweets\": [\n    \"623e4567-e89b-12d3-a456-426614174005\",\n    \"723e4567-e89b-12d3-a456-426614174006\",\n    \"823e4567-e89b-12d3-a456-426614174007\",\n    \"923e4567-e89b-12d3-a456-426614174008\",\n    \"a23e4567-e89b-12d3-a456-426614174009\",\n    \"b23e4567-e89b-12d3-a456-426614174010\",\n    \"c23e4567-e89b-12d3-a456-426614174011\",\n    \"d23e4567-e89b-12d3-a456-426614174012\",\n    \"e23e4567-e89b-12d3-a456-426614174013\",\n    \"f23e4567-e89b-12d3-a456-426614174014\",\n    \"023e4567-e89b-12d3-a456-426614174015\",\n    \"123e4567-e89b-12d3-a456-426614174016\",\n    \"223e4567-e89b-12d3-a456-426614174017\",\n    \"323e4567-e89b-12d3-a456-426614174018\",\n    \"423e4567-e89b-12d3-a456-426614174019\"\n  ],\n  \"deletedTweets\": [\n    \"623e4567-e89b-12d3-a456-426614174005\",\n    \"723e4567-e89b-12d3-a456-426614174006\"\n  ],\n  \"statistics\": {\n    \"totalUsersCreated\": 5,\n    \"totalTweetsCreated\": 15,\n    \"totalTweetsDeleted\": 2,\n    \"usersWithTweets\": 5,\n    \"usersWithoutTweets\": 0,\n    \"executionTimeMs\": 2345,\n    \"errors\": []\n  }\n}"
+						},
+						{
+							"name": "script executed with partial errors",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"nUsers\": 2,\n  \"nTweetsPerUser\": 3,\n  \"lUsersForDeletion\": 5\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/admin-scripts/generate-users-and-tweets",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"admin-scripts",
+										"generate-users-and-tweets"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"createdUsers\": [\n    \"123e4567-e89b-12d3-a456-426614174000\",\n    \"223e4567-e89b-12d3-a456-426614174001\"\n  ],\n  \"createdTweets\": [\n    \"323e4567-e89b-12d3-a456-426614174002\",\n    \"423e4567-e89b-12d3-a456-426614174003\",\n    \"523e4567-e89b-12d3-a456-426614174004\",\n    \"623e4567-e89b-12d3-a456-426614174005\",\n    \"723e4567-e89b-12d3-a456-426614174006\",\n    \"823e4567-e89b-12d3-a456-426614174007\"\n  ],\n  \"deletedTweets\": [],\n  \"statistics\": {\n    \"totalUsersCreated\": 2,\n    \"totalTweetsCreated\": 6,\n    \"totalTweetsDeleted\": 0,\n    \"usersWithTweets\": 2,\n    \"usersWithoutTweets\": 0,\n    \"executionTimeMs\": 856,\n    \"errors\": [\n      \"Validation failed: Business rule 'DELETION_COUNT_EXCEEDS_USERS_WITH_TWEETS' violated for context: Cannot delete tweets from 5 users: only 2 users have tweets\"\n    ]\n  }\n}"
+						},
+						{
+							"name": "validation error - nUsers too small",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"nUsers\": 0,\n  \"nTweetsPerUser\": 5,\n  \"lUsersForDeletion\": 0\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/admin-scripts/generate-users-and-tweets",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"admin-scripts",
+										"generate-users-and-tweets"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/problem+json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"type\": \"https://example.com/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"Validation failed: nUsers: Number of users must be at least 1\",\n  \"timestamp\": \"2025-01-27T15:30:00Z\"\n}"
+						},
+						{
+							"name": "validation error - nUsers too large",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"nUsers\": 1001,\n  \"nTweetsPerUser\": 5,\n  \"lUsersForDeletion\": 0\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/admin-scripts/generate-users-and-tweets",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"admin-scripts",
+										"generate-users-and-tweets"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/problem+json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"type\": \"https://example.com/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"Validation failed: nUsers: Number of users cannot exceed 1000\",\n  \"timestamp\": \"2025-01-27T15:30:00Z\"\n}"
+						},
+						{
+							"name": "validation error - nTweetsPerUser too small",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"nUsers\": 5,\n  \"nTweetsPerUser\": 0,\n  \"lUsersForDeletion\": 0\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/admin-scripts/generate-users-and-tweets",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"admin-scripts",
+										"generate-users-and-tweets"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/problem+json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"type\": \"https://example.com/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"Validation failed: nTweetsPerUser: Number of tweets per user must be at least 1\",\n  \"timestamp\": \"2025-01-27T15:30:00Z\"\n}"
+						},
+						{
+							"name": "validation error - nTweetsPerUser too large",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"nUsers\": 5,\n  \"nTweetsPerUser\": 101,\n  \"lUsersForDeletion\": 0\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/admin-scripts/generate-users-and-tweets",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"admin-scripts",
+										"generate-users-and-tweets"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/problem+json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"type\": \"https://example.com/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"Validation failed: nTweetsPerUser: Number of tweets per user cannot exceed 100\",\n  \"timestamp\": \"2025-01-27T15:30:00Z\"\n}"
+						},
+						{
+							"name": "validation error - lUsersForDeletion negative",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"nUsers\": 5,\n  \"nTweetsPerUser\": 5,\n  \"lUsersForDeletion\": -1\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/admin-scripts/generate-users-and-tweets",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"admin-scripts",
+										"generate-users-and-tweets"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/problem+json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"type\": \"https://example.com/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"Validation failed: lUsersForDeletion: Number of users for deletion cannot be negative\",\n  \"timestamp\": \"2025-01-27T15:30:00Z\"\n}"
+						},
+						{
+							"name": "validation error - null nUsers",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"nUsers\": null,\n  \"nTweetsPerUser\": 5,\n  \"lUsersForDeletion\": 0\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/admin-scripts/generate-users-and-tweets",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"admin-scripts",
+										"generate-users-and-tweets"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/problem+json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"type\": \"https://example.com/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"Validation failed: nUsers: Number of users cannot be null\",\n  \"timestamp\": \"2025-01-27T15:30:00Z\"\n}"
+						}
+					]
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8083",
+			"type": "string"
+		},
+		{
+			"key": "nUsers",
+			"value": "5",
+			"type": "string"
+		},
+		{
+			"key": "nTweetsPerUser",
+			"value": "3",
+			"type": "string"
+		},
+		{
+			"key": "lUsersForDeletion",
+			"value": "2",
+			"type": "string"
+		}
+	]
+}
+

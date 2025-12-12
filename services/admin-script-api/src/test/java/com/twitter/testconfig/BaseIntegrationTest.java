@@ -69,6 +69,7 @@ public abstract class BaseIntegrationTest {
         int wireMockPort = wireMockServer.port();
         registry.add("wiremock.server.port", () -> String.valueOf(wireMockPort));
         registry.add("app.users-api.base-url", () -> "http://localhost:" + wireMockPort);
+        registry.add("app.tweet-api.base-url", () -> "http://localhost:" + wireMockPort);
     }
 
     @BeforeEach
@@ -83,6 +84,19 @@ public abstract class BaseIntegrationTest {
                 }
             }
             wireMockServer.resetAll();
+            // Configure static WireMock context to use our server
+            com.github.tomakehurst.wiremock.client.WireMock.configureFor("localhost", wireMockServer.port());
+        }
+    }
+
+    /**
+     * Gets the WireMock server instance for use in test subclasses.
+     *
+     * @return WireMockServer instance
+     */
+    protected WireMockServer getWireMockServer() {
+        synchronized (BaseIntegrationTest.class) {
+            return wireMockServer;
         }
     }
 

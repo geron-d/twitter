@@ -77,3 +77,8 @@ public class Follow {
 - попробовать прикрутить в gateway GraphQL
 - поиграть с recon и версионированием api
 - разобраться как лучше работать с сохранение и отображением времени. учесть город пользователя и маппинг времени из бд под него в ответах
+- добавить комментарии постов
+- добавить обновление комментариев в реал тайме
+- добавить систему хэштэгов
+- заменить feign client на http interfaces
+- написать тесты для перформанса на JMH benchmark (https://github.com/hibernate/beanvalidation-benchmark/blob/451727417cf64d7e55efcfd5e98631841a567c13/README.md , https://github.com/hibernate/hibernate-validator/blob/main/performance/README.md , https://habr.com/ru/companies/spring_aio/articles/975422/)
