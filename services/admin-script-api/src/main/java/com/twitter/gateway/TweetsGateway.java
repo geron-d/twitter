@@ -1,9 +1,9 @@
 package com.twitter.gateway;
 
 import com.twitter.client.TweetsApiClient;
-import com.twitter.dto.external.CreateTweetRequestDto;
-import com.twitter.dto.external.DeleteTweetRequestDto;
-import com.twitter.dto.external.TweetResponseDto;
+import com.twitter.common.dto.request.CreateTweetRequestDto;
+import com.twitter.common.dto.request.DeleteTweetRequestDto;
+import com.twitter.common.dto.response.TweetResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

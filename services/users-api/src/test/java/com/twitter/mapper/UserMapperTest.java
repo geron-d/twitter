@@ -1,12 +1,12 @@
 package com.twitter.mapper;
 
-import com.twitter.dto.UserPatchDto;
-import com.twitter.dto.UserRequestDto;
-import com.twitter.dto.UserResponseDto;
-import com.twitter.dto.UserUpdateDto;
-import com.twitter.entity.User;
+import com.twitter.common.dto.request.UserRequestDto;
+import com.twitter.common.dto.response.UserResponseDto;
 import com.twitter.common.enums.UserRole;
 import com.twitter.common.enums.UserStatus;
+import com.twitter.dto.UserPatchDto;
+import com.twitter.dto.UserUpdateDto;
+import com.twitter.entity.User;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

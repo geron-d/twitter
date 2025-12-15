@@ -1,4 +1,4 @@
-package com.twitter.dto.external;
+package com.twitter.common.dto.response;
 
 import com.twitter.common.enums.UserRole;
 import com.twitter.common.enums.UserStatus;
@@ -8,10 +8,11 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
- * Data Transfer Object for user response data (external API).
+ * Data Transfer Object for user response data.
  * <p>
  * This record represents the data structure used for returning user information
- * from the users-api service via Feign Client.
+ * to clients. It excludes sensitive fields like password hash and salt for
+ * security purposes while providing all necessary user data for display.
  *
  * @param id        unique identifier for the user
  * @param login     user's login name
@@ -41,9 +42,11 @@ import java.util.UUID;
         """
 )
 public record UserResponseDto(
-
     /**
      * Unique identifier for the user.
+     * <p>
+     * This field contains the UUID that uniquely identifies the user
+     * in the system .
      */
     @Schema(
         description = "Unique identifier for the user",
@@ -64,6 +67,8 @@ public record UserResponseDto(
 
     /**
      * User's first name.
+     * <p>
+     * May be null if not provided during registration.
      */
     @Schema(
         description = "User's first name (optional)",
@@ -75,6 +80,8 @@ public record UserResponseDto(
 
     /**
      * User's last name.
+     * <p>
+     * May be null if not provided during registration.
      */
     @Schema(
         description = "User's last name (optional)",
@@ -96,6 +103,8 @@ public record UserResponseDto(
 
     /**
      * Current status of the user account.
+     * <p>
+     * Affects the user's ability to access the system.
      */
     @Schema(
         description = "Current status of the user account",
@@ -106,6 +115,9 @@ public record UserResponseDto(
 
     /**
      * Role assigned to the user.
+     * <p>
+     * This field determines the user's permissions and access level
+     * within the system.
      */
     @Schema(
         description = "Role assigned to the user",

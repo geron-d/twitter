@@ -1,8 +1,8 @@
 package com.twitter.gateway;
 
 import com.twitter.client.UsersApiClient;
-import com.twitter.dto.external.UserRequestDto;
-import com.twitter.dto.external.UserResponseDto;
+import com.twitter.common.dto.request.UserRequestDto;
+import com.twitter.common.dto.response.UserResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

@@ -1,10 +1,10 @@
 package com.twitter.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.twitter.common.dto.request.UserRequestDto;
+import com.twitter.common.dto.response.UserResponseDto;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.ValidationException;
-import com.twitter.dto.UserRequestDto;
-import com.twitter.dto.UserResponseDto;
 import com.twitter.dto.UserRoleUpdateDto;
 import com.twitter.dto.UserUpdateDto;
 import com.twitter.dto.filter.UserFilter;

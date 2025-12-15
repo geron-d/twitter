@@ -1,7 +1,7 @@
 package com.twitter.client;
 
-import com.twitter.dto.external.UserRequestDto;
-import com.twitter.dto.external.UserResponseDto;
+import com.twitter.common.dto.request.UserRequestDto;
+import com.twitter.common.dto.response.UserResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
