@@ -21,4 +21,3 @@ public interface GenerateUsersAndTweetsValidator {
      */
     void validateDeletionCount(GenerateUsersAndTweetsRequestDto requestDto, int usersWithTweetsCount);
 }
-

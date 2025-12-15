@@ -137,4 +137,3 @@ public record UserResponseDto(
     LocalDateTime createdAt
 ) {
 }
-

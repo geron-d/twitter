@@ -1,3 +1,2 @@
-- вынести общие дто в common-lib
 - добавить в users-api FollowerController с возможностью делать подписку-отписку на пользователя
 - реализовать остальные методы для tweet из TWEET_API_COMMON_2.md

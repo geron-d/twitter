@@ -103,4 +103,3 @@ public record GenerateUsersAndTweetsResponseDto(
     ScriptStatisticsDto statistics
 ) {
 }
-

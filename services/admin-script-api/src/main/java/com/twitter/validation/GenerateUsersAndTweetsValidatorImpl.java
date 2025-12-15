@@ -43,4 +43,3 @@ public class GenerateUsersAndTweetsValidatorImpl implements GenerateUsersAndTwee
         log.debug("Deletion count validation passed: {} <= {}", lUsersForDeletion, usersWithTweetsCount);
     }
 }
-

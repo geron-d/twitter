@@ -94,4 +94,3 @@ public record TweetResponseDto(
     LocalDateTime deletedAt
 ) {
 }
-

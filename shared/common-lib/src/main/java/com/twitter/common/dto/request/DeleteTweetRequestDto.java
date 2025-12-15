@@ -34,4 +34,3 @@ public record DeleteTweetRequestDto(
     UUID userId
 ) {
 }
-
