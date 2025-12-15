@@ -2,14 +2,18 @@ package com.twitter.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.twitter.dto.*;
-import com.twitter.dto.filter.UserFilter;
-import com.twitter.entity.User;
+import com.twitter.common.dto.request.UserRequestDto;
+import com.twitter.common.dto.response.UserResponseDto;
 import com.twitter.common.enums.UserRole;
 import com.twitter.common.enums.UserStatus;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.FormatValidationException;
 import com.twitter.common.exception.validation.UniquenessValidationException;
+import com.twitter.dto.UserPatchDto;
+import com.twitter.dto.UserRoleUpdateDto;
+import com.twitter.dto.UserUpdateDto;
+import com.twitter.dto.filter.UserFilter;
+import com.twitter.entity.User;
 import com.twitter.mapper.UserMapper;
 import com.twitter.repository.UserRepository;
 import com.twitter.util.PatchDtoFactory;
@@ -542,7 +546,7 @@ class UserServiceImplTest {
                 UserRole.USER,
                 testCreatedAt
             );
-            
+
             when(userMapper.toUser(testUserRequestDto)).thenReturn(testUser);
             when(userRepository.saveAndFlush(any(User.class))).thenReturn(savedUser);
             when(userMapper.toUserResponseDto(savedUser)).thenReturn(responseWithActualTime);
@@ -842,7 +846,7 @@ class UserServiceImplTest {
             LocalDateTime originalCreatedAt = LocalDateTime.of(2025, 1, 20, 10, 0, 0);
 
             testUser.setCreatedAt(originalCreatedAt);
-            
+
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
             when(userRepository.save(any(User.class))).thenReturn(updatedUser);
             when(userMapper.toUserResponseDto(updatedUser)).thenReturn(testUserResponseDto);
@@ -1319,7 +1323,7 @@ class UserServiceImplTest {
             LocalDateTime originalCreatedAt = LocalDateTime.of(2025, 1, 20, 10, 0, 0);
 
             testUser.setCreatedAt(originalCreatedAt);
-            
+
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
             when(userMapper.toUserPatchDto(testUser)).thenReturn(testUserPatchDto);
             when(patchDtoFactory.createPatchDto(any(UserPatchDto.class), eq(testJsonNode))).thenReturn(testUserPatchDto);

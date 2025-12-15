@@ -1,4 +1,4 @@
-package com.twitter.dto;
+package com.twitter.common.dto.response;
 
 import com.twitter.common.enums.UserRole;
 import com.twitter.common.enums.UserStatus;
@@ -137,3 +137,4 @@ public record UserResponseDto(
     LocalDateTime createdAt
 ) {
 }
+

@@ -1,9 +1,13 @@
 package com.twitter.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.twitter.common.dto.request.UserRequestDto;
+import com.twitter.common.dto.response.UserResponseDto;
 import com.twitter.common.enums.UserRole;
 import com.twitter.common.enums.UserStatus;
-import com.twitter.dto.*;
+import com.twitter.dto.UserPatchDto;
+import com.twitter.dto.UserRoleUpdateDto;
+import com.twitter.dto.UserUpdateDto;
 import com.twitter.dto.filter.UserFilter;
 import com.twitter.entity.User;
 import com.twitter.mapper.UserMapper;

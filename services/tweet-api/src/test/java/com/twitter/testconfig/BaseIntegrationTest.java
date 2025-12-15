@@ -66,33 +66,6 @@ public abstract class BaseIntegrationTest {
             }
         }
 
-        // Use lazy evaluation to ensure WireMock server is running when port is accessed
-//        registry.add("wiremock.server.port", () -> {
-//            synchronized (BaseIntegrationTest.class) {
-//                if (wireMockServer == null || !wireMockServer.isRunning()) {
-//                    if (wireMockServer == null) {
-//                        wireMockServer = new WireMockServer(0);
-//                    }
-//                    if (!wireMockServer.isRunning()) {
-//                        wireMockServer.start();
-//                    }
-//                }
-//                return String.valueOf(wireMockServer.port());
-//            }
-//        });
-//        registry.add("app.users-api.base-url", () -> {
-//            synchronized (BaseIntegrationTest.class) {
-//                if (wireMockServer == null || !wireMockServer.isRunning()) {
-//                    if (wireMockServer == null) {
-//                        wireMockServer = new WireMockServer(0);
-//                    }
-//                    if (!wireMockServer.isRunning()) {
-//                        wireMockServer.start();
-//                    }
-//                }
-//                return "http://localhost:" + wireMockServer.port();
-//            }
-//        });
         int wireMockPort = wireMockServer.port();
         registry.add("wiremock.server.port", () -> String.valueOf(wireMockPort));
         registry.add("app.users-api.base-url", () -> "http://localhost:" + wireMockPort);

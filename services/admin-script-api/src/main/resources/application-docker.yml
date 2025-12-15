@@ -1,0 +1,6 @@
+# Admin Script API specific configuration
+app:
+  users-api:
+    base-url: http://users-api:8081
+  tweet-api:
+    base-url: http://tweet-api:8082
