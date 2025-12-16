@@ -24,7 +24,7 @@
     - Определена конфигурация для Docker окружения (URL сервисов через имена)
     - Определена конфигурация в docker-compose.yml (зависимости, environment variables, healthcheck)
 
-### Реализация кода
+### Инфраструктура
 
 - [ ] (P1) #3: Обновление settings.gradle - добавить include для follower-api
   - Зависимости: нет
@@ -40,110 +40,7 @@
     - Настроены Lombok и MapStruct с правильными annotation processors
     - Настроен compileJava с параметрами для MapStruct
 
-- [ ] (P1) #5: Создание SQL скрипта - создать sql/follows.sql для таблицы follows
-  - Зависимости: #1
-  - Acceptance criteria:
-    - Создан SQL скрипт с CREATE TABLE follows
-    - Определены все поля (id, follower_id, following_id, created_at)
-    - Добавлено UNIQUE ограничение на (follower_id, following_id)
-    - Добавлено CHECK ограничение (follower_id != following_id)
-
-- [ ] (P1) #6: Реализация Entity Follow - создать JPA сущность с уникальным ограничением на (follower_id, following_id)
-  - Зависимости: #1, #5
-  - Acceptance criteria:
-    - Создана Entity Follow с полями id, followerId, followingId, createdAt
-    - Использованы правильные JPA аннотации (@Entity, @Table, @Id, @Column)
-    - Добавлено уникальное ограничение через @Table(uniqueConstraints)
-    - Использован @CreationTimestamp для createdAt
-    - Добавлена полная JavaDoc документация
-
-- [ ] (P1) #7: Реализация DTO (Records) - создать все Request, Response, Filter DTO с валидацией
-  - Зависимости: #1
-  - Acceptance criteria:
-    - Создан FollowRequestDto (followerId, followingId) с валидацией
-    - Создан FollowResponseDto с информацией о подписке
-    - Создан FollowerResponseDto (id, login, createdAt) для списка подписчиков
-    - Создан FollowingResponseDto (id, login, createdAt) для списка подписок
-    - Создан FollowStatusResponseDto (isFollowing, createdAt)
-    - Создан FollowStatsResponseDto (followersCount, followingCount)
-    - Создан FollowerFilter для фильтрации подписчиков
-    - Создан FollowingFilter для фильтрации подписок
-    - Все DTO используют Records (Java 24)
-    - Все DTO имеют валидационные аннотации
-    - Все DTO имеют @Schema аннотации для Swagger
-
-- [ ] (P1) #8: Реализация Gateway для users-api - создать UsersApiClient (Feign) и UserGateway
-  - Зависимости: #1, #4
-  - Acceptance criteria:
-    - Создан UsersApiClient с методом existsUser для проверки существования пользователя
-    - Настроен Feign Client с правильным URL и path
-    - Создан UserGateway с методом existsUser для обёртки вызовов
-    - Добавлена обработка ошибок в UserGateway
-    - Добавлено логирование
-
-- [ ] (P1) #9: Реализация Repository - создать FollowRepository с Derived Query Methods
-  - Зависимости: #6
-  - Acceptance criteria:
-    - Создан FollowRepository extends JpaRepository<Follow, UUID>
-    - Добавлены Derived Query Methods (existsByFollowerIdAndFollowingId, findByFollowerId, findByFollowingId, countByFollowerId, countByFollowingId)
-    - Repository НЕ имеет JavaDoc для Derived Query Methods (согласно стандартам)
-
-- [ ] (P1) #10: Реализация Mapper (MapStruct) - создать интерфейс FollowMapper с маппингами
-  - Зависимости: #6, #7
-  - Acceptance criteria:
-    - Создан FollowMapper интерфейс с @Mapper
-    - Добавлены методы маппинга (toFollow, toFollowResponseDto, toFollowerResponseDto, toFollowingResponseDto)
-    - Настроены игнорируемые поля (@Mapping(target = "...", ignore = true))
-    - Mapper настроен как Spring компонент
-
-- [ ] (P1) #11: Реализация Validator - создать FollowValidator interface и implementation с проверкой бизнес-правил
-  - Зависимости: #7, #8, #9
-  - Acceptance criteria:
-    - Создан интерфейс FollowValidator
-    - Создана реализация FollowValidatorImpl
-    - Реализована валидация: нельзя подписаться на себя
-    - Реализована валидация: нельзя подписаться дважды
-    - Реализована валидация: оба пользователя должны существовать (через UserGateway)
-    - Используются исключения из common-lib (BusinessRuleValidationException)
-    - Добавлено логирование
-
-- [ ] (P1) #12: Реализация Service - создать FollowService interface и implementation с бизнес-логикой
-  - Зависимости: #7, #9, #10, #11
-  - Acceptance criteria:
-    - Создан интерфейс FollowService
-    - Создана реализация FollowServiceImpl
-    - Реализован метод follow (подписка) с @Transactional
-    - Реализован метод unfollow (отписка) с @Transactional
-    - Реализован метод getFollowers (получение списка подписчиков) с пагинацией
-    - Реализован метод getFollowing (получение списка подписок) с пагинацией
-    - Реализован метод getFollowStatus (проверка статуса подписки)
-    - Реализован метод getFollowStats (получение статистики)
-    - Все методы используют валидатор перед операциями
-    - Добавлено логирование
-
-- [ ] (P1) #13: Реализация Controller - создать FollowApi (OpenAPI) и FollowController с @LoggableRequest
-  - Зависимости: #12
-  - Acceptance criteria:
-    - Создан интерфейс FollowApi с @Tag и OpenAPI аннотациями
-    - Создан FollowController implements FollowApi
-    - Реализован POST /api/v1/follows с @LoggableRequest
-    - Реализован DELETE /api/v1/follows/{followerId}/{followingId} с @LoggableRequest
-    - Реализован GET /api/v1/follows/{userId}/followers с @LoggableRequest
-    - Реализован GET /api/v1/follows/{userId}/following с @LoggableRequest
-    - Реализован GET /api/v1/follows/{followerId}/{followingId}/status с @LoggableRequest
-    - Реализован GET /api/v1/follows/{userId}/stats с @LoggableRequest
-    - Все методы используют @Valid для валидации
-    - Все методы возвращают правильные HTTP статус-коды
-
-- [ ] (P1) #14: Реализация Config - создать OpenApiConfig и FeignConfig
-  - Зависимости: #1, #4
-  - Acceptance criteria:
-    - Создан OpenApiConfig с @Configuration
-    - Создан Bean followerApiOpenAPI() с настройкой Info, Servers
-    - Создан FeignConfig с @Configuration и @EnableFeignClients
-    - Настроен basePackages для Feign клиентов
-
-- [ ] (P1) #15: Создание application.yml - настроить порт 8084, подключение к БД, Feign клиент
+- [ ] (P1) #5: Создание application.yml - настроить порт 8084, подключение к БД, Feign клиент
   - Зависимости: #1, #4
   - Acceptance criteria:
     - Создан application.yml с server.port=8084
@@ -153,15 +50,31 @@
     - Настроены management endpoints
     - Настроено логирование
 
-- [ ] (P1) #16: Создание application-docker.yml - настроить конфигурацию для Docker (URL users-api через имя сервиса)
-  - Зависимости: #1, #15
+- [ ] (P1) #6: Создание SQL скрипта - создать sql/follows.sql для таблицы follows
+  - Зависимости: #1
+  - Acceptance criteria:
+    - Создан SQL скрипт с CREATE TABLE follows
+    - Определены все поля (id, follower_id, following_id, created_at)
+    - Добавлено UNIQUE ограничение на (follower_id, following_id)
+    - Добавлено CHECK ограничение (follower_id != following_id)
+
+- [ ] (P1) #7: Реализация Config - создать OpenApiConfig и FeignConfig
+  - Зависимости: #1, #4
+  - Acceptance criteria:
+    - Создан OpenApiConfig с @Configuration
+    - Создан Bean followerApiOpenAPI() с настройкой Info, Servers
+    - Создан FeignConfig с @Configuration и @EnableFeignClients
+    - Настроен basePackages для Feign клиентов
+
+- [ ] (P1) #8: Создание application-docker.yml - настроить конфигурацию для Docker (URL users-api через имя сервиса)
+  - Зависимости: #1, #5
   - Acceptance criteria:
     - Создан application-docker.yml
     - Настроен users-api URL: http://users-api:8081 (через имя сервиса Docker)
     - Настроен database URL: jdbc:postgresql://postgres:5432/twitter (через имя сервиса Docker)
     - Настроен profile: docker
 
-- [ ] (P1) #17: Создание Dockerfile - multi-stage build с Gradle и JRE, порт 8084, healthcheck
+- [ ] (P1) #9: Создание Dockerfile - multi-stage build с Gradle и JRE, порт 8084, healthcheck
   - Зависимости: #4
   - Acceptance criteria:
     - Создан Dockerfile с multi-stage build
@@ -173,8 +86,8 @@
     - Используется non-root user (appuser)
     - Копируется правильный JAR из build/libs
 
-- [ ] (P1) #18: Обновление docker-compose.yml - добавить сервис follower-api с зависимостями от postgres и users-api
-  - Зависимости: #17, #16
+- [ ] (P1) #10: Обновление docker-compose.yml - добавить сервис follower-api с зависимостями от postgres и users-api
+  - Зависимости: #9, #8
   - Acceptance criteria:
     - Добавлен сервис follower-api в docker-compose.yml
     - Настроен порт 8084:8084
@@ -184,33 +97,408 @@
     - Настроены volumes для логов
     - Добавлен в network twitter-network
 
-### Документация кода (JavaDoc)
+### Общие слои (используются всеми эндпоинтами)
 
-- [ ] (P1) #19: JavaDoc для всех классов - добавить JavaDoc с @author geron, @version 1.0 для всех public классов и методов
-  - Зависимости: #6, #7, #8, #9, #10, #11, #12, #13, #14
+- [ ] (P1) #11: Реализация Entity Follow - создать JPA сущность с уникальным ограничением на (follower_id, following_id)
+  - Зависимости: #1, #6
   - Acceptance criteria:
-    - Все public классы имеют JavaDoc с @author geron, @version 1.0
-    - Все public методы имеют JavaDoc с @param, @return, @throws
-    - JavaDoc на английском языке
-    - DTO Records имеют JavaDoc с @param для всех компонентов
-    - Repository Derived Query Methods НЕ имеют JavaDoc (согласно стандартам)
+    - Создана Entity Follow с полями id, followerId, followingId, createdAt
+    - Использованы правильные JPA аннотации (@Entity, @Table, @Id, @Column)
+    - Добавлено уникальное ограничение через @Table(uniqueConstraints)
+    - Использован @CreationTimestamp для createdAt
+    - Добавлена полная JavaDoc документация
 
-### Тестирование
-
-- [ ] (P1) #20: Unit тесты для Service - покрыть все методы FollowServiceImpl тестами
-  - Зависимости: #12
+- [ ] (P1) #12: Реализация Gateway для users-api - создать UsersApiClient (Feign) и UserGateway
+  - Зависимости: #1, #4
   - Acceptance criteria:
-    - Создан FollowServiceImplTest с @ExtendWith(MockitoExtension.class)
-    - Протестированы все методы (follow, unfollow, getFollowers, getFollowing, getFollowStatus, getFollowStats)
-    - Протестированы успешные сценарии
-    - Протестированы ошибочные сценарии (валидация, пользователь не найден)
+    - Создан UsersApiClient с методом existsUser для проверки существования пользователя
+    - Настроен Feign Client с правильным URL и path
+    - Создан UserGateway с методом existsUser для обёртки вызовов
+    - Добавлена обработка ошибок в UserGateway
+    - Добавлено логирование
+
+- [ ] (P1) #13: Реализация Repository - создать FollowRepository с Derived Query Methods
+  - Зависимости: #11
+  - Acceptance criteria:
+    - Создан FollowRepository extends JpaRepository<Follow, UUID>
+    - Добавлены Derived Query Methods (existsByFollowerIdAndFollowingId, findByFollowerId, findByFollowingId, countByFollowerId, countByFollowingId)
+    - Repository НЕ имеет JavaDoc для Derived Query Methods (согласно стандартам)
+
+- [ ] (P1) #14: Реализация Mapper (MapStruct) - создать интерфейс FollowMapper с маппингами
+  - Зависимости: #11
+  - Acceptance criteria:
+    - Создан FollowMapper интерфейс с @Mapper
+    - Добавлены методы маппинга (toFollow, toFollowResponseDto, toFollowerResponseDto, toFollowingResponseDto)
+    - Настроены игнорируемые поля (@Mapping(target = "...", ignore = true))
+    - Mapper настроен как Spring компонент
+
+- [ ] (P1) #15: Реализация Validator - создать FollowValidator interface и implementation с проверкой бизнес-правил
+  - Зависимости: #12, #13
+  - Acceptance criteria:
+    - Создан интерфейс FollowValidator
+    - Создана реализация FollowValidatorImpl
+    - Реализована валидация: нельзя подписаться на себя
+    - Реализована валидация: нельзя подписаться дважды
+    - Реализована валидация: оба пользователя должны существовать (через UserGateway)
+    - Используются исключения из common-lib (BusinessRuleValidationException)
+    - Добавлено логирование
+
+### Эндпоинт: POST /api/v1/follows - Подписка на пользователя
+
+- [ ] (P1) #16: POST /api/v1/follows - Реализация DTO - создать FollowRequestDto и FollowResponseDto
+  - Зависимости: #1
+  - Acceptance criteria:
+    - Создан FollowRequestDto (followerId, followingId) с валидацией (@NotNull, @Valid UUID)
+    - Создан FollowResponseDto с информацией о подписке (id, followerId, followingId, createdAt)
+    - Все DTO используют Records (Java 24)
+    - Все DTO имеют валидационные аннотации
+    - Все DTO имеют @Schema аннотации для Swagger
+
+- [ ] (P1) #17: POST /api/v1/follows - Реализация Service метода - создать метод follow в FollowService
+  - Зависимости: #11, #13, #14, #15, #16
+  - Acceptance criteria:
+    - Добавлен метод follow(FollowRequestDto) в интерфейс FollowService
+    - Реализован метод follow в FollowServiceImpl с @Transactional
+    - Метод использует валидатор перед операцией
+    - Метод сохраняет подписку через Repository
+    - Метод использует Mapper для преобразования
+    - Добавлено логирование
+
+- [ ] (P1) #18: POST /api/v1/follows - Реализация Controller метода - создать метод createFollow в FollowController
+  - Зависимости: #17
+  - Acceptance criteria:
+    - Добавлен метод createFollow в интерфейс FollowApi с OpenAPI аннотациями
+    - Реализован метод createFollow в FollowController с @LoggableRequest
+    - Метод использует @Valid для валидации
+    - Метод возвращает HttpStatus.CREATED (201)
+    - Метод возвращает FollowResponseDto
+
+- [ ] (P1) #19: POST /api/v1/follows - Unit тесты для Service метода - протестировать метод follow
+  - Зависимости: #17
+  - Acceptance criteria:
+    - Создан тест для метода follow в FollowServiceImplTest
+    - Протестирован успешный сценарий
+    - Протестированы ошибочные сценарии (валидация, пользователь не найден, двойная подписка)
     - Используется @Nested для группировки тестов
     - Используется AssertJ для assertions
     - Проверены взаимодействия с зависимостями (verify)
-    - Покрытие > 80%
 
-- [ ] (P1) #21: Unit тесты для Validator - покрыть все методы FollowValidatorImpl тестами
-  - Зависимости: #11
+- [ ] (P2) #20: POST /api/v1/follows - Integration тесты - протестировать эндпоинт POST /api/v1/follows
+  - Зависимости: #18
+  - Acceptance criteria:
+    - Создан тест для POST /api/v1/follows в FollowControllerTest
+    - Протестирован успешный сценарий (201 Created)
+    - Протестированы ошибочные сценарии (400 Bad Request, 404 Not Found, 409 Conflict)
+    - Использован MockMvc для тестирования REST endpoint
+    - Использован WireMock для мокирования users-api
+    - Использован @Transactional для изоляции тестов
+    - Проверена валидация запросов
+    - Проверен формат ответов
+
+- [ ] (P1) #21: POST /api/v1/follows - OpenAPI документация - добавить @Operation, @ApiResponses для метода createFollow
+  - Зависимости: #18
+  - Acceptance criteria:
+    - Метод createFollow имеет @Operation с summary и description
+    - Метод createFollow имеет @ApiResponses со всеми возможными статус-кодами (201, 400, 404, 409)
+    - Метод createFollow имеет @ExampleObject для успешных и ошибочных ответов
+    - Параметры имеют @Parameter с description
+    - Документация на английском языке
+
+### Эндпоинт: DELETE /api/v1/follows/{followerId}/{followingId} - Отписка от пользователя
+
+- [ ] (P1) #22: DELETE /api/v1/follows/{followerId}/{followingId} - Реализация Service метода - создать метод unfollow в FollowService
+  - Зависимости: #11, #13, #15
+  - Acceptance criteria:
+    - Добавлен метод unfollow(UUID followerId, UUID followingId) в интерфейс FollowService
+    - Реализован метод unfollow в FollowServiceImpl с @Transactional
+    - Метод проверяет существование подписки
+    - Метод удаляет подписку через Repository
+    - Добавлено логирование
+
+- [ ] (P1) #23: DELETE /api/v1/follows/{followerId}/{followingId} - Реализация Controller метода - создать метод deleteFollow в FollowController
+  - Зависимости: #22
+  - Acceptance criteria:
+    - Добавлен метод deleteFollow в интерфейс FollowApi с OpenAPI аннотациями
+    - Реализован метод deleteFollow в FollowController с @LoggableRequest
+    - Метод использует @PathVariable для параметров
+    - Метод возвращает HttpStatus.NO_CONTENT (204) при успехе
+    - Метод возвращает HttpStatus.NOT_FOUND (404) если подписка не найдена
+
+- [ ] (P1) #24: DELETE /api/v1/follows/{followerId}/{followingId} - Unit тесты для Service метода - протестировать метод unfollow
+  - Зависимости: #22
+  - Acceptance criteria:
+    - Создан тест для метода unfollow в FollowServiceImplTest
+    - Протестирован успешный сценарий
+    - Протестирован ошибочный сценарий (подписка не найдена)
+    - Используется @Nested для группировки тестов
+    - Используется AssertJ для assertions
+    - Проверены взаимодействия с зависимостями (verify)
+
+- [ ] (P2) #25: DELETE /api/v1/follows/{followerId}/{followingId} - Integration тесты - протестировать эндпоинт DELETE /api/v1/follows/{followerId}/{followingId}
+  - Зависимости: #23
+  - Acceptance criteria:
+    - Создан тест для DELETE /api/v1/follows/{followerId}/{followingId} в FollowControllerTest
+    - Протестирован успешный сценарий (204 No Content)
+    - Протестирован ошибочный сценарий (404 Not Found)
+    - Использован MockMvc для тестирования REST endpoint
+    - Использован @Transactional для изоляции тестов
+    - Проверен формат ответов
+
+- [ ] (P1) #26: DELETE /api/v1/follows/{followerId}/{followingId} - OpenAPI документация - добавить @Operation, @ApiResponses для метода deleteFollow
+  - Зависимости: #23
+  - Acceptance criteria:
+    - Метод deleteFollow имеет @Operation с summary и description
+    - Метод deleteFollow имеет @ApiResponses со всеми возможными статус-кодами (204, 404)
+    - Параметры имеют @Parameter с description
+    - Документация на английском языке
+
+### Эндпоинт: GET /api/v1/follows/{userId}/followers - Получение списка подписчиков
+
+- [ ] (P1) #27: GET /api/v1/follows/{userId}/followers - Реализация DTO - создать FollowerResponseDto и FollowerFilter
+  - Зависимости: #1
+  - Acceptance criteria:
+    - Создан FollowerResponseDto (id, login, createdAt) для списка подписчиков
+    - Создан FollowerFilter для фильтрации подписчиков
+    - Все DTO используют Records (Java 24)
+    - Все DTO имеют @Schema аннотации для Swagger
+
+- [ ] (P1) #28: GET /api/v1/follows/{userId}/followers - Реализация Service метода - создать метод getFollowers в FollowService
+  - Зависимости: #11, #13, #14, #27
+  - Acceptance criteria:
+    - Добавлен метод getFollowers(UUID userId, FollowerFilter filter, Pageable pageable) в интерфейс FollowService
+    - Реализован метод getFollowers в FollowServiceImpl
+    - Метод использует пагинацию
+    - Метод возвращает PagedModel<FollowerResponseDto>
+    - Метод использует Mapper для преобразования
+    - Добавлено логирование
+
+- [ ] (P1) #29: GET /api/v1/follows/{userId}/followers - Реализация Controller метода - создать метод getFollowers в FollowController
+  - Зависимости: #28
+  - Acceptance criteria:
+    - Добавлен метод getFollowers в интерфейс FollowApi с OpenAPI аннотациями
+    - Реализован метод getFollowers в FollowController с @LoggableRequest
+    - Метод использует @PathVariable для userId
+    - Метод использует @PageableDefault для пагинации
+    - Метод возвращает HttpStatus.OK (200)
+    - Метод возвращает PagedModel<FollowerResponseDto>
+
+- [ ] (P1) #30: GET /api/v1/follows/{userId}/followers - Unit тесты для Service метода - протестировать метод getFollowers
+  - Зависимости: #28
+  - Acceptance criteria:
+    - Создан тест для метода getFollowers в FollowServiceImplTest
+    - Протестирован успешный сценарий с пагинацией
+    - Протестирован сценарий с фильтрацией
+    - Используется @Nested для группировки тестов
+    - Используется AssertJ для assertions
+    - Проверены взаимодействия с зависимостями (verify)
+
+- [ ] (P2) #31: GET /api/v1/follows/{userId}/followers - Integration тесты - протестировать эндпоинт GET /api/v1/follows/{userId}/followers
+  - Зависимости: #29
+  - Acceptance criteria:
+    - Создан тест для GET /api/v1/follows/{userId}/followers в FollowControllerTest
+    - Протестирован успешный сценарий (200 OK) с пагинацией
+    - Протестирован ошибочный сценарий (404 Not Found)
+    - Использован MockMvc для тестирования REST endpoint
+    - Использован @Transactional для изоляции тестов
+    - Проверен формат ответов (PagedModel)
+
+- [ ] (P1) #32: GET /api/v1/follows/{userId}/followers - OpenAPI документация - добавить @Operation, @ApiResponses для метода getFollowers
+  - Зависимости: #29
+  - Acceptance criteria:
+    - Метод getFollowers имеет @Operation с summary и description
+    - Метод getFollowers имеет @ApiResponses со всеми возможными статус-кодами (200, 404)
+    - Параметры имеют @Parameter с description
+    - Документация на английском языке
+
+### Эндпоинт: GET /api/v1/follows/{userId}/following - Получение списка подписок
+
+- [ ] (P1) #33: GET /api/v1/follows/{userId}/following - Реализация DTO - создать FollowingResponseDto и FollowingFilter
+  - Зависимости: #1
+  - Acceptance criteria:
+    - Создан FollowingResponseDto (id, login, createdAt) для списка подписок
+    - Создан FollowingFilter для фильтрации подписок
+    - Все DTO используют Records (Java 24)
+    - Все DTO имеют @Schema аннотации для Swagger
+
+- [ ] (P1) #34: GET /api/v1/follows/{userId}/following - Реализация Service метода - создать метод getFollowing в FollowService
+  - Зависимости: #11, #13, #14, #33
+  - Acceptance criteria:
+    - Добавлен метод getFollowing(UUID userId, FollowingFilter filter, Pageable pageable) в интерфейс FollowService
+    - Реализован метод getFollowing в FollowServiceImpl
+    - Метод использует пагинацию
+    - Метод возвращает PagedModel<FollowingResponseDto>
+    - Метод использует Mapper для преобразования
+    - Добавлено логирование
+
+- [ ] (P1) #35: GET /api/v1/follows/{userId}/following - Реализация Controller метода - создать метод getFollowing в FollowController
+  - Зависимости: #34
+  - Acceptance criteria:
+    - Добавлен метод getFollowing в интерфейс FollowApi с OpenAPI аннотациями
+    - Реализован метод getFollowing в FollowController с @LoggableRequest
+    - Метод использует @PathVariable для userId
+    - Метод использует @PageableDefault для пагинации
+    - Метод возвращает HttpStatus.OK (200)
+    - Метод возвращает PagedModel<FollowingResponseDto>
+
+- [ ] (P1) #36: GET /api/v1/follows/{userId}/following - Unit тесты для Service метода - протестировать метод getFollowing
+  - Зависимости: #34
+  - Acceptance criteria:
+    - Создан тест для метода getFollowing в FollowServiceImplTest
+    - Протестирован успешный сценарий с пагинацией
+    - Протестирован сценарий с фильтрацией
+    - Используется @Nested для группировки тестов
+    - Используется AssertJ для assertions
+    - Проверены взаимодействия с зависимостями (verify)
+
+- [ ] (P2) #37: GET /api/v1/follows/{userId}/following - Integration тесты - протестировать эндпоинт GET /api/v1/follows/{userId}/following
+  - Зависимости: #35
+  - Acceptance criteria:
+    - Создан тест для GET /api/v1/follows/{userId}/following в FollowControllerTest
+    - Протестирован успешный сценарий (200 OK) с пагинацией
+    - Протестирован ошибочный сценарий (404 Not Found)
+    - Использован MockMvc для тестирования REST endpoint
+    - Использован @Transactional для изоляции тестов
+    - Проверен формат ответов (PagedModel)
+
+- [ ] (P1) #38: GET /api/v1/follows/{userId}/following - OpenAPI документация - добавить @Operation, @ApiResponses для метода getFollowing
+  - Зависимости: #35
+  - Acceptance criteria:
+    - Метод getFollowing имеет @Operation с summary и description
+    - Метод getFollowing имеет @ApiResponses со всеми возможными статус-кодами (200, 404)
+    - Параметры имеют @Parameter с description
+    - Документация на английском языке
+
+### Эндпоинт: GET /api/v1/follows/{followerId}/{followingId}/status - Проверка статуса подписки
+
+- [ ] (P1) #39: GET /api/v1/follows/{followerId}/{followingId}/status - Реализация DTO - создать FollowStatusResponseDto
+  - Зависимости: #1
+  - Acceptance criteria:
+    - Создан FollowStatusResponseDto (isFollowing, createdAt)
+    - DTO использует Records (Java 24)
+    - DTO имеет @Schema аннотации для Swagger
+
+- [ ] (P1) #40: GET /api/v1/follows/{followerId}/{followingId}/status - Реализация Service метода - создать метод getFollowStatus в FollowService
+  - Зависимости: #11, #13, #14, #39
+  - Acceptance criteria:
+    - Добавлен метод getFollowStatus(UUID followerId, UUID followingId) в интерфейс FollowService
+    - Реализован метод getFollowStatus в FollowServiceImpl
+    - Метод проверяет существование подписки
+    - Метод возвращает FollowStatusResponseDto
+    - Метод использует Mapper для преобразования
+    - Добавлено логирование
+
+- [ ] (P1) #41: GET /api/v1/follows/{followerId}/{followingId}/status - Реализация Controller метода - создать метод getFollowStatus в FollowController
+  - Зависимости: #40
+  - Acceptance criteria:
+    - Добавлен метод getFollowStatus в интерфейс FollowApi с OpenAPI аннотациями
+    - Реализован метод getFollowStatus в FollowController с @LoggableRequest
+    - Метод использует @PathVariable для параметров
+    - Метод возвращает HttpStatus.OK (200)
+    - Метод возвращает FollowStatusResponseDto
+
+- [ ] (P1) #42: GET /api/v1/follows/{followerId}/{followingId}/status - Unit тесты для Service метода - протестировать метод getFollowStatus
+  - Зависимости: #40
+  - Acceptance criteria:
+    - Создан тест для метода getFollowStatus в FollowServiceImplTest
+    - Протестирован успешный сценарий (подписка существует)
+    - Протестирован сценарий (подписка не существует)
+    - Используется @Nested для группировки тестов
+    - Используется AssertJ для assertions
+    - Проверены взаимодействия с зависимостями (verify)
+
+- [ ] (P2) #43: GET /api/v1/follows/{followerId}/{followingId}/status - Integration тесты - протестировать эндпоинт GET /api/v1/follows/{followerId}/{followingId}/status
+  - Зависимости: #41
+  - Acceptance criteria:
+    - Создан тест для GET /api/v1/follows/{followerId}/{followingId}/status в FollowControllerTest
+    - Протестирован успешный сценарий (200 OK)
+    - Использован MockMvc для тестирования REST endpoint
+    - Использован @Transactional для изоляции тестов
+    - Проверен формат ответов
+
+- [ ] (P1) #44: GET /api/v1/follows/{followerId}/{followingId}/status - OpenAPI документация - добавить @Operation, @ApiResponses для метода getFollowStatus
+  - Зависимости: #41
+  - Acceptance criteria:
+    - Метод getFollowStatus имеет @Operation с summary и description
+    - Метод getFollowStatus имеет @ApiResponses со всеми возможными статус-кодами (200)
+    - Параметры имеют @Parameter с description
+    - Документация на английском языке
+
+### Эндпоинт: GET /api/v1/follows/{userId}/stats - Получение статистики подписок
+
+- [ ] (P1) #45: GET /api/v1/follows/{userId}/stats - Реализация DTO - создать FollowStatsResponseDto
+  - Зависимости: #1
+  - Acceptance criteria:
+    - Создан FollowStatsResponseDto (followersCount, followingCount)
+    - DTO использует Records (Java 24)
+    - DTO имеет @Schema аннотации для Swagger
+
+- [ ] (P1) #46: GET /api/v1/follows/{userId}/stats - Реализация Service метода - создать метод getFollowStats в FollowService
+  - Зависимости: #11, #13, #14, #45
+  - Acceptance criteria:
+    - Добавлен метод getFollowStats(UUID userId) в интерфейс FollowService
+    - Реализован метод getFollowStats в FollowServiceImpl
+    - Метод использует Repository для подсчета
+    - Метод возвращает FollowStatsResponseDto
+    - Метод использует Mapper для преобразования
+    - Добавлено логирование
+
+- [ ] (P1) #47: GET /api/v1/follows/{userId}/stats - Реализация Controller метода - создать метод getFollowStats в FollowController
+  - Зависимости: #46
+  - Acceptance criteria:
+    - Добавлен метод getFollowStats в интерфейс FollowApi с OpenAPI аннотациями
+    - Реализован метод getFollowStats в FollowController с @LoggableRequest
+    - Метод использует @PathVariable для userId
+    - Метод возвращает HttpStatus.OK (200)
+    - Метод возвращает FollowStatsResponseDto
+
+- [ ] (P1) #48: GET /api/v1/follows/{userId}/stats - Unit тесты для Service метода - протестировать метод getFollowStats
+  - Зависимости: #46
+  - Acceptance criteria:
+    - Создан тест для метода getFollowStats в FollowServiceImplTest
+    - Протестирован успешный сценарий
+    - Используется @Nested для группировки тестов
+    - Используется AssertJ для assertions
+    - Проверены взаимодействия с зависимостями (verify)
+
+- [ ] (P2) #49: GET /api/v1/follows/{userId}/stats - Integration тесты - протестировать эндпоинт GET /api/v1/follows/{userId}/stats
+  - Зависимости: #47
+  - Acceptance criteria:
+    - Создан тест для GET /api/v1/follows/{userId}/stats в FollowControllerTest
+    - Протестирован успешный сценарий (200 OK)
+    - Использован MockMvc для тестирования REST endpoint
+    - Использован @Transactional для изоляции тестов
+    - Проверен формат ответов
+
+- [ ] (P1) #50: GET /api/v1/follows/{userId}/stats - OpenAPI документация - добавить @Operation, @ApiResponses для метода getFollowStats
+  - Зависимости: #47
+  - Acceptance criteria:
+    - Метод getFollowStats имеет @Operation с summary и description
+    - Метод getFollowStats имеет @ApiResponses со всеми возможными статус-кодами (200)
+    - Параметры имеют @Parameter с description
+    - Документация на английском языке
+
+### Дополнительные тесты и документация
+
+- [ ] (P1) #51: Unit тесты для Gateway - протестировать UserGateway
+  - Зависимости: #12
+  - Acceptance criteria:
+    - Создан UserGatewayTest с @ExtendWith(MockitoExtension.class)
+    - Протестирован метод existsUser
+    - Протестированы успешные сценарии
+    - Протестированы ошибочные сценарии (ошибка Feign клиента)
+    - Используется AssertJ для assertions
+
+- [ ] (P1) #52: Unit тесты для Mapper - протестировать FollowMapper с реальным маппером
+  - Зависимости: #14
+  - Acceptance criteria:
+    - Создан FollowMapperTest
+    - Используется реальный маппер (Mappers.getMapper)
+    - Протестированы все методы маппинга
+    - Проверены игнорируемые поля
+    - Используется AssertJ для assertions
+
+- [ ] (P1) #53: Unit тесты для Validator - протестировать FollowValidatorImpl
+  - Зависимости: #15
   - Acceptance criteria:
     - Создан FollowValidatorImplTest с @ExtendWith(MockitoExtension.class)
     - Протестированы все валидационные методы
@@ -220,66 +508,32 @@
     - Используется AssertJ для assertions
     - Проверены выбросы исключений
 
-- [ ] (P1) #22: Unit тесты для Mapper - протестировать FollowMapper с реальным маппером
-  - Зависимости: #10
+- [ ] (P1) #54: JavaDoc для всех классов - добавить JavaDoc с @author geron, @version 1.0 для всех public классов и методов
+  - Зависимости: #11, #12, #13, #14, #15, #16, #17, #18, #22, #23, #27, #28, #29, #33, #34, #35, #39, #40, #41, #45, #46, #47, #7
   - Acceptance criteria:
-    - Создан FollowMapperTest
-    - Используется реальный маппер (Mappers.getMapper)
-    - Протестированы все методы маппинга
-    - Проверены игнорируемые поля
-    - Используется AssertJ для assertions
+    - Все public классы имеют JavaDoc с @author geron, @version 1.0
+    - Все public методы имеют JavaDoc с @param, @return, @throws
+    - JavaDoc на английском языке
+    - DTO Records имеют JavaDoc с @param для всех компонентов
+    - Repository Derived Query Methods НЕ имеют JavaDoc (согласно стандартам)
 
-- [ ] (P1) #23: Unit тесты для Gateway - протестировать UserGateway
-  - Зависимости: #8
-  - Acceptance criteria:
-    - Создан UserGatewayTest с @ExtendWith(MockitoExtension.class)
-    - Протестирован метод existsUser
-    - Протестированы успешные сценарии
-    - Протестированы ошибочные сценарии (ошибка Feign клиента)
-    - Используется AssertJ для assertions
-
-- [ ] (P2) #24: Integration тесты для Controller - покрыть все эндпоинты тестами с MockMvc, проверить все статус-коды
-  - Зависимости: #13
-  - Acceptance criteria:
-    - Создан FollowControllerTest с @SpringBootTest, @AutoConfigureWebMvc
-    - Протестированы все эндпоинты (POST, DELETE, GET)
-    - Протестированы все статус-коды (200, 201, 400, 404, 409)
-    - Использован MockMvc для тестирования REST endpoints
-    - Использован WireMock для мокирования users-api
-    - Использован @Transactional для изоляции тестов
-    - Проверена валидация запросов
-    - Проверен формат ответов
-
-### Swagger/OpenAPI документация
-
-- [ ] (P1) #25: OpenAPI interface (FollowApi.java) - добавить @Tag, @Operation, @ApiResponses, @Parameter для всех методов
-  - Зависимости: #13
-  - Acceptance criteria:
-    - Все методы имеют @Operation с summary и description
-    - Все методы имеют @ApiResponses со всеми возможными статус-кодами
-    - Все методы имеют @ExampleObject для успешных и ошибочных ответов
-    - Все параметры имеют @Parameter с description
-    - Документация на английском языке
-
-- [ ] (P1) #26: DTO Schema аннотации - добавить @Schema на уровне класса и полей для всех DTO
-  - Зависимости: #7
+- [ ] (P1) #55: DTO Schema аннотации - добавить @Schema на уровне класса и полей для всех DTO
+  - Зависимости: #16, #27, #33, #39, #45
   - Acceptance criteria:
     - Все DTO имеют @Schema на уровне класса (name, description, example)
     - Все поля DTO имеют @Schema (description, example, requiredMode, format, minLength, maxLength)
     - Примеры используют реалистичные UUID и данные
 
-- [ ] (P2) #27: Обновление OpenApiConfig - настроить Info, Servers для follower-api
-  - Зависимости: #14
+- [ ] (P2) #56: Обновление OpenApiConfig - настроить Info, Servers для follower-api
+  - Зависимости: #7
   - Acceptance criteria:
     - OpenApiConfig содержит правильный title "Twitter Follower API"
     - OpenApiConfig содержит подробное description
     - OpenApiConfig содержит server на localhost:8084
     - Version установлена в "1.0.0"
 
-### Обновление README
-
-- [ ] (P2) #28: Обновление README.md - создать полную документацию на русском языке согласно STANDART_README.md
-  - Зависимости: #13, #12, #11
+- [ ] (P2) #57: Обновление README.md - создать полную документацию на русском языке согласно STANDART_README.md
+  - Зависимости: #18, #23, #29, #35, #41, #47
   - Acceptance criteria:
     - Создан README.md на русском языке
     - Включены все обязательные секции (Введение, Основные возможности, Архитектура, REST API, OpenAPI/Swagger, Бизнес-логика, Слой валидации, Работа с базой данных, Интеграция, Примеры использования, Конфигурация, Запуск и развертывание, Безопасность, Тестирование)
@@ -288,24 +542,20 @@
     - Описана структура таблицы follows
     - Включены примеры curl команд
 
-### Postman коллекции
-
-- [ ] (P2) #29: Обновление Postman коллекции - создать коллекцию с всеми запросами, примерами ответов, переменными окружения
-  - Зависимости: #13
+- [ ] (P2) #58: Обновление Postman коллекции - создать коллекцию с всеми запросами, примерами ответов, переменными окружения
+  - Зависимости: #18, #23, #29, #35, #41, #47
   - Acceptance criteria:
     - Создана Postman коллекция twitter-follower-api.postman_collection.json
     - Создано окружение twitter-follower-api.postman_environment.json
     - Добавлены все запросы (lowercase с пробелами)
     - Используется переменная {{baseUrl}}
     - Используются переменные окружения для path параметров
-    - Добавлены примеры ответов для всех сценариев (200, 201, 400, 404, 409)
+    - Добавлены примеры ответов для всех сценариев (200, 201, 204, 400, 404, 409)
     - Ошибки в формате RFC 7807 Problem Details
     - Правильные Content-Type (application/json, application/problem+json)
 
-### Проверка соответствия стандартам
-
-- [ ] (P1) #30: Проверка соответствия стандартам - проверить соответствие всем стандартам проекта
-  - Зависимости: #19, #20, #21, #22, #23, #24, #25, #26, #28, #29, #17, #18
+- [ ] (P1) #59: Проверка соответствия стандартам - проверить соответствие всем стандартам проекта
+  - Зависимости: #54, #19, #20, #24, #25, #30, #31, #36, #37, #42, #43, #48, #49, #51, #52, #53, #55, #56, #57, #58, #9, #10
   - Acceptance criteria:
     - Проверено соответствие STANDART_CODE.md
     - Проверено соответствие STANDART_PROJECT.md
@@ -348,4 +598,3 @@
 - Сервис успешно разворачивается через `docker-compose up`
 - Healthcheck работает корректно
 - Интеграция с users-api через Docker network функционирует
-
