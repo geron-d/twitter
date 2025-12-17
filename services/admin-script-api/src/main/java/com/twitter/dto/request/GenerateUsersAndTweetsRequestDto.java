@@ -88,3 +88,4 @@ public record GenerateUsersAndTweetsRequestDto(
     Integer lUsersForDeletion
 ) {
 }
+

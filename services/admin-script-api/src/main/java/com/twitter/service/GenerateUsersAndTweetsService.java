@@ -31,3 +31,4 @@ public interface GenerateUsersAndTweetsService {
      */
     GenerateUsersAndTweetsResponseDto executeScript(GenerateUsersAndTweetsRequestDto requestDto);
 }
+
