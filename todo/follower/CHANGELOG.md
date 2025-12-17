@@ -1,5 +1,9 @@
 # Changelog - Follower API Service
 
+## 2025-12-17 18:39 — step 4 done — Создание build.gradle для follower-api — автор: assistant
+
+Создан build.gradle для follower-api в services/follower-api/build.gradle. Настроены все зависимости: shared модули (common-lib, database), Spring Boot starters (web, data-jpa, validation, actuator), Spring Cloud OpenFeign для интеграции с users-api, OpenAPI/Swagger, Lombok и MapStruct с правильными annotation processors (включая lombok-mapstruct-binding), PostgreSQL driver, тестовые зависимости (включая WireMock для мокирования users-api). Настроен compileJava с параметрами для MapStruct (defaultComponentModel=spring, unmappedTargetPolicy=IGNORE). Настроен springBoot с mainClass.
+
 ## 2025-12-17 18:37 — step 3 done — Обновление settings.gradle — автор: assistant
 
 Добавлена строка `include 'services:follower-api'` в settings.gradle. Модуль follower-api теперь включен в структуру проекта Gradle и будет доступен для сборки.

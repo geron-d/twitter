@@ -33,7 +33,7 @@
     - Добавлена строка `include 'services:follower-api'` в settings.gradle
   - Выполнено: Добавлена строка `include 'services:follower-api'` в settings.gradle после других сервисов (users-api, tweet-api, admin-script-api). Модуль follower-api теперь включен в структуру проекта Gradle.
 
-- [ ] (P1) #4: Создание build.gradle для follower-api - настроить зависимости и аннотационные процессоры
+- [x] (P1) [2025-12-17 18:39] #4: Создание build.gradle для follower-api - настроить зависимости и аннотационные процессоры
   - Зависимости: #1
   - Acceptance criteria:
     - Создан build.gradle с зависимостями на shared:common-lib и shared:database
@@ -41,6 +41,7 @@
     - Настроены OpenAPI/Swagger зависимости
     - Настроены Lombok и MapStruct с правильными annotation processors
     - Настроен compileJava с параметрами для MapStruct
+  - Выполнено: Создан build.gradle для follower-api в services/follower-api/build.gradle. Настроены все зависимости: shared модули (common-lib, database), Spring Boot starters (web, data-jpa, validation, actuator), Spring Cloud OpenFeign для интеграции с users-api, OpenAPI/Swagger, Lombok и MapStruct с правильными annotation processors (включая lombok-mapstruct-binding), PostgreSQL driver, тестовые зависимости (включая WireMock для мокирования users-api). Настроен compileJava с параметрами для MapStruct (defaultComponentModel=spring, unmappedTargetPolicy=IGNORE). Настроен springBoot с mainClass.
 
 - [ ] (P1) #5: Создание application.yml - настроить порт 8084, подключение к БД, Feign клиент
   - Зависимости: #1, #4
