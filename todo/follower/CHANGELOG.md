@@ -1,5 +1,9 @@
 # Changelog - Follower API Service
 
+## 2025-12-17 18:37 — step 3 done — Обновление settings.gradle — автор: assistant
+
+Добавлена строка `include 'services:follower-api'` в settings.gradle. Модуль follower-api теперь включен в структуру проекта Gradle и будет доступен для сборки.
+
 ## 2025-12-17 18:34 — step 2 done — Проектирование Docker конфигурации — автор: assistant
 
 Создан документ DOCKER_DESIGN.md с полным проектированием Docker конфигурации для follower-api:

@@ -27,10 +27,11 @@
 
 ### Инфраструктура
 
-- [ ] (P1) #3: Обновление settings.gradle - добавить include для follower-api
+- [x] (P1) [2025-12-17 18:37] #3: Обновление settings.gradle - добавить include для follower-api
   - Зависимости: нет
   - Acceptance criteria:
     - Добавлена строка `include 'services:follower-api'` в settings.gradle
+  - Выполнено: Добавлена строка `include 'services:follower-api'` в settings.gradle после других сервисов (users-api, tweet-api, admin-script-api). Модуль follower-api теперь включен в структуру проекта Gradle.
 
 - [ ] (P1) #4: Создание build.gradle для follower-api - настроить зависимости и аннотационные процессоры
   - Зависимости: #1
