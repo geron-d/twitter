@@ -17,12 +17,13 @@
     - Определена структура таблицы follows в БД
   - Выполнено: Создан документ ANALYSIS_DESIGN.md с полным проектированием API, включая все эндпоинты, DTO структуры, Entity структуру, бизнес-правила и схему БД. Документ содержит детальное описание 6 REST эндпоинтов, 7 DTO (Request, Response, Filter), структуру Entity Follow, 3 бизнес-правила и полную схему таблицы follows с индексами.
 
-- [ ] (P1) #2: Проектирование Docker конфигурации - определить структуру Dockerfile, application-docker.yml, конфигурацию в docker-compose.yml
+- [x] (P1) [2025-12-17 18:34] #2: Проектирование Docker конфигурации - определить структуру Dockerfile, application-docker.yml, конфигурацию в docker-compose.yml
   - Зависимости: #1
   - Acceptance criteria:
     - Определена структура Dockerfile (multi-stage build)
     - Определена конфигурация для Docker окружения (URL сервисов через имена)
     - Определена конфигурация в docker-compose.yml (зависимости, environment variables, healthcheck)
+  - Выполнено: Создан документ DOCKER_DESIGN.md с полным проектированием Docker конфигурации для follower-api. Документ содержит детальное описание структуры Dockerfile (multi-stage build с gradle:jdk24 и eclipse-temurin:24-jre, порт 8084, healthcheck, non-root user), структуры application-docker.yml (URL users-api через имя сервиса Docker, профиль docker), и полной конфигурации в docker-compose.yml (зависимости от postgres и users-api, environment variables, healthcheck, volumes, network). Все проектирование соответствует паттернам существующих сервисов проекта.
 
 ### Инфраструктура
 
