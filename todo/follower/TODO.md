@@ -43,7 +43,7 @@
     - Настроен compileJava с параметрами для MapStruct
   - Выполнено: Создан build.gradle для follower-api в services/follower-api/build.gradle. Настроены все зависимости: shared модули (common-lib, database), Spring Boot starters (web, data-jpa, validation, actuator), Spring Cloud OpenFeign для интеграции с users-api, OpenAPI/Swagger, Lombok и MapStruct с правильными annotation processors (включая lombok-mapstruct-binding), PostgreSQL driver, тестовые зависимости (включая WireMock для мокирования users-api). Настроен compileJava с параметрами для MapStruct (defaultComponentModel=spring, unmappedTargetPolicy=IGNORE). Настроен springBoot с mainClass.
 
-- [ ] (P1) #5: Создание application.yml - настроить порт 8084, подключение к БД, Feign клиент
+- [x] (P1) [2025-12-17 19:15] #5: Создание application.yml - настроить порт 8084, подключение к БД, Feign клиент
   - Зависимости: #1, #4
   - Acceptance criteria:
     - Создан application.yml с server.port=8084
@@ -52,14 +52,16 @@
     - Настроены SpringDoc OpenAPI параметры
     - Настроены management endpoints
     - Настроено логирование
+  - Выполнено: Создан application.yml для follower-api в services/follower-api/src/main/resources/application.yml. Настроены все параметры: server.port=8084, spring.application.name=follower-api, подключение к PostgreSQL (jdbc:postgresql://localhost:5432/twitter), Feign клиент для users-api (http://localhost:8081), SpringDoc OpenAPI параметры (path, swagger-ui настройки), management endpoints (health, info, metrics, tracing), логирование (уровни DEBUG для com.twitter, паттерны для console и file). Конфигурация соответствует структуре других сервисов (tweet-api, admin-script-api) и включает пагинацию (default-page-size=10, max-page-size=100).
 
-- [ ] (P1) #6: Создание SQL скрипта - создать sql/follows.sql для таблицы follows
+- [x] (P1) [2025-12-17 19:20] #6: Создание SQL скрипта - создать sql/follows.sql для таблицы follows
   - Зависимости: #1
   - Acceptance criteria:
     - Создан SQL скрипт с CREATE TABLE follows
     - Определены все поля (id, follower_id, following_id, created_at)
     - Добавлено UNIQUE ограничение на (follower_id, following_id)
     - Добавлено CHECK ограничение (follower_id != following_id)
+  - Выполнено: Создан SQL скрипт sql/follows.sql для таблицы follows. Определены все поля: id (UUID PRIMARY KEY), follower_id (UUID NOT NULL), following_id (UUID NOT NULL), created_at (TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP). Добавлены FOREIGN KEY ограничения на users(id) для обоих полей (follows_follower_fk, follows_following_fk). Добавлено UNIQUE ограничение на (follower_id, following_id) (follows_unique_follower_following). Добавлено CHECK ограничение (follower_id != following_id) (follows_check_no_self_follow). Созданы индексы для оптимизации запросов: idx_follows_follower_id, idx_follows_following_id, idx_follows_created_at. Скрипт соответствует структуре из ANALYSIS_DESIGN.md и стилю существующих SQL скриптов проекта.
 
 - [ ] (P1) #7: Реализация Config - создать OpenApiConfig и FeignConfig
   - Зависимости: #1, #4
