@@ -1,5 +1,22 @@
 # Changelog - Follower API Service
 
+## 2025-12-17 19:30 — step 7 done — Реализация Config — автор: assistant
+
+Созданы конфигурационные классы для follower-api:
+- OpenApiConfig в пакете com.twitter.config:
+  - @Configuration для Spring конфигурации
+  - @Bean метод followerApiOpenAPI() для создания OpenAPI спецификации
+  - Настройка Info с title "Twitter Follower API", подробным description (возможности API, аутентификация, rate limiting, обработка ошибок), version "1.0.0"
+  - Настройка Server с url "http://localhost:8084" и description "Local development server"
+  - Полная JavaDoc документация (@author geron, @version 1.0)
+- FeignConfig в пакете com.twitter.config:
+  - @Configuration для Spring конфигурации
+  - @EnableFeignClients(basePackages = "com.twitter.client") для активации Feign клиентов
+  - Сканирование пакета com.twitter.client для поиска Feign Client интерфейсов
+  - Полная JavaDoc документация (@author geron, @version 1.0)
+
+Все классы соответствуют стандартам проекта (STANDART_SWAGGER.md, STANDART_CODE.md) и структуре других сервисов (tweet-api, admin-script-api). Проверка линтера: ошибок не обнаружено.
+
 ## 2025-12-17 19:20 — step 6 done — Создание SQL скрипта — автор: assistant
 
 Создан SQL скрипт sql/follows.sql для таблицы follows. Скрипт включает:

@@ -63,13 +63,14 @@
     - Добавлено CHECK ограничение (follower_id != following_id)
   - Выполнено: Создан SQL скрипт sql/follows.sql для таблицы follows. Определены все поля: id (UUID PRIMARY KEY), follower_id (UUID NOT NULL), following_id (UUID NOT NULL), created_at (TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP). Добавлены FOREIGN KEY ограничения на users(id) для обоих полей (follows_follower_fk, follows_following_fk). Добавлено UNIQUE ограничение на (follower_id, following_id) (follows_unique_follower_following). Добавлено CHECK ограничение (follower_id != following_id) (follows_check_no_self_follow). Созданы индексы для оптимизации запросов: idx_follows_follower_id, idx_follows_following_id, idx_follows_created_at. Скрипт соответствует структуре из ANALYSIS_DESIGN.md и стилю существующих SQL скриптов проекта.
 
-- [ ] (P1) #7: Реализация Config - создать OpenApiConfig и FeignConfig
+- [x] (P1) [2025-12-17 19:30] #7: Реализация Config - создать OpenApiConfig и FeignConfig
   - Зависимости: #1, #4
   - Acceptance criteria:
     - Создан OpenApiConfig с @Configuration
     - Создан Bean followerApiOpenAPI() с настройкой Info, Servers
     - Создан FeignConfig с @Configuration и @EnableFeignClients
     - Настроен basePackages для Feign клиентов
+  - Выполнено: Создан OpenApiConfig в пакете com.twitter.config с @Configuration и @Bean методом followerApiOpenAPI(). Настроена OpenAPI спецификация с title "Twitter Follower API", подробным description (возможности API, аутентификация, rate limiting, обработка ошибок), version "1.0.0", server на localhost:8084. Создан FeignConfig в пакете com.twitter.config с @Configuration и @EnableFeignClients(basePackages = "com.twitter.client") для активации Feign клиентов в пакете com.twitter.client. Все классы содержат полную JavaDoc документацию (@author geron, @version 1.0). Конфигурация соответствует структуре других сервисов (tweet-api, admin-script-api) и стандартам проекта (STANDART_SWAGGER.md, STANDART_CODE.md). Проверка линтера: ошибок не обнаружено.
 
 - [ ] (P1) #8: Создание application-docker.yml - настроить конфигурацию для Docker (URL users-api через имя сервиса)
   - Зависимости: #1, #5
