@@ -145,7 +145,7 @@
     - Mapper настроен как Spring компонент
   - Выполнено: Создан FollowMapper в пакете com.twitter.mapper с @Mapper аннотацией (настроен как Spring компонент через defaultComponentModel=spring в build.gradle). Добавлены методы маппинга: toFollow(FollowRequestDto) с игнорированием id и createdAt (service-managed поля), toFollowResponseDto(Follow) для преобразования Entity в Response DTO, toFollowerResponseDto(Follow, String login) для списка подписчиков (login получается через users-api), toFollowingResponseDto(Follow, String login) для списка подписок (login получается через users-api). Все методы используют @Mapping для настройки маппинга полей. Mapper имеет полную JavaDoc документацию с @author geron, @version 1.0. Соответствует стандартам проекта (STANDART_CODE.md, STANDART_JAVADOC.md) и структуре других Mapper (UserMapper, TweetMapper). Проверка линтера: ошибок не обнаружено. Примечание: DTO классы будут созданы в последующих шагах (#16, #27, #33).
 
-- [ ] (P1) #15: Реализация Validator - создать FollowValidator interface и implementation с проверкой бизнес-правил
+- [x] (P1) [2025-12-17 20:30] #15: Реализация Validator - создать FollowValidator interface и implementation с проверкой бизнес-правил
   - Зависимости: #12, #13
   - Acceptance criteria:
     - Создан интерфейс FollowValidator
@@ -155,10 +155,11 @@
     - Реализована валидация: оба пользователя должны существовать (через UserGateway)
     - Используются исключения из common-lib (BusinessRuleValidationException)
     - Добавлено логирование
+  - Выполнено: Создан интерфейс FollowValidator в пакете com.twitter.validation с методом validateForFollow(FollowRequestDto). Создана реализация FollowValidatorImpl с @Component, @RequiredArgsConstructor, @Slf4j. Реализованы все три валидации: validateNoSelfFollow (проверка, что followerId != followingId, выбрасывает BusinessRuleValidationException с правилом "SELF_FOLLOW_NOT_ALLOWED"), validateUsersExist (проверка существования обоих пользователей через UserGateway, выбрасывает BusinessRuleValidationException с правилами "FOLLOWER_NOT_EXISTS" и "FOLLOWING_NOT_EXISTS"), validateUniqueness (проверка через FollowRepository.existsByFollowerIdAndFollowingId, выбрасывает UniquenessValidationException). Все методы имеют логирование (warn для ошибок). Оба класса содержат полную JavaDoc документацию с @author geron, @version 1.0. Соответствует стандартам проекта (STANDART_CODE.md, STANDART_JAVADOC.md) и структуре других Validator (UserValidator, TweetValidator). Проверка линтера: ошибок не обнаружено. Примечание: FollowRequestDto будет создан в шаге #16.
 
 ### Эндпоинт: POST /api/v1/follows - Подписка на пользователя
 
-- [ ] (P1) #16: POST /api/v1/follows - Реализация DTO - создать FollowRequestDto и FollowResponseDto
+- [x] (P1) [2025-12-17 20:35] #16: POST /api/v1/follows - Реализация DTO - создать FollowRequestDto и FollowResponseDto
   - Зависимости: #1
   - Acceptance criteria:
     - Создан FollowRequestDto (followerId, followingId) с валидацией (@NotNull, @Valid UUID)
@@ -166,8 +167,9 @@
     - Все DTO используют Records (Java 24)
     - Все DTO имеют валидационные аннотации
     - Все DTO имеют @Schema аннотации для Swagger
+  - Выполнено: Создан FollowRequestDto в пакете com.twitter.dto.request с полями followerId и followingId (оба UUID, @NotNull). Добавлены @Schema аннотации на уровне класса (name="FollowRequest", description, example JSON) и на уровне полей (description, example UUID, format="uuid", requiredMode=REQUIRED). Использован @Builder для удобства создания. Создан FollowResponseDto в пакете com.twitter.dto.response с полями id, followerId, followingId, createdAt (LocalDateTime). Добавлены @Schema аннотации на уровне класса (name="FollowResponse", description, example JSON) и на уровне полей (description, example, format). Использован @JsonFormat для createdAt (pattern="yyyy-MM-dd'T'HH:mm:ss'Z'", timezone="UTC"). Использован @Builder. Оба DTO используют Records (Java 24), имеют полную JavaDoc документацию с @param для всех компонентов, @author geron, @version 1.0. Соответствуют стандартам проекта (STANDART_CODE.md, STANDART_SWAGGER.md, STANDART_JAVADOC.md) и структуре других DTO (CreateTweetRequestDto, TweetResponseDto). Проверка линтера: ошибок не обнаружено.
 
-- [ ] (P1) #17: POST /api/v1/follows - Реализация Service метода - создать метод follow в FollowService
+- [x] (P1) [2025-12-17 20:40] #17: POST /api/v1/follows - Реализация Service метода - создать метод follow в FollowService
   - Зависимости: #11, #13, #14, #15, #16
   - Acceptance criteria:
     - Добавлен метод follow(FollowRequestDto) в интерфейс FollowService
@@ -176,8 +178,9 @@
     - Метод сохраняет подписку через Repository
     - Метод использует Mapper для преобразования
     - Добавлено логирование
+  - Выполнено: Создан интерфейс FollowService в пакете com.twitter.service с методом follow(FollowRequestDto), возвращающим FollowResponseDto. Метод имеет полную JavaDoc документацию с описанием операций, @param, @return, @throws. Создана реализация FollowServiceImpl с @Service, @RequiredArgsConstructor, @Slf4j. Зависимости: FollowRepository, FollowMapper, FollowValidator. Метод follow реализован с @Transactional для обеспечения транзакционности. Метод использует валидатор (followValidator.validateForFollow) перед операцией, использует маппер для преобразования DTO в Entity (followMapper.toFollow), сохраняет через Repository (followRepository.saveAndFlush), использует маппер для преобразования Entity в Response DTO (followMapper.toFollowResponseDto). Добавлено логирование: debug перед операцией, info после успешного создания. Метод имеет JavaDoc с @see для ссылки на интерфейс. Соответствует стандартам проекта (STANDART_CODE.md, STANDART_JAVADOC.md) и структуре других Service (TweetService, UserService). Проверка линтера: ошибок не обнаружено.
 
-- [ ] (P1) #18: POST /api/v1/follows - Реализация Controller метода - создать метод createFollow в FollowController
+- [x] (P1) [2025-12-17 20:45] #18: POST /api/v1/follows - Реализация Controller метода - создать метод createFollow в FollowController
   - Зависимости: #17
   - Acceptance criteria:
     - Добавлен метод createFollow в интерфейс FollowApi с OpenAPI аннотациями
@@ -185,6 +188,7 @@
     - Метод использует @Valid для валидации
     - Метод возвращает HttpStatus.CREATED (201)
     - Метод возвращает FollowResponseDto
+  - Выполнено: Создан интерфейс FollowApi в пакете com.twitter.controller с @Tag(name="Follow Management", description="API for managing follow relationships in the Twitter system"). Метод createFollow имеет @Operation с summary и description, @ApiResponses со всеми возможными статус-кодами (201 Created, 400 Bad Request для валидации, 409 Conflict для бизнес-правил и уникальности), @ExampleObject для успешных и ошибочных ответов в формате RFC 7807 Problem Details. @Parameter для request с description. Создан FollowController в пакете com.twitter.controller с @RestController, @RequestMapping("/api/v1/follows"), @RequiredArgsConstructor, @Slf4j. Метод createFollow реализован с @LoggableRequest, @PostMapping, @RequestBody @Valid FollowRequestDto, возвращает ResponseEntity.status(HttpStatus.CREATED).body(createdFollow). Метод имеет JavaDoc с @see для ссылки на интерфейс. Соответствует стандартам проекта (STANDART_CODE.md, STANDART_SWAGGER.md, STANDART_JAVADOC.md) и структуре других Controller (TweetController, UserController). Проверка линтера: ошибок не обнаружено.
 
 - [ ] (P1) #19: POST /api/v1/follows - Unit тесты для Service метода - протестировать метод follow
   - Зависимости: #17
