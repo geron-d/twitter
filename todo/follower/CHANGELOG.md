@@ -1,5 +1,16 @@
 # Changelog - Follower API Service
 
+## 2025-12-17 20:10 — step 11 done — Реализация Entity Follow — автор: assistant
+
+Создана Entity Follow в пакете com.twitter.entity для представления подписок пользователей:
+- Поля: id (UUID, Primary Key), followerId (UUID, NOT NULL), followingId (UUID, NOT NULL), createdAt (LocalDateTime, NOT NULL)
+- JPA аннотации: @Entity, @Table с uniqueConstraints для (follower_id, following_id), @Id с @GeneratedValue(strategy = GenerationType.UUID), @Column для всех полей
+- Lombok аннотации: @Data, @Accessors(chain = true), @NoArgsConstructor, @AllArgsConstructor
+- @CreationTimestamp для автоматической установки createdAt при создании
+- Полная JavaDoc документация с @author geron, @version 1.0, включая описание всех полей и бизнес-правил
+
+Entity соответствует стандартам проекта (STANDART_CODE.md, STANDART_JAVADOC.md) и структуре других Entity (User, Tweet). Уникальное ограничение на уровне БД предотвращает двойные подписки, а CHECK ограничение (на уровне БД) предотвращает подписку на себя. Проверка линтера: ошибок не обнаружено.
+
 ## 2025-12-17 20:00 — step 10 done — Обновление docker-compose.yml — автор: assistant
 
 Добавлен сервис follower-api в docker-compose.yml после admin-script-api. Настроена полная конфигурация:

@@ -108,7 +108,7 @@
 
 ### Общие слои (используются всеми эндпоинтами)
 
-- [ ] (P1) #11: Реализация Entity Follow - создать JPA сущность с уникальным ограничением на (follower_id, following_id)
+- [x] (P1) [2025-12-17 20:10] #11: Реализация Entity Follow - создать JPA сущность с уникальным ограничением на (follower_id, following_id)
   - Зависимости: #1, #6
   - Acceptance criteria:
     - Создана Entity Follow с полями id, followerId, followingId, createdAt
@@ -116,6 +116,7 @@
     - Добавлено уникальное ограничение через @Table(uniqueConstraints)
     - Использован @CreationTimestamp для createdAt
     - Добавлена полная JavaDoc документация
+  - Выполнено: Создана Entity Follow в пакете com.twitter.entity. Использованы все необходимые JPA аннотации (@Entity, @Table с uniqueConstraints для (follower_id, following_id), @Id с @GeneratedValue(strategy = GenerationType.UUID), @Column для всех полей). Добавлен @CreationTimestamp для createdAt. Использованы Lombok аннотации (@Data, @Accessors(chain = true), @NoArgsConstructor, @AllArgsConstructor). Добавлена полная JavaDoc документация с @author geron, @version 1.0, включая описание всех полей и бизнес-правил. Entity соответствует стандартам проекта (STANDART_CODE.md, STANDART_JAVADOC.md) и структуре других Entity (User, Tweet). Проверка линтера: ошибок не обнаружено.
 
 - [ ] (P1) #12: Реализация Gateway для users-api - создать UsersApiClient (Feign) и UserGateway
   - Зависимости: #1, #4
