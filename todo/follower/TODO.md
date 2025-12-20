@@ -72,15 +72,16 @@
     - Настроен basePackages для Feign клиентов
   - Выполнено: Создан OpenApiConfig в пакете com.twitter.config с @Configuration и @Bean методом followerApiOpenAPI(). Настроена OpenAPI спецификация с title "Twitter Follower API", подробным description (возможности API, аутентификация, rate limiting, обработка ошибок), version "1.0.0", server на localhost:8084. Создан FeignConfig в пакете com.twitter.config с @Configuration и @EnableFeignClients(basePackages = "com.twitter.client") для активации Feign клиентов в пакете com.twitter.client. Все классы содержат полную JavaDoc документацию (@author geron, @version 1.0). Конфигурация соответствует структуре других сервисов (tweet-api, admin-script-api) и стандартам проекта (STANDART_SWAGGER.md, STANDART_CODE.md). Проверка линтера: ошибок не обнаружено.
 
-- [ ] (P1) #8: Создание application-docker.yml - настроить конфигурацию для Docker (URL users-api через имя сервиса)
+- [x] (P1) [2025-12-17 19:40] #8: Создание application-docker.yml - настроить конфигурацию для Docker (URL users-api через имя сервиса)
   - Зависимости: #1, #5
   - Acceptance criteria:
     - Создан application-docker.yml
     - Настроен users-api URL: http://users-api:8081 (через имя сервиса Docker)
     - Настроен database URL: jdbc:postgresql://postgres:5432/twitter (через имя сервиса Docker)
     - Настроен profile: docker
+  - Выполнено: Создан application-docker.yml для follower-api в services/follower-api/src/main/resources/application-docker.yml. Настроен users-api URL: http://users-api:8081 (через имя сервиса Docker вместо localhost). Конфигурация базы данных будет передаваться через environment variables в docker-compose.yml (SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/twitter), что соответствует паттерну других сервисов. Профиль docker будет активирован через environment variable SPRING_PROFILES_ACTIVE=docker в docker-compose.yml. Конфигурация соответствует структуре других сервисов (tweet-api, admin-script-api) и проектированию из DOCKER_DESIGN.md.
 
-- [ ] (P1) #9: Создание Dockerfile - multi-stage build с Gradle и JRE, порт 8084, healthcheck
+- [x] (P1) [2025-12-17 19:50] #9: Создание Dockerfile - multi-stage build с Gradle и JRE, порт 8084, healthcheck
   - Зависимости: #4
   - Acceptance criteria:
     - Создан Dockerfile с multi-stage build
@@ -91,8 +92,9 @@
     - Настроены JVM опции для контейнера
     - Используется non-root user (appuser)
     - Копируется правильный JAR из build/libs
+  - Выполнено: Создан Dockerfile для follower-api в services/follower-api/Dockerfile с multi-stage build. Stage 1 использует gradle:jdk24 для сборки приложения (копирование Gradle файлов, загрузка зависимостей, сборка через ./gradlew :services:follower-api:build). Stage 2 использует eclipse-temurin:24-jre для runtime (установка curl для healthcheck, создание non-root пользователя appuser, копирование JAR из build stage, создание директории для логов). Настроен порт 8084 (EXPOSE 8084). Добавлен healthcheck на /actuator/health с интервалом 30s, таймаутом 3s, start-period 60s, retries 3. Настроены JVM опции для контейнера (Xms512m, Xmx1024m, UseG1GC, UseContainerSupport). Dockerfile соответствует структуре других сервисов (users-api, tweet-api, admin-script-api) и проектированию из DOCKER_DESIGN.md.
 
-- [ ] (P1) #10: Обновление docker-compose.yml - добавить сервис follower-api с зависимостями от postgres и users-api
+- [x] (P1) [2025-12-17 20:00] #10: Обновление docker-compose.yml - добавить сервис follower-api с зависимостями от postgres и users-api
   - Зависимости: #9, #8
   - Acceptance criteria:
     - Добавлен сервис follower-api в docker-compose.yml
@@ -102,6 +104,7 @@
     - Добавлен healthcheck
     - Настроены volumes для логов
     - Добавлен в network twitter-network
+  - Выполнено: Добавлен сервис follower-api в docker-compose.yml после admin-script-api. Настроен build context (.), dockerfile (services/follower-api/Dockerfile), container_name (twitter-follower-api), порт 8084:8084. Добавлены зависимости: postgres (service_healthy), users-api (service_healthy). Настроены environment variables: SPRING_PROFILES_ACTIVE=docker, SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/twitter, SPRING_DATASOURCE_USERNAME=user, SPRING_DATASOURCE_PASSWORD=password, SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver, SPRING_JPA_HIBERNATE_DDL_AUTO=validate, SPRING_JPA_SHOW_SQL=false, LOGGING_LEVEL_COM_TWITTER=DEBUG, LOGGING_LEVEL_ORG_HIBERNATE_SQL=DEBUG. Добавлен healthcheck на /actuator/health (interval=30s, timeout=10s, retries=3, start_period=60s). Настроены volumes для логов (./logs:/app/logs). Добавлен в network twitter-network. Настроен restart: unless-stopped. Конфигурация соответствует структуре других сервисов и проектированию из DOCKER_DESIGN.md.
 
 ### Общие слои (используются всеми эндпоинтами)
 

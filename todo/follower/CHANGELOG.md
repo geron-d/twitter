@@ -1,5 +1,58 @@
 # Changelog - Follower API Service
 
+## 2025-12-17 20:00 — step 10 done — Обновление docker-compose.yml — автор: assistant
+
+Добавлен сервис follower-api в docker-compose.yml после admin-script-api. Настроена полная конфигурация:
+- Build: context (.), dockerfile (services/follower-api/Dockerfile)
+- Container name: twitter-follower-api
+- Порт: 8084:8084
+- Зависимости: postgres (service_healthy), users-api (service_healthy)
+- Environment variables:
+  - SPRING_PROFILES_ACTIVE=docker
+  - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/twitter
+  - SPRING_DATASOURCE_USERNAME=user
+  - SPRING_DATASOURCE_PASSWORD=password
+  - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
+  - SPRING_JPA_HIBERNATE_DDL_AUTO=validate
+  - SPRING_JPA_SHOW_SQL=false
+  - LOGGING_LEVEL_COM_TWITTER=DEBUG
+  - LOGGING_LEVEL_ORG_HIBERNATE_SQL=DEBUG
+- Healthcheck: /actuator/health (interval=30s, timeout=10s, retries=3, start_period=60s)
+- Volumes: ./logs:/app/logs
+- Network: twitter-network
+- Restart: unless-stopped
+
+Конфигурация соответствует структуре других сервисов (users-api, tweet-api, admin-script-api) и проектированию из DOCKER_DESIGN.md. Сервис готов для развертывания через docker-compose up.
+
+## 2025-12-17 19:50 — step 9 done — Создание Dockerfile — автор: assistant
+
+Создан Dockerfile для follower-api в services/follower-api/Dockerfile с multi-stage build:
+- Stage 1 (build): использует gradle:jdk24 для сборки приложения
+  - Копирование Gradle файлов для кэширования
+  - Загрузка зависимостей (./gradlew dependencies)
+  - Сборка приложения (./gradlew :services:follower-api:build -x test --no-daemon --parallel --build-cache)
+- Stage 2 (runtime): использует eclipse-temurin:24-jre для runtime
+  - Установка curl для healthcheck
+  - Создание non-root пользователя appuser для безопасности
+  - Копирование JAR файла из build stage
+  - Создание директории для логов
+  - Переключение на non-root пользователя
+  - Настройка порта 8084 (EXPOSE 8084)
+  - Настройка JVM опций (Xms512m, Xmx1024m, UseG1GC, UseContainerSupport)
+  - Настройка healthcheck на /actuator/health (interval=30s, timeout=3s, start-period=60s, retries=3)
+  - Запуск приложения через ENTRYPOINT
+
+Dockerfile соответствует структуре других сервисов (users-api, tweet-api, admin-script-api) и проектированию из DOCKER_DESIGN.md. Готов для использования в docker-compose.yml.
+
+## 2025-12-17 19:40 — step 8 done — Создание application-docker.yml — автор: assistant
+
+Создан application-docker.yml для follower-api в services/follower-api/src/main/resources/application-docker.yml. Настроена конфигурация для Docker окружения:
+- users-api URL: http://users-api:8081 (через имя сервиса Docker вместо localhost)
+- Конфигурация базы данных будет передаваться через environment variables в docker-compose.yml (SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/twitter), что соответствует паттерну других сервисов
+- Профиль docker будет активирован через environment variable SPRING_PROFILES_ACTIVE=docker в docker-compose.yml
+
+Конфигурация соответствует структуре других сервисов (tweet-api, admin-script-api) и проектированию из DOCKER_DESIGN.md. Файл готов для использования в Docker окружении.
+
 ## 2025-12-17 19:30 — step 7 done — Реализация Config — автор: assistant
 
 Созданы конфигурационные классы для follower-api:
