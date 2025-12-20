@@ -1,5 +1,54 @@
 # Changelog - Follower API Service
 
+## 2025-12-17 20:25 — step 14 done — Реализация Mapper (MapStruct) — автор: assistant
+
+Создан FollowMapper в пакете com.twitter.mapper для преобразования между Follow entities и DTO:
+- @Mapper аннотация (настроен как Spring компонент через defaultComponentModel=spring в build.gradle)
+- Методы маппинга:
+  - toFollow(FollowRequestDto) - преобразование DTO в Entity с игнорированием service-managed полей (id, createdAt)
+  - toFollowResponseDto(Follow) - преобразование Entity в Response DTO для ответов API
+  - toFollowerResponseDto(Follow, String login) - преобразование для списка подписчиков (login получается через users-api)
+  - toFollowingResponseDto(Follow, String login) - преобразование для списка подписок (login получается через users-api)
+- Все методы используют @Mapping для настройки маппинга полей
+- Игнорирование service-managed полей (id, createdAt) при создании Entity из DTO
+- Полная JavaDoc документация с @author geron, @version 1.0
+
+Mapper соответствует стандартам проекта (STANDART_CODE.md, STANDART_JAVADOC.md) и структуре других Mapper (UserMapper, TweetMapper). MapStruct автоматически сгенерирует реализацию при компиляции. Примечание: DTO классы (FollowRequestDto, FollowResponseDto, FollowerResponseDto, FollowingResponseDto) будут созданы в последующих шагах (#16, #27, #33). Проверка линтера: ошибок не обнаружено.
+
+## 2025-12-17 20:20 — step 13 done — Реализация Repository — автор: assistant
+
+Создан FollowRepository в пакете com.twitter.repository для доступа к данным о подписках:
+- Расширяет JpaRepository<Follow, UUID> для стандартных CRUD операций
+- Derived Query Methods (без JavaDoc согласно стандартам):
+  - existsByFollowerIdAndFollowingId(UUID, UUID) - проверка существования подписки
+  - findByFollowerId(UUID, Pageable) - поиск подписок пользователя с пагинацией
+  - findByFollowingId(UUID, Pageable) - поиск подписчиков пользователя с пагинацией
+  - countByFollowerId(UUID) - подсчет количества подписок пользователя
+  - countByFollowingId(UUID) - подсчет количества подписчиков пользователя
+  - findByFollowerIdAndFollowingId(UUID, UUID) - поиск конкретной подписки (возвращает Optional<Follow>)
+- JavaDoc документация только на уровне класса с @author geron, @version 1.0
+- Все методы являются Derived Query Methods и self-documenting через имена методов
+
+Repository соответствует стандартам проекта (STANDART_CODE.md, STANDART_JAVADOC.md) и структуре других Repository (UserRepository, TweetRepository). Методы обеспечивают все необходимые операции для работы эндпоинтов (создание подписки, получение списков с пагинацией, проверка статуса, статистика). Проверка линтера: ошибок не обнаружено.
+
+## 2025-12-17 20:15 — step 12 done — Реализация Gateway для users-api — автор: assistant
+
+Созданы классы для интеграции с Users API:
+- UsersApiClient (Feign Client) в пакете com.twitter.client:
+  - @FeignClient с name="users-api", url="${app.users-api.base-url:http://localhost:8081}", path="/api/v1/users"
+  - Метод existsUser(UUID userId) вызывает GET /api/v1/users/{userId}/exists
+  - Возвращает UserExistsResponseDto из common-lib
+  - Полная JavaDoc документация с @author geron, @version 1.0
+- UserGateway (Gateway wrapper) в пакете com.twitter.gateway:
+  - @Component, @RequiredArgsConstructor, @Slf4j
+  - Метод existsUser(UUID userId) оборачивает вызов Feign клиента
+  - Обработка null userId: возвращает false с предупреждением в лог
+  - Обработка исключений: возвращает false с debug логированием
+  - Логирование успешных проверок существования пользователя
+  - Полная JavaDoc документация с @author geron, @version 1.0
+
+Классы соответствуют стандартам проекта (STANDART_CODE.md, STANDART_JAVADOC.md) и структуре других Gateway/Feign клиентов (tweet-api, admin-script-api). Gateway обеспечивает абстракцию над HTTP клиентом, централизованную обработку ошибок и упрощает тестирование. Проверка линтера: ошибок не обнаружено.
+
 ## 2025-12-17 20:10 — step 11 done — Реализация Entity Follow — автор: assistant
 
 Создана Entity Follow в пакете com.twitter.entity для представления подписок пользователей:

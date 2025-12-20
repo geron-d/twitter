@@ -118,7 +118,7 @@
     - Добавлена полная JavaDoc документация
   - Выполнено: Создана Entity Follow в пакете com.twitter.entity. Использованы все необходимые JPA аннотации (@Entity, @Table с uniqueConstraints для (follower_id, following_id), @Id с @GeneratedValue(strategy = GenerationType.UUID), @Column для всех полей). Добавлен @CreationTimestamp для createdAt. Использованы Lombok аннотации (@Data, @Accessors(chain = true), @NoArgsConstructor, @AllArgsConstructor). Добавлена полная JavaDoc документация с @author geron, @version 1.0, включая описание всех полей и бизнес-правил. Entity соответствует стандартам проекта (STANDART_CODE.md, STANDART_JAVADOC.md) и структуре других Entity (User, Tweet). Проверка линтера: ошибок не обнаружено.
 
-- [ ] (P1) #12: Реализация Gateway для users-api - создать UsersApiClient (Feign) и UserGateway
+- [x] (P1) [2025-12-17 20:15] #12: Реализация Gateway для users-api - создать UsersApiClient (Feign) и UserGateway
   - Зависимости: #1, #4
   - Acceptance criteria:
     - Создан UsersApiClient с методом existsUser для проверки существования пользователя
@@ -126,21 +126,24 @@
     - Создан UserGateway с методом existsUser для обёртки вызовов
     - Добавлена обработка ошибок в UserGateway
     - Добавлено логирование
+  - Выполнено: Создан UsersApiClient в пакете com.twitter.client с @FeignClient аннотацией (name="users-api", url="${app.users-api.base-url:http://localhost:8081}", path="/api/v1/users"). Метод existsUser вызывает GET /api/v1/users/{userId}/exists и возвращает UserExistsResponseDto из common-lib. Создан UserGateway в пакете com.twitter.gateway с @Component, @RequiredArgsConstructor, @Slf4j. Метод existsUser оборачивает вызов Feign клиента, обрабатывает null userId (возвращает false с предупреждением), обрабатывает исключения (возвращает false с debug логированием), логирует успешные проверки. Оба класса содержат полную JavaDoc документацию с @author geron, @version 1.0. Классы соответствуют стандартам проекта (STANDART_CODE.md, STANDART_JAVADOC.md) и структуре других Gateway/Feign клиентов (tweet-api, admin-script-api). Проверка линтера: ошибок не обнаружено.
 
-- [ ] (P1) #13: Реализация Repository - создать FollowRepository с Derived Query Methods
+- [x] (P1) [2025-12-17 20:20] #13: Реализация Repository - создать FollowRepository с Derived Query Methods
   - Зависимости: #11
   - Acceptance criteria:
     - Создан FollowRepository extends JpaRepository<Follow, UUID>
     - Добавлены Derived Query Methods (existsByFollowerIdAndFollowingId, findByFollowerId, findByFollowingId, countByFollowerId, countByFollowingId)
     - Repository НЕ имеет JavaDoc для Derived Query Methods (согласно стандартам)
+  - Выполнено: Создан FollowRepository в пакете com.twitter.repository, расширяет JpaRepository<Follow, UUID>. Добавлены все необходимые Derived Query Methods: existsByFollowerIdAndFollowingId (проверка существования подписки), findByFollowerId и findByFollowingId с Pageable (для пагинации списков подписок и подписчиков), countByFollowerId и countByFollowingId (для подсчета статистики), findByFollowerIdAndFollowingId возвращает Optional<Follow> (для поиска конкретной подписки). Все методы являются Derived Query Methods и НЕ имеют JavaDoc документации (согласно стандартам проекта STANDART_JAVADOC.md). Repository имеет JavaDoc только на уровне класса с @author geron, @version 1.0. Соответствует структуре других Repository (UserRepository, TweetRepository). Проверка линтера: ошибок не обнаружено.
 
-- [ ] (P1) #14: Реализация Mapper (MapStruct) - создать интерфейс FollowMapper с маппингами
+- [x] (P1) [2025-12-17 20:25] #14: Реализация Mapper (MapStruct) - создать интерфейс FollowMapper с маппингами
   - Зависимости: #11
   - Acceptance criteria:
     - Создан FollowMapper интерфейс с @Mapper
     - Добавлены методы маппинга (toFollow, toFollowResponseDto, toFollowerResponseDto, toFollowingResponseDto)
     - Настроены игнорируемые поля (@Mapping(target = "...", ignore = true))
     - Mapper настроен как Spring компонент
+  - Выполнено: Создан FollowMapper в пакете com.twitter.mapper с @Mapper аннотацией (настроен как Spring компонент через defaultComponentModel=spring в build.gradle). Добавлены методы маппинга: toFollow(FollowRequestDto) с игнорированием id и createdAt (service-managed поля), toFollowResponseDto(Follow) для преобразования Entity в Response DTO, toFollowerResponseDto(Follow, String login) для списка подписчиков (login получается через users-api), toFollowingResponseDto(Follow, String login) для списка подписок (login получается через users-api). Все методы используют @Mapping для настройки маппинга полей. Mapper имеет полную JavaDoc документацию с @author geron, @version 1.0. Соответствует стандартам проекта (STANDART_CODE.md, STANDART_JAVADOC.md) и структуре других Mapper (UserMapper, TweetMapper). Проверка линтера: ошибок не обнаружено. Примечание: DTO классы будут созданы в последующих шагах (#16, #27, #33).
 
 - [ ] (P1) #15: Реализация Validator - создать FollowValidator interface и implementation с проверкой бизнес-правил
   - Зависимости: #12, #13
