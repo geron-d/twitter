@@ -4,6 +4,9 @@ import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.UniquenessValidationException;
 import com.twitter.dto.request.FollowRequestDto;
 import com.twitter.dto.response.FollowResponseDto;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.UUID;
 
 /**
  * Service interface for follow relationship management in Twitter microservices.
@@ -30,5 +33,18 @@ public interface FollowService {
      * @throws UniquenessValidationException   if follow relationship already exists
      */
     FollowResponseDto follow(FollowRequestDto request);
+
+    /**
+     * Removes a follow relationship between two users.
+     * <p>
+     * The method is transactional, ensuring data consistency. It checks if the follow
+     * relationship exists before attempting to delete it. If the relationship does not
+     * exist, a ResponseStatusException with HTTP 404 status is thrown.
+     *
+     * @param followerId  the ID of the user who is following (the follower)
+     * @param followingId the ID of the user being followed (the following)
+     * @throws ResponseStatusException if the follow relationship does not exist (404 Not Found)
+     */
+    void unfollow(UUID followerId, UUID followingId);
 }
 

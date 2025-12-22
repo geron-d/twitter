@@ -12,6 +12,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 
+import java.util.UUID;
+
 /**
  * OpenAPI interface for Follow Management API.
  *
@@ -150,5 +152,85 @@ public interface FollowApi {
     ResponseEntity<FollowResponseDto> createFollow(
         @Parameter(description = "Follow relationship data for creation", required = true)
         FollowRequestDto request);
+
+    /**
+     * Removes a follow relationship between two users.
+     * <p>
+     * This method removes an existing follow relationship where one user (follower)
+     * was following another user (following). It checks if the follow relationship
+     * exists before attempting to delete it. If the relationship does not exist,
+     * a 404 Not Found response is returned.
+     *
+     * @param followerId  the ID of the user who is following (the follower)
+     * @param followingId the ID of the user being followed (the following)
+     * @return ResponseEntity with HTTP 204 status if deletion is successful
+     */
+    @Operation(
+        summary = "Delete follow relationship",
+        description = "Removes an existing follow relationship between two users. " +
+            "It checks if the follow relationship exists before attempting to delete it. " +
+            "If the relationship does not exist, a 404 Not Found response is returned."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "204",
+            description = "Follow relationship deleted successfully"
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Follow relationship not found",
+            content = @Content(
+                mediaType = "application/problem+json",
+                examples = @ExampleObject(
+                    name = "Follow Not Found",
+                    summary = "Follow relationship does not exist",
+                    value = """
+                        {
+                          "type": "https://example.com/errors/business-rule-validation",
+                          "title": "Business Rule Validation Error",
+                          "status": 404,
+                          "detail": "Business rule 'FOLLOW_NOT_FOUND' violated for context: Follow relationship between followerId=123e4567-e89b-12d3-a456-426614174000 and followingId=987fcdeb-51a2-43d7-b123-426614174999 does not exist",
+                          "ruleName": "FOLLOW_NOT_FOUND",
+                          "context": "Follow relationship between followerId=123e4567-e89b-12d3-a456-426614174000 and followingId=987fcdeb-51a2-43d7-b123-426614174999 does not exist",
+                          "timestamp": "2025-01-27T10:30:00Z"
+                        }
+                        """
+                )
+            )
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Validation error - Invalid UUID format",
+            content = @Content(
+                mediaType = "application/problem+json",
+                examples = @ExampleObject(
+                    name = "Invalid UUID Format Error",
+                    summary = "Invalid UUID format for path parameters",
+                    value = """
+                        {
+                          "type": "https://example.com/errors/validation-error",
+                          "title": "Validation Error",
+                          "status": 400,
+                          "detail": "Invalid UUID format for followerId or followingId parameter",
+                          "timestamp": "2025-01-27T10:30:00Z"
+                        }
+                        """
+                )
+            )
+        )
+    })
+    ResponseEntity<Void> deleteFollow(
+        @Parameter(
+            description = "ID of the user who is following (the follower)",
+            required = true,
+            example = "123e4567-e89b-12d3-a456-426614174000"
+        )
+        UUID followerId,
+        @Parameter(
+            description = "ID of the user being followed (the following)",
+            required = true,
+            example = "987fcdeb-51a2-43d7-b123-426614174999"
+        )
+        UUID followingId);
 }
 

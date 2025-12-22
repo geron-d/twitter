@@ -214,7 +214,7 @@
     - Проверен формат ответов
   - Выполнено: Создан BaseIntegrationTest в services/follower-api/src/test/java/com/twitter/testconfig/BaseIntegrationTest.java с настройкой PostgreSQL Testcontainers и WireMock сервера для мокирования users-api. Создан application-test.yml для тестового профиля. Создан FollowControllerTest в services/follower-api/src/test/java/com/twitter/controller/FollowControllerTest.java с полными integration тестами для эндпоинта POST /api/v1/follows: успешный сценарий (201 Created) с проверкой создания подписки в БД, валидация Bean Validation (400 Bad Request) для null полей (followerId, followingId), неверный формат JSON (400 Bad Request), отсутствие body (400 Bad Request), бизнес-валидация (409 Conflict) для самоподписки (SELF_FOLLOW_NOT_ALLOWED), пользователь не найден - follower (FOLLOWER_NOT_EXISTS), пользователь не найден - following (FOLLOWING_NOT_EXISTS), двойная подписка (409 Conflict), обработка ошибок users-api (500 Internal Server Error) с graceful handling. Все тесты используют @SpringBootTest, @AutoConfigureWebMvc, @ActiveProfiles("test"), @Transactional, MockMvc для тестирования REST endpoints, WireMock для мокирования users-api (GET /api/v1/users/{userId}/exists), проверяют формат ответов (RFC 7807 Problem Details для ошибок), проверяют сохранение в БД через FollowRepository. Тесты соответствуют стандартам проекта (STANDART_TEST.md): именование methodName_WhenCondition_ShouldExpectedResult, использование @Nested для группировки, AssertJ для assertions, паттерн AAA. Проверка линтера: ошибок не обнаружено.
 
-- [ ] (P1) #21: POST /api/v1/follows - OpenAPI документация - добавить @Operation, @ApiResponses для метода createFollow
+- [x] (P1) [2025-01-27 21:10] #21: POST /api/v1/follows - OpenAPI документация - добавить @Operation, @ApiResponses для метода createFollow
   - Зависимости: #18
   - Acceptance criteria:
     - Метод createFollow имеет @Operation с summary и description
@@ -222,10 +222,11 @@
     - Метод createFollow имеет @ExampleObject для успешных и ошибочных ответов
     - Параметры имеют @Parameter с description
     - Документация на английском языке
+  - Выполнено: OpenAPI документация для метода createFollow уже полностью реализована в шаге #18 в интерфейсе FollowApi. Метод имеет @Operation с summary="Create follow relationship" и подробным description, @ApiResponses со всеми возможными статус-кодами (201 Created, 400 Bad Request для валидации, 409 Conflict для бизнес-правил и уникальности), @ExampleObject для всех ответов в формате RFC 7807 Problem Details, @Parameter для request с description. Документация на английском языке. Все критерии acceptance criteria выполнены. Примечание: статус 404 не используется для этого эндпоинта, так как все ошибки обрабатываются через 400 (валидация) и 409 (бизнес-правила).
 
 ### Эндпоинт: DELETE /api/v1/follows/{followerId}/{followingId} - Отписка от пользователя
 
-- [ ] (P1) #22: DELETE /api/v1/follows/{followerId}/{followingId} - Реализация Service метода - создать метод unfollow в FollowService
+- [x] (P1) [2025-01-27 21:15] #22: DELETE /api/v1/follows/{followerId}/{followingId} - Реализация Service метода - создать метод unfollow в FollowService
   - Зависимости: #11, #13, #15
   - Acceptance criteria:
     - Добавлен метод unfollow(UUID followerId, UUID followingId) в интерфейс FollowService
@@ -233,8 +234,9 @@
     - Метод проверяет существование подписки
     - Метод удаляет подписку через Repository
     - Добавлено логирование
+  - Выполнено: Добавлен метод unfollow(UUID followerId, UUID followingId) в интерфейс FollowService с полной JavaDoc документацией (описание операций, @param, @throws BusinessRuleValidationException). Реализован метод unfollow в FollowServiceImpl с @Transactional для обеспечения транзакционности. Метод проверяет существование подписки через followRepository.findByFollowerIdAndFollowingId(), выбрасывает BusinessRuleValidationException с правилом "FOLLOW_NOT_FOUND" если подписка не найдена, удаляет подписку через followRepository.delete(). Добавлено логирование: debug перед операцией, warn при отсутствии подписки, info после успешного удаления. Метод имеет JavaDoc с @see для ссылки на интерфейс. Соответствует стандартам проекта (STANDART_CODE.md, STANDART_JAVADOC.md) и структуре других Service методов (TweetService.deleteTweet). Проверка линтера: ошибок не обнаружено.
 
-- [ ] (P1) #23: DELETE /api/v1/follows/{followerId}/{followingId} - Реализация Controller метода - создать метод deleteFollow в FollowController
+- [x] (P1) [2025-01-27 21:20] #23: DELETE /api/v1/follows/{followerId}/{followingId} - Реализация Controller метода - создать метод deleteFollow в FollowController
   - Зависимости: #22
   - Acceptance criteria:
     - Добавлен метод deleteFollow в интерфейс FollowApi с OpenAPI аннотациями
@@ -242,6 +244,7 @@
     - Метод использует @PathVariable для параметров
     - Метод возвращает HttpStatus.NO_CONTENT (204) при успехе
     - Метод возвращает HttpStatus.NOT_FOUND (404) если подписка не найдена
+  - Выполнено: Добавлен метод deleteFollow в интерфейс FollowApi с полной OpenAPI документацией: @Operation с summary="Delete follow relationship" и подробным description, @ApiResponses со всеми возможными статус-кодами (204 No Content, 404 Not Found для отсутствующей подписки, 400 Bad Request для неверного формата UUID), @ExampleObject для всех ответов в формате RFC 7807 Problem Details, @Parameter для обоих path параметров с description и example. Реализован метод deleteFollow в FollowController с @LoggableRequest, @DeleteMapping("/{followerId}/{followingId}"), @PathVariable для обоих параметров. Метод обрабатывает BusinessRuleValidationException и преобразует его в ResponseStatusException с HttpStatus.NOT_FOUND (404) если правило "FOLLOW_NOT_FOUND", возвращает ResponseEntity.noContent().build() при успехе. Метод имеет JavaDoc с @see для ссылки на интерфейс. Соответствует стандартам проекта (STANDART_CODE.md, STANDART_SWAGGER.md, STANDART_JAVADOC.md) и структуре других Controller методов (TweetController.deleteTweet). Проверка линтера: ошибок не обнаружено.
 
 - [ ] (P1) #24: DELETE /api/v1/follows/{followerId}/{followingId} - Unit тесты для Service метода - протестировать метод unfollow
   - Зависимости: #22

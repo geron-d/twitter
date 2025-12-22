@@ -1,5 +1,47 @@
 # Changelog - Follower API Service
 
+## 2025-01-27 21:20 — step 23 done — DELETE /api/v1/follows/{followerId}/{followingId} - Реализация Controller метода — автор: assistant
+
+Реализован метод deleteFollow для удаления подписок через REST API:
+- Добавлен метод deleteFollow в интерфейс FollowApi:
+  - @Operation с summary="Delete follow relationship" и подробным description
+  - @ApiResponses со всеми возможными статус-кодами:
+    - 204 No Content - успешное удаление
+    - 404 Not Found - подписка не найдена (с примером Problem Details)
+    - 400 Bad Request - неверный формат UUID (с примером Problem Details)
+  - @ExampleObject для всех ответов в формате RFC 7807 Problem Details
+  - @Parameter для обоих path параметров (followerId, followingId) с description и example
+  - Полная JavaDoc документация с @param для обоих параметров, @return
+- Реализован метод deleteFollow в FollowController:
+  - @LoggableRequest для автоматического логирования запросов/ответов
+  - @DeleteMapping("/{followerId}/{followingId}") для обработки DELETE запросов
+  - @PathVariable для обоих параметров (followerId, followingId)
+  - Обработка BusinessRuleValidationException с преобразованием в ResponseStatusException(HttpStatus.NOT_FOUND) если правило "FOLLOW_NOT_FOUND"
+  - Возвращает ResponseEntity.noContent().build() при успехе (204 No Content)
+  - JavaDoc с @see для ссылки на интерфейс
+
+Метод соответствует стандартам проекта (STANDART_CODE.md, STANDART_SWAGGER.md, STANDART_JAVADOC.md) и структуре других Controller методов (TweetController.deleteTweet). Эндпоинт готов для использования и полностью документирован в Swagger. Проверка линтера: ошибок не обнаружено.
+
+## 2025-01-27 21:15 — step 22 done — DELETE /api/v1/follows/{followerId}/{followingId} - Реализация Service метода — автор: assistant
+
+Реализован метод unfollow для удаления подписок:
+- Добавлен метод unfollow(UUID followerId, UUID followingId) в интерфейс FollowService:
+  - Полная JavaDoc документация с описанием операций, @param для обоих параметров, @throws BusinessRuleValidationException
+  - Описание транзакционности и проверки существования подписки
+- Реализован метод unfollow в FollowServiceImpl:
+  - @Transactional для обеспечения транзакционности
+  - Проверка существования подписки через followRepository.findByFollowerIdAndFollowingId()
+  - Выброс BusinessRuleValidationException с правилом "FOLLOW_NOT_FOUND" если подписка не найдена
+  - Удаление подписки через followRepository.delete()
+  - Логирование: debug перед операцией, warn при отсутствии подписки, info после успешного удаления
+  - JavaDoc с @see для ссылки на интерфейс
+
+Метод соответствует стандартам проекта (STANDART_CODE.md, STANDART_JAVADOC.md) и структуре других Service методов (TweetService.deleteTweet). Проверка линтера: ошибок не обнаружено.
+
+## 2025-01-27 21:10 — step 21 done — POST /api/v1/follows - OpenAPI документация — автор: assistant
+
+OpenAPI документация для метода createFollow уже полностью реализована в шаге #18 в интерфейсе FollowApi. Все критерии acceptance criteria выполнены: @Operation с summary и description, @ApiResponses со всеми возможными статус-кодами (201, 400, 409), @ExampleObject для всех ответов, @Parameter с description, документация на английском языке. Примечание: статус 404 не используется для этого эндпоинта, так как все ошибки обрабатываются через 400 (валидация) и 409 (бизнес-правила).
+
 ## 2025-01-27 21:00 — step 20 done — POST /api/v1/follows - Integration тесты — автор: assistant
 
 Созданы integration тесты для эндпоинта POST /api/v1/follows:

@@ -9,10 +9,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 /**
  * REST controller for follow relationship management in Twitter microservices.
@@ -37,6 +36,18 @@ public class FollowController implements FollowApi {
     public ResponseEntity<FollowResponseDto> createFollow(@RequestBody @Valid FollowRequestDto request) {
         FollowResponseDto createdFollow = followService.follow(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdFollow);
+    }
+
+    /**
+     * @see FollowApi#deleteFollow
+     */
+    @LoggableRequest
+    @DeleteMapping("/{followerId}/{followingId}")
+    @Override
+    public ResponseEntity<Void> deleteFollow(@PathVariable("followerId") UUID followerId,
+                                             @PathVariable("followingId") UUID followingId) {
+        followService.unfollow(followerId, followingId);
+        return ResponseEntity.noContent().build();
     }
 }
 
