@@ -1,5 +1,62 @@
 # Changelog - Follower API Service
 
+## 2025-01-27 21:00 — step 20 done — POST /api/v1/follows - Integration тесты — автор: assistant
+
+Созданы integration тесты для эндпоинта POST /api/v1/follows:
+- BaseIntegrationTest в services/follower-api/src/test/java/com/twitter/testconfig/BaseIntegrationTest.java:
+  - Настройка PostgreSQL Testcontainers (postgres:15-alpine)
+  - Настройка WireMock сервера для мокирования users-api
+  - Динамическая конфигурация Spring properties через @DynamicPropertySource
+  - Helper методы setupUserExistsStub() и setupUserExistsStubWithError() для настройки WireMock stubs
+  - Автоматический reset WireMock перед каждым тестом
+- application-test.yml в services/follower-api/src/test/resources/application-test.yml:
+  - Конфигурация для тестового профиля
+  - Настройка Feign клиента для тестов
+  - Настройка логирования для тестов
+- FollowControllerTest в services/follower-api/src/test/java/com/twitter/controller/FollowControllerTest.java:
+  - @Nested класс CreateFollowTests для группировки тестов
+  - Тесты успешного сценария:
+    - createFollow_WithValidData_ShouldReturn201Created - проверка создания подписки с валидацией ответа и сохранения в БД
+  - Тесты валидации (400 Bad Request):
+    - createFollow_WithNullFollowerId_ShouldReturn400BadRequest - проверка валидации null полей
+    - createFollow_WithNullFollowingId_ShouldReturn400BadRequest - проверка валидации null полей
+    - createFollow_WithInvalidJson_ShouldReturn400BadRequest - проверка неверного формата JSON
+    - createFollow_WithMissingBody_ShouldReturn400BadRequest - проверка отсутствия body
+  - Тесты бизнес-правил (409 Conflict):
+    - createFollow_WhenSelfFollow_ShouldReturn409Conflict - проверка самоподписки (SELF_FOLLOW_NOT_ALLOWED)
+    - createFollow_WhenFollowerNotFound_ShouldReturn409Conflict - проверка несуществующего follower (FOLLOWER_NOT_EXISTS)
+    - createFollow_WhenFollowingNotFound_ShouldReturn409Conflict - проверка несуществующего following (FOLLOWING_NOT_EXISTS)
+    - createFollow_WhenFollowAlreadyExists_ShouldReturn409Conflict - проверка двойной подписки
+  - Тесты обработки ошибок:
+    - createFollow_WhenUsersApiReturns500_ShouldHandleGracefully - проверка graceful handling ошибок users-api
+  - Все тесты проверяют формат ответов (RFC 7807 Problem Details для ошибок)
+  - Все тесты проверяют сохранение в БД через FollowRepository
+  - Helper методы: createValidRequest(), verifyFollowInDatabase(), getFollowCount()
+
+Тесты используют @SpringBootTest, @AutoConfigureWebMvc, @ActiveProfiles("test"), @Transactional для изоляции тестов, MockMvc для тестирования REST endpoints, WireMock для мокирования users-api. Все тесты соответствуют стандартам проекта (STANDART_TEST.md) и структуре других Controller тестов (TweetControllerTest). Проверка линтера: ошибок не обнаружено.
+
+## 2025-01-27 20:50 — step 19 done — POST /api/v1/follows - Unit тесты для Service метода — автор: assistant
+
+Создан FollowServiceImplTest в services/follower-api/src/test/java/com/twitter/service/FollowServiceImplTest.java для unit тестирования метода follow:
+- @ExtendWith(MockitoExtension.class) для использования Mockito
+- @Mock для зависимостей: FollowRepository, FollowMapper, FollowValidator
+- @InjectMocks для FollowServiceImpl
+- @Nested класс FollowTests для группировки тестов метода follow
+- Тесты успешного сценария:
+  - follow_WithValidData_ShouldReturnFollowResponseDto - проверка корректного возврата FollowResponseDto
+  - follow_WithValidData_ShouldCallEachDependencyExactlyOnce - проверка взаимодействий с зависимостями
+- Тесты ошибочных сценариев:
+  - follow_WhenSelfFollow_ShouldThrowBusinessRuleValidationException - валидация самоподписки
+  - follow_WhenFollowerNotFound_ShouldThrowBusinessRuleValidationException - пользователь не найден (follower)
+  - follow_WhenFollowingNotFound_ShouldThrowBusinessRuleValidationException - пользователь не найден (following)
+  - follow_WhenFollowAlreadyExists_ShouldThrowUniquenessValidationException - двойная подписка
+- Все тесты используют AssertJ для assertions (assertThat, assertThatThrownBy)
+- Все тесты проверяют взаимодействия с зависимостями через verify()
+- Тесты используют @BeforeEach для инициализации тестовых данных
+- Тесты соответствуют стандартам проекта (STANDART_TEST.md) и структуре других Service тестов (TweetServiceImplTest)
+
+Тесты покрывают все сценарии использования метода follow, включая успешное создание подписки и все возможные ошибки валидации. Проверка линтера: ошибок не обнаружено.
+
 ## 2025-12-17 20:45 — step 18 done — POST /api/v1/follows - Реализация Controller метода — автор: assistant
 
 Созданы классы Controller для эндпоинта POST /api/v1/follows:

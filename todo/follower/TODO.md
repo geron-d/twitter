@@ -190,7 +190,7 @@
     - Метод возвращает FollowResponseDto
   - Выполнено: Создан интерфейс FollowApi в пакете com.twitter.controller с @Tag(name="Follow Management", description="API for managing follow relationships in the Twitter system"). Метод createFollow имеет @Operation с summary и description, @ApiResponses со всеми возможными статус-кодами (201 Created, 400 Bad Request для валидации, 409 Conflict для бизнес-правил и уникальности), @ExampleObject для успешных и ошибочных ответов в формате RFC 7807 Problem Details. @Parameter для request с description. Создан FollowController в пакете com.twitter.controller с @RestController, @RequestMapping("/api/v1/follows"), @RequiredArgsConstructor, @Slf4j. Метод createFollow реализован с @LoggableRequest, @PostMapping, @RequestBody @Valid FollowRequestDto, возвращает ResponseEntity.status(HttpStatus.CREATED).body(createdFollow). Метод имеет JavaDoc с @see для ссылки на интерфейс. Соответствует стандартам проекта (STANDART_CODE.md, STANDART_SWAGGER.md, STANDART_JAVADOC.md) и структуре других Controller (TweetController, UserController). Проверка линтера: ошибок не обнаружено.
 
-- [ ] (P1) #19: POST /api/v1/follows - Unit тесты для Service метода - протестировать метод follow
+- [x] (P1) [2025-01-27 20:50] #19: POST /api/v1/follows - Unit тесты для Service метода - протестировать метод follow
   - Зависимости: #17
   - Acceptance criteria:
     - Создан тест для метода follow в FollowServiceImplTest
@@ -199,8 +199,9 @@
     - Используется @Nested для группировки тестов
     - Используется AssertJ для assertions
     - Проверены взаимодействия с зависимостями (verify)
+  - Выполнено: Создан FollowServiceImplTest в services/follower-api/src/test/java/com/twitter/service/FollowServiceImplTest.java. Реализован @Nested класс FollowTests с тестами: follow_WithValidData_ShouldReturnFollowResponseDto (успешный сценарий), follow_WithValidData_ShouldCallEachDependencyExactlyOnce (проверка взаимодействий), follow_WhenSelfFollow_ShouldThrowBusinessRuleValidationException (валидация самоподписки), follow_WhenFollowerNotFound_ShouldThrowBusinessRuleValidationException (пользователь не найден), follow_WhenFollowingNotFound_ShouldThrowBusinessRuleValidationException (пользователь не найден), follow_WhenFollowAlreadyExists_ShouldThrowUniquenessValidationException (двойная подписка). Все тесты используют @ExtendWith(MockitoExtension.class), AssertJ для assertions, проверяют взаимодействия с зависимостями через verify. Тесты соответствуют стандартам проекта (STANDART_TEST.md) и структуре других Service тестов (TweetServiceImplTest). Проверка линтера: ошибок не обнаружено.
 
-- [ ] (P2) #20: POST /api/v1/follows - Integration тесты - протестировать эндпоинт POST /api/v1/follows
+- [x] (P2) [2025-01-27 21:00] #20: POST /api/v1/follows - Integration тесты - протестировать эндпоинт POST /api/v1/follows
   - Зависимости: #18
   - Acceptance criteria:
     - Создан тест для POST /api/v1/follows в FollowControllerTest
@@ -211,6 +212,7 @@
     - Использован @Transactional для изоляции тестов
     - Проверена валидация запросов
     - Проверен формат ответов
+  - Выполнено: Создан BaseIntegrationTest в services/follower-api/src/test/java/com/twitter/testconfig/BaseIntegrationTest.java с настройкой PostgreSQL Testcontainers и WireMock сервера для мокирования users-api. Создан application-test.yml для тестового профиля. Создан FollowControllerTest в services/follower-api/src/test/java/com/twitter/controller/FollowControllerTest.java с полными integration тестами для эндпоинта POST /api/v1/follows: успешный сценарий (201 Created) с проверкой создания подписки в БД, валидация Bean Validation (400 Bad Request) для null полей (followerId, followingId), неверный формат JSON (400 Bad Request), отсутствие body (400 Bad Request), бизнес-валидация (409 Conflict) для самоподписки (SELF_FOLLOW_NOT_ALLOWED), пользователь не найден - follower (FOLLOWER_NOT_EXISTS), пользователь не найден - following (FOLLOWING_NOT_EXISTS), двойная подписка (409 Conflict), обработка ошибок users-api (500 Internal Server Error) с graceful handling. Все тесты используют @SpringBootTest, @AutoConfigureWebMvc, @ActiveProfiles("test"), @Transactional, MockMvc для тестирования REST endpoints, WireMock для мокирования users-api (GET /api/v1/users/{userId}/exists), проверяют формат ответов (RFC 7807 Problem Details для ошибок), проверяют сохранение в БД через FollowRepository. Тесты соответствуют стандартам проекта (STANDART_TEST.md): именование methodName_WhenCondition_ShouldExpectedResult, использование @Nested для группировки, AssertJ для assertions, паттерн AAA. Проверка линтера: ошибок не обнаружено.
 
 - [ ] (P1) #21: POST /api/v1/follows - OpenAPI документация - добавить @Operation, @ApiResponses для метода createFollow
   - Зависимости: #18
