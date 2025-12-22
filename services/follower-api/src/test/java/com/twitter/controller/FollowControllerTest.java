@@ -3,6 +3,7 @@ package com.twitter.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.twitter.dto.request.FollowRequestDto;
 import com.twitter.dto.response.FollowResponseDto;
+import com.twitter.entity.Follow;
 import com.twitter.repository.FollowRepository;
 import com.twitter.testconfig.BaseIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +22,7 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -78,6 +80,21 @@ public class FollowControllerTest extends BaseIntegrationTest {
      */
     protected long getFollowCount() {
         return followRepository.count();
+    }
+
+    /**
+     * Creates and saves a follow relationship in the database for testing.
+     *
+     * @param followerId  the follower user ID
+     * @param followingId the following user ID
+     * @return the saved Follow entity
+     */
+    protected Follow createAndSaveFollow(UUID followerId, UUID followingId) {
+        Follow follow = Follow.builder()
+            .followerId(followerId)
+            .followingId(followingId)
+            .build();
+        return followRepository.saveAndFlush(follow);
     }
 
     @Nested
@@ -250,6 +267,46 @@ public class FollowControllerTest extends BaseIntegrationTest {
                     .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.type").exists());
+
+            assertThat(getFollowCount()).isEqualTo(0);
+        }
+    }
+
+    @Nested
+    class DeleteFollowTests {
+
+        private UUID testFollowerId;
+        private UUID testFollowingId;
+
+        @BeforeEach
+        void setUp() {
+            testFollowerId = UUID.randomUUID();
+            testFollowingId = UUID.randomUUID();
+        }
+
+        @Test
+        void deleteFollow_WithValidData_ShouldReturn204NoContent() throws Exception {
+            Follow savedFollow = createAndSaveFollow(testFollowerId, testFollowingId);
+
+            assertThat(getFollowCount()).isEqualTo(1);
+            assertThat(verifyFollowInDatabase(testFollowerId, testFollowingId)).isTrue();
+
+            mockMvc.perform(delete("/api/v1/follows/{followerId}/{followingId}", testFollowerId, testFollowingId))
+                .andExpect(status().isNoContent());
+
+            assertThat(verifyFollowInDatabase(testFollowerId, testFollowingId)).isFalse();
+            assertThat(getFollowCount()).isEqualTo(0);
+        }
+
+        @Test
+        void deleteFollow_WhenFollowDoesNotExist_ShouldReturn404NotFound() throws Exception {
+            mockMvc.perform(delete("/api/v1/follows/{followerId}/{followingId}", testFollowerId, testFollowingId))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.type").exists())
+                .andExpect(jsonPath("$.title").exists())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.detail").exists());
 
             assertThat(getFollowCount()).isEqualTo(0);
         }

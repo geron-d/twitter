@@ -1,5 +1,35 @@
 # Changelog - Follower API Service
 
+## 2025-01-27 21:30 — step 25 done — DELETE /api/v1/follows/{followerId}/{followingId} - Integration тесты — автор: assistant
+
+Добавлены integration тесты для эндпоинта DELETE /api/v1/follows/{followerId}/{followingId}:
+- @Nested класс DeleteFollowTests для группировки тестов DELETE эндпоинта
+- Тесты успешного сценария:
+  - deleteFollow_WithValidData_ShouldReturn204NoContent - проверка удаления подписки (204 No Content) с проверкой удаления из БД
+- Тесты ошибочного сценария:
+  - deleteFollow_WhenFollowDoesNotExist_ShouldReturn404NotFound - проверка 404 Not Found и формата ответа (RFC 7807 Problem Details)
+- Helper метод createAndSaveFollow() для создания и сохранения подписок в БД для тестов
+- Все тесты используют MockMvc для тестирования REST endpoints
+- Все тесты используют @Transactional для изоляции тестов
+- Все тесты проверяют сохранение/удаление в БД через FollowRepository
+- Все тесты проверяют формат ответов (RFC 7807 Problem Details для ошибок)
+
+Тесты соответствуют стандартам проекта (STANDART_TEST.md) и структуре других Controller тестов (TweetControllerTest). Проверка линтера: ошибок не обнаружено.
+
+## 2025-01-27 21:25 — step 24 done — DELETE /api/v1/follows/{followerId}/{followingId} - Unit тесты для Service метода — автор: assistant
+
+Добавлены unit тесты для метода unfollow в FollowServiceImplTest:
+- @Nested класс UnfollowTests для группировки тестов метода unfollow
+- Тесты успешного сценария:
+  - unfollow_WithValidData_ShouldDeleteFollow - проверка успешного удаления подписки и взаимодействий с зависимостями
+- Тесты ошибочного сценария:
+  - unfollow_WhenFollowNotFound_ShouldThrowResponseStatusException - проверка выброса ResponseStatusException с HttpStatus.NOT_FOUND (404) и сообщением, содержащим followerId и followingId
+- Все тесты используют AssertJ для assertions (assertThat, assertThatThrownBy)
+- Все тесты проверяют взаимодействия с зависимостями через verify (followRepository.findByFollowerIdAndFollowingId, followRepository.delete)
+- Тесты используют @BeforeEach для инициализации тестовых данных
+
+Тесты соответствуют стандартам проекта (STANDART_TEST.md) и структуре других Service тестов (TweetServiceImplTest). Проверка линтера: ошибок не обнаружено.
+
 ## 2025-01-27 21:20 — step 23 done — DELETE /api/v1/follows/{followerId}/{followingId} - Реализация Controller метода — автор: assistant
 
 Реализован метод deleteFollow для удаления подписок через REST API:
@@ -16,8 +46,8 @@
   - @LoggableRequest для автоматического логирования запросов/ответов
   - @DeleteMapping("/{followerId}/{followingId}") для обработки DELETE запросов
   - @PathVariable для обоих параметров (followerId, followingId)
-  - Обработка BusinessRuleValidationException с преобразованием в ResponseStatusException(HttpStatus.NOT_FOUND) если правило "FOLLOW_NOT_FOUND"
-  - Возвращает ResponseEntity.noContent().build() при успехе (204 No Content)
+  - Вызывает followService.unfollow() и возвращает ResponseEntity.noContent().build() при успехе (204 No Content)
+  - ResponseStatusException с HttpStatus.NOT_FOUND (404) выбрасывается в сервисе, если подписка не найдена, и обрабатывается GlobalExceptionHandler
   - JavaDoc с @see для ссылки на интерфейс
 
 Метод соответствует стандартам проекта (STANDART_CODE.md, STANDART_SWAGGER.md, STANDART_JAVADOC.md) и структуре других Controller методов (TweetController.deleteTweet). Эндпоинт готов для использования и полностью документирован в Swagger. Проверка линтера: ошибок не обнаружено.

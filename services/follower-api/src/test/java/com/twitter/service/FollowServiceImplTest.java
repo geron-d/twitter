@@ -15,8 +15,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -184,6 +187,61 @@ class FollowServiceImplTest {
             verify(followMapper, never()).toFollow(any());
             verify(followRepository, never()).saveAndFlush(any());
             verify(followMapper, never()).toFollowResponseDto(any());
+        }
+    }
+
+    @Nested
+    class UnfollowTests {
+
+        private UUID testFollowerId;
+        private UUID testFollowingId;
+        private Follow existingFollow;
+
+        @BeforeEach
+        void setUp() {
+            testFollowerId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+            testFollowingId = UUID.fromString("987fcdeb-51a2-43d7-b123-426614174999");
+
+            UUID followId = UUID.fromString("456e7890-e89b-12d3-a456-426614174111");
+            existingFollow = Follow.builder()
+                .id(followId)
+                .followerId(testFollowerId)
+                .followingId(testFollowingId)
+                .createdAt(LocalDateTime.of(2025, 1, 27, 10, 30, 0))
+                .build();
+        }
+
+        @Test
+        void unfollow_WithValidData_ShouldDeleteFollow() {
+            when(followRepository.findByFollowerIdAndFollowingId(testFollowerId, testFollowingId))
+                .thenReturn(Optional.of(existingFollow));
+            doNothing().when(followRepository).delete(existingFollow);
+
+            followService.unfollow(testFollowerId, testFollowingId);
+
+            verify(followRepository, times(1))
+                .findByFollowerIdAndFollowingId(eq(testFollowerId), eq(testFollowingId));
+            verify(followRepository, times(1)).delete(eq(existingFollow));
+        }
+
+        @Test
+        void unfollow_WhenFollowNotFound_ShouldThrowResponseStatusException() {
+            when(followRepository.findByFollowerIdAndFollowingId(testFollowerId, testFollowingId))
+                .thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> followService.unfollow(testFollowerId, testFollowingId))
+                .isInstanceOf(ResponseStatusException.class)
+                .satisfies(exception -> {
+                    ResponseStatusException ex = (ResponseStatusException) exception;
+                    assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+                    assertThat(ex.getReason()).contains("Follow relationship between");
+                    assertThat(ex.getReason()).contains(testFollowerId.toString());
+                    assertThat(ex.getReason()).contains(testFollowingId.toString());
+                });
+
+            verify(followRepository, times(1))
+                .findByFollowerIdAndFollowingId(eq(testFollowerId), eq(testFollowingId));
+            verify(followRepository, never()).delete(any());
         }
     }
 }
