@@ -2,10 +2,13 @@ package com.twitter.gateway;
 
 import com.twitter.client.UsersApiClient;
 import com.twitter.common.dto.UserExistsResponseDto;
+import com.twitter.common.dto.response.UserResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -48,6 +51,39 @@ public class UserGateway {
         } catch (Exception ex) {
             log.debug("User {} does not exist: {}", userId, ex.getMessage());
             return false;
+        }
+    }
+
+    /**
+     * Retrieves user login by user identifier.
+     * <p>
+     * If the user does not exist or if an error occurs, it returns an empty Optional and logs the error.
+     * <p>
+     * Null userId values are handled gracefully by returning an empty Optional
+     * and logging a warning message.
+     *
+     * @param userId the user identifier
+     * @return Optional containing user login if user exists, empty otherwise
+     */
+    public Optional<String> getUserLogin(UUID userId) {
+        if (userId == null) {
+            log.warn("Attempted to get login for null user ID");
+            return Optional.empty();
+        }
+
+        try {
+            ResponseEntity<UserResponseDto> response = usersApiClient.getUserById(userId);
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                String login = response.getBody().login();
+                log.debug("Retrieved login for user {}: {}", userId, login);
+                return Optional.of(login);
+            } else {
+                log.debug("User {} not found or response body is null", userId);
+                return Optional.empty();
+            }
+        } catch (Exception ex) {
+            log.debug("Failed to get login for user {}: {}", userId, ex.getMessage());
+            return Optional.empty();
         }
     }
 }

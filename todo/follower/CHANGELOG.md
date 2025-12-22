@@ -1,5 +1,49 @@
 # Changelog - Follower API Service
 
+## 2025-01-27 22:00 — step 28 done — GET /api/v1/follows/{userId}/followers - Реализация Service метода — автор: assistant
+
+Реализован метод getFollowers для получения списка подписчиков:
+- Добавлен метод getFollowers(UUID userId, FollowerFilter filter, Pageable pageable) в интерфейс FollowService:
+  - Полная JavaDoc документация с описанием операций, @param для всех параметров, @return
+  - Описание пагинации, фильтрации и интеграции с users-api
+- Реализован метод getFollowers в FollowServiceImpl:
+  - @Transactional(readOnly = true) для обеспечения транзакционности только для чтения
+  - Получение Page<Follow> из Repository (findByFollowingId с сортировкой по createdAt DESC)
+  - Для каждой Follow получение login из users-api через UserGateway.getUserLogin()
+  - Преобразование в FollowerResponseDto через FollowMapper.toFollowerResponseDto()
+  - Применение фильтра по логину (если указан) - частичное совпадение без учета регистра
+  - Создание PagedModel из отфильтрованных результатов
+  - Логирование: debug перед операцией, info после успешного получения
+- Расширен UserGateway:
+  - Добавлен метод getUserLogin(UUID userId) для получения логина пользователя из users-api
+  - Обработка null userId, ошибок Feign клиента, логирование
+- Расширен UsersApiClient:
+  - Добавлен метод getUserById(UUID id) для получения UserResponseDto из users-api
+  - Интеграция с GET /api/v1/users/{id} эндпоинтом
+
+Метод соответствует стандартам проекта (STANDART_CODE.md, STANDART_JAVADOC.md) и структуре других Service методов (TweetService.getUserTweets). Примечание: фильтрация по логину выполняется на уровне приложения после получения данных из БД, так как login хранится в users-api, а не в таблице follows. Это означает, что пагинация может работать некорректно при использовании фильтра, но это ограничение архитектуры. Проверка линтера: ошибок не обнаружено.
+
+## 2025-01-27 21:45 — step 27 done — GET /api/v1/follows/{userId}/followers - Реализация DTO — автор: assistant
+
+Созданы DTO для эндпоинта GET /api/v1/follows/{userId}/followers:
+- FollowerResponseDto в пакете com.twitter.dto.response:
+  - Поля: id (UUID), login (String), createdAt (LocalDateTime)
+  - @Schema аннотации на уровне класса (name="FollowerResponse", description, example JSON) и на уровне полей (description, example, format, requiredMode)
+  - @JsonFormat для createdAt (pattern="yyyy-MM-dd'T'HH:mm:ss'Z'", timezone="UTC")
+  - @Builder для удобства создания
+  - Полная JavaDoc документация с @param для всех компонентов, @author geron, @version 1.0
+- FollowerFilter в пакете com.twitter.dto.filter:
+  - Поле: login (String, optional) для фильтрации подписчиков по логину (частичное совпадение)
+  - @Schema аннотации на уровне класса (name="FollowerFilter", description, example JSON) и на уровне полей (description, example, requiredMode=NOT_REQUIRED)
+  - Полная JavaDoc документация с @param для всех компонентов, @author geron, @version 1.0
+  - Примечание: фильтрация по логину будет выполняться на уровне сервиса после получения данных из users-api, так как login не хранится в таблице follows
+
+Оба DTO используют Records (Java 24), соответствуют стандартам проекта (STANDART_CODE.md, STANDART_SWAGGER.md, STANDART_JAVADOC.md) и структуре других DTO (FollowRequestDto, FollowResponseDto). Проверка линтера: ошибок не обнаружено.
+
+## 2025-01-27 21:35 — step 26 done — DELETE /api/v1/follows/{followerId}/{followingId} - OpenAPI документация — автор: assistant
+
+OpenAPI документация для метода deleteFollow уже полностью реализована в шаге #23 в интерфейсе FollowApi. Все критерии acceptance criteria выполнены: @Operation с summary и description, @ApiResponses со всеми возможными статус-кодами (204, 404, 400), @ExampleObject для всех ответов, @Parameter с description для обоих параметров, документация на английском языке.
+
 ## 2025-01-27 21:30 — step 25 done — DELETE /api/v1/follows/{followerId}/{followingId} - Integration тесты — автор: assistant
 
 Добавлены integration тесты для эндпоинта DELETE /api/v1/follows/{followerId}/{followingId}:

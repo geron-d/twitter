@@ -70,7 +70,7 @@
     - Создан Bean followerApiOpenAPI() с настройкой Info, Servers
     - Создан FeignConfig с @Configuration и @EnableFeignClients
     - Настроен basePackages для Feign клиентов
-  - Выполнено: Создан OpenApiConfig в пакете com.twitter.config с @Configuration и @Bean методом followerApiOpenAPI(). Настроена OpenAPI спецификация с title "Twitter Follower API", подробным description (возможности API, аутентификация, rate limiting, обработка ошибок), version "1.0.0", server на localhost:8084. Создан FeignConfig в пакете com.twitter.config с @Configuration и @EnableFeignClients(basePackages = "com.twitter.client") для активации Feign клиентов в пакете com.twitter.client. Все классы содержат полную JavaDoc документацию (@author geron, @version 1.0). Конфигурация соответствует структуре других сервисов (tweet-api, admin-script-api) и стандартам проекта (STANDART_SWAGGER.md, STANDART_CODE.md). Проверка линтера: ошибок не обнаружено.
+  - Выполнено: Создан OpenApiConfig в пакете com.twitter.config с @Configuration и @Bean методом followerApiOpenAPI(). Настроена OpenAPI спецификация с title "Twitter Follower API", подробным description (возможности API, аутентификация, rate limiting, обработка ошибок), version "1.0.0", server на localhost:8084. Создан FeignConfig в пакете com.twitter.config с @Configuration и @EnableFeignClients(basePackages = "com.twitter.client") для активации Feign клиентов в пакете com.twitter.client. Все классы содержат полную JavaDoc документацию (@author geron, @version 1.0). Конфигурация соответствует структуре других сервисов (tweet-api, admin-script-api) и стандартам проекта (STANDART_SWAGGER.md, STANDART_CODE.md). Проверка линтера: ошибок не обнаружено.``
 
 - [x] (P1) [2025-12-17 19:40] #8: Создание application-docker.yml - настроить конфигурацию для Docker (URL users-api через имя сервиса)
   - Зависимости: #1, #5
@@ -268,25 +268,27 @@
     - Проверен формат ответов
   - Выполнено: Добавлен @Nested класс DeleteFollowTests в FollowControllerTest для группировки тестов DELETE эндпоинта. Реализованы тесты: deleteFollow_WithValidData_ShouldReturn204NoContent (успешный сценарий с проверкой удаления подписки из БД), deleteFollow_WhenFollowDoesNotExist_ShouldReturn404NotFound (ошибочный сценарий - подписка не найдена, проверка 404 Not Found и формата ответа RFC 7807 Problem Details). Добавлен helper метод createAndSaveFollow() для создания и сохранения подписок в БД для тестов. Все тесты используют MockMvc для тестирования REST endpoints, @Transactional для изоляции тестов, проверяют сохранение/удаление в БД через FollowRepository, проверяют формат ответов (RFC 7807 Problem Details для ошибок). Тесты соответствуют стандартам проекта (STANDART_TEST.md) и структуре других Controller тестов (TweetControllerTest). Проверка линтера: ошибок не обнаружено.
 
-- [ ] (P1) #26: DELETE /api/v1/follows/{followerId}/{followingId} - OpenAPI документация - добавить @Operation, @ApiResponses для метода deleteFollow
+- [x] (P1) [2025-01-27 21:35] #26: DELETE /api/v1/follows/{followerId}/{followingId} - OpenAPI документация - добавить @Operation, @ApiResponses для метода deleteFollow
   - Зависимости: #23
   - Acceptance criteria:
     - Метод deleteFollow имеет @Operation с summary и description
     - Метод deleteFollow имеет @ApiResponses со всеми возможными статус-кодами (204, 404)
     - Параметры имеют @Parameter с description
     - Документация на английском языке
+  - Выполнено: OpenAPI документация для метода deleteFollow уже полностью реализована в шаге #23 в интерфейсе FollowApi. Метод имеет @Operation с summary="Delete follow relationship" и подробным description, @ApiResponses со всеми возможными статус-кодами (204 No Content, 404 Not Found для отсутствующей подписки, 400 Bad Request для неверного формата UUID), @ExampleObject для всех ответов в формате RFC 7807 Problem Details, @Parameter для обоих path параметров (followerId, followingId) с description, required=true и example. Документация на английском языке. Все критерии acceptance criteria выполнены.
 
 ### Эндпоинт: GET /api/v1/follows/{userId}/followers - Получение списка подписчиков
 
-- [ ] (P1) #27: GET /api/v1/follows/{userId}/followers - Реализация DTO - создать FollowerResponseDto и FollowerFilter
+- [x] (P1) [2025-01-27 21:45] #27: GET /api/v1/follows/{userId}/followers - Реализация DTO - создать FollowerResponseDto и FollowerFilter
   - Зависимости: #1
   - Acceptance criteria:
     - Создан FollowerResponseDto (id, login, createdAt) для списка подписчиков
     - Создан FollowerFilter для фильтрации подписчиков
     - Все DTO используют Records (Java 24)
     - Все DTO имеют @Schema аннотации для Swagger
+  - Выполнено: Создан FollowerResponseDto в пакете com.twitter.dto.response с полями id (UUID), login (String), createdAt (LocalDateTime). Добавлены @Schema аннотации на уровне класса (name="FollowerResponse", description, example JSON) и на уровне полей (description, example, format, requiredMode). Использован @JsonFormat для createdAt (pattern="yyyy-MM-dd'T'HH:mm:ss'Z'", timezone="UTC"). Использован @Builder. Создан FollowerFilter в пакете com.twitter.dto.filter с полем login (String, optional) для фильтрации подписчиков по логину (частичное совпадение). Добавлены @Schema аннотации на уровне класса (name="FollowerFilter", description, example JSON) и на уровне полей (description, example, requiredMode=NOT_REQUIRED). Оба DTO используют Records (Java 24), имеют полную JavaDoc документацию с @param для всех компонентов, @author geron, @version 1.0. Соответствуют стандартам проекта (STANDART_CODE.md, STANDART_SWAGGER.md, STANDART_JAVADOC.md) и структуре других DTO (FollowRequestDto, FollowResponseDto). Проверка линтера: ошибок не обнаружено.
 
-- [ ] (P1) #28: GET /api/v1/follows/{userId}/followers - Реализация Service метода - создать метод getFollowers в FollowService
+- [x] (P1) [2025-01-27 22:00] #28: GET /api/v1/follows/{userId}/followers - Реализация Service метода - создать метод getFollowers в FollowService
   - Зависимости: #11, #13, #14, #27
   - Acceptance criteria:
     - Добавлен метод getFollowers(UUID userId, FollowerFilter filter, Pageable pageable) в интерфейс FollowService
@@ -295,6 +297,7 @@
     - Метод возвращает PagedModel<FollowerResponseDto>
     - Метод использует Mapper для преобразования
     - Добавлено логирование
+  - Выполнено: Добавлен метод getFollowers(UUID userId, FollowerFilter filter, Pageable pageable) в интерфейс FollowService с полной JavaDoc документацией (описание операций, @param для всех параметров, @return). Реализован метод getFollowers в FollowServiceImpl с @Transactional(readOnly = true). Метод получает Page<Follow> из Repository (findByFollowingId с сортировкой по createdAt DESC), для каждой Follow получает login из users-api через UserGateway.getUserLogin(), преобразует в FollowerResponseDto через FollowMapper.toFollowerResponseDto(), применяет фильтр по логину (если указан) - частичное совпадение без учета регистра, создает PagedModel из отфильтрованных результатов. Добавлено логирование: debug перед операцией, info после успешного получения. Добавлен метод getUserLogin в UserGateway для получения логина пользователя из users-api. Добавлен метод getUserById в UsersApiClient для получения UserResponseDto из users-api. Метод имеет JavaDoc с @see для ссылки на интерфейс. Соответствует стандартам проекта (STANDART_CODE.md, STANDART_JAVADOC.md) и структуре других Service методов (TweetService.getUserTweets). Примечание: фильтрация по логину выполняется на уровне приложения после получения данных из БД, так как login хранится в users-api, а не в таблице follows. Это означает, что пагинация может работать некорректно при использовании фильтра, но это ограничение архитектуры. Проверка линтера: ошибок не обнаружено.
 
 - [ ] (P1) #29: GET /api/v1/follows/{userId}/followers - Реализация Controller метода - создать метод getFollowers в FollowController
   - Зависимости: #28
