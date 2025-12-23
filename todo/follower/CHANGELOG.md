@@ -1,5 +1,57 @@
 # Changelog - Follower API Service
 
+## 2025-01-27 23:25 — step 38 done — GET /api/v1/follows/{userId}/following - OpenAPI документация — автор: assistant
+
+OpenAPI документация для метода getFollowing уже полностью реализована в шаге #35 в интерфейсе FollowApi. Все критерии acceptance criteria выполнены: @Operation с summary="Get following list" и подробным description (описание функциональности, фильтрации, сортировки, интеграции с users-api), @ApiResponses со всеми возможными статус-кодами (200 OK для успешного получения списка подписок с примером PagedModel, 400 Bad Request для неверного формата UUID с примером Problem Details), @ExampleObject для успешного ответа в формате PagedModel с примером структуры (content, page metadata), @Parameter для всех параметров (userId, filter, pageable) с description, required=true/required=false и example. Документация на английском языке. Примечание: статус 404 не используется для этого эндпоинта, так как метод всегда возвращает список подписок (может быть пустым), а не ошибку 404. Это аналогично другим GET эндпоинтам для получения списков (FollowController.getFollowers, TweetController.getUserTweets, UserController.findAll).
+
+## 2025-01-27 23:20 — step 37 done — GET /api/v1/follows/{userId}/following - Integration тесты — автор: assistant
+
+Добавлены integration тесты для эндпоинта GET /api/v1/follows/{userId}/following:
+- @Nested класс GetFollowingTests в FollowControllerTest для группировки тестов GET эндпоинта
+- Тесты успешного сценария:
+  - getFollowing_WhenFollowingExist_ShouldReturn200Ok - проверка успешного получения списка подписок с проверкой структуры PagedModel (content, metadata) и метаданных пагинации (size, number, totalElements, totalPages)
+  - getFollowing_WhenNoFollowingExist_ShouldReturn200OkWithEmptyList - проверка пустого списка с проверкой метаданных (totalElements=0, totalPages=0)
+  - getFollowing_WithPagination_ShouldReturnCorrectPage - проверка пагинации (page=0, size=2) с проверкой корректности страницы и метаданных
+- Тесты фильтрации:
+  - getFollowing_WithLoginFilter_ShouldFilterByLogin - проверка фильтрации по логину (частичное совпадение)
+  - getFollowing_WithLoginFilter_ShouldFilterCaseInsensitively - проверка фильтрации без учета регистра
+- Тесты валидации:
+  - getFollowing_WithInvalidUserIdFormat_ShouldReturn400BadRequest - проверка неверного формата UUID для userId
+- Тесты функциональности:
+  - getFollowing_ShouldSortByCreatedAtDesc - проверка сортировки по createdAt DESC (новые первыми)
+  - getFollowing_WhenUserLoginNotFound_ShouldUseUnknownLogin - проверка использования "unknown" логина при отсутствии логина в users-api
+- Все тесты используют:
+  - MockMvc для тестирования REST endpoints
+  - @Transactional для изоляции тестов
+  - WireMock для мокирования users-api (GET /api/v1/users/{id})
+  - jsonPath для проверки структуры PagedModel
+  - Проверку метаданных пагинации (size, number, totalElements, totalPages)
+
+Тесты соответствуют стандартам проекта (STANDART_TEST.md) и структуре других Controller тестов (FollowControllerTest.getFollowers, TweetControllerTest.getUserTweets, UserControllerTest.findAll). Проверка линтера: ошибок не обнаружено.
+
+## 2025-01-27 23:15 — step 36 done — GET /api/v1/follows/{userId}/following - Unit тесты для Service метода — автор: assistant
+
+Добавлены unit тесты для метода getFollowing в FollowServiceImplTest:
+- @Nested класс GetFollowingTests для группировки тестов метода getFollowing
+- Тесты успешного сценария:
+  - getFollowing_WithValidData_ShouldReturnPagedModelWithFollowing - проверка успешного получения списка подписок с пагинацией, проверка структуры PagedModel (content, page metadata)
+  - getFollowing_WithValidData_ShouldCallEachDependencyExactlyOnce - проверка взаимодействий с зависимостями (followRepository.findByFollowerId, userGateway.getUserLogin, followMapper.toFollowingResponseDto)
+- Тесты пустого результата:
+  - getFollowing_WhenNoFollowingExist_ShouldReturnEmptyPagedModel - проверка пустого результата, проверка отсутствия вызовов userGateway и followMapper
+- Тесты фильтрации:
+  - getFollowing_WithLoginFilter_ShouldFilterByLogin - проверка фильтрации по логину (частичное совпадение)
+  - getFollowing_WithLoginFilter_ShouldFilterCaseInsensitively - проверка фильтрации без учета регистра
+- Тесты обработки ошибок:
+  - getFollowing_WhenUserLoginNotFound_ShouldUseUnknownLogin - проверка использования "unknown" логина при отсутствии логина в users-api
+- Тесты пагинации:
+  - getFollowing_WithPagination_ShouldUseCorrectPageable - проверка использования правильного Pageable
+  - getFollowing_WhenPageableNotSorted_ShouldAddDefaultSorting - проверка добавления сортировки по умолчанию (createdAt DESC) при отсутствии сортировки
+- Все тесты используют AssertJ для assertions (assertThat)
+- Все тесты проверяют взаимодействия с зависимостями через verify
+- Тесты используют @BeforeEach для инициализации тестовых данных
+
+Тесты соответствуют стандартам проекта (STANDART_TEST.md) и структуре других Service тестов (FollowServiceImplTest.getFollowers, TweetServiceImplTest.getUserTweets, UserServiceImplTest.findAll). Проверка линтера: ошибок не обнаружено.
+
 ## 2025-01-27 23:10 — step 35 done — GET /api/v1/follows/{userId}/following - Реализация Controller метода — автор: assistant
 
 Реализован метод getFollowing для получения списка подписок через REST API:

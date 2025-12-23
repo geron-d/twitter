@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.net.URI;
@@ -27,6 +28,7 @@ import java.time.Instant;
  *   <li>ResponseStatusException - HTTP status exceptions</li>
  *   <li>RuntimeException - General runtime errors</li>
  *   <li>ConstraintViolationException - Bean validation errors</li>
+ *   <li>MethodArgumentTypeMismatchException - Invalid path variable format (e.g., invalid UUID)</li>
  *   <li>UniquenessValidationException - Duplicate data errors</li>
  *   <li>BusinessRuleValidationException - Business logic violations</li>
  *   <li>FormatValidationException - Data format errors</li>
@@ -271,6 +273,42 @@ public class GlobalExceptionHandler {
         problemDetail.setType(URI.create("https://example.com/errors/validation-error"));
         problemDetail.setProperty("timestamp", Instant.now());
         problemDetail.setProperty("validationType", ex.getValidationType().name());
+        return problemDetail;
+    }
+
+    /**
+     * Handles method argument type mismatch exceptions (e.g., invalid UUID format in path variables).
+     *
+     * <p>Response format:</p>
+     * <pre>
+     * {
+     *   "type": "https://example.com/errors/validation-error",
+     *   "title": "Validation Error",
+     *   "status": 400,
+     *   "detail": "Invalid UUID format for userId parameter",
+     *   "timestamp": "2025-01-27T15:30:00Z"
+     * }
+     * </pre>
+     *
+     * @param ex the MethodArgumentTypeMismatchException that was thrown
+     * @return ProblemDetail containing validation error information
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ProblemDetail handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex) {
+        String parameterName = ex.getName();
+        Class<?> requiredTypeClass = ex.getRequiredType();
+        String requiredType = requiredTypeClass != null ? requiredTypeClass.getSimpleName() : "unknown";
+        String detail = String.format("Invalid %s format for %s parameter", requiredType, parameterName);
+
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+            HttpStatus.BAD_REQUEST,
+            detail
+        );
+        problemDetail.setTitle("Validation Error");
+        problemDetail.setType(URI.create("https://example.com/errors/validation-error"));
+        problemDetail.setProperty("timestamp", Instant.now());
+        problemDetail.setProperty("parameterName", parameterName);
+        problemDetail.setProperty("requiredType", requiredType);
         return problemDetail;
     }
 }

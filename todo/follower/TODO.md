@@ -374,7 +374,7 @@
     - Метод возвращает PagedModel<FollowingResponseDto>
   - Выполнено: Добавлен метод getFollowing в интерфейс FollowApi с полной OpenAPI документацией: @Operation с summary="Get following list" и подробным description (описание функциональности, фильтрации, сортировки, интеграции с users-api), @ApiResponses со всеми возможными статус-кодами (200 OK для успешного получения списка подписок с примером PagedModel, 400 Bad Request для неверного формата UUID с примером Problem Details), @ExampleObject для успешного ответа в формате PagedModel с примером структуры (content, page metadata), @Parameter для всех параметров (userId, filter, pageable) с description, required=true/required=false и example. Реализован метод getFollowing в FollowController с @LoggableRequest, @GetMapping("/{userId}/following"), @PathVariable для userId, @ModelAttribute для FollowingFilter (автоматическое связывание query параметров), @PageableDefault(size=10, sort="createdAt", direction=Sort.Direction.DESC) для пагинации. Метод вызывает followService.getFollowing() и возвращает PagedModel<FollowingResponseDto> напрямую (так как Service уже возвращает PagedModel). Метод имеет JavaDoc с @see для ссылки на интерфейс. Соответствует стандартам проекта (STANDART_CODE.md, STANDART_SWAGGER.md, STANDART_JAVADOC.md) и структуре других Controller методов (FollowController.getFollowers, TweetController.getUserTweets, UserController.findAll). Эндпоинт готов для использования и полностью документирован в Swagger. Проверка линтера: ошибок не обнаружено.
 
-- [ ] (P1) #36: GET /api/v1/follows/{userId}/following - Unit тесты для Service метода - протестировать метод getFollowing
+- [x] (P1) [2025-01-27 23:15] #36: GET /api/v1/follows/{userId}/following - Unit тесты для Service метода - протестировать метод getFollowing
   - Зависимости: #34
   - Acceptance criteria:
     - Создан тест для метода getFollowing в FollowServiceImplTest
@@ -383,8 +383,9 @@
     - Используется @Nested для группировки тестов
     - Используется AssertJ для assertions
     - Проверены взаимодействия с зависимостями (verify)
+  - Выполнено: Добавлен @Nested класс GetFollowingTests в FollowServiceImplTest для группировки тестов метода getFollowing. Реализованы тесты: getFollowing_WithValidData_ShouldReturnPagedModelWithFollowing (успешный сценарий с пагинацией, проверка структуры PagedModel), getFollowing_WithValidData_ShouldCallEachDependencyExactlyOnce (проверка взаимодействий с зависимостями), getFollowing_WhenNoFollowingExist_ShouldReturnEmptyPagedModel (пустой результат), getFollowing_WithLoginFilter_ShouldFilterByLogin (фильтрация по логину), getFollowing_WithLoginFilter_ShouldFilterCaseInsensitively (фильтрация без учета регистра), getFollowing_WhenUserLoginNotFound_ShouldUseUnknownLogin (обработка отсутствия логина), getFollowing_WithPagination_ShouldUseCorrectPageable (проверка пагинации), getFollowing_WhenPageableNotSorted_ShouldAddDefaultSorting (добавление сортировки по умолчанию). Все тесты используют AssertJ для assertions (assertThat), проверяют взаимодействия с зависимостями через verify (followRepository.findByFollowerId, userGateway.getUserLogin, followMapper.toFollowingResponseDto). Тесты соответствуют стандартам проекта (STANDART_TEST.md) и структуре других Service тестов (FollowServiceImplTest.getFollowers, TweetServiceImplTest.getUserTweets, UserServiceImplTest.findAll). Проверка линтера: ошибок не обнаружено.
 
-- [ ] (P2) #37: GET /api/v1/follows/{userId}/following - Integration тесты - протестировать эндпоинт GET /api/v1/follows/{userId}/following
+- [x] (P2) [2025-01-27 23:20] #37: GET /api/v1/follows/{userId}/following - Integration тесты - протестировать эндпоинт GET /api/v1/follows/{userId}/following
   - Зависимости: #35
   - Acceptance criteria:
     - Создан тест для GET /api/v1/follows/{userId}/following в FollowControllerTest
@@ -393,14 +394,16 @@
     - Использован MockMvc для тестирования REST endpoint
     - Использован @Transactional для изоляции тестов
     - Проверен формат ответов (PagedModel)
+  - Выполнено: Добавлен @Nested класс GetFollowingTests в FollowControllerTest для группировки тестов GET эндпоинта. Реализованы тесты: getFollowing_WhenFollowingExist_ShouldReturn200Ok (успешный сценарий с проверкой структуры PagedModel и метаданных пагинации), getFollowing_WhenNoFollowingExist_ShouldReturn200OkWithEmptyList (пустой список с проверкой метаданных), getFollowing_WithPagination_ShouldReturnCorrectPage (пагинация с проверкой корректности страницы), getFollowing_WithLoginFilter_ShouldFilterByLogin (фильтрация по логину), getFollowing_WithLoginFilter_ShouldFilterCaseInsensitively (фильтрация без учета регистра), getFollowing_WithInvalidUserIdFormat_ShouldReturn400BadRequest (неверный формат UUID), getFollowing_ShouldSortByCreatedAtDesc (проверка сортировки по createdAt DESC), getFollowing_WhenUserLoginNotFound_ShouldUseUnknownLogin (обработка отсутствия логина в users-api). Все тесты используют MockMvc для тестирования REST endpoints, @Transactional для изоляции тестов, проверяют формат ответов (PagedModel с метаданными), используют WireMock для мокирования users-api (GET /api/v1/users/{id}). Тесты соответствуют стандартам проекта (STANDART_TEST.md) и структуре других Controller тестов (FollowControllerTest.getFollowers, TweetControllerTest.getUserTweets, UserControllerTest.findAll). Проверка линтера: ошибок не обнаружено.
 
-- [ ] (P1) #38: GET /api/v1/follows/{userId}/following - OpenAPI документация - добавить @Operation, @ApiResponses для метода getFollowing
+- [x] (P1) [2025-01-27 23:25] #38: GET /api/v1/follows/{userId}/following - OpenAPI документация - добавить @Operation, @ApiResponses для метода getFollowing
   - Зависимости: #35
   - Acceptance criteria:
     - Метод getFollowing имеет @Operation с summary и description
     - Метод getFollowing имеет @ApiResponses со всеми возможными статус-кодами (200, 404)
     - Параметры имеют @Parameter с description
     - Документация на английском языке
+  - Выполнено: OpenAPI документация для метода getFollowing уже полностью реализована в шаге #35 в интерфейсе FollowApi. Метод имеет @Operation с summary="Get following list" и подробным description (описание функциональности, фильтрации, сортировки, интеграции с users-api), @ApiResponses со всеми возможными статус-кодами (200 OK для успешного получения списка подписок с примером PagedModel, 400 Bad Request для неверного формата UUID с примером Problem Details), @ExampleObject для успешного ответа в формате PagedModel с примером структуры (content, page metadata), @Parameter для всех параметров (userId, filter, pageable) с description, required=true/required=false и example. Документация на английском языке. Все критерии acceptance criteria выполнены. Примечание: статус 404 не используется для этого эндпоинта, так как метод всегда возвращает список подписок (может быть пустым), а не ошибку 404. Это аналогично другим GET эндпоинтам для получения списков (FollowController.getFollowers, TweetController.getUserTweets, UserController.findAll).
 
 ### Эндпоинт: GET /api/v1/follows/{followerId}/{followingId}/status - Проверка статуса подписки
 

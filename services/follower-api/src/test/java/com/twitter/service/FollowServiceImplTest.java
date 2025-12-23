@@ -3,9 +3,11 @@ package com.twitter.service;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.UniquenessValidationException;
 import com.twitter.dto.filter.FollowerFilter;
+import com.twitter.dto.filter.FollowingFilter;
 import com.twitter.dto.request.FollowRequestDto;
 import com.twitter.dto.response.FollowResponseDto;
 import com.twitter.dto.response.FollowerResponseDto;
+import com.twitter.dto.response.FollowingResponseDto;
 import com.twitter.entity.Follow;
 import com.twitter.gateway.UserGateway;
 import com.twitter.mapper.FollowMapper;
@@ -461,6 +463,235 @@ class FollowServiceImplTest {
             followService.getFollowers(testUserId, null, unsortedPageable);
 
             verify(followRepository, times(1)).findByFollowingId(
+                eq(testUserId),
+                argThat(pageable -> pageable.getSort().isSorted() &&
+                    pageable.getSort().getOrderFor("createdAt") != null &&
+                    pageable.getSort().getOrderFor("createdAt").getDirection() == Sort.Direction.DESC)
+            );
+        }
+    }
+
+    @Nested
+    class GetFollowingTests {
+
+        private UUID testUserId;
+        private UUID testFollowingId1;
+        private UUID testFollowingId2;
+        private Follow follow1;
+        private Follow follow2;
+        private FollowingResponseDto followingResponseDto1;
+        private FollowingResponseDto followingResponseDto2;
+        private Pageable pageable;
+
+        @BeforeEach
+        void setUp() {
+            testUserId = UUID.fromString("111e4567-e89b-12d3-a456-426614174000");
+            testFollowingId1 = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+            testFollowingId2 = UUID.fromString("222e4567-e89b-12d3-a456-426614174000");
+
+            UUID followId1 = UUID.fromString("456e7890-e89b-12d3-a456-426614174111");
+            follow1 = Follow.builder()
+                .id(followId1)
+                .followerId(testUserId)
+                .followingId(testFollowingId1)
+                .createdAt(LocalDateTime.of(2025, 1, 20, 15, 30, 0))
+                .build();
+
+            UUID followId2 = UUID.fromString("789e0123-e89b-12d3-a456-426614174222");
+            follow2 = Follow.builder()
+                .id(followId2)
+                .followerId(testUserId)
+                .followingId(testFollowingId2)
+                .createdAt(LocalDateTime.of(2025, 1, 25, 12, 0, 0))
+                .build();
+
+            followingResponseDto1 = FollowingResponseDto.builder()
+                .id(testFollowingId1)
+                .login("jane_doe")
+                .createdAt(LocalDateTime.of(2025, 1, 20, 15, 30, 0))
+                .build();
+
+            followingResponseDto2 = FollowingResponseDto.builder()
+                .id(testFollowingId2)
+                .login("john_smith")
+                .createdAt(LocalDateTime.of(2025, 1, 25, 12, 0, 0))
+                .build();
+
+            pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdAt"));
+        }
+
+        @Test
+        void getFollowing_WithValidData_ShouldReturnPagedModelWithFollowing() {
+            List<Follow> follows = List.of(follow1, follow2);
+            Page<Follow> followsPage = new PageImpl<>(follows, pageable, 2);
+
+            when(followRepository.findByFollowerId(eq(testUserId), any(Pageable.class)))
+                .thenReturn(followsPage);
+            when(userGateway.getUserLogin(testFollowingId1)).thenReturn(Optional.of("jane_doe"));
+            when(userGateway.getUserLogin(testFollowingId2)).thenReturn(Optional.of("john_smith"));
+            when(followMapper.toFollowingResponseDto(follow1, "jane_doe"))
+                .thenReturn(followingResponseDto1);
+            when(followMapper.toFollowingResponseDto(follow2, "john_smith"))
+                .thenReturn(followingResponseDto2);
+
+            PagedModel<FollowingResponseDto> result = followService.getFollowing(
+                testUserId, null, pageable);
+            assertThat(result).isNotNull();
+            assertThat(result.getContent()).hasSize(2);
+            assertThat(result.getContent()).containsExactly(followingResponseDto1, followingResponseDto2);
+            assertThat(result.getMetadata().totalElements()).isEqualTo(2);
+            assertThat(result.getMetadata().number()).isEqualTo(0);
+            assertThat(result.getMetadata().size()).isEqualTo(10);
+        }
+
+        @Test
+        void getFollowing_WithValidData_ShouldCallEachDependencyExactlyOnce() {
+            List<Follow> follows = List.of(follow1);
+            Page<Follow> followsPage = new PageImpl<>(follows, pageable, 1);
+
+            when(followRepository.findByFollowerId(eq(testUserId), any(Pageable.class)))
+                .thenReturn(followsPage);
+            when(userGateway.getUserLogin(testFollowingId1)).thenReturn(Optional.of("jane_doe"));
+            when(followMapper.toFollowingResponseDto(follow1, "jane_doe"))
+                .thenReturn(followingResponseDto1);
+
+            followService.getFollowing(testUserId, null, pageable);
+
+            verify(followRepository, times(1))
+                .findByFollowerId(eq(testUserId), any(Pageable.class));
+            verify(userGateway, times(1)).getUserLogin(eq(testFollowingId1));
+            verify(followMapper, times(1))
+                .toFollowingResponseDto(eq(follow1), eq("jane_doe"));
+        }
+
+        @Test
+        void getFollowing_WhenNoFollowingExist_ShouldReturnEmptyPagedModel() {
+            Page<Follow> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+
+            when(followRepository.findByFollowerId(eq(testUserId), any(Pageable.class)))
+                .thenReturn(emptyPage);
+
+            PagedModel<FollowingResponseDto> result = followService.getFollowing(
+                testUserId, null, pageable);
+
+            assertThat(result).isNotNull();
+            assertThat(result.getContent()).isEmpty();
+            assertThat(result.getMetadata().totalElements()).isEqualTo(0);
+
+            verify(followRepository, times(1))
+                .findByFollowerId(eq(testUserId), any(Pageable.class));
+            verify(userGateway, never()).getUserLogin(any());
+            verify(followMapper, never()).toFollowingResponseDto(any(), any());
+        }
+
+        @Test
+        void getFollowing_WithLoginFilter_ShouldFilterByLogin() {
+            List<Follow> follows = List.of(follow1, follow2);
+            Page<Follow> followsPage = new PageImpl<>(follows, pageable, 2);
+            FollowingFilter filter = new FollowingFilter("jane");
+
+            when(followRepository.findByFollowerId(eq(testUserId), any(Pageable.class)))
+                .thenReturn(followsPage);
+            when(userGateway.getUserLogin(testFollowingId1)).thenReturn(Optional.of("jane_doe"));
+            when(userGateway.getUserLogin(testFollowingId2)).thenReturn(Optional.of("john_smith"));
+            when(followMapper.toFollowingResponseDto(follow1, "jane_doe"))
+                .thenReturn(followingResponseDto1);
+            when(followMapper.toFollowingResponseDto(follow2, "john_smith"))
+                .thenReturn(followingResponseDto2);
+
+            PagedModel<FollowingResponseDto> result = followService.getFollowing(
+                testUserId, filter, pageable);
+
+            assertThat(result).isNotNull();
+            assertThat(result.getContent()).hasSize(1);
+            assertThat(result.getContent()).containsExactly(followingResponseDto1);
+            assertThat(result.getContent().get(0).login()).isEqualTo("jane_doe");
+        }
+
+        @Test
+        void getFollowing_WithLoginFilter_ShouldFilterCaseInsensitively() {
+            List<Follow> follows = List.of(follow1, follow2);
+            Page<Follow> followsPage = new PageImpl<>(follows, pageable, 2);
+            FollowingFilter filter = new FollowingFilter("JANE");
+
+            when(followRepository.findByFollowerId(eq(testUserId), any(Pageable.class)))
+                .thenReturn(followsPage);
+            when(userGateway.getUserLogin(testFollowingId1)).thenReturn(Optional.of("jane_doe"));
+            when(userGateway.getUserLogin(testFollowingId2)).thenReturn(Optional.of("john_smith"));
+            when(followMapper.toFollowingResponseDto(follow1, "jane_doe"))
+                .thenReturn(followingResponseDto1);
+            when(followMapper.toFollowingResponseDto(follow2, "john_smith"))
+                .thenReturn(followingResponseDto2);
+
+            PagedModel<FollowingResponseDto> result = followService.getFollowing(
+                testUserId, filter, pageable);
+
+            assertThat(result).isNotNull();
+            assertThat(result.getContent()).hasSize(1);
+            assertThat(result.getContent()).containsExactly(followingResponseDto1);
+        }
+
+        @Test
+        void getFollowing_WhenUserLoginNotFound_ShouldUseUnknownLogin() {
+            List<Follow> follows = List.of(follow1);
+            Page<Follow> followsPage = new PageImpl<>(follows, pageable, 1);
+            FollowingResponseDto followingWithUnknownLogin = FollowingResponseDto.builder()
+                .id(testFollowingId1)
+                .login("unknown")
+                .createdAt(LocalDateTime.of(2025, 1, 20, 15, 30, 0))
+                .build();
+
+            when(followRepository.findByFollowerId(eq(testUserId), any(Pageable.class)))
+                .thenReturn(followsPage);
+            when(userGateway.getUserLogin(testFollowingId1)).thenReturn(Optional.empty());
+            when(followMapper.toFollowingResponseDto(follow1, "unknown"))
+                .thenReturn(followingWithUnknownLogin);
+
+            PagedModel<FollowingResponseDto> result = followService.getFollowing(
+                testUserId, null, pageable);
+
+            assertThat(result).isNotNull();
+            assertThat(result.getContent()).hasSize(1);
+            assertThat(result.getContent().get(0).login()).isEqualTo("unknown");
+
+            verify(userGateway, times(1)).getUserLogin(eq(testFollowingId1));
+            verify(followMapper, times(1))
+                .toFollowingResponseDto(eq(follow1), eq("unknown"));
+        }
+
+        @Test
+        void getFollowing_WithPagination_ShouldUseCorrectPageable() {
+            Pageable customPageable = PageRequest.of(1, 5, Sort.by(Sort.Direction.DESC, "createdAt"));
+            List<Follow> follows = List.of(follow1);
+            Page<Follow> followsPage = new PageImpl<>(follows, customPageable, 1);
+
+            when(followRepository.findByFollowerId(eq(testUserId), any(Pageable.class)))
+                .thenReturn(followsPage);
+            when(userGateway.getUserLogin(testFollowingId1)).thenReturn(Optional.of("jane_doe"));
+            when(followMapper.toFollowingResponseDto(follow1, "jane_doe"))
+                .thenReturn(followingResponseDto1);
+
+            followService.getFollowing(testUserId, null, customPageable);
+
+            verify(followRepository, times(1))
+                .findByFollowerId(eq(testUserId), eq(customPageable));
+        }
+
+        @Test
+        void getFollowing_WhenPageableNotSorted_ShouldAddDefaultSorting() {
+            Pageable unsortedPageable = PageRequest.of(0, 10);
+            List<Follow> follows = List.of(follow1);
+            Page<Follow> followsPage = new PageImpl<>(follows, unsortedPageable, 1);
+
+            when(followRepository.findByFollowerId(eq(testUserId), any(Pageable.class)))
+                .thenReturn(followsPage);
+            when(userGateway.getUserLogin(testFollowingId1)).thenReturn(Optional.of("jane_doe"));
+            when(followMapper.toFollowingResponseDto(follow1, "jane_doe"))
+                .thenReturn(followingResponseDto1);
+
+            followService.getFollowing(testUserId, null, unsortedPageable);
+
+            verify(followRepository, times(1)).findByFollowerId(
                 eq(testUserId),
                 argThat(pageable -> pageable.getSort().isSorted() &&
                     pageable.getSort().getOrderFor("createdAt") != null &&
