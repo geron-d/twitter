@@ -1,9 +1,11 @@
 package com.twitter.service;
 
 import com.twitter.dto.filter.FollowerFilter;
+import com.twitter.dto.filter.FollowingFilter;
 import com.twitter.dto.request.FollowRequestDto;
 import com.twitter.dto.response.FollowResponseDto;
 import com.twitter.dto.response.FollowerResponseDto;
+import com.twitter.dto.response.FollowingResponseDto;
 import com.twitter.entity.Follow;
 import com.twitter.gateway.UserGateway;
 import com.twitter.mapper.FollowMapper;
@@ -128,6 +130,47 @@ public class FollowServiceImpl implements FollowService {
 
         log.info("Retrieved {} followers for user: userId={}, totalElements={}",
             followers.size(), userId, filteredPage.getTotalElements());
+
+        return new PagedModel<>(filteredPage);
+    }
+
+    /**
+     * @see FollowService#getFollowing
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public PagedModel<FollowingResponseDto> getFollowing(UUID userId, FollowingFilter filter, Pageable pageable) {
+        log.debug("Retrieving following for user: userId={}, filter={}, page={}, size={}",
+            userId, filter, pageable.getPageNumber(), pageable.getPageSize());
+
+        Pageable sortedPageable = pageable.getSort().isSorted()
+            ? pageable
+            : PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), 
+                Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        Page<Follow> followsPage = followRepository.findByFollowerId(userId, sortedPageable);
+
+        List<FollowingResponseDto> following = followsPage.getContent().stream()
+            .map(follow -> {
+                String login = userGateway.getUserLogin(follow.getFollowingId())
+                    .orElse("unknown");
+                return followMapper.toFollowingResponseDto(follow, login);
+            })
+            .filter(followingDto -> {
+                if (filter != null && StringUtils.hasText(filter.login())) {
+                    String filterLogin = filter.login().toLowerCase();
+                    String followingLogin = followingDto.login() != null ? followingDto.login().toLowerCase() : "";
+                    return followingLogin.contains(filterLogin);
+                }
+                return true;
+            })
+            .collect(Collectors.toList());
+
+        Page<FollowingResponseDto> filteredPage = new PageImpl<>(following, followsPage.getPageable(),
+            followsPage.getTotalElements());
+
+        log.info("Retrieved {} following for user: userId={}, totalElements={}",
+            following.size(), userId, filteredPage.getTotalElements());
 
         return new PagedModel<>(filteredPage);
     }

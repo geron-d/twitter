@@ -1,5 +1,44 @@
 # Changelog - Follower API Service
 
+## 2025-01-27 23:05 — step 34 done — GET /api/v1/follows/{userId}/following - Реализация Service метода — автор: assistant
+
+Реализован метод getFollowing для получения списка подписок:
+- Добавлен метод getFollowing(UUID userId, FollowingFilter filter, Pageable pageable) в интерфейс FollowService:
+  - Полная JavaDoc документация с описанием операций, @param для всех параметров, @return
+  - Описание пагинации, фильтрации и интеграции с users-api
+- Реализован метод getFollowing в FollowServiceImpl:
+  - @Transactional(readOnly = true) для обеспечения транзакционности только для чтения
+  - Получение Page<Follow> из Repository (findByFollowerId с сортировкой по createdAt DESC)
+  - Для каждой Follow получение login из users-api через UserGateway.getUserLogin() для followingId
+  - Преобразование в FollowingResponseDto через FollowMapper.toFollowingResponseDto()
+  - Применение фильтра по логину (если указан) - частичное совпадение без учета регистра
+  - Создание PagedModel из отфильтрованных результатов
+  - Логирование: debug перед операцией, info после успешного получения
+- Метод имеет JavaDoc с @see для ссылки на интерфейс
+
+Метод соответствует стандартам проекта (STANDART_CODE.md, STANDART_JAVADOC.md) и структуре других Service методов (FollowService.getFollowers). Примечание: фильтрация по логину выполняется на уровне приложения после получения данных из БД, так как login хранится в users-api, а не в таблице follows. Это означает, что пагинация может работать некорректно при использовании фильтра, но это ограничение архитектуры. Проверка линтера: ошибок не обнаружено.
+
+## 2025-01-27 23:00 — step 33 done — GET /api/v1/follows/{userId}/following - Реализация DTO — автор: assistant
+
+Созданы DTO для эндпоинта GET /api/v1/follows/{userId}/following:
+- FollowingResponseDto в пакете com.twitter.dto.response:
+  - Поля: id (UUID), login (String), createdAt (LocalDateTime)
+  - @Schema аннотации на уровне класса (name="FollowingResponse", description, example JSON) и на уровне полей (description, example, format, requiredMode)
+  - @JsonFormat для createdAt (pattern="yyyy-MM-dd'T'HH:mm:ss'Z'", timezone="UTC")
+  - @Builder для удобства создания
+  - Полная JavaDoc документация с @param для всех компонентов, @author geron, @version 1.0
+- FollowingFilter в пакете com.twitter.dto.filter:
+  - Поле: login (String, optional) для фильтрации подписок по логину (частичное совпадение)
+  - @Schema аннотации на уровне класса (name="FollowingFilter", description, example JSON) и на уровне полей (description, example, requiredMode=NOT_REQUIRED)
+  - Полная JavaDoc документация с @param для всех компонентов, @author geron, @version 1.0
+  - Примечание: фильтрация по логину будет выполняться на уровне сервиса после получения данных из users-api, так как login не хранится в таблице follows
+
+Оба DTO используют Records (Java 24), соответствуют стандартам проекта (STANDART_CODE.md, STANDART_SWAGGER.md, STANDART_JAVADOC.md) и структуре других DTO (FollowerResponseDto, FollowerFilter). Проверка линтера: ошибок не обнаружено.
+
+## 2025-01-27 22:50 — step 32 done — GET /api/v1/follows/{userId}/followers - OpenAPI документация — автор: assistant
+
+OpenAPI документация для метода getFollowers уже полностью реализована в шаге #29 в интерфейсе FollowApi. Все критерии acceptance criteria выполнены: @Operation с summary="Get followers list" и подробным description (описание функциональности, фильтрации, сортировки, интеграции с users-api), @ApiResponses со всеми возможными статус-кодами (200 OK для успешного получения списка подписчиков с примером PagedModel, 400 Bad Request для неверного формата UUID с примером Problem Details), @ExampleObject для успешного ответа в формате PagedModel с примером структуры (content, page metadata), @Parameter для всех параметров (userId, filter, pageable) с description, required=true/required=false и example. Документация на английском языке. Примечание: статус 404 не используется для этого эндпоинта, так как метод всегда возвращает список подписчиков (может быть пустым), а не ошибку 404. Это аналогично другим GET эндпоинтам для получения списков (TweetController.getUserTweets, UserController.findAll).
+
 ## 2025-01-27 22:45 — step 31 done — GET /api/v1/follows/{userId}/followers - Integration тесты — автор: assistant
 
 Добавлены integration тесты для эндпоинта GET /api/v1/follows/{userId}/followers:
