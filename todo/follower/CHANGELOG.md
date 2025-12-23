@@ -1,6 +1,34 @@
 # Changelog - Follower API Service
 
-## 2025-01-27 22:30 — step 30 done — GET /api/v1/follows/{userId}/followers - Unit тесты для Service метода — автор: assistant
+## 2025-01-27 22:45 — step 31 done — GET /api/v1/follows/{userId}/followers - Integration тесты — автор: assistant
+
+Добавлены integration тесты для эндпоинта GET /api/v1/follows/{userId}/followers:
+- @Nested класс GetFollowersTests в FollowControllerTest для группировки тестов GET эндпоинта
+- Тесты успешного сценария:
+  - getFollowers_WhenFollowersExist_ShouldReturn200Ok - проверка успешного получения списка подписчиков с проверкой структуры PagedModel (content, metadata) и метаданных пагинации (size, number, totalElements, totalPages)
+  - getFollowers_WhenNoFollowersExist_ShouldReturn200OkWithEmptyList - проверка пустого списка с проверкой метаданных (totalElements=0, totalPages=0)
+  - getFollowers_WithPagination_ShouldReturnCorrectPage - проверка пагинации (page=0, size=2) с проверкой корректности страницы и метаданных
+- Тесты фильтрации:
+  - getFollowers_WithLoginFilter_ShouldFilterByLogin - проверка фильтрации по логину (частичное совпадение)
+  - getFollowers_WithLoginFilter_ShouldFilterCaseInsensitively - проверка фильтрации без учета регистра
+- Тесты валидации:
+  - getFollowers_WithInvalidUserIdFormat_ShouldReturn400BadRequest - проверка неверного формата UUID для userId
+- Тесты функциональности:
+  - getFollowers_ShouldSortByCreatedAtDesc - проверка сортировки по createdAt DESC (новые первыми)
+  - getFollowers_WhenUserLoginNotFound_ShouldUseUnknownLogin - проверка использования "unknown" логина при отсутствии логина в users-api
+- Расширен BaseIntegrationTest:
+  - Добавлен метод setupUserByIdStub(UUID userId, String login) для мокирования GET /api/v1/users/{id} эндпоинта
+  - Добавлен метод setupUserByIdStubWithError(UUID userId, int statusCode) для мокирования ошибок users-api
+- Все тесты используют:
+  - MockMvc для тестирования REST endpoints
+  - @Transactional для изоляции тестов
+  - WireMock для мокирования users-api (GET /api/v1/users/{id})
+  - jsonPath для проверки структуры PagedModel
+  - Проверку метаданных пагинации (size, number, totalElements, totalPages)
+
+Тесты соответствуют стандартам проекта (STANDART_TEST.md) и структуре других Controller тестов (TweetControllerTest.getUserTweets, UserControllerTest.findAll). Проверка линтера: ошибок не обнаружено.
+
+## 2025-01-27 22:30 — step 30 done — GET /api/v1/follows/{userId}/followers - OpenAPI документация — автор: assistant
 
 Добавлены unit тесты для метода getFollowers в FollowServiceImplTest:
 - @Nested класс GetFollowersTests для группировки тестов метода getFollowers

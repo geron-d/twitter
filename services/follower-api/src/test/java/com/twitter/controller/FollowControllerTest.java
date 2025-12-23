@@ -23,6 +23,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -309,6 +310,149 @@ public class FollowControllerTest extends BaseIntegrationTest {
                 .andExpect(jsonPath("$.detail").exists());
 
             assertThat(getFollowCount()).isEqualTo(0);
+        }
+    }
+
+    @Nested
+    class GetFollowersTests {
+
+        private UUID testUserId;
+        private UUID testFollowerId1;
+        private UUID testFollowerId2;
+        private UUID testFollowerId3;
+
+        @BeforeEach
+        void setUp() {
+            testUserId = UUID.randomUUID();
+            testFollowerId1 = UUID.randomUUID();
+            testFollowerId2 = UUID.randomUUID();
+            testFollowerId3 = UUID.randomUUID();
+        }
+
+        @Test
+        void getFollowers_WhenFollowersExist_ShouldReturn200Ok() throws Exception {
+            setupUserExistsStub(testFollowerId1, true);
+            setupUserExistsStub(testFollowerId2, true);
+            setupUserByIdStub(testFollowerId1, "john_doe");
+            setupUserByIdStub(testFollowerId2, "jane_smith");
+
+            createAndSaveFollow(testFollowerId1, testUserId);
+            createAndSaveFollow(testFollowerId2, testUserId);
+
+            mockMvc.perform(get("/api/v1/follows/{userId}/followers", testUserId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(2))
+                .andExpect(jsonPath("$.content[0].id").exists())
+                .andExpect(jsonPath("$.content[0].login").exists())
+                .andExpect(jsonPath("$.content[0].createdAt").exists())
+                .andExpect(jsonPath("$.page.size").value(10))
+                .andExpect(jsonPath("$.page.number").value(0))
+                .andExpect(jsonPath("$.page.totalElements").value(2))
+                .andExpect(jsonPath("$.page.totalPages").value(1));
+        }
+
+        @Test
+        void getFollowers_WhenNoFollowersExist_ShouldReturn200OkWithEmptyList() throws Exception {
+            mockMvc.perform(get("/api/v1/follows/{userId}/followers", testUserId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(0))
+                .andExpect(jsonPath("$.page.size").value(10))
+                .andExpect(jsonPath("$.page.number").value(0))
+                .andExpect(jsonPath("$.page.totalElements").value(0))
+                .andExpect(jsonPath("$.page.totalPages").value(0));
+        }
+
+        @Test
+        void getFollowers_WithPagination_ShouldReturnCorrectPage() throws Exception {
+            setupUserByIdStub(testFollowerId1, "john_doe");
+            setupUserByIdStub(testFollowerId2, "jane_smith");
+            setupUserByIdStub(testFollowerId3, "bob_wilson");
+
+            createAndSaveFollow(testFollowerId1, testUserId);
+            createAndSaveFollow(testFollowerId2, testUserId);
+            createAndSaveFollow(testFollowerId3, testUserId);
+
+            mockMvc.perform(get("/api/v1/follows/{userId}/followers?page=0&size=2", testUserId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(2))
+                .andExpect(jsonPath("$.page.size").value(2))
+                .andExpect(jsonPath("$.page.number").value(0))
+                .andExpect(jsonPath("$.page.totalElements").value(3))
+                .andExpect(jsonPath("$.page.totalPages").value(2));
+        }
+
+        @Test
+        void getFollowers_WithLoginFilter_ShouldFilterByLogin() throws Exception {
+            setupUserByIdStub(testFollowerId1, "john_doe");
+            setupUserByIdStub(testFollowerId2, "jane_smith");
+
+            createAndSaveFollow(testFollowerId1, testUserId);
+            createAndSaveFollow(testFollowerId2, testUserId);
+
+            mockMvc.perform(get("/api/v1/follows/{userId}/followers?login=john", testUserId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.content[0].login").value("john_doe"));
+        }
+
+        @Test
+        void getFollowers_WithLoginFilter_ShouldFilterCaseInsensitively() throws Exception {
+            setupUserByIdStub(testFollowerId1, "john_doe");
+            setupUserByIdStub(testFollowerId2, "jane_smith");
+
+            createAndSaveFollow(testFollowerId1, testUserId);
+            createAndSaveFollow(testFollowerId2, testUserId);
+
+            mockMvc.perform(get("/api/v1/follows/{userId}/followers?login=JOHN", testUserId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.content[0].login").value("john_doe"));
+        }
+
+        @Test
+        void getFollowers_ShouldSortByCreatedAtDesc() throws Exception {
+            setupUserByIdStub(testFollowerId1, "john_doe");
+            setupUserByIdStub(testFollowerId2, "jane_smith");
+
+            // Create follows with different timestamps
+            Follow follow1 = createAndSaveFollow(testFollowerId1, testUserId);
+            // Wait a bit to ensure different timestamps
+            Thread.sleep(10);
+            Follow follow2 = createAndSaveFollow(testFollowerId2, testUserId);
+
+            String responseJson = mockMvc.perform(get("/api/v1/follows/{userId}/followers", testUserId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+            // Verify that the most recent follow (follow2) appears first
+            assertThat(responseJson).contains(testFollowerId2.toString());
+        }
+
+        @Test
+        void getFollowers_WhenUserLoginNotFound_ShouldUseUnknownLogin() throws Exception {
+            setupUserByIdStubWithError(testFollowerId1, 404);
+
+            createAndSaveFollow(testFollowerId1, testUserId);
+
+            mockMvc.perform(get("/api/v1/follows/{userId}/followers", testUserId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.content[0].login").value("unknown"));
         }
     }
 }

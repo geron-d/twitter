@@ -128,5 +128,58 @@ public abstract class BaseIntegrationTest {
                     .withBody("{\"error\":\"Internal Server Error\"}"))
         );
     }
+
+    /**
+     * Sets up WireMock stub for getting user by ID.
+     *
+     * @param userId the user ID
+     * @param login  the user login to return
+     */
+    protected void setupUserByIdStub(UUID userId, String login) {
+        if (wireMockServer == null) {
+            return;
+        }
+
+        String responseBody = String.format("""
+            {
+              "id": "%s",
+              "login": "%s",
+              "firstName": "Test",
+              "lastName": "User",
+              "email": "test@example.com",
+              "status": "ACTIVE",
+              "role": "USER",
+              "createdAt": "2025-01-20T10:00:00"
+            }
+            """, userId, login);
+
+        wireMockServer.stubFor(
+            get(urlEqualTo("/api/v1/users/" + userId))
+                .willReturn(aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(responseBody))
+        );
+    }
+
+    /**
+     * Sets up WireMock stub for getting user by ID with error response.
+     *
+     * @param userId     the user ID
+     * @param statusCode HTTP status code to return
+     */
+    protected void setupUserByIdStubWithError(UUID userId, int statusCode) {
+        if (wireMockServer == null) {
+            return;
+        }
+
+        wireMockServer.stubFor(
+            get(urlEqualTo("/api/v1/users/" + userId))
+                .willReturn(aResponse()
+                    .withStatus(statusCode)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody("{\"error\":\"User not found\"}"))
+        );
+    }
 }
 
