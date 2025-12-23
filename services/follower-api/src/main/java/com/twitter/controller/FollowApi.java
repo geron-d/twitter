@@ -1,9 +1,11 @@
 package com.twitter.controller;
 
 import com.twitter.dto.filter.FollowerFilter;
+import com.twitter.dto.filter.FollowingFilter;
 import com.twitter.dto.request.FollowRequestDto;
 import com.twitter.dto.response.FollowResponseDto;
 import com.twitter.dto.response.FollowerResponseDto;
+import com.twitter.dto.response.FollowingResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -319,6 +321,90 @@ public interface FollowApi {
         UUID userId,
         @Parameter(description = "Filter criteria for filtering followers by login (partial match)")
         FollowerFilter filter,
+        @Parameter(description = "Pagination parameters (page, size, sorting)")
+        @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC)
+        Pageable pageable);
+
+    /**
+     * Retrieves a paginated list of following for a specific user.
+     * <p>
+     * This method retrieves all users that the specified user is following, with optional
+     * filtering by login name. The results are paginated and sorted by creation date
+     * in descending order (newest first). User login information is retrieved from
+     * the users-api service.
+     *
+     * @param userId   the ID of the user whose following should be retrieved
+     * @param filter   optional filter criteria for filtering following by login (partial match)
+     * @param pageable pagination parameters (page, size, sorting)
+     * @return PagedModel containing paginated list of following with metadata and HATEOAS links
+     */
+    @Operation(
+        summary = "Get following list",
+        description = "Retrieves a paginated list of following for a specific user. " +
+            "Supports optional filtering by login name (partial match, case-insensitive). " +
+            "Results are sorted by creation date in descending order (newest first). " +
+            "User login information is retrieved from the users-api service."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Following retrieved successfully",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = PagedModel.class),
+                examples = @ExampleObject(
+                    name = "Paginated Following",
+                    summary = "Example paginated following response",
+                    value = """
+                        {
+                          "content": [
+                            {
+                              "id": "987fcdeb-51a2-43d7-b123-426614174999",
+                              "login": "jane_doe",
+                              "createdAt": "2025-01-20T15:30:00Z"
+                            }
+                          ],
+                          "page": {
+                            "size": 10,
+                            "number": 0,
+                            "totalElements": 1,
+                            "totalPages": 1
+                          }
+                        }
+                        """
+                )
+            )
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Validation error - Invalid UUID format",
+            content = @Content(
+                mediaType = "application/problem+json",
+                examples = @ExampleObject(
+                    name = "Invalid UUID Format Error",
+                    summary = "Invalid UUID format for userId parameter",
+                    value = """
+                        {
+                          "type": "https://example.com/errors/validation-error",
+                          "title": "Validation Error",
+                          "status": 400,
+                          "detail": "Invalid UUID format for userId parameter",
+                          "timestamp": "2025-01-27T10:30:00Z"
+                        }
+                        """
+                )
+            )
+        )
+    })
+    PagedModel<FollowingResponseDto> getFollowing(
+        @Parameter(
+            description = "Unique identifier of the user whose following should be retrieved",
+            required = true,
+            example = "123e4567-e89b-12d3-a456-426614174000"
+        )
+        UUID userId,
+        @Parameter(description = "Filter criteria for filtering following by login (partial match)")
+        FollowingFilter filter,
         @Parameter(description = "Pagination parameters (page, size, sorting)")
         @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC)
         Pageable pageable);

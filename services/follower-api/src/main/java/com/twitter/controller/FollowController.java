@@ -2,9 +2,11 @@ package com.twitter.controller;
 
 import com.twitter.common.aspect.LoggableRequest;
 import com.twitter.dto.filter.FollowerFilter;
+import com.twitter.dto.filter.FollowingFilter;
 import com.twitter.dto.request.FollowRequestDto;
 import com.twitter.dto.response.FollowResponseDto;
 import com.twitter.dto.response.FollowerResponseDto;
+import com.twitter.dto.response.FollowingResponseDto;
 import com.twitter.service.FollowService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -68,6 +70,19 @@ public class FollowController implements FollowApi {
         @ModelAttribute FollowerFilter filter,
         @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         return followService.getFollowers(userId, filter, pageable);
+    }
+
+    /**
+     * @see FollowApi#getFollowing
+     */
+    @LoggableRequest
+    @GetMapping("/{userId}/following")
+    @Override
+    public PagedModel<FollowingResponseDto> getFollowing(
+        @PathVariable("userId") UUID userId,
+        @ModelAttribute FollowingFilter filter,
+        @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return followService.getFollowing(userId, filter, pageable);
     }
 }
 

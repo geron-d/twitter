@@ -1,5 +1,27 @@
 # Changelog - Follower API Service
 
+## 2025-01-27 23:10 — step 35 done — GET /api/v1/follows/{userId}/following - Реализация Controller метода — автор: assistant
+
+Реализован метод getFollowing для получения списка подписок через REST API:
+- Добавлен метод getFollowing в интерфейс FollowApi:
+  - @Operation с summary="Get following list" и подробным description
+  - @ApiResponses со всеми возможными статус-кодами:
+    - 200 OK - успешное получение списка подписок (с примером PagedModel)
+    - 400 Bad Request - неверный формат UUID (с примером Problem Details)
+  - @ExampleObject для успешного ответа в формате PagedModel с примером структуры
+  - @Parameter для всех параметров (userId, filter, pageable) с description и example
+  - Полная JavaDoc документация с @param для всех параметров, @return
+- Реализован метод getFollowing в FollowController:
+  - @LoggableRequest для автоматического логирования запросов/ответов
+  - @GetMapping("/{userId}/following") для обработки GET запросов
+  - @PathVariable для userId
+  - @ModelAttribute для FollowingFilter (автоматическое связывание query параметров)
+  - @PageableDefault(size=10, sort="createdAt", direction=Sort.Direction.DESC) для пагинации
+  - Вызывает followService.getFollowing() и возвращает PagedModel<FollowingResponseDto> напрямую
+  - JavaDoc с @see для ссылки на интерфейс
+
+Метод соответствует стандартам проекта (STANDART_CODE.md, STANDART_SWAGGER.md, STANDART_JAVADOC.md) и структуре других Controller методов (FollowController.getFollowers, TweetController.getUserTweets, UserController.findAll). Эндпоинт готов для использования и полностью документирован в Swagger. Проверка линтера: ошибок не обнаружено.
+
 ## 2025-01-27 23:05 — step 34 done — GET /api/v1/follows/{userId}/following - Реализация Service метода — автор: assistant
 
 Реализован метод getFollowing для получения списка подписок:
