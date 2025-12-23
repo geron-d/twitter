@@ -310,7 +310,7 @@
     - Метод возвращает PagedModel<FollowerResponseDto>
   - Выполнено: Добавлен метод getFollowers в интерфейс FollowApi с полной OpenAPI документацией: @Operation с summary="Get followers list" и подробным description, @ApiResponses со всеми возможными статус-кодами (200 OK для успешного получения, 400 Bad Request для неверного формата UUID), @ExampleObject для успешного ответа в формате PagedModel, @Parameter для всех параметров (userId, filter, pageable) с description и example. Реализован метод getFollowers в FollowController с @LoggableRequest, @GetMapping("/{userId}/followers"), @PathVariable для userId, @ModelAttribute для FollowerFilter, @PageableDefault(size=10, sort="createdAt", direction=Sort.Direction.DESC) для пагинации. Метод вызывает followService.getFollowers() и возвращает PagedModel<FollowerResponseDto> напрямую (так как Service уже возвращает PagedModel). Метод имеет JavaDoc с @see для ссылки на интерфейс. Соответствует стандартам проекта (STANDART_CODE.md, STANDART_SWAGGER.md, STANDART_JAVADOC.md) и структуре других Controller методов (TweetController.getUserTweets, UserController.findAll). Проверка линтера: ошибок не обнаружено.
 
-- [ ] (P1) #30: GET /api/v1/follows/{userId}/followers - Unit тесты для Service метода - протестировать метод getFollowers
+- [x] (P1) [2025-01-27 22:30] #30: GET /api/v1/follows/{userId}/followers - Unit тесты для Service метода - протестировать метод getFollowers
   - Зависимости: #28
   - Acceptance criteria:
     - Создан тест для метода getFollowers в FollowServiceImplTest
@@ -319,6 +319,7 @@
     - Используется @Nested для группировки тестов
     - Используется AssertJ для assertions
     - Проверены взаимодействия с зависимостями (verify)
+  - Выполнено: Добавлен @Nested класс GetFollowersTests в FollowServiceImplTest для группировки тестов метода getFollowers. Добавлен @Mock для UserGateway. Реализованы тесты: getFollowers_WithValidData_ShouldReturnPagedModelWithFollowers (успешный сценарий с пагинацией, проверка структуры PagedModel), getFollowers_WithValidData_ShouldCallEachDependencyExactlyOnce (проверка взаимодействий с зависимостями), getFollowers_WhenNoFollowersExist_ShouldReturnEmptyPagedModel (пустой результат), getFollowers_WithLoginFilter_ShouldFilterByLogin (фильтрация по логину), getFollowers_WithLoginFilter_ShouldFilterCaseInsensitively (фильтрация без учета регистра), getFollowers_WhenUserLoginNotFound_ShouldUseUnknownLogin (обработка отсутствия логина), getFollowers_WithPagination_ShouldUseCorrectPageable (проверка пагинации), getFollowers_WhenPageableNotSorted_ShouldAddDefaultSorting (добавление сортировки по умолчанию). Все тесты используют AssertJ для assertions (assertThat), проверяют взаимодействия с зависимостями через verify (followRepository.findByFollowingId, userGateway.getUserLogin, followMapper.toFollowerResponseDto). Тесты соответствуют стандартам проекта (STANDART_TEST.md) и структуре других Service тестов (TweetServiceImplTest.getUserTweets, UserServiceImplTest.findAll). Проверка линтера: ошибок не обнаружено.
 
 - [ ] (P2) #31: GET /api/v1/follows/{userId}/followers - Integration тесты - протестировать эндпоинт GET /api/v1/follows/{userId}/followers
   - Зависимости: #29

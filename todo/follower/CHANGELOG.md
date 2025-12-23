@@ -1,5 +1,29 @@
 # Changelog - Follower API Service
 
+## 2025-01-27 22:30 — step 30 done — GET /api/v1/follows/{userId}/followers - Unit тесты для Service метода — автор: assistant
+
+Добавлены unit тесты для метода getFollowers в FollowServiceImplTest:
+- @Nested класс GetFollowersTests для группировки тестов метода getFollowers
+- Добавлен @Mock для UserGateway (используется в методе getFollowers)
+- Тесты успешного сценария:
+  - getFollowers_WithValidData_ShouldReturnPagedModelWithFollowers - проверка успешного получения списка подписчиков с пагинацией, проверка структуры PagedModel (content, page metadata)
+  - getFollowers_WithValidData_ShouldCallEachDependencyExactlyOnce - проверка взаимодействий с зависимостями (followRepository.findByFollowingId, userGateway.getUserLogin, followMapper.toFollowerResponseDto)
+- Тесты пустого результата:
+  - getFollowers_WhenNoFollowersExist_ShouldReturnEmptyPagedModel - проверка пустого результата, проверка отсутствия вызовов userGateway и followMapper
+- Тесты фильтрации:
+  - getFollowers_WithLoginFilter_ShouldFilterByLogin - проверка фильтрации по логину (частичное совпадение)
+  - getFollowers_WithLoginFilter_ShouldFilterCaseInsensitively - проверка фильтрации без учета регистра
+- Тесты обработки ошибок:
+  - getFollowers_WhenUserLoginNotFound_ShouldUseUnknownLogin - проверка использования "unknown" логина при отсутствии логина в users-api
+- Тесты пагинации:
+  - getFollowers_WithPagination_ShouldUseCorrectPageable - проверка использования правильного Pageable
+  - getFollowers_WhenPageableNotSorted_ShouldAddDefaultSorting - проверка добавления сортировки по умолчанию (createdAt DESC) при отсутствии сортировки
+- Все тесты используют AssertJ для assertions (assertThat)
+- Все тесты проверяют взаимодействия с зависимостями через verify
+- Тесты используют @BeforeEach для инициализации тестовых данных
+
+Тесты соответствуют стандартам проекта (STANDART_TEST.md) и структуре других Service тестов (TweetServiceImplTest.getUserTweets, UserServiceImplTest.findAll). Проверка линтера: ошибок не обнаружено.
+
 ## 2025-01-27 22:15 — step 29 done — GET /api/v1/follows/{userId}/followers - Реализация Controller метода — автор: assistant
 
 Реализован метод getFollowers для получения списка подписчиков через REST API:
