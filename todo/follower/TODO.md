@@ -299,7 +299,7 @@
     - Добавлено логирование
   - Выполнено: Добавлен метод getFollowers(UUID userId, FollowerFilter filter, Pageable pageable) в интерфейс FollowService с полной JavaDoc документацией (описание операций, @param для всех параметров, @return). Реализован метод getFollowers в FollowServiceImpl с @Transactional(readOnly = true). Метод получает Page<Follow> из Repository (findByFollowingId с сортировкой по createdAt DESC), для каждой Follow получает login из users-api через UserGateway.getUserLogin(), преобразует в FollowerResponseDto через FollowMapper.toFollowerResponseDto(), применяет фильтр по логину (если указан) - частичное совпадение без учета регистра, создает PagedModel из отфильтрованных результатов. Добавлено логирование: debug перед операцией, info после успешного получения. Добавлен метод getUserLogin в UserGateway для получения логина пользователя из users-api. Добавлен метод getUserById в UsersApiClient для получения UserResponseDto из users-api. Метод имеет JavaDoc с @see для ссылки на интерфейс. Соответствует стандартам проекта (STANDART_CODE.md, STANDART_JAVADOC.md) и структуре других Service методов (TweetService.getUserTweets). Примечание: фильтрация по логину выполняется на уровне приложения после получения данных из БД, так как login хранится в users-api, а не в таблице follows. Это означает, что пагинация может работать некорректно при использовании фильтра, но это ограничение архитектуры. Проверка линтера: ошибок не обнаружено.
 
-- [ ] (P1) #29: GET /api/v1/follows/{userId}/followers - Реализация Controller метода - создать метод getFollowers в FollowController
+- [x] (P1) [2025-01-27 22:15] #29: GET /api/v1/follows/{userId}/followers - Реализация Controller метода - создать метод getFollowers в FollowController
   - Зависимости: #28
   - Acceptance criteria:
     - Добавлен метод getFollowers в интерфейс FollowApi с OpenAPI аннотациями
@@ -308,6 +308,7 @@
     - Метод использует @PageableDefault для пагинации
     - Метод возвращает HttpStatus.OK (200)
     - Метод возвращает PagedModel<FollowerResponseDto>
+  - Выполнено: Добавлен метод getFollowers в интерфейс FollowApi с полной OpenAPI документацией: @Operation с summary="Get followers list" и подробным description, @ApiResponses со всеми возможными статус-кодами (200 OK для успешного получения, 400 Bad Request для неверного формата UUID), @ExampleObject для успешного ответа в формате PagedModel, @Parameter для всех параметров (userId, filter, pageable) с description и example. Реализован метод getFollowers в FollowController с @LoggableRequest, @GetMapping("/{userId}/followers"), @PathVariable для userId, @ModelAttribute для FollowerFilter, @PageableDefault(size=10, sort="createdAt", direction=Sort.Direction.DESC) для пагинации. Метод вызывает followService.getFollowers() и возвращает PagedModel<FollowerResponseDto> напрямую (так как Service уже возвращает PagedModel). Метод имеет JavaDoc с @see для ссылки на интерфейс. Соответствует стандартам проекта (STANDART_CODE.md, STANDART_SWAGGER.md, STANDART_JAVADOC.md) и структуре других Controller методов (TweetController.getUserTweets, UserController.findAll). Проверка линтера: ошибок не обнаружено.
 
 - [ ] (P1) #30: GET /api/v1/follows/{userId}/followers - Unit тесты для Service метода - протестировать метод getFollowers
   - Зависимости: #28
