@@ -487,7 +487,7 @@
     - Добавлено логирование
   - Выполнено: Добавлен метод getFollowStats(UUID userId) в интерфейс FollowService с полной JavaDoc документацией (описание операций, @param, @return). Реализован метод getFollowStats в FollowServiceImpl с @Transactional(readOnly = true) для обеспечения транзакционности только для чтения. Метод использует Repository для подсчета: countByFollowingId(userId) для подсчета подписчиков (количество пользователей, которые следуют за userId), countByFollowerId(userId) для подсчета подписок (количество пользователей, за которыми следует userId). Метод использует Mapper для преобразования двух long в FollowStatsResponseDto через followMapper.toFollowStatsResponseDto(followersCount, followingCount). Добавлено логирование: debug перед операцией, info после успешного получения с выведением userId, followersCount и followingCount. Добавлен метод toFollowStatsResponseDto(long followersCount, long followingCount) в FollowMapper с @Mapping для настройки маппинга полей. Метод имеет JavaDoc с @see для ссылки на интерфейс. Соответствует стандартам проекта (STANDART_CODE.md, STANDART_JAVADOC.md) и структуре других Service методов (FollowService.getFollowers, FollowService.getFollowing, FollowService.getFollowStatus). Проверка линтера: ошибок не обнаружено.
 
-- [ ] (P1) #47: GET /api/v1/follows/{userId}/stats - Реализация Controller метода - создать метод getFollowStats в FollowController
+- [x] (P1) [2025-01-28 00:00] #47: GET /api/v1/follows/{userId}/stats - Реализация Controller метода - создать метод getFollowStats в FollowController
   - Зависимости: #46
   - Acceptance criteria:
     - Добавлен метод getFollowStats в интерфейс FollowApi с OpenAPI аннотациями
@@ -495,8 +495,9 @@
     - Метод использует @PathVariable для userId
     - Метод возвращает HttpStatus.OK (200)
     - Метод возвращает FollowStatsResponseDto
+  - Выполнено: Добавлен метод getFollowStats в интерфейс FollowApi с полной OpenAPI документацией: @Operation с summary="Get follow statistics" и подробным description (описание функциональности получения статистики подписок), @ApiResponses со всеми возможными статус-кодами (200 OK для успешного получения статистики с примером FollowStatsResponseDto, 400 Bad Request для неверного формата UUID с примером Problem Details), @ExampleObject для успешного ответа в формате JSON с примером структуры (followersCount, followingCount), @Parameter для userId с description, required=true и example. Реализован метод getFollowStats в FollowController с @LoggableRequest, @GetMapping("/{userId}/stats"), @PathVariable для userId. Метод вызывает followService.getFollowStats() и возвращает ResponseEntity.ok(stats) (200 OK). Метод имеет JavaDoc с @see для ссылки на интерфейс. Соответствует стандартам проекта (STANDART_CODE.md, STANDART_SWAGGER.md, STANDART_JAVADOC.md) и структуре других Controller методов (FollowController.getFollowStatus, FollowController.getFollowers, FollowController.getFollowing). Эндпоинт готов для использования и полностью документирован в Swagger. Проверка линтера: ошибок не обнаружено.
 
-- [ ] (P1) #48: GET /api/v1/follows/{userId}/stats - Unit тесты для Service метода - протестировать метод getFollowStats
+- [x] (P1) [2025-01-28 00:01] #48: GET /api/v1/follows/{userId}/stats - Unit тесты для Service метода - протестировать метод getFollowStats
   - Зависимости: #46
   - Acceptance criteria:
     - Создан тест для метода getFollowStats в FollowServiceImplTest
@@ -504,8 +505,9 @@
     - Используется @Nested для группировки тестов
     - Используется AssertJ для assertions
     - Проверены взаимодействия с зависимостями (verify)
+  - Выполнено: Добавлен @Nested класс GetFollowStatsTests в FollowServiceImplTest для группировки тестов метода getFollowStats. Реализованы тесты: getFollowStats_WithValidData_ShouldReturnFollowStatsResponseDto (успешный сценарий с проверкой корректного возврата FollowStatsResponseDto и значений followersCount и followingCount), getFollowStats_WithZeroCounts_ShouldReturnFollowStatsResponseDtoWithZeros (сценарий с нулевыми значениями, проверка корректной обработки нулевых счетчиков), getFollowStats_WithValidData_ShouldCallEachDependencyExactlyOnce (проверка взаимодействий с зависимостями - followRepository.countByFollowingId, followRepository.countByFollowerId, followMapper.toFollowStatsResponseDto). Все тесты используют AssertJ для assertions (assertThat), проверяют взаимодействия с зависимостями через verify (followRepository.countByFollowingId, followRepository.countByFollowerId, followMapper.toFollowStatsResponseDto). Тесты используют @BeforeEach для инициализации тестовых данных. Тесты соответствуют стандартам проекта (STANDART_TEST.md) и структуре других Service тестов (FollowServiceImplTest.getFollowStatus, FollowServiceImplTest.getFollowers, FollowServiceImplTest.getFollowing). Проверка линтера: ошибок не обнаружено.
 
-- [ ] (P2) #49: GET /api/v1/follows/{userId}/stats - Integration тесты - протестировать эндпоинт GET /api/v1/follows/{userId}/stats
+- [x] (P2) [2025-01-28 00:02] #49: GET /api/v1/follows/{userId}/stats - Integration тесты - протестировать эндпоинт GET /api/v1/follows/{userId}/stats
   - Зависимости: #47
   - Acceptance criteria:
     - Создан тест для GET /api/v1/follows/{userId}/stats в FollowControllerTest
@@ -513,14 +515,16 @@
     - Использован MockMvc для тестирования REST endpoint
     - Использован @Transactional для изоляции тестов
     - Проверен формат ответов
+  - Выполнено: Добавлен @Nested класс GetFollowStatsTests в FollowControllerTest для группировки тестов GET эндпоинта. Реализованы тесты: getFollowStats_WhenStatsExist_ShouldReturn200Ok (успешный сценарий с проверкой корректных счетчиков followersCount и followingCount при наличии подписок), getFollowStats_WhenNoStatsExist_ShouldReturn200OkWithZeros (сценарий с нулевыми счетчиками, когда у пользователя нет подписок), getFollowStats_WithOnlyFollowers_ShouldReturnCorrectCounts (проверка корректного подсчета только подписчиков), getFollowStats_WithOnlyFollowing_ShouldReturnCorrectCounts (проверка корректного подсчета только подписок), getFollowStats_WithInvalidUserIdFormat_ShouldReturn400BadRequest (валидация неверного формата UUID для userId). Все тесты используют MockMvc для тестирования REST endpoints, @Transactional для изоляции тестов, проверяют формат ответов (JSON для успешных ответов, RFC 7807 Problem Details для ошибок), используют jsonPath для проверки структуры ответов, создают подписки в БД через createAndSaveFollow для тестирования статистики. Тесты соответствуют стандартам проекта (STANDART_TEST.md) и структуре других Controller тестов (FollowControllerTest.getFollowStatus, FollowControllerTest.getFollowers, FollowControllerTest.getFollowing). Проверка линтера: ошибок не обнаружено.
 
-- [ ] (P1) #50: GET /api/v1/follows/{userId}/stats - OpenAPI документация - добавить @Operation, @ApiResponses для метода getFollowStats
+- [x] (P1) [2025-01-28 00:03] #50: GET /api/v1/follows/{userId}/stats - OpenAPI документация - добавить @Operation, @ApiResponses для метода getFollowStats
   - Зависимости: #47
   - Acceptance criteria:
     - Метод getFollowStats имеет @Operation с summary и description
     - Метод getFollowStats имеет @ApiResponses со всеми возможными статус-кодами (200)
     - Параметры имеют @Parameter с description
     - Документация на английском языке
+  - Выполнено: OpenAPI документация для метода getFollowStats уже полностью реализована в шаге #47 в интерфейсе FollowApi. Метод имеет @Operation с summary="Get follow statistics" и подробным description (описание функциональности получения статистики подписок, описание возвращаемых значений - количество подписчиков и подписок), @ApiResponses со всеми возможными статус-кодами (200 OK для успешного получения статистики с примером FollowStatsResponseDto, 400 Bad Request для неверного формата UUID с примером Problem Details), @ExampleObject для успешного ответа в формате JSON с примером структуры (followersCount, followingCount), @Parameter для userId с description, required=true и example. Документация на английском языке. Все критерии acceptance criteria выполнены.
 
 ### Дополнительные тесты и документация
 

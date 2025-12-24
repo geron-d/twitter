@@ -5,6 +5,7 @@ import com.twitter.dto.filter.FollowerFilter;
 import com.twitter.dto.filter.FollowingFilter;
 import com.twitter.dto.request.FollowRequestDto;
 import com.twitter.dto.response.FollowResponseDto;
+import com.twitter.dto.response.FollowStatsResponseDto;
 import com.twitter.dto.response.FollowStatusResponseDto;
 import com.twitter.dto.response.FollowerResponseDto;
 import com.twitter.dto.response.FollowingResponseDto;
@@ -97,6 +98,18 @@ public class FollowController implements FollowApi {
         @PathVariable("followingId") UUID followingId) {
         FollowStatusResponseDto status = followService.getFollowStatus(followerId, followingId);
         return ResponseEntity.ok(status);
+    }
+
+    /**
+     * @see FollowApi#getFollowStats
+     */
+    @LoggableRequest
+    @GetMapping("/{userId}/stats")
+    @Override
+    public ResponseEntity<FollowStatsResponseDto> getFollowStats(
+        @PathVariable("userId") UUID userId) {
+        FollowStatsResponseDto stats = followService.getFollowStats(userId);
+        return ResponseEntity.ok(stats);
     }
 }
 

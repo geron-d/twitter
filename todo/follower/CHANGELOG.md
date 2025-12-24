@@ -1,5 +1,64 @@
 # Changelog - Follower API Service
 
+## 2025-01-28 00:03 — step 50 done — GET /api/v1/follows/{userId}/stats - OpenAPI документация — автор: assistant
+
+OpenAPI документация для метода getFollowStats уже полностью реализована в шаге #47 в интерфейсе FollowApi. Все критерии acceptance criteria выполнены: @Operation с summary="Get follow statistics" и подробным description (описание функциональности получения статистики подписок, описание возвращаемых значений - количество подписчиков и подписок), @ApiResponses со всеми возможными статус-кодами (200 OK для успешного получения статистики с примером FollowStatsResponseDto, 400 Bad Request для неверного формата UUID с примером Problem Details), @ExampleObject для успешного ответа в формате JSON с примером структуры (followersCount, followingCount), @Parameter для userId с description, required=true и example. Документация на английском языке.
+
+## 2025-01-28 00:02 — step 49 done — GET /api/v1/follows/{userId}/stats - Integration тесты — автор: assistant
+
+Добавлены integration тесты для эндпоинта GET /api/v1/follows/{userId}/stats:
+- @Nested класс GetFollowStatsTests в FollowControllerTest для группировки тестов GET эндпоинта
+- Тесты успешного сценария:
+  - getFollowStats_WhenStatsExist_ShouldReturn200Ok - проверка успешного получения статистики (200 OK) при наличии подписок, проверка корректных счетчиков followersCount и followingCount
+  - getFollowStats_WhenNoStatsExist_ShouldReturn200OkWithZeros - проверка успешного получения статистики (200 OK) с нулевыми счетчиками, когда у пользователя нет подписок
+  - getFollowStats_WithOnlyFollowers_ShouldReturnCorrectCounts - проверка корректного подсчета только подписчиков (followersCount > 0, followingCount = 0)
+  - getFollowStats_WithOnlyFollowing_ShouldReturnCorrectCounts - проверка корректного подсчета только подписок (followersCount = 0, followingCount > 0)
+- Тесты валидации:
+  - getFollowStats_WithInvalidUserIdFormat_ShouldReturn400BadRequest - проверка неверного формата UUID для userId (400 Bad Request)
+- Все тесты используют:
+  - MockMvc для тестирования REST endpoints
+  - @Transactional для изоляции тестов
+  - jsonPath для проверки структуры ответов
+  - Проверку формата ответов (JSON для успешных ответов, RFC 7807 Problem Details для ошибок)
+  - Создание подписок в БД через createAndSaveFollow для тестирования статистики
+
+Тесты соответствуют стандартам проекта (STANDART_TEST.md) и структуре других Controller тестов (FollowControllerTest.getFollowStatus, FollowControllerTest.getFollowers, FollowControllerTest.getFollowing). Проверка линтера: ошибок не обнаружено.
+
+## 2025-01-28 00:01 — step 48 done — GET /api/v1/follows/{userId}/stats - Unit тесты для Service метода — автор: assistant
+
+Добавлены unit тесты для метода getFollowStats в FollowServiceImplTest:
+- @Nested класс GetFollowStatsTests для группировки тестов метода getFollowStats
+- Тесты успешного сценария:
+  - getFollowStats_WithValidData_ShouldReturnFollowStatsResponseDto - проверка корректного возврата FollowStatsResponseDto с правильными значениями followersCount и followingCount
+  - getFollowStats_WithZeroCounts_ShouldReturnFollowStatsResponseDtoWithZeros - проверка корректной обработки нулевых счетчиков (когда у пользователя нет подписчиков и подписок)
+- Тесты взаимодействий с зависимостями:
+  - getFollowStats_WithValidData_ShouldCallEachDependencyExactlyOnce - проверка взаимодействий с зависимостями (followRepository.countByFollowingId, followRepository.countByFollowerId, followMapper.toFollowStatsResponseDto)
+- Все тесты используют AssertJ для assertions (assertThat)
+- Все тесты проверяют взаимодействия с зависимостями через verify
+- Тесты используют @BeforeEach для инициализации тестовых данных
+
+Тесты соответствуют стандартам проекта (STANDART_TEST.md) и структуре других Service тестов (FollowServiceImplTest.getFollowStatus, FollowServiceImplTest.getFollowers, FollowServiceImplTest.getFollowing). Проверка линтера: ошибок не обнаружено.
+
+## 2025-01-28 00:00 — step 47 done — GET /api/v1/follows/{userId}/stats - Реализация Controller метода — автор: assistant
+
+Реализован метод getFollowStats для получения статистики подписок через REST API:
+- Добавлен метод getFollowStats в интерфейс FollowApi:
+  - @Operation с summary="Get follow statistics" и подробным description (описание функциональности получения статистики подписок)
+  - @ApiResponses со всеми возможными статус-кодами:
+    - 200 OK - успешное получение статистики (с примером FollowStatsResponseDto)
+    - 400 Bad Request - неверный формат UUID (с примером Problem Details)
+  - @ExampleObject для успешного ответа в формате JSON с примером структуры (followersCount, followingCount)
+  - @Parameter для userId с description, required=true и example
+  - Полная JavaDoc документация с @param для userId, @return
+- Реализован метод getFollowStats в FollowController:
+  - @LoggableRequest для автоматического логирования запросов/ответов
+  - @GetMapping("/{userId}/stats") для обработки GET запросов
+  - @PathVariable для userId
+  - Вызывает followService.getFollowStats() и возвращает ResponseEntity.ok(stats) (200 OK)
+  - JavaDoc с @see для ссылки на интерфейс
+
+Метод соответствует стандартам проекта (STANDART_CODE.md, STANDART_SWAGGER.md, STANDART_JAVADOC.md) и структуре других Controller методов (FollowController.getFollowStatus, FollowController.getFollowers, FollowController.getFollowing). Эндпоинт готов для использования и полностью документирован в Swagger. Проверка линтера: ошибок не обнаружено.
+
 ## 2025-01-27 23:59 — step 46 done — GET /api/v1/follows/{userId}/stats - Реализация Service метода — автор: assistant
 
 Реализован метод getFollowStats для получения статистики подписок:

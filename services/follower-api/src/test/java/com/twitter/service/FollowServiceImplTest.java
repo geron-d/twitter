@@ -6,6 +6,7 @@ import com.twitter.dto.filter.FollowerFilter;
 import com.twitter.dto.filter.FollowingFilter;
 import com.twitter.dto.request.FollowRequestDto;
 import com.twitter.dto.response.FollowResponseDto;
+import com.twitter.dto.response.FollowStatsResponseDto;
 import com.twitter.dto.response.FollowStatusResponseDto;
 import com.twitter.dto.response.FollowerResponseDto;
 import com.twitter.dto.response.FollowingResponseDto;
@@ -779,6 +780,88 @@ class FollowServiceImplTest {
             verify(followRepository, times(1))
                 .findByFollowerIdAndFollowingId(eq(testFollowerId), eq(testFollowingId));
             verify(followMapper, never()).toFollowStatusResponseDto(any());
+        }
+    }
+
+    @Nested
+    class GetFollowStatsTests {
+
+        private UUID testUserId;
+        private FollowStatsResponseDto statsResponseDto;
+
+        @BeforeEach
+        void setUp() {
+            testUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+
+            statsResponseDto = FollowStatsResponseDto.builder()
+                .followersCount(150L)
+                .followingCount(75L)
+                .build();
+        }
+
+        @Test
+        void getFollowStats_WithValidData_ShouldReturnFollowStatsResponseDto() {
+            long followersCount = 150L;
+            long followingCount = 75L;
+
+            when(followRepository.countByFollowingId(testUserId))
+                .thenReturn(followersCount);
+            when(followRepository.countByFollowerId(testUserId))
+                .thenReturn(followingCount);
+            when(followMapper.toFollowStatsResponseDto(followersCount, followingCount))
+                .thenReturn(statsResponseDto);
+
+            FollowStatsResponseDto result = followService.getFollowStats(testUserId);
+
+            assertThat(result).isNotNull();
+            assertThat(result.followersCount()).isEqualTo(followersCount);
+            assertThat(result.followingCount()).isEqualTo(followingCount);
+        }
+
+        @Test
+        void getFollowStats_WithZeroCounts_ShouldReturnFollowStatsResponseDtoWithZeros() {
+            long followersCount = 0L;
+            long followingCount = 0L;
+
+            FollowStatsResponseDto zeroStats = FollowStatsResponseDto.builder()
+                .followersCount(0L)
+                .followingCount(0L)
+                .build();
+
+            when(followRepository.countByFollowingId(testUserId))
+                .thenReturn(followersCount);
+            when(followRepository.countByFollowerId(testUserId))
+                .thenReturn(followingCount);
+            when(followMapper.toFollowStatsResponseDto(followersCount, followingCount))
+                .thenReturn(zeroStats);
+
+            FollowStatsResponseDto result = followService.getFollowStats(testUserId);
+
+            assertThat(result).isNotNull();
+            assertThat(result.followersCount()).isEqualTo(0L);
+            assertThat(result.followingCount()).isEqualTo(0L);
+        }
+
+        @Test
+        void getFollowStats_WithValidData_ShouldCallEachDependencyExactlyOnce() {
+            long followersCount = 150L;
+            long followingCount = 75L;
+
+            when(followRepository.countByFollowingId(testUserId))
+                .thenReturn(followersCount);
+            when(followRepository.countByFollowerId(testUserId))
+                .thenReturn(followingCount);
+            when(followMapper.toFollowStatsResponseDto(followersCount, followingCount))
+                .thenReturn(statsResponseDto);
+
+            followService.getFollowStats(testUserId);
+
+            verify(followRepository, times(1))
+                .countByFollowingId(eq(testUserId));
+            verify(followRepository, times(1))
+                .countByFollowerId(eq(testUserId));
+            verify(followMapper, times(1))
+                .toFollowStatsResponseDto(eq(followersCount), eq(followingCount));
         }
     }
 }

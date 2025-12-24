@@ -4,6 +4,7 @@ import com.twitter.dto.filter.FollowerFilter;
 import com.twitter.dto.filter.FollowingFilter;
 import com.twitter.dto.request.FollowRequestDto;
 import com.twitter.dto.response.FollowResponseDto;
+import com.twitter.dto.response.FollowStatsResponseDto;
 import com.twitter.dto.response.FollowStatusResponseDto;
 import com.twitter.dto.response.FollowerResponseDto;
 import com.twitter.dto.response.FollowingResponseDto;
@@ -493,5 +494,68 @@ public interface FollowApi {
             example = "987fcdeb-51a2-43d7-b123-426614174999"
         )
         UUID followingId);
+
+    /**
+     * Retrieves follow statistics for a specific user.
+     * <p>
+     * This method calculates and returns the total number of followers (users following
+     * this user) and the total number of following (users this user is following).
+     *
+     * @param userId the ID of the user whose statistics should be retrieved
+     * @return ResponseEntity containing follow statistics with HTTP 200 status
+     */
+    @Operation(
+        summary = "Get follow statistics",
+        description = "Retrieves follow statistics for a specific user. " +
+            "Returns the total number of followers (users following this user) and " +
+            "the total number of following (users this user is following)."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Follow statistics retrieved successfully",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = FollowStatsResponseDto.class),
+                examples = @ExampleObject(
+                    name = "Follow Statistics",
+                    summary = "Example follow statistics response",
+                    value = """
+                        {
+                          "followersCount": 150,
+                          "followingCount": 75
+                        }
+                        """
+                )
+            )
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Validation error - Invalid UUID format",
+            content = @Content(
+                mediaType = "application/problem+json",
+                examples = @ExampleObject(
+                    name = "Invalid UUID Format Error",
+                    summary = "Invalid UUID format for userId parameter",
+                    value = """
+                        {
+                          "type": "https://example.com/errors/validation-error",
+                          "title": "Validation Error",
+                          "status": 400,
+                          "detail": "Invalid UUID format for userId parameter",
+                          "timestamp": "2025-01-27T10:30:00Z"
+                        }
+                        """
+                )
+            )
+        )
+    })
+    ResponseEntity<FollowStatsResponseDto> getFollowStats(
+        @Parameter(
+            description = "Unique identifier of the user whose statistics should be retrieved",
+            required = true,
+            example = "123e4567-e89b-12d3-a456-426614174000"
+        )
+        UUID userId);
 }
 

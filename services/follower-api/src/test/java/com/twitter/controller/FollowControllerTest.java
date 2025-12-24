@@ -680,5 +680,88 @@ public class FollowControllerTest extends BaseIntegrationTest {
                 .andExpect(jsonPath("$.detail").exists());
         }
     }
+
+    @Nested
+    class GetFollowStatsTests {
+
+        private UUID testUserId;
+        private UUID follower1Id;
+        private UUID follower2Id;
+        private UUID following1Id;
+        private UUID following2Id;
+
+        @BeforeEach
+        void setUp() {
+            testUserId = UUID.randomUUID();
+            follower1Id = UUID.randomUUID();
+            follower2Id = UUID.randomUUID();
+            following1Id = UUID.randomUUID();
+            following2Id = UUID.randomUUID();
+        }
+
+        @Test
+        void getFollowStats_WhenStatsExist_ShouldReturn200Ok() throws Exception {
+            // Create followers (users following testUserId)
+            createAndSaveFollow(follower1Id, testUserId);
+            createAndSaveFollow(follower2Id, testUserId);
+
+            // Create following (users that testUserId is following)
+            createAndSaveFollow(testUserId, following1Id);
+            createAndSaveFollow(testUserId, following2Id);
+
+            mockMvc.perform(get("/api/v1/follows/{userId}/stats", testUserId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.followersCount").value(2))
+                .andExpect(jsonPath("$.followingCount").value(2));
+        }
+
+        @Test
+        void getFollowStats_WhenNoStatsExist_ShouldReturn200OkWithZeros() throws Exception {
+            mockMvc.perform(get("/api/v1/follows/{userId}/stats", testUserId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.followersCount").value(0))
+                .andExpect(jsonPath("$.followingCount").value(0));
+        }
+
+        @Test
+        void getFollowStats_WithOnlyFollowers_ShouldReturnCorrectCounts() throws Exception {
+            // Create only followers (users following testUserId)
+            createAndSaveFollow(follower1Id, testUserId);
+            createAndSaveFollow(follower2Id, testUserId);
+            createAndSaveFollow(UUID.randomUUID(), testUserId);
+
+            mockMvc.perform(get("/api/v1/follows/{userId}/stats", testUserId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.followersCount").value(3))
+                .andExpect(jsonPath("$.followingCount").value(0));
+        }
+
+        @Test
+        void getFollowStats_WithOnlyFollowing_ShouldReturnCorrectCounts() throws Exception {
+            // Create only following (users that testUserId is following)
+            createAndSaveFollow(testUserId, following1Id);
+            createAndSaveFollow(testUserId, following2Id);
+
+            mockMvc.perform(get("/api/v1/follows/{userId}/stats", testUserId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.followersCount").value(0))
+                .andExpect(jsonPath("$.followingCount").value(2));
+        }
+
+        @Test
+        void getFollowStats_WithInvalidUserIdFormat_ShouldReturn400BadRequest() throws Exception {
+            mockMvc.perform(get("/api/v1/follows/{userId}/stats", "invalid-uuid"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.type").exists())
+                .andExpect(jsonPath("$.title").exists())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.detail").exists());
+        }
+    }
 }
 
