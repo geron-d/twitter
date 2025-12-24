@@ -447,7 +447,7 @@
     - Проверены взаимодействия с зависимостями (verify)
   - Выполнено: Добавлен @Nested класс GetFollowStatusTests в FollowServiceImplTest для группировки тестов метода getFollowStatus. Реализованы тесты: getFollowStatus_WhenFollowExists_ShouldReturnFollowStatusResponseDto (успешный сценарий - подписка существует, проверка isFollowing=true и createdAt), getFollowStatus_WhenFollowDoesNotExist_ShouldReturnFollowStatusResponseDtoWithFalse (сценарий - подписка не существует, проверка isFollowing=false и createdAt=null), getFollowStatus_WithValidData_ShouldCallEachDependencyExactlyOnce (проверка взаимодействий с зависимостями - followRepository.findByFollowerIdAndFollowingId, followMapper.toFollowStatusResponseDto), getFollowStatus_WhenFollowDoesNotExist_ShouldNotCallMapper (проверка отсутствия вызова маппера при отсутствии подписки). Все тесты используют AssertJ для assertions (assertThat), проверяют взаимодействия с зависимостями через verify (followRepository.findByFollowerIdAndFollowingId, followMapper.toFollowStatusResponseDto). Тесты используют @BeforeEach для инициализации тестовых данных. Тесты соответствуют стандартам проекта (STANDART_TEST.md) и структуре других Service тестов (FollowServiceImplTest.getFollowers, FollowServiceImplTest.getFollowing, FollowServiceImplTest.unfollow). Проверка линтера: ошибок не обнаружено.
 
-- [ ] (P2) #43: GET /api/v1/follows/{followerId}/{followingId}/status - Integration тесты - протестировать эндпоинт GET /api/v1/follows/{followerId}/{followingId}/status
+- [x] (P2) [2025-01-27 23:50] #43: GET /api/v1/follows/{followerId}/{followingId}/status - Integration тесты - протестировать эндпоинт GET /api/v1/follows/{followerId}/{followingId}/status
   - Зависимости: #41
   - Acceptance criteria:
     - Создан тест для GET /api/v1/follows/{followerId}/{followingId}/status в FollowControllerTest
@@ -455,14 +455,16 @@
     - Использован MockMvc для тестирования REST endpoint
     - Использован @Transactional для изоляции тестов
     - Проверен формат ответов
+  - Выполнено: Добавлен @Nested класс GetFollowStatusTests в FollowControllerTest для группировки тестов GET эндпоинта. Реализованы тесты: getFollowStatus_WhenFollowExists_ShouldReturn200Ok (успешный сценарий - подписка существует, проверка isFollowing=true и createdAt), getFollowStatus_WhenFollowDoesNotExist_ShouldReturn200OkWithFalse (успешный сценарий - подписка не существует, проверка isFollowing=false и createdAt=null), getFollowStatus_WithInvalidFollowerIdFormat_ShouldReturn400BadRequest (валидация неверного формата UUID для followerId), getFollowStatus_WithInvalidFollowingIdFormat_ShouldReturn400BadRequest (валидация неверного формата UUID для followingId). Все тесты используют MockMvc для тестирования REST endpoints, @Transactional для изоляции тестов, проверяют формат ответов (JSON для успешных ответов, RFC 7807 Problem Details для ошибок), используют jsonPath для проверки структуры ответов. Тесты соответствуют стандартам проекта (STANDART_TEST.md) и структуре других Controller тестов (FollowControllerTest.getFollowers, FollowControllerTest.getFollowing, FollowControllerTest.deleteFollow). Проверка линтера: ошибок не обнаружено.
 
-- [ ] (P1) #44: GET /api/v1/follows/{followerId}/{followingId}/status - OpenAPI документация - добавить @Operation, @ApiResponses для метода getFollowStatus
+- [x] (P1) [2025-01-27 23:55] #44: GET /api/v1/follows/{followerId}/{followingId}/status - OpenAPI документация - добавить @Operation, @ApiResponses для метода getFollowStatus
   - Зависимости: #41
   - Acceptance criteria:
     - Метод getFollowStatus имеет @Operation с summary и description
     - Метод getFollowStatus имеет @ApiResponses со всеми возможными статус-кодами (200)
     - Параметры имеют @Parameter с description
     - Документация на английском языке
+  - Выполнено: OpenAPI документация для метода getFollowStatus уже полностью реализована в шаге #41 в интерфейсе FollowApi. Метод имеет @Operation с summary="Get follow relationship status" и подробным description (описание функциональности проверки статуса подписки, описание возвращаемых значений для обоих случаев - когда подписка существует и когда не существует), @ApiResponses со всеми возможными статус-кодами (200 OK для успешного получения статуса подписки с двумя примерами - когда подписка существует и когда не существует, 400 Bad Request для неверного формата UUID с примером Problem Details), @ExampleObject для обоих случаев (Follow Relationship Exists и Follow Relationship Does Not Exist), @Parameter для обоих path параметров (followerId, followingId) с description, required=true и example. Документация на английском языке. Все критерии acceptance criteria выполнены.
 
 ### Эндпоинт: GET /api/v1/follows/{userId}/stats - Получение статистики подписок
 

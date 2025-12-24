@@ -620,5 +620,65 @@ public class FollowControllerTest extends BaseIntegrationTest {
                 .andExpect(jsonPath("$.detail").exists());
         }
     }
+
+    @Nested
+    class GetFollowStatusTests {
+
+        private UUID testFollowerId;
+        private UUID testFollowingId;
+
+        @BeforeEach
+        void setUp() {
+            testFollowerId = UUID.randomUUID();
+            testFollowingId = UUID.randomUUID();
+        }
+
+        @Test
+        void getFollowStatus_WhenFollowExists_ShouldReturn200Ok() throws Exception {
+            Follow savedFollow = createAndSaveFollow(testFollowerId, testFollowingId);
+
+            mockMvc.perform(get("/api/v1/follows/{followerId}/{followingId}/status",
+                    testFollowerId, testFollowingId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.isFollowing").value(true))
+                .andExpect(jsonPath("$.createdAt").exists())
+                .andExpect(jsonPath("$.createdAt").isNotEmpty());
+        }
+
+        @Test
+        void getFollowStatus_WhenFollowDoesNotExist_ShouldReturn200OkWithFalse() throws Exception {
+            mockMvc.perform(get("/api/v1/follows/{followerId}/{followingId}/status",
+                    testFollowerId, testFollowingId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.isFollowing").value(false))
+                .andExpect(jsonPath("$.createdAt").isEmpty());
+        }
+
+        @Test
+        void getFollowStatus_WithInvalidFollowerIdFormat_ShouldReturn400BadRequest() throws Exception {
+            mockMvc.perform(get("/api/v1/follows/{followerId}/{followingId}/status",
+                    "invalid-uuid", testFollowingId))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.type").exists())
+                .andExpect(jsonPath("$.title").exists())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.detail").exists());
+        }
+
+        @Test
+        void getFollowStatus_WithInvalidFollowingIdFormat_ShouldReturn400BadRequest() throws Exception {
+            mockMvc.perform(get("/api/v1/follows/{followerId}/{followingId}/status",
+                    testFollowerId, "invalid-uuid"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.type").exists())
+                .andExpect(jsonPath("$.title").exists())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.detail").exists());
+        }
+    }
 }
 

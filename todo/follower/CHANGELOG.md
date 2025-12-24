@@ -1,5 +1,27 @@
 # Changelog - Follower API Service
 
+## 2025-01-27 23:55 — step 44 done — GET /api/v1/follows/{followerId}/{followingId}/status - OpenAPI документация — автор: assistant
+
+OpenAPI документация для метода getFollowStatus уже полностью реализована в шаге #41 в интерфейсе FollowApi. Все критерии acceptance criteria выполнены: @Operation с summary="Get follow relationship status" и подробным description (описание функциональности проверки статуса подписки, описание возвращаемых значений для обоих случаев - когда подписка существует и когда не существует), @ApiResponses со всеми возможными статус-кодами (200 OK для успешного получения статуса подписки с двумя примерами - когда подписка существует и когда не существует, 400 Bad Request для неверного формата UUID с примером Problem Details), @ExampleObject для обоих случаев (Follow Relationship Exists и Follow Relationship Does Not Exist), @Parameter для обоих path параметров (followerId, followingId) с description, required=true и example. Документация на английском языке.
+
+## 2025-01-27 23:50 — step 43 done — GET /api/v1/follows/{followerId}/{followingId}/status - Integration тесты — автор: assistant
+
+Добавлены integration тесты для эндпоинта GET /api/v1/follows/{followerId}/{followingId}/status:
+- @Nested класс GetFollowStatusTests в FollowControllerTest для группировки тестов GET эндпоинта
+- Тесты успешного сценария:
+  - getFollowStatus_WhenFollowExists_ShouldReturn200Ok - проверка успешного получения статуса подписки (200 OK) когда подписка существует, проверка isFollowing=true и createdAt
+  - getFollowStatus_WhenFollowDoesNotExist_ShouldReturn200OkWithFalse - проверка успешного получения статуса подписки (200 OK) когда подписка не существует, проверка isFollowing=false и createdAt=null
+- Тесты валидации:
+  - getFollowStatus_WithInvalidFollowerIdFormat_ShouldReturn400BadRequest - проверка неверного формата UUID для followerId (400 Bad Request)
+  - getFollowStatus_WithInvalidFollowingIdFormat_ShouldReturn400BadRequest - проверка неверного формата UUID для followingId (400 Bad Request)
+- Все тесты используют:
+  - MockMvc для тестирования REST endpoints
+  - @Transactional для изоляции тестов
+  - jsonPath для проверки структуры ответов
+  - Проверку формата ответов (JSON для успешных ответов, RFC 7807 Problem Details для ошибок)
+
+Тесты соответствуют стандартам проекта (STANDART_TEST.md) и структуре других Controller тестов (FollowControllerTest.getFollowers, FollowControllerTest.getFollowing, FollowControllerTest.deleteFollow). Проверка линтера: ошибок не обнаружено.
+
 ## 2025-01-27 23:45 — step 42 done — GET /api/v1/follows/{followerId}/{followingId}/status - Unit тесты для Service метода — автор: assistant
 
 Добавлены unit тесты для метода getFollowStatus в FollowServiceImplTest:
