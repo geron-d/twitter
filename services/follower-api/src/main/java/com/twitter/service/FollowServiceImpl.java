@@ -4,6 +4,7 @@ import com.twitter.dto.filter.FollowerFilter;
 import com.twitter.dto.filter.FollowingFilter;
 import com.twitter.dto.request.FollowRequestDto;
 import com.twitter.dto.response.FollowResponseDto;
+import com.twitter.dto.response.FollowStatusResponseDto;
 import com.twitter.dto.response.FollowerResponseDto;
 import com.twitter.dto.response.FollowingResponseDto;
 import com.twitter.entity.Follow;
@@ -173,6 +174,22 @@ public class FollowServiceImpl implements FollowService {
             following.size(), userId, filteredPage.getTotalElements());
 
         return new PagedModel<>(filteredPage);
+    }
+
+    /**
+     * @see FollowService#getFollowStatus
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public FollowStatusResponseDto getFollowStatus(UUID followerId, UUID followingId) {
+        log.debug("Checking follow relationship status: followerId={}, followingId={}", followerId, followingId);
+
+        return followRepository.findByFollowerIdAndFollowingId(followerId, followingId)
+            .map(followMapper::toFollowStatusResponseDto)
+            .orElseGet(() -> FollowStatusResponseDto.builder()
+                .isFollowing(false)
+                .createdAt(null)
+                .build());
     }
 }
 

@@ -4,6 +4,7 @@ import com.twitter.dto.filter.FollowerFilter;
 import com.twitter.dto.filter.FollowingFilter;
 import com.twitter.dto.request.FollowRequestDto;
 import com.twitter.dto.response.FollowResponseDto;
+import com.twitter.dto.response.FollowStatusResponseDto;
 import com.twitter.dto.response.FollowerResponseDto;
 import com.twitter.dto.response.FollowingResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -408,5 +409,89 @@ public interface FollowApi {
         @Parameter(description = "Pagination parameters (page, size, sorting)")
         @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC)
         Pageable pageable);
+
+    /**
+     * Retrieves the status of a follow relationship between two users.
+     * <p>
+     * This method checks if a follow relationship exists between the specified follower
+     * and following users. If the relationship exists, it returns isFollowing=true and
+     * the creation timestamp. If the relationship does not exist, it returns
+     * isFollowing=false and createdAt=null.
+     *
+     * @param followerId  the ID of the user who is following (the follower)
+     * @param followingId the ID of the user being followed (the following)
+     * @return ResponseEntity containing the status of the follow relationship with HTTP 200 status
+     */
+    @Operation(
+        summary = "Get follow relationship status",
+        description = "Retrieves the status of a follow relationship between two users. " +
+            "If the relationship exists, it returns isFollowing=true and the creation timestamp. " +
+            "If the relationship does not exist, it returns isFollowing=false and createdAt=null."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Follow relationship status retrieved successfully",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = FollowStatusResponseDto.class),
+                examples = {
+                    @ExampleObject(
+                        name = "Follow Relationship Exists",
+                        summary = "Example when follow relationship exists",
+                        value = """
+                            {
+                              "isFollowing": true,
+                              "createdAt": "2025-01-20T15:30:00Z"
+                            }
+                            """
+                    ),
+                    @ExampleObject(
+                        name = "Follow Relationship Does Not Exist",
+                        summary = "Example when follow relationship does not exist",
+                        value = """
+                            {
+                              "isFollowing": false,
+                              "createdAt": null
+                            }
+                            """
+                    )
+                }
+            )
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Validation error - Invalid UUID format",
+            content = @Content(
+                mediaType = "application/problem+json",
+                examples = @ExampleObject(
+                    name = "Invalid UUID Format Error",
+                    summary = "Invalid UUID format for path parameters",
+                    value = """
+                        {
+                          "type": "https://example.com/errors/validation-error",
+                          "title": "Validation Error",
+                          "status": 400,
+                          "detail": "Invalid UUID format for followerId or followingId parameter",
+                          "timestamp": "2025-01-27T10:30:00Z"
+                        }
+                        """
+                )
+            )
+        )
+    })
+    ResponseEntity<FollowStatusResponseDto> getFollowStatus(
+        @Parameter(
+            description = "ID of the user who is following (the follower)",
+            required = true,
+            example = "123e4567-e89b-12d3-a456-426614174000"
+        )
+        UUID followerId,
+        @Parameter(
+            description = "ID of the user being followed (the following)",
+            required = true,
+            example = "987fcdeb-51a2-43d7-b123-426614174999"
+        )
+        UUID followingId);
 }
 

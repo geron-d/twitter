@@ -1,5 +1,55 @@
 # Changelog - Follower API Service
 
+## 2025-01-27 23:40 — step 41 done — GET /api/v1/follows/{followerId}/{followingId}/status - Реализация Controller метода — автор: assistant
+
+Реализован метод getFollowStatus для проверки статуса подписки через REST API:
+- Добавлен метод getFollowStatus в интерфейс FollowApi:
+  - @Operation с summary="Get follow relationship status" и подробным description (описание функциональности проверки статуса подписки)
+  - @ApiResponses со всеми возможными статус-кодами:
+    - 200 OK - успешное получение статуса подписки (с двумя примерами - когда подписка существует и когда не существует)
+    - 400 Bad Request - неверный формат UUID (с примером Problem Details)
+  - @ExampleObject для обоих случаев (Follow Relationship Exists и Follow Relationship Does Not Exist)
+  - @Parameter для обоих path параметров (followerId, followingId) с description, required=true и example
+  - Полная JavaDoc документация с @param для обоих параметров, @return
+- Реализован метод getFollowStatus в FollowController:
+  - @LoggableRequest для автоматического логирования запросов/ответов
+  - @GetMapping("/{followerId}/{followingId}/status") для обработки GET запросов
+  - @PathVariable для обоих параметров (followerId, followingId)
+  - Вызывает followService.getFollowStatus() и возвращает ResponseEntity.ok(status) (200 OK)
+  - JavaDoc с @see для ссылки на интерфейс
+
+Метод соответствует стандартам проекта (STANDART_CODE.md, STANDART_SWAGGER.md, STANDART_JAVADOC.md) и структуре других Controller методов (FollowController.deleteFollow, FollowController.getFollowers, FollowController.getFollowing). Эндпоинт готов для использования и полностью документирован в Swagger. Проверка линтера: ошибок не обнаружено (только предупреждение о classpath, не критично).
+
+## 2025-01-27 23:35 — step 40 done — GET /api/v1/follows/{followerId}/{followingId}/status - Реализация Service метода — автор: assistant
+
+Реализован метод getFollowStatus для проверки статуса подписки:
+- Добавлен метод getFollowStatus(UUID followerId, UUID followingId) в интерфейс FollowService:
+  - Полная JavaDoc документация с описанием операций, @param для обоих параметров, @return
+  - Описание проверки существования подписки и возврата статуса
+- Реализован метод getFollowStatus в FollowServiceImpl:
+  - @Transactional(readOnly = true) для обеспечения транзакционности только для чтения
+  - Проверка существования подписки через followRepository.findByFollowerIdAndFollowingId()
+  - Использование Optional.map() для преобразования Follow в FollowStatusResponseDto через followMapper.toFollowStatusResponseDto() если подписка существует
+  - Возврат FollowStatusResponseDto с isFollowing=false и createdAt=null если подписки нет (через orElseGet())
+  - Логирование: debug перед операцией, debug при существовании подписки (с id, followerId, followingId, createdAt), debug при отсутствии подписки
+- Добавлен метод toFollowStatusResponseDto(Follow) в FollowMapper:
+  - @Mapping для настройки маппинга (isFollowing=true через constant, createdAt из follow.createdAt)
+  - Полная JavaDoc документация с описанием преобразования
+- Метод имеет JavaDoc с @see для ссылки на интерфейс
+
+Метод соответствует стандартам проекта (STANDART_CODE.md, STANDART_JAVADOC.md) и структуре других Service методов (FollowService.getFollowers, FollowService.getFollowing). Проверка линтера: ошибок не обнаружено.
+
+## 2025-01-27 23:30 — step 39 done — GET /api/v1/follows/{followerId}/{followingId}/status - Реализация DTO — автор: assistant
+
+Создан FollowStatusResponseDto в пакете com.twitter.dto.response для эндпоинта проверки статуса подписки:
+- Поля: isFollowing (boolean) - флаг существования подписки, createdAt (LocalDateTime, nullable) - дата создания подписки (null, если подписки нет)
+- @Schema аннотации на уровне класса (name="FollowStatusResponse", description, example JSON для обоих случаев - когда подписка существует и когда не существует) и на уровне полей (description, example, format, requiredMode, nullable для createdAt)
+- @JsonFormat для createdAt (pattern="yyyy-MM-dd'T'HH:mm:ss'Z'", timezone="UTC")
+- @Builder для удобства создания
+- Полная JavaDoc документация с @param для всех компонентов, @author geron, @version 1.0
+- DTO использует Records (Java 24), соответствует стандартам проекта (STANDART_CODE.md, STANDART_SWAGGER.md, STANDART_JAVADOC.md) и структуре других DTO (FollowResponseDto, FollowerResponseDto, FollowingResponseDto)
+- Проверка линтера: ошибок не обнаружено
+
 ## 2025-01-27 23:25 — step 38 done — GET /api/v1/follows/{userId}/following - OpenAPI документация — автор: assistant
 
 OpenAPI документация для метода getFollowing уже полностью реализована в шаге #35 в интерфейсе FollowApi. Все критерии acceptance criteria выполнены: @Operation с summary="Get following list" и подробным description (описание функциональности, фильтрации, сортировки, интеграции с users-api), @ApiResponses со всеми возможными статус-кодами (200 OK для успешного получения списка подписок с примером PagedModel, 400 Bad Request для неверного формата UUID с примером Problem Details), @ExampleObject для успешного ответа в формате PagedModel с примером структуры (content, page metadata), @Parameter для всех параметров (userId, filter, pageable) с description, required=true/required=false и example. Документация на английском языке. Примечание: статус 404 не используется для этого эндпоинта, так как метод всегда возвращает список подписок (может быть пустым), а не ошибку 404. Это аналогично другим GET эндпоинтам для получения списков (FollowController.getFollowers, TweetController.getUserTweets, UserController.findAll).

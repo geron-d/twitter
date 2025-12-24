@@ -2,6 +2,7 @@ package com.twitter.mapper;
 
 import com.twitter.dto.request.FollowRequestDto;
 import com.twitter.dto.response.FollowResponseDto;
+import com.twitter.dto.response.FollowStatusResponseDto;
 import com.twitter.dto.response.FollowerResponseDto;
 import com.twitter.dto.response.FollowingResponseDto;
 import com.twitter.entity.Follow;
@@ -74,5 +75,19 @@ public interface FollowMapper {
     @Mapping(target = "login", source = "login")
     @Mapping(target = "createdAt", source = "follow.createdAt")
     FollowingResponseDto toFollowingResponseDto(Follow follow, String login);
+
+    /**
+     * Converts Follow entity to FollowStatusResponseDto.
+     * <p>
+     * This method transforms a Follow entity into a FollowStatusResponseDto for
+     * displaying follow relationship status. The method sets isFollowing=true
+     * and includes the creation timestamp.
+     *
+     * @param follow Follow entity from database
+     * @return DTO containing follow relationship status (isFollowing=true, createdAt)
+     */
+    @Mapping(target = "isFollowing", constant = "true")
+    @Mapping(target = "createdAt", source = "follow.createdAt")
+    FollowStatusResponseDto toFollowStatusResponseDto(Follow follow);
 }
 

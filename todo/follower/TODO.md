@@ -407,14 +407,15 @@
 
 ### Эндпоинт: GET /api/v1/follows/{followerId}/{followingId}/status - Проверка статуса подписки
 
-- [ ] (P1) #39: GET /api/v1/follows/{followerId}/{followingId}/status - Реализация DTO - создать FollowStatusResponseDto
+- [x] (P1) [2025-01-27 23:30] #39: GET /api/v1/follows/{followerId}/{followingId}/status - Реализация DTO - создать FollowStatusResponseDto
   - Зависимости: #1
   - Acceptance criteria:
     - Создан FollowStatusResponseDto (isFollowing, createdAt)
     - DTO использует Records (Java 24)
     - DTO имеет @Schema аннотации для Swagger
+  - Выполнено: Создан FollowStatusResponseDto в пакете com.twitter.dto.response с полями isFollowing (boolean) и createdAt (LocalDateTime, nullable). Добавлены @Schema аннотации на уровне класса (name="FollowStatusResponse", description, example JSON для обоих случаев - когда подписка существует и когда не существует) и на уровне полей (description, example, format, requiredMode, nullable для createdAt). Использован @JsonFormat для createdAt (pattern="yyyy-MM-dd'T'HH:mm:ss'Z'", timezone="UTC"). Использован @Builder. DTO использует Records (Java 24), имеет полную JavaDoc документацию с @param для всех компонентов, @author geron, @version 1.0. Соответствует стандартам проекта (STANDART_CODE.md, STANDART_SWAGGER.md, STANDART_JAVADOC.md) и структуре других DTO (FollowResponseDto, FollowerResponseDto, FollowingResponseDto). Проверка линтера: ошибок не обнаружено.
 
-- [ ] (P1) #40: GET /api/v1/follows/{followerId}/{followingId}/status - Реализация Service метода - создать метод getFollowStatus в FollowService
+- [x] (P1) [2025-01-27 23:35] #40: GET /api/v1/follows/{followerId}/{followingId}/status - Реализация Service метода - создать метод getFollowStatus в FollowService
   - Зависимости: #11, #13, #14, #39
   - Acceptance criteria:
     - Добавлен метод getFollowStatus(UUID followerId, UUID followingId) в интерфейс FollowService
@@ -423,8 +424,9 @@
     - Метод возвращает FollowStatusResponseDto
     - Метод использует Mapper для преобразования
     - Добавлено логирование
+  - Выполнено: Добавлен метод getFollowStatus(UUID followerId, UUID followingId) в интерфейс FollowService с полной JavaDoc документацией (описание операций, @param для обоих параметров, @return). Реализован метод getFollowStatus в FollowServiceImpl с @Transactional(readOnly = true) для обеспечения транзакционности только для чтения. Метод проверяет существование подписки через followRepository.findByFollowerIdAndFollowingId(), использует Optional.map() для преобразования Follow в FollowStatusResponseDto через followMapper.toFollowStatusResponseDto() если подписка существует, или возвращает FollowStatusResponseDto с isFollowing=false и createdAt=null если подписки нет. Добавлено логирование: debug перед операцией, debug при существовании подписки (с id, followerId, followingId, createdAt), debug при отсутствии подписки. Добавлен метод toFollowStatusResponseDto(Follow) в FollowMapper с @Mapping для настройки маппинга (isFollowing=true через constant, createdAt из follow.createdAt). Метод имеет JavaDoc с @see для ссылки на интерфейс. Соответствует стандартам проекта (STANDART_CODE.md, STANDART_JAVADOC.md) и структуре других Service методов (FollowService.getFollowers, FollowService.getFollowing). Проверка линтера: ошибок не обнаружено.
 
-- [ ] (P1) #41: GET /api/v1/follows/{followerId}/{followingId}/status - Реализация Controller метода - создать метод getFollowStatus в FollowController
+- [x] (P1) [2025-01-27 23:40] #41: GET /api/v1/follows/{followerId}/{followingId}/status - Реализация Controller метода - создать метод getFollowStatus в FollowController
   - Зависимости: #40
   - Acceptance criteria:
     - Добавлен метод getFollowStatus в интерфейс FollowApi с OpenAPI аннотациями
@@ -432,6 +434,7 @@
     - Метод использует @PathVariable для параметров
     - Метод возвращает HttpStatus.OK (200)
     - Метод возвращает FollowStatusResponseDto
+  - Выполнено: Добавлен метод getFollowStatus в интерфейс FollowApi с полной OpenAPI документацией: @Operation с summary="Get follow relationship status" и подробным description (описание функциональности проверки статуса подписки), @ApiResponses со всеми возможными статус-кодами (200 OK для успешного получения статуса с двумя примерами - когда подписка существует и когда не существует, 400 Bad Request для неверного формата UUID с примером Problem Details), @ExampleObject для обоих случаев (Follow Relationship Exists и Follow Relationship Does Not Exist), @Parameter для обоих path параметров (followerId, followingId) с description, required=true и example. Реализован метод getFollowStatus в FollowController с @LoggableRequest, @GetMapping("/{followerId}/{followingId}/status"), @PathVariable для обоих параметров (followerId, followingId). Метод вызывает followService.getFollowStatus() и возвращает ResponseEntity.ok(status) (200 OK). Метод имеет JavaDoc с @see для ссылки на интерфейс. Соответствует стандартам проекта (STANDART_CODE.md, STANDART_SWAGGER.md, STANDART_JAVADOC.md) и структуре других Controller методов (FollowController.deleteFollow, FollowController.getFollowers, FollowController.getFollowing). Эндпоинт готов для использования и полностью документирован в Swagger. Проверка линтера: ошибок не обнаружено (только предупреждение о classpath, не критично).
 
 - [ ] (P1) #42: GET /api/v1/follows/{followerId}/{followingId}/status - Unit тесты для Service метода - протестировать метод getFollowStatus
   - Зависимости: #40

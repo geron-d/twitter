@@ -6,6 +6,7 @@ import com.twitter.dto.filter.FollowerFilter;
 import com.twitter.dto.filter.FollowingFilter;
 import com.twitter.dto.request.FollowRequestDto;
 import com.twitter.dto.response.FollowResponseDto;
+import com.twitter.dto.response.FollowStatusResponseDto;
 import com.twitter.dto.response.FollowerResponseDto;
 import com.twitter.dto.response.FollowingResponseDto;
 import org.springframework.data.domain.Pageable;
@@ -82,5 +83,19 @@ public interface FollowService {
      * @return PagedModel containing paginated list of following with metadata and HATEOAS links
      */
     PagedModel<FollowingResponseDto> getFollowing(UUID userId, FollowingFilter filter, Pageable pageable);
+
+    /**
+     * Retrieves the status of a follow relationship between two users.
+     * <p>
+     * The method checks if a follow relationship exists between the specified follower
+     * and following users. If the relationship exists, it returns isFollowing=true and
+     * the creation timestamp. If the relationship does not exist, it returns
+     * isFollowing=false and createdAt=null.
+     *
+     * @param followerId  the ID of the user who is following (the follower)
+     * @param followingId the ID of the user being followed (the following)
+     * @return FollowStatusResponseDto containing the status of the follow relationship
+     */
+    FollowStatusResponseDto getFollowStatus(UUID followerId, UUID followingId);
 }
 
