@@ -6,6 +6,7 @@ import com.twitter.dto.filter.FollowerFilter;
 import com.twitter.dto.filter.FollowingFilter;
 import com.twitter.dto.request.FollowRequestDto;
 import com.twitter.dto.response.FollowResponseDto;
+import com.twitter.dto.response.FollowStatusResponseDto;
 import com.twitter.dto.response.FollowerResponseDto;
 import com.twitter.dto.response.FollowingResponseDto;
 import com.twitter.entity.Follow;
@@ -697,6 +698,87 @@ class FollowServiceImplTest {
                     pageable.getSort().getOrderFor("createdAt") != null &&
                     pageable.getSort().getOrderFor("createdAt").getDirection() == Sort.Direction.DESC)
             );
+        }
+    }
+
+    @Nested
+    class GetFollowStatusTests {
+
+        private UUID testFollowerId;
+        private UUID testFollowingId;
+        private Follow existingFollow;
+        private FollowStatusResponseDto statusResponseDto;
+
+        @BeforeEach
+        void setUp() {
+            testFollowerId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+            testFollowingId = UUID.fromString("987fcdeb-51a2-43d7-b123-426614174999");
+
+            UUID followId = UUID.fromString("456e7890-e89b-12d3-a456-426614174111");
+            existingFollow = Follow.builder()
+                .id(followId)
+                .followerId(testFollowerId)
+                .followingId(testFollowingId)
+                .createdAt(LocalDateTime.of(2025, 1, 20, 15, 30, 0))
+                .build();
+
+            statusResponseDto = FollowStatusResponseDto.builder()
+                .isFollowing(true)
+                .createdAt(LocalDateTime.of(2025, 1, 20, 15, 30, 0))
+                .build();
+        }
+
+        @Test
+        void getFollowStatus_WhenFollowExists_ShouldReturnFollowStatusResponseDto() {
+            when(followRepository.findByFollowerIdAndFollowingId(testFollowerId, testFollowingId))
+                .thenReturn(Optional.of(existingFollow));
+            when(followMapper.toFollowStatusResponseDto(existingFollow))
+                .thenReturn(statusResponseDto);
+
+            FollowStatusResponseDto result = followService.getFollowStatus(testFollowerId, testFollowingId);
+
+            assertThat(result).isNotNull();
+            assertThat(result.isFollowing()).isTrue();
+            assertThat(result.createdAt()).isEqualTo(existingFollow.getCreatedAt());
+        }
+
+        @Test
+        void getFollowStatus_WhenFollowDoesNotExist_ShouldReturnFollowStatusResponseDtoWithFalse() {
+            when(followRepository.findByFollowerIdAndFollowingId(testFollowerId, testFollowingId))
+                .thenReturn(Optional.empty());
+
+            FollowStatusResponseDto result = followService.getFollowStatus(testFollowerId, testFollowingId);
+
+            assertThat(result).isNotNull();
+            assertThat(result.isFollowing()).isFalse();
+            assertThat(result.createdAt()).isNull();
+        }
+
+        @Test
+        void getFollowStatus_WithValidData_ShouldCallEachDependencyExactlyOnce() {
+            when(followRepository.findByFollowerIdAndFollowingId(testFollowerId, testFollowingId))
+                .thenReturn(Optional.of(existingFollow));
+            when(followMapper.toFollowStatusResponseDto(existingFollow))
+                .thenReturn(statusResponseDto);
+
+            followService.getFollowStatus(testFollowerId, testFollowingId);
+
+            verify(followRepository, times(1))
+                .findByFollowerIdAndFollowingId(eq(testFollowerId), eq(testFollowingId));
+            verify(followMapper, times(1))
+                .toFollowStatusResponseDto(eq(existingFollow));
+        }
+
+        @Test
+        void getFollowStatus_WhenFollowDoesNotExist_ShouldNotCallMapper() {
+            when(followRepository.findByFollowerIdAndFollowingId(testFollowerId, testFollowingId))
+                .thenReturn(Optional.empty());
+
+            followService.getFollowStatus(testFollowerId, testFollowingId);
+
+            verify(followRepository, times(1))
+                .findByFollowerIdAndFollowingId(eq(testFollowerId), eq(testFollowingId));
+            verify(followMapper, never()).toFollowStatusResponseDto(any());
         }
     }
 }

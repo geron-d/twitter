@@ -1,5 +1,21 @@
 # Changelog - Follower API Service
 
+## 2025-01-27 23:45 — step 42 done — GET /api/v1/follows/{followerId}/{followingId}/status - Unit тесты для Service метода — автор: assistant
+
+Добавлены unit тесты для метода getFollowStatus в FollowServiceImplTest:
+- @Nested класс GetFollowStatusTests для группировки тестов метода getFollowStatus
+- Тесты успешного сценария:
+  - getFollowStatus_WhenFollowExists_ShouldReturnFollowStatusResponseDto - проверка успешного получения статуса подписки (isFollowing=true, createdAt) когда подписка существует
+  - getFollowStatus_WithValidData_ShouldCallEachDependencyExactlyOnce - проверка взаимодействий с зависимостями (followRepository.findByFollowerIdAndFollowingId, followMapper.toFollowStatusResponseDto)
+- Тесты сценария отсутствия подписки:
+  - getFollowStatus_WhenFollowDoesNotExist_ShouldReturnFollowStatusResponseDtoWithFalse - проверка возврата статуса (isFollowing=false, createdAt=null) когда подписка не существует
+  - getFollowStatus_WhenFollowDoesNotExist_ShouldNotCallMapper - проверка отсутствия вызова маппера при отсутствии подписки
+- Все тесты используют AssertJ для assertions (assertThat)
+- Все тесты проверяют взаимодействия с зависимостями через verify
+- Тесты используют @BeforeEach для инициализации тестовых данных
+
+Тесты соответствуют стандартам проекта (STANDART_TEST.md) и структуре других Service тестов (FollowServiceImplTest.getFollowers, FollowServiceImplTest.getFollowing, FollowServiceImplTest.unfollow). Проверка линтера: ошибок не обнаружено.
+
 ## 2025-01-27 23:40 — step 41 done — GET /api/v1/follows/{followerId}/{followingId}/status - Реализация Controller метода — автор: assistant
 
 Реализован метод getFollowStatus для проверки статуса подписки через REST API:
