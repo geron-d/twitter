@@ -434,7 +434,7 @@
     - Метод использует @PathVariable для параметров
     - Метод возвращает HttpStatus.OK (200)
     - Метод возвращает FollowStatusResponseDto
-  - Выполнено: Добавлен метод getFollowStatus в интерфейс FollowApi с полной OpenAPI документацией: @Operation с summary="Get follow relationship status" и подробным description (описание функциональности проверки статуса подписки), @ApiResponses со всеми возможными статус-кодами (200 OK для успешного получения статуса с двумя примерами - когда подписка существует и когда не существует, 400 Bad Request для неверного формата UUID с примером Problem Details), @ExampleObject для обоих случаев (Follow Relationship Exists и Follow Relationship Does Not Exist), @Parameter для обоих path параметров (followerId, followingId) с description, required=true и example. Реализован метод getFollowStatus в FollowController с @LoggableRequest, @GetMapping("/{followerId}/{followingId}/status"), @PathVariable для обоих параметров (followerId, followingId). Метод вызывает followService.getFollowStatus() и возвращает ResponseEntity.ok(status) (200 OK). Метод имеет JavaDoc с @see для ссылки на интерфейс. Соответствует стандартам проекта (STANDART_CODE.md, STANDART_SWAGGER.md, STANDART_JAVADOC.md) и структуре других Controller методов (FollowController.deleteFollow, FollowController.getFollowers, FollowController.getFollowing). Эндпоинт готов для использования и полностью документирован в Swagger. Проверка линтера: ошибок не обнаружено (только предупреждение о classpath, не критично).
+  - Выполнено: Добавлен метод getFollowStatus в интерфейс FollowApi с полной OpenAPI документацией: @Operation с summary="Get follow relationship status" и подробным description (описание функциональности проверки статуса подписки), @ApiResponses со всеми возможными статус-кодами (200 OK для успешного получения статуса с двумя примерами - когда подписка существует и когда не существует, 400 Bad Request для неверного формата UUID с примером Problem Details), @ExampleObject для обоих случаев (Follow Relationship Exists и Follow Relationship Does Not Exist), @Parameter для обоих path параметров (followerId, followingId) с description, required=true и example. Реализован метод getFollowStatus в FollowController с @LoggableRequest, @GetMapping("/{followerId}/{followingId}/status"), @PathVariable для обоих параметров (followerId, followingId). Метод вызывает followService.getFollowStatus() и возвращает ResponseEntity.ok(status) (200 OK). Метод имеет JavaDoc с @see для ссылки на интерфейс. Соответствует стандартам проекта (STANDART_CODE.md, STANDART_SWAGGER.md, STANDART_JAVADOC.md) и структуре других Controller метод``ов (FollowController.deleteFollow, FollowController.getFollowers, FollowController.getFollowing). Эндпоинт готов для использования и полностью документирован в Swagger. Проверка линтера: ошибок не обнаружено (только предупреждение о classpath, не критично).
 
 - [x] (P1) [2025-01-27 23:45] #42: GET /api/v1/follows/{followerId}/{followingId}/status - Unit тесты для Service метода - протестировать метод getFollowStatus
   - Зависимости: #40
@@ -468,14 +468,15 @@
 
 ### Эндпоинт: GET /api/v1/follows/{userId}/stats - Получение статистики подписок
 
-- [ ] (P1) #45: GET /api/v1/follows/{userId}/stats - Реализация DTO - создать FollowStatsResponseDto
+- [x] (P1) [2025-01-27 23:58] #45: GET /api/v1/follows/{userId}/stats - Реализация DTO - создать FollowStatsResponseDto
   - Зависимости: #1
   - Acceptance criteria:
     - Создан FollowStatsResponseDto (followersCount, followingCount)
     - DTO использует Records (Java 24)
     - DTO имеет @Schema аннотации для Swagger
+  - Выполнено: Создан FollowStatsResponseDto в пакете com.twitter.dto.response с полями followersCount (long) и followingCount (long). Добавлены @Schema аннотации на уровне класса (name="FollowStatsResponse", description, example JSON) и на уровне полей (description, example, requiredMode=REQUIRED). Использован @Builder. DTO использует Records (Java 24), имеет полную JavaDoc документацию с @param для всех компонентов, @author geron, @version 1.0. Соответствует стандартам проекта (STANDART_CODE.md, STANDART_SWAGGER.md, STANDART_JAVADOC.md) и структуре других DTO (FollowResponseDto, FollowerResponseDto, FollowingResponseDto, FollowStatusResponseDto). Проверка линтера: ошибок не обнаружено.
 
-- [ ] (P1) #46: GET /api/v1/follows/{userId}/stats - Реализация Service метода - создать метод getFollowStats в FollowService
+- [x] (P1) [2025-01-27 23:59] #46: GET /api/v1/follows/{userId}/stats - Реализация Service метода - создать метод getFollowStats в FollowService
   - Зависимости: #11, #13, #14, #45
   - Acceptance criteria:
     - Добавлен метод getFollowStats(UUID userId) в интерфейс FollowService
@@ -484,6 +485,7 @@
     - Метод возвращает FollowStatsResponseDto
     - Метод использует Mapper для преобразования
     - Добавлено логирование
+  - Выполнено: Добавлен метод getFollowStats(UUID userId) в интерфейс FollowService с полной JavaDoc документацией (описание операций, @param, @return). Реализован метод getFollowStats в FollowServiceImpl с @Transactional(readOnly = true) для обеспечения транзакционности только для чтения. Метод использует Repository для подсчета: countByFollowingId(userId) для подсчета подписчиков (количество пользователей, которые следуют за userId), countByFollowerId(userId) для подсчета подписок (количество пользователей, за которыми следует userId). Метод использует Mapper для преобразования двух long в FollowStatsResponseDto через followMapper.toFollowStatsResponseDto(followersCount, followingCount). Добавлено логирование: debug перед операцией, info после успешного получения с выведением userId, followersCount и followingCount. Добавлен метод toFollowStatsResponseDto(long followersCount, long followingCount) в FollowMapper с @Mapping для настройки маппинга полей. Метод имеет JavaDoc с @see для ссылки на интерфейс. Соответствует стандартам проекта (STANDART_CODE.md, STANDART_JAVADOC.md) и структуре других Service методов (FollowService.getFollowers, FollowService.getFollowing, FollowService.getFollowStatus). Проверка линтера: ошибок не обнаружено.
 
 - [ ] (P1) #47: GET /api/v1/follows/{userId}/stats - Реализация Controller метода - создать метод getFollowStats в FollowController
   - Зависимости: #46

@@ -1,5 +1,35 @@
 # Changelog - Follower API Service
 
+## 2025-01-27 23:59 — step 46 done — GET /api/v1/follows/{userId}/stats - Реализация Service метода — автор: assistant
+
+Реализован метод getFollowStats для получения статистики подписок:
+- Добавлен метод getFollowStats(UUID userId) в интерфейс FollowService:
+  - Полная JavaDoc документация с описанием операций, @param для userId, @return
+  - Описание вычисления статистики (количество подписчиков и подписок) через эффективные запросы к БД
+- Реализован метод getFollowStats в FollowServiceImpl:
+  - @Transactional(readOnly = true) для обеспечения транзакционности только для чтения
+  - Использование Repository для подсчета:
+    - countByFollowingId(userId) для подсчета подписчиков (количество пользователей, которые следуют за userId)
+    - countByFollowerId(userId) для подсчета подписок (количество пользователей, за которыми следует userId)
+  - Использование Mapper для преобразования двух long в FollowStatsResponseDto через followMapper.toFollowStatsResponseDto(followersCount, followingCount)
+  - Логирование: debug перед операцией, info после успешного получения с выведением userId, followersCount и followingCount
+- Добавлен метод toFollowStatsResponseDto(long followersCount, long followingCount) в FollowMapper:
+  - @Mapping для настройки маппинга полей (followersCount, followingCount)
+  - Полная JavaDoc документация с описанием преобразования
+- Метод имеет JavaDoc с @see для ссылки на интерфейс
+
+Метод соответствует стандартам проекта (STANDART_CODE.md, STANDART_JAVADOC.md) и структуре других Service методов (FollowService.getFollowers, FollowService.getFollowing, FollowService.getFollowStatus). Проверка линтера: ошибок не обнаружено.
+
+## 2025-01-27 23:58 — step 45 done — GET /api/v1/follows/{userId}/stats - Реализация DTO — автор: assistant
+
+Создан FollowStatsResponseDto в пакете com.twitter.dto.response для эндпоинта получения статистики подписок:
+- Поля: followersCount (long) - общее количество подписчиков пользователя, followingCount (long) - общее количество подписок пользователя
+- @Schema аннотации на уровне класса (name="FollowStatsResponse", description="Follow statistics information returned by the API", example JSON с реалистичными значениями) и на уровне полей (description, example, requiredMode=REQUIRED)
+- @Builder для удобства создания
+- Полная JavaDoc документация с @param для всех компонентов, @author geron, @version 1.0
+- DTO использует Records (Java 24), соответствует стандартам проекта (STANDART_CODE.md, STANDART_SWAGGER.md, STANDART_JAVADOC.md) и структуре других DTO (FollowResponseDto, FollowerResponseDto, FollowingResponseDto, FollowStatusResponseDto)
+- Проверка линтера: ошибок не обнаружено
+
 ## 2025-01-27 23:55 — step 44 done — GET /api/v1/follows/{followerId}/{followingId}/status - OpenAPI документация — автор: assistant
 
 OpenAPI документация для метода getFollowStatus уже полностью реализована в шаге #41 в интерфейсе FollowApi. Все критерии acceptance criteria выполнены: @Operation с summary="Get follow relationship status" и подробным description (описание функциональности проверки статуса подписки, описание возвращаемых значений для обоих случаев - когда подписка существует и когда не существует), @ApiResponses со всеми возможными статус-кодами (200 OK для успешного получения статуса подписки с двумя примерами - когда подписка существует и когда не существует, 400 Bad Request для неверного формата UUID с примером Problem Details), @ExampleObject для обоих случаев (Follow Relationship Exists и Follow Relationship Does Not Exist), @Parameter для обоих path параметров (followerId, followingId) с description, required=true и example. Документация на английском языке.

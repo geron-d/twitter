@@ -2,6 +2,7 @@ package com.twitter.mapper;
 
 import com.twitter.dto.request.FollowRequestDto;
 import com.twitter.dto.response.FollowResponseDto;
+import com.twitter.dto.response.FollowStatsResponseDto;
 import com.twitter.dto.response.FollowStatusResponseDto;
 import com.twitter.dto.response.FollowerResponseDto;
 import com.twitter.dto.response.FollowingResponseDto;
@@ -89,5 +90,20 @@ public interface FollowMapper {
     @Mapping(target = "isFollowing", constant = "true")
     @Mapping(target = "createdAt", source = "follow.createdAt")
     FollowStatusResponseDto toFollowStatusResponseDto(Follow follow);
+
+    /**
+     * Converts follower and following counts to FollowStatsResponseDto.
+     * <p>
+     * This method transforms count values into a FollowStatsResponseDto for
+     * displaying follow statistics. The counts are obtained from database
+     * queries using countByFollowingId and countByFollowerId.
+     *
+     * @param followersCount total number of users following this user
+     * @param followingCount total number of users this user is following
+     * @return DTO containing follow statistics (followersCount, followingCount)
+     */
+    @Mapping(target = "followersCount", source = "followersCount")
+    @Mapping(target = "followingCount", source = "followingCount")
+    FollowStatsResponseDto toFollowStatsResponseDto(long followersCount, long followingCount);
 }
 

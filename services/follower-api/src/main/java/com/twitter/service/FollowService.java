@@ -6,6 +6,7 @@ import com.twitter.dto.filter.FollowerFilter;
 import com.twitter.dto.filter.FollowingFilter;
 import com.twitter.dto.request.FollowRequestDto;
 import com.twitter.dto.response.FollowResponseDto;
+import com.twitter.dto.response.FollowStatsResponseDto;
 import com.twitter.dto.response.FollowStatusResponseDto;
 import com.twitter.dto.response.FollowerResponseDto;
 import com.twitter.dto.response.FollowingResponseDto;
@@ -97,5 +98,16 @@ public interface FollowService {
      * @return FollowStatusResponseDto containing the status of the follow relationship
      */
     FollowStatusResponseDto getFollowStatus(UUID followerId, UUID followingId);
+
+    /**
+     * Retrieves follow statistics for a specific user.
+     * <p>
+     * The method calculates and returns the total number of followers (users following
+     * this user) and the total number of following (users this user is following).
+     *
+     * @param userId the ID of the user whose statistics should be retrieved
+     * @return FollowStatsResponseDto containing followers count and following count
+     */
+    FollowStatsResponseDto getFollowStats(UUID userId);
 }
 

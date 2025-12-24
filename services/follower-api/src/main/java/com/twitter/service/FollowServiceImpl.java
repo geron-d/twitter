@@ -4,6 +4,7 @@ import com.twitter.dto.filter.FollowerFilter;
 import com.twitter.dto.filter.FollowingFilter;
 import com.twitter.dto.request.FollowRequestDto;
 import com.twitter.dto.response.FollowResponseDto;
+import com.twitter.dto.response.FollowStatsResponseDto;
 import com.twitter.dto.response.FollowStatusResponseDto;
 import com.twitter.dto.response.FollowerResponseDto;
 import com.twitter.dto.response.FollowingResponseDto;
@@ -190,6 +191,22 @@ public class FollowServiceImpl implements FollowService {
                 .isFollowing(false)
                 .createdAt(null)
                 .build());
+    }
+
+    /**
+     * @see FollowService#getFollowStats
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public FollowStatsResponseDto getFollowStats(UUID userId) {
+        log.debug("Retrieving follow statistics for user: userId={}", userId);
+
+        long followersCount = followRepository.countByFollowingId(userId);
+        long followingCount = followRepository.countByFollowerId(userId);
+
+        FollowStatsResponseDto stats = followMapper.toFollowStatsResponseDto(followersCount, followingCount);
+
+        return stats;
     }
 }
 
