@@ -528,7 +528,7 @@
 
 ### Дополнительные тесты и документация
 
-- [ ] (P1) #51: Unit тесты для Gateway - протестировать UserGateway
+- [x] (P1) [2025-01-28 00:10] #51: Unit тесты для Gateway - протестировать UserGateway
   - Зависимости: #12
   - Acceptance criteria:
     - Создан UserGatewayTest с @ExtendWith(MockitoExtension.class)
@@ -536,8 +536,9 @@
     - Протестированы успешные сценарии
     - Протестированы ошибочные сценарии (ошибка Feign клиента)
     - Используется AssertJ для assertions
+  - Выполнено: Создан UserGatewayTest в services/follower-api/src/test/java/com/twitter/gateway/UserGatewayTest.java. Реализованы @Nested классы ExistsUserTests и GetUserLoginTests для группировки тестов. Протестирован метод existsUser: успешные сценарии (пользователь существует, пользователь не существует), null userId (возвращает false без вызова клиента), ошибка Feign клиента (возвращает false). Протестирован метод getUserLogin: успешный сценарий (пользователь существует, возвращает Optional с логином), пользователь не найден (404, возвращает пустой Optional), null response body (возвращает пустой Optional), null userId (возвращает пустой Optional без вызова клиента), ошибка Feign клиента (возвращает пустой Optional). Все тесты используют AssertJ для assertions (assertThat), проверяют взаимодействия с зависимостями через verify (usersApiClient.existsUser, usersApiClient.getUserById). Тесты соответствуют стандартам проекта (STANDART_TEST.md) и структуре других Gateway тестов (tweet-api UserGatewayTest). Проверка линтера: ошибок не обнаружено.
 
-- [ ] (P1) #52: Unit тесты для Mapper - протестировать FollowMapper с реальным маппером
+- [x] (P1) [2025-01-28 00:15] #52: Unit тесты для Mapper - протестировать FollowMapper с реальным маппером
   - Зависимости: #14
   - Acceptance criteria:
     - Создан FollowMapperTest
@@ -545,8 +546,9 @@
     - Протестированы все методы маппинга
     - Проверены игнорируемые поля
     - Используется AssertJ для assertions
+  - Выполнено: Создан FollowMapperTest в services/follower-api/src/test/java/com/twitter/mapper/FollowMapperTest.java. Используется реальный маппер через Mappers.getMapper(FollowMapper.class). Протестированы все методы маппинга: toFollow (проверка маппинга полей, игнорирование id и createdAt), toFollowResponseDto (проверка маппинга всех полей), toFollowerResponseDto (проверка маппинга с login, использование followerId как id), toFollowingResponseDto (проверка маппинга с login, использование followingId как id), toFollowStatusResponseDto (проверка маппинга со статусом, проверка isFollowing=true), toFollowStatsResponseDto (проверка маппинга статистики с различными значениями). Проверены игнорируемые поля: id и createdAt в toFollow (должны быть null). Все тесты используют AssertJ для assertions (assertThat). Тесты организованы в @Nested классы для группировки по методам. Тесты соответствуют стандартам проекта (STANDART_TEST.md) и структуре других Mapper тестов (UserMapperTest, TweetMapperTest). Проверка линтера: ошибок не обнаружено.
 
-- [ ] (P1) #53: Unit тесты для Validator - протестировать FollowValidatorImpl
+- [x] (P1) [2025-01-28 00:20] #53: Unit тесты для Validator - протестировать FollowValidatorImpl
   - Зависимости: #15
   - Acceptance criteria:
     - Создан FollowValidatorImplTest с @ExtendWith(MockitoExtension.class)
@@ -556,6 +558,7 @@
     - Используется @Nested для группировки тестов
     - Используется AssertJ для assertions
     - Проверены выбросы исключений
+  - Выполнено: Создан FollowValidatorImplTest в services/follower-api/src/test/java/com/twitter/validation/FollowValidatorImplTest.java. Используется @ExtendWith(MockitoExtension.class), @Mock для FollowRepository и UserGateway, @InjectMocks для FollowValidatorImpl. Протестирован метод validateForFollow: успешный сценарий (валидные данные, все проверки проходят), null request (BusinessRuleValidationException с правилом "FOLLOW_REQUEST_NULL"), null followerId (BusinessRuleValidationException с правилом "FOLLOWER_ID_NULL"), null followingId (BusinessRuleValidationException с правилом "FOLLOWING_ID_NULL"), самоподписка (BusinessRuleValidationException с правилом "SELF_FOLLOW_NOT_ALLOWED"), пользователь не существует - follower (BusinessRuleValidationException с правилом "FOLLOWER_NOT_EXISTS"), пользователь не существует - following (BusinessRuleValidationException с правилом "FOLLOWING_NOT_EXISTS"), двойная подписка (UniquenessValidationException), проверка порядка вызовов зависимостей. Все тесты используют AssertJ для assertions (assertThat, assertThatCode, assertThatThrownBy), проверяют взаимодействия с зависимостями через verify, используют @BeforeEach для инициализации тестовых данных. Тесты организованы в @Nested класс ValidateForFollowTests для группировки. Тесты соответствуют стандартам проекта (STANDART_TEST.md) и структуре других Validator тестов (TweetValidatorImplTest). Проверка линтера: ошибок не обнаружено.
 
 - [ ] (P1) #54: JavaDoc для всех классов - добавить JavaDoc с @author geron, @version 1.0 для всех public классов и методов
   - Зависимости: #11, #12, #13, #14, #15, #16, #17, #18, #22, #23, #27, #28, #29, #33, #34, #35, #39, #40, #41, #45, #46, #47, #7

@@ -1,5 +1,80 @@
 # Changelog - Follower API Service
 
+## 2025-01-28 00:20 — step 53 done — Unit тесты для Validator — автор: assistant
+
+Создан FollowValidatorImplTest в services/follower-api/src/test/java/com/twitter/validation/FollowValidatorImplTest.java для unit тестирования FollowValidatorImpl:
+- @ExtendWith(MockitoExtension.class) для использования Mockito
+- @Mock для FollowRepository и UserGateway
+- @InjectMocks для FollowValidatorImpl
+- @BeforeEach для инициализации тестовых данных (testFollowerId, testFollowingId, validRequestDto)
+- @Nested класс ValidateForFollowTests для группировки тестов метода validateForFollow:
+  - validateForFollow_WhenValidData_ShouldCompleteWithoutExceptions - успешный сценарий (валидные данные, все проверки проходят)
+  - validateForFollow_WhenRequestIsNull_ShouldThrowBusinessRuleValidationException - null request (BusinessRuleValidationException с правилом "FOLLOW_REQUEST_NULL")
+  - validateForFollow_WhenFollowerIdIsNull_ShouldThrowBusinessRuleValidationException - null followerId (BusinessRuleValidationException с правилом "FOLLOWER_ID_NULL")
+  - validateForFollow_WhenFollowingIdIsNull_ShouldThrowBusinessRuleValidationException - null followingId (BusinessRuleValidationException с правилом "FOLLOWING_ID_NULL")
+  - validateForFollow_WhenSelfFollow_ShouldThrowBusinessRuleValidationException - самоподписка (BusinessRuleValidationException с правилом "SELF_FOLLOW_NOT_ALLOWED", проверка содержимого context)
+  - validateForFollow_WhenFollowerDoesNotExist_ShouldThrowBusinessRuleValidationException - пользователь не существует - follower (BusinessRuleValidationException с правилом "FOLLOWER_NOT_EXISTS")
+  - validateForFollow_WhenFollowingDoesNotExist_ShouldThrowBusinessRuleValidationException - пользователь не существует - following (BusinessRuleValidationException с правилом "FOLLOWING_NOT_EXISTS")
+  - validateForFollow_WhenFollowAlreadyExists_ShouldThrowUniquenessValidationException - двойная подписка (UniquenessValidationException)
+  - validateForFollow_ShouldCallDependenciesInCorrectOrder - проверка порядка вызовов зависимостей (inOrder)
+- Все тесты используют AssertJ для assertions (assertThat, assertThatCode, assertThatThrownBy)
+- Все тесты проверяют взаимодействия с зависимостями через verify (userGateway.existsUser, followRepository.existsByFollowerIdAndFollowingId)
+- Все тесты проверяют выбросы исключений с проверкой типа, ruleName и context
+- Тесты соответствуют стандартам проекта (STANDART_TEST.md) и структуре других Validator тестов (TweetValidatorImplTest)
+- Проверка линтера: ошибок не обнаружено
+
+## 2025-01-28 00:15 — step 52 done — Unit тесты для Mapper — автор: assistant
+
+Создан FollowMapperTest в services/follower-api/src/test/java/com/twitter/mapper/FollowMapperTest.java для unit тестирования FollowMapper:
+- Используется реальный маппер через Mappers.getMapper(FollowMapper.class) (не мок)
+- @Nested класс ToFollowTests для группировки тестов метода toFollow:
+  - toFollow_WithValidData_ShouldMapCorrectly - проверка маппинга полей (followerId, followingId)
+  - toFollow_ShouldIgnoreIdField - проверка игнорирования id (должен быть null)
+  - toFollow_ShouldIgnoreCreatedAtField - проверка игнорирования createdAt (должен быть null)
+  - toFollow_WithNullInput_ShouldReturnNull - проверка обработки null входных данных
+- @Nested класс ToFollowResponseDtoTests для группировки тестов метода toFollowResponseDto:
+  - toFollowResponseDto_WithValidData_ShouldMapAllFieldsCorrectly - проверка маппинга всех полей (id, followerId, followingId, createdAt)
+  - toFollowResponseDto_WithNullInput_ShouldReturnNull - проверка обработки null входных данных
+- @Nested класс ToFollowerResponseDtoTests для группировки тестов метода toFollowerResponseDto:
+  - toFollowerResponseDto_WithValidData_ShouldMapAllFieldsCorrectly - проверка маппинга всех полей (id из followerId, login, createdAt)
+  - toFollowerResponseDto_WithNullInput_ShouldReturnNull - проверка обработки null входных данных
+- @Nested класс ToFollowingResponseDtoTests для группировки тестов метода toFollowingResponseDto:
+  - toFollowingResponseDto_WithValidData_ShouldMapAllFieldsCorrectly - проверка маппинга всех полей (id из followingId, login, createdAt)
+  - toFollowingResponseDto_WithNullInput_ShouldReturnNull - проверка обработки null входных данных
+- @Nested класс ToFollowStatusResponseDtoTests для группировки тестов метода toFollowStatusResponseDto:
+  - toFollowStatusResponseDto_WithValidData_ShouldMapAllFieldsCorrectly - проверка маппинга всех полей (isFollowing=true, createdAt)
+  - toFollowStatusResponseDto_ShouldSetIsFollowingToTrue - проверка установки isFollowing=true
+  - toFollowStatusResponseDto_WithNullInput_ShouldReturnNull - проверка обработки null входных данных
+- @Nested класс ToFollowStatsResponseDtoTests для группировки тестов метода toFollowStatsResponseDto:
+  - toFollowStatsResponseDto_WithValidData_ShouldMapAllFieldsCorrectly - проверка маппинга всех полей (followersCount, followingCount)
+  - toFollowStatsResponseDto_WithZeroCounts_ShouldMapCorrectly - проверка маппинга с нулевыми значениями
+  - toFollowStatsResponseDto_WithLargeCounts_ShouldMapCorrectly - проверка маппинга с большими значениями
+- Все тесты используют AssertJ для assertions (assertThat)
+- Тесты соответствуют стандартам проекта (STANDART_TEST.md) и структуре других Mapper тестов (UserMapperTest, TweetMapperTest)
+- Проверка линтера: ошибок не обнаружено
+
+## 2025-01-28 00:10 — step 51 done — Unit тесты для Gateway — автор: assistant
+
+Создан UserGatewayTest в services/follower-api/src/test/java/com/twitter/gateway/UserGatewayTest.java для unit тестирования UserGateway:
+- @ExtendWith(MockitoExtension.class) для использования Mockito
+- @Mock для UsersApiClient
+- @InjectMocks для UserGateway
+- @Nested класс ExistsUserTests для группировки тестов метода existsUser:
+  - existsUser_WhenValidUserIdAndUserExists_ShouldReturnTrue - успешный сценарий (пользователь существует)
+  - existsUser_WhenValidUserIdAndUserDoesNotExist_ShouldReturnFalse - успешный сценарий (пользователь не существует)
+  - existsUser_WhenUserIdIsNull_ShouldReturnFalseWithoutCallingClient - null userId (возвращает false без вызова клиента)
+  - existsUser_WhenExceptionOccurs_ShouldReturnFalse - ошибка Feign клиента (возвращает false)
+- @Nested класс GetUserLoginTests для группировки тестов метода getUserLogin:
+  - getUserLogin_WhenValidUserIdAndUserExists_ShouldReturnOptionalWithLogin - успешный сценарий (пользователь существует, возвращает Optional с логином)
+  - getUserLogin_WhenValidUserIdAndUserDoesNotExist_ShouldReturnEmptyOptional - пользователь не найден (404, возвращает пустой Optional)
+  - getUserLogin_WhenResponseBodyIsNull_ShouldReturnEmptyOptional - null response body (возвращает пустой Optional)
+  - getUserLogin_WhenUserIdIsNull_ShouldReturnEmptyOptionalWithoutCallingClient - null userId (возвращает пустой Optional без вызова клиента)
+  - getUserLogin_WhenExceptionOccurs_ShouldReturnEmptyOptional - ошибка Feign клиента (возвращает пустой Optional)
+- Все тесты используют AssertJ для assertions (assertThat)
+- Все тесты проверяют взаимодействия с зависимостями через verify (usersApiClient.existsUser, usersApiClient.getUserById)
+- Тесты соответствуют стандартам проекта (STANDART_TEST.md) и структуре других Gateway тестов (tweet-api UserGatewayTest)
+- Проверка линтера: ошибок не обнаружено
+
 ## 2025-01-28 00:03 — step 50 done — GET /api/v1/follows/{userId}/stats - OpenAPI документация — автор: assistant
 
 OpenAPI документация для метода getFollowStats уже полностью реализована в шаге #47 в интерфейсе FollowApi. Все критерии acceptance criteria выполнены: @Operation с summary="Get follow statistics" и подробным description (описание функциональности получения статистики подписок, описание возвращаемых значений - количество подписчиков и подписок), @ApiResponses со всеми возможными статус-кодами (200 OK для успешного получения статистики с примером FollowStatsResponseDto, 400 Bad Request для неверного формата UUID с примером Problem Details), @ExampleObject для успешного ответа в формате JSON с примером структуры (followersCount, followingCount), @Parameter для userId с description, required=true и example. Документация на английском языке.
