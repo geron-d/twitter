@@ -1,7 +1,7 @@
 package com.twitter.mapper;
 
-import com.twitter.dto.request.FollowRequestDto;
-import com.twitter.dto.response.FollowResponseDto;
+import com.twitter.common.dto.request.FollowRequestDto;
+import com.twitter.common.dto.response.FollowResponseDto;
 import com.twitter.dto.response.FollowStatsResponseDto;
 import com.twitter.dto.response.FollowStatusResponseDto;
 import com.twitter.dto.response.FollowerResponseDto;

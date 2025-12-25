@@ -14,17 +14,14 @@
 ## Tasks
 
 ### Анализ и проектирование
-- [x] (P1) #1: Анализ требований и проектирование логики создания follow-отношений
+- [ ] (P1) #1: Анализ требований и проектирование логики создания follow-отношений
   acceptance: "Понять вход/выход, логику выбора центрального пользователя, вычисления половины, обработку ошибок, определить затронутые стандарты"
-  metadata: priority=P1, done=2025-01-27T12:00, note="Создан документ ANALYSIS_DESIGN_FOLLOW.md с полным анализом требований, логики создания follow-отношений, проектированием интеграции, затронутыми стандартами и примерами сценариев"
-- [x] (P1) #2: Проектирование интеграции с follower-api
+- [ ] (P1) #2: Проектирование интеграции с follower-api
   acceptance: "Определить структуру Feign Client, Gateway, использование DTO из follower-api или создание shared DTO"
-  metadata: priority=P1, done=2025-01-27T12:30, note="Создан документ INTEGRATION_DESIGN_FOLLOW.md с детальным проектированием интеграции: структура FollowApiClient и FollowGateway, решение об использовании DTO напрямую из follower-api, конфигурация application.yml, зависимости build.gradle"
 
 ### Реализация кода
-- [x] (P1) #3: Создание FollowApiClient (Feign Client) для интеграции с follower-api
+- [ ] (P1) #3: Создание FollowApiClient (Feign Client) для интеграции с follower-api
   acceptance: "FollowApiClient создан с методом createFollow, использует @FeignClient, настроен URL из properties, имеет JavaDoc"
-  metadata: priority=P1, done=2025-01-27T13:00, note="Создан FollowApiClient в пакете com.twitter.client с методом createFollow, использует DTO из follower-api (FollowRequestDto, FollowResponseDto), добавлена зависимость на follower-api в build.gradle"
 - [ ] (P1) #4: Создание FollowGateway для абстракции над Feign Client
   acceptance: "FollowGateway создан с методом createFollow, использует паттерн Gateway, обработка ошибок, логирование, имеет JavaDoc"
 - [ ] (P1) #5: Обновление GenerateUsersAndTweetsResponseDto: добавление поля createdFollows

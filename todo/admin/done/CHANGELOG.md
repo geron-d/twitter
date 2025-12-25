@@ -2,6 +2,134 @@
 
 ## 2025-01-27
 
+### Step #1 (TODO_1.md): Анализ требований и проектирование логики создания follow-отношений
+**Время:** 2025-01-27 12:00  
+**Автор:** assistant
+
+**Выполнено:**
+- Создан документ `ANALYSIS_DESIGN_FOLLOW.md` с полным анализом требований и проектированием логики создания follow-отношений
+- Проанализированы входные данные: список успешно созданных пользователей из Step 1
+- Проанализированы выходные данные: список ID созданных follow-отношений, статистика totalFollowsCreated
+- Определена логика выбора центрального пользователя: первый созданный пользователь (первый элемент в списке)
+- Определена логика вычисления половины: целочисленное деление `halfCount = (createdUsers.size() - 1) / 2`
+- Спроектирована логика создания follow-отношений:
+  - Центральный пользователь фолловит половину остальных
+  - Половина остальных фолловят центрального пользователя
+  - Использование Collections.shuffle для случайного выбора пользователей
+- Определена стратегия обработки ошибок: graceful degradation, логирование, добавление в errors, продолжение выполнения
+- Определена позиция в общем потоке: Step 1.5 (после создания пользователей, до создания твитов)
+- Спроектирована интеграция с follower-api:
+  - FollowApiClient (Feign Client) с методом createFollow
+  - FollowGateway (Gateway паттерн) с обработкой ошибок и логированием
+  - Использование DTO из follower-api (FollowRequestDto, FollowResponseDto)
+- Определены затронутые стандарты проекта:
+  - STANDART_CODE.md (Records, Lombok, JavaDoc, naming conventions)
+  - STANDART_PROJECT.md (Gateway паттерн, Feign Clients, обработка ошибок)
+  - STANDART_JAVADOC.md (полная JavaDoc документация)
+  - STANDART_TEST.md (unit тесты, AssertJ, Mockito)
+  - STANDART_README.md (обновление документации)
+- Созданы примеры сценариев для различных количеств пользователей (1, 3, 5 пользователей)
+- Определены обновления DTO: добавление поля createdFollows в GenerateUsersAndTweetsResponseDto, totalFollowsCreated в ScriptStatisticsDto
+
+**Артефакты:**
+- `todo/admin/done/ANALYSIS_DESIGN_FOLLOW.md` - документ с анализом и проектированием
+- `todo/admin/TODO_1.md` - обновлён (шаг #1 отмечен как выполненный)
+
+### Step #2 (TODO_1.md): Проектирование интеграции с follower-api
+**Время:** 2025-01-27 12:30  
+**Автор:** assistant
+
+**Выполнено:**
+- Создан документ `INTEGRATION_DESIGN_FOLLOW.md` с детальным проектированием интеграции с follower-api
+- Проанализированы существующие интеграции (users-api, tweet-api) для следования паттерну
+- Определена структура `FollowApiClient` (Feign Client):
+  - Аннотация @FeignClient с настройкой URL и path
+  - Метод createFollow с параметрами и возвращаемым значением
+  - JavaDoc документация
+- Определена структура `FollowGateway` (Gateway паттерн):
+  - Компонент Spring с аннотациями @Component, @RequiredArgsConstructor, @Slf4j
+  - Метод createFollow с валидацией, обработкой ошибок и логированием
+  - JavaDoc документация
+- Принято решение об использовании DTO:
+  - Вариант 1: Использование DTO напрямую из follower-api (выбран)
+  - Вариант 2: Создание shared DTO в common-lib (альтернатива)
+  - Обоснование выбора: соответствует assumption из TODO_1.md, меньше работы, автоматическая синхронизация
+- Определена конфигурация application.yml:
+  - Локальное окружение: `app.follower-api.base-url: http://localhost:8084`
+  - Docker окружение: `app.follower-api.base-url: http://follower-api:8084`
+- Определены зависимости build.gradle:
+  - Добавление зависимости `project(':services:follower-api')` для доступа к DTO
+- Созданы примеры использования и обработки ошибок
+- Определены требования к тестированию (unit и integration тесты)
+
+**Артефакты:**
+- `todo/admin/done/INTEGRATION_DESIGN_FOLLOW.md` - документ с проектированием интеграции
+- `todo/admin/TODO_1.md` - обновлён (шаг #2 отмечен как выполненный)
+
+### Step #3 (TODO_1.md): Создание FollowApiClient (Feign Client) для интеграции с follower-api
+**Время:** 2025-01-27 13:00  
+**Автор:** assistant
+
+**Выполнено:**
+- Создан `FollowApiClient` в пакете `com.twitter.client`:
+  - Интерфейс Feign Client с аннотацией @FeignClient
+  - Настройка URL через `${app.follower-api.base-url:http://localhost:8084}`
+  - Path: `/api/v1/follows`
+  - Метод `createFollow` с параметром `FollowRequestDto` и возвращаемым значением `FollowResponseDto`
+  - Использование DTO из follower-api (com.twitter.dto.request.FollowRequestDto, com.twitter.dto.response.FollowResponseDto)
+  - Полная JavaDoc документация с @author geron, @version 1.0, описанием метода, @param, @return
+- Добавлена зависимость на follower-api в `build.gradle`:
+  - `implementation project(':services:follower-api')` для доступа к DTO
+- Класс следует паттерну существующих Feign Clients (UsersApiClient, TweetsApiClient)
+- Все стандарты проекта соблюдены (STANDART_CODE.md, STANDART_JAVADOC.md)
+
+**Артефакты:**
+- `services/admin-script-api/src/main/java/com/twitter/client/FollowApiClient.java` - создан
+- `services/admin-script-api/build.gradle` - обновлён (добавлена зависимость на follower-api)
+- `todo/admin/TODO_1.md` - обновлён (шаг #3 отмечен как выполненный)
+
+**Примечание:**
+- Может потребоваться пересборка проекта для разрешения зависимостей (gradle build)
+
+### Рефакторинг: Вынос DTO в common-lib и удаление зависимости на follower-api
+**Время:** 2025-01-27 13:15  
+**Автор:** assistant
+
+**Выполнено:**
+- Созданы DTO в common-lib:
+  - `shared/common-lib/src/main/java/com/twitter/common/dto/request/FollowRequestDto.java` - создан
+  - `shared/common-lib/src/main/java/com/twitter/common/dto/response/FollowResponseDto.java` - создан
+- Обновлён `FollowApiClient` в admin-script-api:
+  - Импорты изменены с `com.twitter.dto` на `com.twitter.common.dto`
+- Удалена зависимость на follower-api из `build.gradle` admin-script-api
+- Обновлён follower-api для использования DTO из common-lib:
+  - Обновлены импорты во всех основных файлах (FollowApi, FollowController, FollowService, FollowServiceImpl, FollowMapper, FollowValidator, FollowValidatorImpl)
+  - Обновлены импорты во всех тестовых файлах (FollowControllerTest, FollowServiceImplTest, FollowMapperTest, FollowValidatorImplTest)
+  - Удалены старые DTO из follower-api (FollowRequestDto.java, FollowResponseDto.java)
+- Все DTO теперь находятся в common-lib, что соответствует стандартам проекта (STANDART_PROJECT.md)
+- Улучшена архитектура: loose coupling между сервисами, единый источник истины для DTO
+
+**Артефакты:**
+- `shared/common-lib/src/main/java/com/twitter/common/dto/request/FollowRequestDto.java` - создан
+- `shared/common-lib/src/main/java/com/twitter/common/dto/response/FollowResponseDto.java` - создан
+- `services/admin-script-api/src/main/java/com/twitter/client/FollowApiClient.java` - обновлён (импорты)
+- `services/admin-script-api/build.gradle` - обновлён (удалена зависимость на follower-api)
+- `services/follower-api/src/main/java/com/twitter/controller/FollowApi.java` - обновлён (импорты)
+- `services/follower-api/src/main/java/com/twitter/controller/FollowController.java` - обновлён (импорты)
+- `services/follower-api/src/main/java/com/twitter/service/FollowService.java` - обновлён (импорты)
+- `services/follower-api/src/main/java/com/twitter/service/FollowServiceImpl.java` - обновлён (импорты)
+- `services/follower-api/src/main/java/com/twitter/mapper/FollowMapper.java` - обновлён (импорты)
+- `services/follower-api/src/main/java/com/twitter/validation/FollowValidator.java` - обновлён (импорты)
+- `services/follower-api/src/main/java/com/twitter/validation/FollowValidatorImpl.java` - обновлён (импорты)
+- `services/follower-api/src/test/java/com/twitter/controller/FollowControllerTest.java` - обновлён (импорты)
+- `services/follower-api/src/test/java/com/twitter/service/FollowServiceImplTest.java` - обновлён (импорты)
+- `services/follower-api/src/test/java/com/twitter/mapper/FollowMapperTest.java` - обновлён (импорты)
+- `services/follower-api/src/test/java/com/twitter/validation/FollowValidatorImplTest.java` - обновлён (импорты)
+- `services/follower-api/src/main/java/com/twitter/dto/request/FollowRequestDto.java` - удалён
+- `services/follower-api/src/main/java/com/twitter/dto/response/FollowResponseDto.java` - удалён
+
+## 2025-01-27
+
 ### Step #1: Анализ требований и проектирование API
 **Время:** 2025-01-27  
 **Автор:** assistant
