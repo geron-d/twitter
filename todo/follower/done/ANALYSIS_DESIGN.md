@@ -552,8 +552,8 @@ CREATE INDEX IF NOT EXISTS idx_follows_created_at ON follows(created_at);
 
 ## 14. References
 
-- [Code Standards](../../standards/STANDART_CODE.md)
-- [Project Standards](../../standards/STANDART_PROJECT.md)
-- [Users API README](../../services/users-api/README.md)
-- [Tweet API README](../../services/tweet-api/README.md)
+- [Code Standards](../../../standards/STANDART_CODE.md)
+- [Project Standards](../../../standards/STANDART_PROJECT.md)
+- [Users API README](../../../services/users-api/README.md)
+- [Tweet API README](../../../services/tweet-api/README.md)
 
