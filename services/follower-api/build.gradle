@@ -14,18 +14,15 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-
+    
     // OpenAPI/Swagger документация
     implementation 'io.swagger.core.v3:swagger-annotations'
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui") {
         exclude group: "io.swagger.core.v3", module: "swagger-annotations"
     }
-
+    
     // Трейсинг и мониторинг
     implementation 'io.micrometer:micrometer-tracing-bridge-otel'
-
-    // Datafaker for generating fake data
-    implementation 'net.datafaker:datafaker'
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'

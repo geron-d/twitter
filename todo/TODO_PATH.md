@@ -1,20 +1,3 @@
-# Base stack
-- БД Postgres
-- REST
-
-## 1.1 Создание user-service
-
-## 2. Создание tweet-service
-- Публикация твита (280 символов max)
-
-```java
-public class Tweet {
-    private UUID id;
-    private UUID userId;
-    private String content;
-    private LocalDateTime createdAt;
-}
-```
 
 ## 3. follow-service
 - подписка на пользователя
@@ -82,3 +65,4 @@ public class Follow {
 - добавить систему хэштэгов
 - заменить feign client на http interfaces
 - написать тесты для перформанса на JMH benchmark (https://github.com/hibernate/beanvalidation-benchmark/blob/451727417cf64d7e55efcfd5e98631841a567c13/README.md , https://github.com/hibernate/hibernate-validator/blob/main/performance/README.md , https://habr.com/ru/companies/spring_aio/articles/975422/)
+- разобраться как собираться конкретный образ из докер компосе и сделать так чтобы он участвовал в докер компос
