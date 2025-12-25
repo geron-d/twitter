@@ -560,31 +560,34 @@
     - Проверены выбросы исключений
   - Выполнено: Создан FollowValidatorImplTest в services/follower-api/src/test/java/com/twitter/validation/FollowValidatorImplTest.java. Используется @ExtendWith(MockitoExtension.class), @Mock для FollowRepository и UserGateway, @InjectMocks для FollowValidatorImpl. Протестирован метод validateForFollow: успешный сценарий (валидные данные, все проверки проходят), null request (BusinessRuleValidationException с правилом "FOLLOW_REQUEST_NULL"), null followerId (BusinessRuleValidationException с правилом "FOLLOWER_ID_NULL"), null followingId (BusinessRuleValidationException с правилом "FOLLOWING_ID_NULL"), самоподписка (BusinessRuleValidationException с правилом "SELF_FOLLOW_NOT_ALLOWED"), пользователь не существует - follower (BusinessRuleValidationException с правилом "FOLLOWER_NOT_EXISTS"), пользователь не существует - following (BusinessRuleValidationException с правилом "FOLLOWING_NOT_EXISTS"), двойная подписка (UniquenessValidationException), проверка порядка вызовов зависимостей. Все тесты используют AssertJ для assertions (assertThat, assertThatCode, assertThatThrownBy), проверяют взаимодействия с зависимостями через verify, используют @BeforeEach для инициализации тестовых данных. Тесты организованы в @Nested класс ValidateForFollowTests для группировки. Тесты соответствуют стандартам проекта (STANDART_TEST.md) и структуре других Validator тестов (TweetValidatorImplTest). Проверка линтера: ошибок не обнаружено.
 
-- [ ] (P1) #54: JavaDoc для всех классов - добавить JavaDoc с @author geron, @version 1.0 для всех public классов и методов
+- [x] (P1) [2025-01-28 00:25] #54: JavaDoc для всех классов - добавить JavaDoc с @author geron, @version 1.0 для всех public классов и методов
   - Зависимости: #11, #12, #13, #14, #15, #16, #17, #18, #22, #23, #27, #28, #29, #33, #34, #35, #39, #40, #41, #45, #46, #47, #7
   - Acceptance criteria:
     - Все public классы имеют JavaDoc с @author geron, @version 1.0
     - Все public методы имеют JavaDoc с @param, @return, @throws
     - JavaDoc на английском языке
     - DTO Records имеют JavaDoc с @param для всех компонентов
+  - Выполнено: Проверены все классы в services/follower-api/src/main/java. Добавлен JavaDoc для Application.java и FollowRepository.java. Все остальные классы уже имели JavaDoc с @author geron и @version 1.0. Все public методы имеют JavaDoc с @param, @return и @throws (где необходимо). Все DTO Records имеют JavaDoc с @param для всех компонентов. JavaDoc на английском языке. Методы в FollowServiceImpl и FollowController используют @see для ссылки на интерфейсы. Derived Query Methods в FollowRepository не требуют JavaDoc согласно стандартам проекта (STANDART_JAVADOC.md). Проверка линтера: ошибок не обнаружено.
     - Repository Derived Query Methods НЕ имеют JavaDoc (согласно стандартам)
 
-- [ ] (P1) #55: DTO Schema аннотации - добавить @Schema на уровне класса и полей для всех DTO
+- [x] (P1) [2025-01-28 00:30] #55: DTO Schema аннотации - добавить @Schema на уровне класса и полей для всех DTO
   - Зависимости: #16, #27, #33, #39, #45
   - Acceptance criteria:
     - Все DTO имеют @Schema на уровне класса (name, description, example)
     - Все поля DTO имеют @Schema (description, example, requiredMode, format, minLength, maxLength)
     - Примеры используют реалистичные UUID и данные
+  - Выполнено: Проверены все DTO в services/follower-api/src/main/java/com/twitter/dto. Все DTO уже имеют полные @Schema аннотации на уровне класса и полей. Все DTO соответствуют стандартам проекта (STANDART_SWAGGER.md): FollowRequestDto, FollowResponseDto, FollowerResponseDto, FollowingResponseDto, FollowStatusResponseDto, FollowStatsResponseDto, FollowerFilter, FollowingFilter. Все классы имеют @Schema с name, description и example. Все поля имеют @Schema с description, example, requiredMode, format (где необходимо). Примеры используют реалистичные UUID и данные. Проверка линтера: ошибок не обнаружено.
 
-- [ ] (P2) #56: Обновление OpenApiConfig - настроить Info, Servers для follower-api
+- [x] (P2) [2025-01-28 00:35] #56: Обновление OpenApiConfig - настроить Info, Servers для follower-api
   - Зависимости: #7
   - Acceptance criteria:
     - OpenApiConfig содержит правильный title "Twitter Follower API"
     - OpenApiConfig содержит подробное description
     - OpenApiConfig содержит server на localhost:8084
     - Version установлена в "1.0.0"
+  - Выполнено: Обновлен OpenApiConfig в services/follower-api/src/main/java/com/twitter/config/OpenApiConfig.java. Добавлено подробное description с описанием возможностей API, секциями Authentication, Rate Limiting и Error Handling. Title установлен в "Twitter Follower API", version в "1.0.0", server настроен на localhost:8084. Конфигурация соответствует стандартам проекта (STANDART_SWAGGER.md) и структуре других сервисов (users-api, tweet-api). Проверка линтера: ошибок не обнаружено.
 
-- [ ] (P2) #57: Обновление README.md - создать полную документацию на русском языке согласно STANDART_README.md
+- [x] (P2) [2025-01-28 00:40] #57: Обновление README.md - создать полную документацию на русском языке согласно STANDART_README.md
   - Зависимости: #18, #23, #29, #35, #41, #47
   - Acceptance criteria:
     - Создан README.md на русском языке
@@ -593,6 +596,7 @@
     - Описана интеграция с users-api
     - Описана структура таблицы follows
     - Включены примеры curl команд
+  - Выполнено: Создан README.md в services/follower-api/README.md на русском языке согласно STANDART_README.md. Включены все обязательные секции: Введение, Основные возможности, Архитектура (структура пакетов и диаграмма компонентов), REST API (базовый URL, таблица эндпоинтов, детальное описание всех 6 эндпоинтов с примерами), OpenAPI/Swagger документация, Бизнес-логика (FollowService с описанием всех методов), Слой валидации (FollowValidator, типы исключений, валидация по операциям), Работа с базой данных (сущность Follow, таблица follows, FollowRepository), Интеграция с users-api (архитектура, компоненты, процессы, обработка ошибок), Примеры использования (curl команды для всех эндпоинтов), Конфигурация, Запуск и развертывание, Безопасность, Тестирование. Документированы все эндпоинты с примерами запросов и ответов. Описана интеграция с users-api через Feign Client. Описана структура таблицы follows с ограничениями и индексами. Включены примеры curl команд для всех операций. Документация соответствует стандартам проекта.
 
 - [ ] (P2) #58: Обновление Postman коллекции - создать коллекцию с всеми запросами, примерами ответов, переменными окружения
   - Зависимости: #18, #23, #29, #35, #41, #47

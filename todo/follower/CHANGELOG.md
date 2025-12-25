@@ -1,5 +1,99 @@
 # Changelog - Follower API Service
 
+## 2025-01-28 00:40 — step 57 done — Обновление README.md — автор: assistant
+
+Создан README.md в services/follower-api/README.md на русском языке согласно STANDART_README.md:
+- Включены все обязательные секции:
+  - Введение с описанием сервиса
+  - Основные возможности (9 пунктов)
+  - Архитектура (структура пакетов с ASCII tree, диаграмма компонентов с ASCII art)
+  - REST API (базовый URL, таблица эндпоинтов, детальное описание всех 6 эндпоинтов):
+    - POST /api/v1/follows - создание подписки
+    - DELETE /api/v1/follows/{followerId}/{followingId} - удаление подписки
+    - GET /api/v1/follows/{userId}/followers - список подписчиков
+    - GET /api/v1/follows/{userId}/following - список подписок
+    - GET /api/v1/follows/{followerId}/{followingId}/status - статус подписки
+    - GET /api/v1/follows/{userId}/stats - статистика подписок
+  - OpenAPI/Swagger документация (обзор, доступ, особенности, конфигурация)
+  - Бизнес-логика (FollowService с описанием всех 6 методов и ключевых бизнес-правил)
+  - Слой валидации (FollowValidator, типы исключений с примерами, валидация по операциям)
+  - Работа с базой данных (сущность Follow, таблица follows с ограничениями и индексами, FollowRepository)
+  - Интеграция с users-api (архитектура, компоненты UsersApiClient и UserGateway, процессы, обработка ошибок)
+  - Примеры использования (curl команды для всех эндпоинтов с примерами запросов и ответов)
+  - Конфигурация (зависимости, управление версиями, настройки)
+  - Запуск и развертывание (локальный запуск, Docker, мониторинг)
+  - Безопасность (валидация, логирование, защита от ошибок)
+  - Тестирование (описание тестов, команды запуска, покрытие)
+- Документированы все эндпоинты с примерами запросов и ответов
+- Описана интеграция с users-api через Feign Client (UsersApiClient, UserGateway)
+- Описана структура таблицы follows с ограничениями (unique, check, foreign keys) и индексами
+- Включены примеры curl команд для всех операций
+- Документация соответствует стандартам проекта (STANDART_README.md) и структуре других сервисов (users-api, tweet-api)
+
+## 2025-01-28 00:35 — step 56 done — Обновление OpenApiConfig — автор: assistant
+
+Обновлен OpenApiConfig в services/follower-api/src/main/java/com/twitter/config/OpenApiConfig.java:
+- Title установлен в "Twitter Follower API"
+- Version установлена в "1.0.0"
+- Server настроен на localhost:8084 (соответствует порту из application.yml)
+- Добавлено подробное description с:
+  - Кратким описанием назначения API
+  - Списком основных возможностей (bullet points):
+    - Creating and removing follow relationships between users
+    - Retrieving followers and following lists with pagination
+    - Filtering followers and following by login name
+    - Checking follow relationship status
+    - Retrieving follow statistics (followers count, following count)
+    - User existence verification via users-api integration
+    - Business rule enforcement (no self-follow, uniqueness validation)
+  - Секцией Authentication (текущее состояние и планы на будущее)
+  - Секцией Rate Limiting
+  - Секцией Error Handling (RFC 7807 Problem Details)
+- Конфигурация соответствует стандартам проекта (STANDART_SWAGGER.md)
+- Структура соответствует другим сервисам (users-api, tweet-api)
+- Проверка линтера: ошибок не обнаружено
+
+## 2025-01-28 00:30 — step 55 done — DTO Schema аннотации — автор: assistant
+
+Проверены все DTO в services/follower-api/src/main/java/com/twitter/dto и подтверждено, что все DTO имеют полные @Schema аннотации:
+- Все DTO имеют @Schema на уровне класса с name, description и example:
+  - FollowRequestDto - класс и поля (followerId, followingId)
+  - FollowResponseDto - класс и поля (id, followerId, followingId, createdAt)
+  - FollowerResponseDto - класс и поля (id, login, createdAt)
+  - FollowingResponseDto - класс и поля (id, login, createdAt)
+  - FollowStatusResponseDto - класс и поля (isFollowing, createdAt)
+  - FollowStatsResponseDto - класс и поля (followersCount, followingCount)
+  - FollowerFilter - класс и поля (login)
+  - FollowingFilter - класс и поля (login)
+- Все поля имеют @Schema с description, example, requiredMode, format (где необходимо)
+- UUID поля имеют format = "uuid"
+- LocalDateTime поля имеют format = "date-time"
+- Обязательные поля имеют requiredMode = Schema.RequiredMode.REQUIRED
+- Необязательные поля имеют requiredMode = Schema.RequiredMode.NOT_REQUIRED
+- Nullable поля имеют nullable = true
+- Примеры используют реалистичные UUID и данные
+- Все DTO соответствуют стандартам проекта (STANDART_SWAGGER.md)
+- Проверка линтера: ошибок не обнаружено
+
+## 2025-01-28 00:25 — step 54 done — JavaDoc для всех классов — автор: assistant
+
+Проверены все классы в services/follower-api/src/main/java и добавлен JavaDoc там, где его не хватало:
+- Добавлен JavaDoc для Application.java (класс и метод main)
+- Добавлен JavaDoc для FollowRepository.java (класс)
+- Все остальные классы уже имели JavaDoc с @author geron и @version 1.0:
+  - FollowApi, FollowController, FollowService, FollowServiceImpl
+  - UserGateway, UsersApiClient, FollowMapper
+  - FollowValidator, FollowValidatorImpl
+  - Follow entity
+  - Все DTO (FollowRequestDto, FollowResponseDto, FollowerResponseDto, FollowingResponseDto, FollowStatusResponseDto, FollowStatsResponseDto, FollowerFilter, FollowingFilter)
+  - Config классы (OpenApiConfig, FeignConfig)
+- Все public методы имеют JavaDoc с @param, @return и @throws (где необходимо)
+- Все DTO Records имеют JavaDoc с @param для всех компонентов
+- JavaDoc на английском языке
+- Методы в FollowServiceImpl и FollowController используют @see для ссылки на интерфейсы
+- Derived Query Methods в FollowRepository не требуют JavaDoc согласно стандартам проекта (STANDART_JAVADOC.md)
+- Проверка линтера: ошибок не обнаружено
+
 ## 2025-01-28 00:20 — step 53 done — Unit тесты для Validator — автор: assistant
 
 Создан FollowValidatorImplTest в services/follower-api/src/test/java/com/twitter/validation/FollowValidatorImplTest.java для unit тестирования FollowValidatorImpl:
