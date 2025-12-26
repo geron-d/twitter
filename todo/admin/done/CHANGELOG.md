@@ -91,6 +91,38 @@
 **Примечание:**
 - Может потребоваться пересборка проекта для разрешения зависимостей (gradle build)
 
+### Step #4 (TODO_1.md): Создание FollowGateway для абстракции над Feign Client
+**Время:** 2025-01-27 14:00  
+**Автор:** assistant
+
+**Выполнено:**
+- Создан `FollowGateway` в пакете `com.twitter.gateway`:
+  - Компонент Spring с аннотациями @Component, @RequiredArgsConstructor, @Slf4j
+  - Зависимость `FollowApiClient` через конструктор (final поле)
+  - Метод `createFollow` с полной реализацией:
+    - Валидация входных параметров: проверка на null для request и полей (followerId, followingId)
+    - Вызов Feign Client через `followApiClient.createFollow(request)`
+    - Обработка ошибок: перехват исключений с логированием и проброс RuntimeException
+    - Логирование: ERROR для ошибок, INFO для успешных операций с деталями (followerId, followingId, ID созданного follow-отношения)
+  - Полная JavaDoc документация:
+    - Класс-уровневая JavaDoc с @author geron, @version 1.0, описанием назначения и паттерна Gateway
+    - Метод-уровневая JavaDoc с @param, @return, @throws для всех исключений
+- Класс следует паттерну Gateway, аналогично `UsersGateway`:
+  - Абстракция над Feign Client
+  - Централизованная обработка ошибок и логирование
+  - Валидация входных данных
+- Используются DTO из common-lib:
+  - `com.twitter.common.dto.request.FollowRequestDto`
+  - `com.twitter.common.dto.response.FollowResponseDto`
+- Все стандарты проекта соблюдены (STANDART_CODE.md, STANDART_PROJECT.md, STANDART_JAVADOC.md)
+
+**Артефакты:**
+- `services/admin-script-api/src/main/java/com/twitter/gateway/FollowGateway.java` - создан
+- `todo/admin/TODO_1.md` - обновлён (шаг #4 отмечен как выполненный)
+
+**Примечание:**
+- Класс готов к использованию в `GenerateUsersAndTweetsServiceImpl` для создания follow-отношений
+
 ### Рефакторинг: Вынос DTO в common-lib и удаление зависимости на follower-api
 **Время:** 2025-01-27 13:15  
 **Автор:** assistant

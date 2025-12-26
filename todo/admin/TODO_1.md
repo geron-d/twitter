@@ -25,8 +25,9 @@
 - [x] (P1) #3: Создание FollowApiClient (Feign Client) для интеграции с follower-api
   acceptance: "FollowApiClient создан с методом createFollow, использует @FeignClient, настроен URL из properties, имеет JavaDoc"
   metadata: priority=P1, done=2025-01-27T13:00, note="Создан FollowApiClient в пакете com.twitter.client с методом createFollow, использует DTO из follower-api (FollowRequestDto, FollowResponseDto), добавлена зависимость на follower-api в build.gradle"
-- [ ] (P1) #4: Создание FollowGateway для абстракции над Feign Client
+- [x] (P1) #4: Создание FollowGateway для абстракции над Feign Client
   acceptance: "FollowGateway создан с методом createFollow, использует паттерн Gateway, обработка ошибок, логирование, имеет JavaDoc"
+  metadata: priority=P1, done=2025-01-27T14:00, note="Создан FollowGateway в пакете com.twitter.gateway с методом createFollow, реализована валидация входных параметров (null check для request и полей), обработка ошибок с логированием, используется паттерн Gateway аналогично UsersGateway, полная JavaDoc документация с @author geron, @version 1.0, @param, @return, @throws"
 - [ ] (P1) #5: Обновление GenerateUsersAndTweetsResponseDto: добавление поля createdFollows
   acceptance: "Добавлено поле List<UUID> createdFollows, обновлены JavaDoc и @Schema аннотации"
 - [ ] (P1) #6: Обновление ScriptStatisticsDto: добавление поля totalFollowsCreated
