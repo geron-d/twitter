@@ -123,6 +123,60 @@
 **Примечание:**
 - Класс готов к использованию в `GenerateUsersAndTweetsServiceImpl` для создания follow-отношений
 
+### Step #5 (TODO_1.md): Обновление GenerateUsersAndTweetsResponseDto: добавление поля createdFollows
+**Время:** 2025-01-27 14:15  
+**Автор:** assistant
+
+**Выполнено:**
+- Обновлён `GenerateUsersAndTweetsResponseDto` в пакете `com.twitter.dto.response`:
+  - Добавлено поле `List<UUID> createdFollows` после поля `createdUsers`
+  - Поле содержит список ID успешно созданных follow-отношений
+  - Поле размещено логически после `createdUsers`, так как follow-отношения создаются после пользователей, но до твитов
+- Обновлена JavaDoc документация:
+  - Добавлен `@param createdFollows` в класс-уровневую JavaDoc
+  - Добавлен JavaDoc для нового поля с описанием назначения и контекста создания
+- Добавлена аннотация `@Schema` для нового поля:
+  - `description`: "List of IDs of successfully created follow relationships"
+  - `example`: пример с двумя UUID
+  - `requiredMode`: `Schema.RequiredMode.REQUIRED`
+- Обновлён пример JSON в `@Schema` на уровне класса:
+  - Добавлен раздел `"createdFollows"` в пример ответа между `createdUsers` и `createdTweets`
+- Все стандарты проекта соблюдены (STANDART_CODE.md, STANDART_JAVADOC.md)
+
+**Артефакты:**
+- `services/admin-script-api/src/main/java/com/twitter/dto/response/GenerateUsersAndTweetsResponseDto.java` - обновлён
+- `todo/admin/TODO_1.md` - обновлён (шаг #5 отмечен как выполненный)
+
+**Примечание:**
+- Поле готово к использованию в `GenerateUsersAndTweetsServiceImpl` для возврата списка созданных follow-отношений
+
+### Step #6 (TODO_1.md): Обновление ScriptStatisticsDto: добавление поля totalFollowsCreated
+**Время:** 2025-01-27 14:30  
+**Автор:** assistant
+
+**Выполнено:**
+- Обновлён `ScriptStatisticsDto` в пакете `com.twitter.dto.response`:
+  - Добавлено поле `Integer totalFollowsCreated` после поля `totalTweetsCreated`
+  - Поле содержит общее количество успешно созданных follow-отношений
+  - Поле размещено логически после `totalTweetsCreated` для группировки полей "total...Created"
+- Обновлена JavaDoc документация:
+  - Добавлен `@param totalFollowsCreated` в класс-уровневую JavaDoc
+  - Добавлен JavaDoc для нового поля с описанием назначения
+- Добавлена аннотация `@Schema` для нового поля:
+  - `description`: "Total number of successfully created follow relationships"
+  - `example`: "5"
+  - `requiredMode`: `Schema.RequiredMode.REQUIRED`
+- Обновлён пример JSON в `@Schema` на уровне класса:
+  - Добавлено поле `"totalFollowsCreated": 5` в пример ответа после `totalTweetsCreated`
+- Все стандарты проекта соблюдены (STANDART_CODE.md, STANDART_JAVADOC.md)
+
+**Артефакты:**
+- `services/admin-script-api/src/main/java/com/twitter/dto/response/ScriptStatisticsDto.java` - обновлён
+- `todo/admin/TODO_1.md` - обновлён (шаг #6 отмечен как выполненный)
+
+**Примечание:**
+- Поле готово к использованию в `GenerateUsersAndTweetsServiceImpl` для отслеживания статистики созданных follow-отношений
+
 ### Рефакторинг: Вынос DTO в common-lib и удаление зависимости на follower-api
 **Время:** 2025-01-27 13:15  
 **Автор:** assistant

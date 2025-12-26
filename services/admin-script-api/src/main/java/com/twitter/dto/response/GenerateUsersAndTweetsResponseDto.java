@@ -13,10 +13,11 @@ import java.util.UUID;
  * script. It contains lists of created and deleted entity IDs, as well as detailed
  * statistics about the script execution.
  *
- * @param createdUsers  list of IDs of successfully created users
- * @param createdTweets list of IDs of successfully created tweets
- * @param deletedTweets list of IDs of successfully deleted tweets
- * @param statistics    detailed statistics about script execution
+ * @param createdUsers   list of IDs of successfully created users
+ * @param createdFollows list of IDs of successfully created follow relationships
+ * @param createdTweets  list of IDs of successfully created tweets
+ * @param deletedTweets  list of IDs of successfully deleted tweets
+ * @param statistics      detailed statistics about script execution
  * @author geron
  * @version 1.0
  */
@@ -28,6 +29,10 @@ import java.util.UUID;
           "createdUsers": [
             "123e4567-e89b-12d3-a456-426614174000",
             "223e4567-e89b-12d3-a456-426614174001"
+          ],
+          "createdFollows": [
+            "456e7890-e89b-12d3-a456-426614174111",
+            "567e8901-e89b-12d3-a456-426614174222"
           ],
           "createdTweets": [
             "323e4567-e89b-12d3-a456-426614174002",
@@ -63,6 +68,16 @@ public record GenerateUsersAndTweetsResponseDto(
         requiredMode = Schema.RequiredMode.REQUIRED
     )
     List<UUID> createdUsers,
+
+    /**
+     * List of IDs of successfully created follow relationships.
+     */
+    @Schema(
+        description = "List of IDs of successfully created follow relationships",
+        example = "[\"456e7890-e89b-12d3-a456-426614174111\", \"567e8901-e89b-12d3-a456-426614174222\"]",
+        requiredMode = Schema.RequiredMode.REQUIRED
+    )
+    List<UUID> createdFollows,
 
     /**
      * List of IDs of successfully created tweets.

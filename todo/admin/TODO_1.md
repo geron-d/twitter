@@ -28,10 +28,12 @@
 - [x] (P1) #4: Создание FollowGateway для абстракции над Feign Client
   acceptance: "FollowGateway создан с методом createFollow, использует паттерн Gateway, обработка ошибок, логирование, имеет JavaDoc"
   metadata: priority=P1, done=2025-01-27T14:00, note="Создан FollowGateway в пакете com.twitter.gateway с методом createFollow, реализована валидация входных параметров (null check для request и полей), обработка ошибок с логированием, используется паттерн Gateway аналогично UsersGateway, полная JavaDoc документация с @author geron, @version 1.0, @param, @return, @throws"
-- [ ] (P1) #5: Обновление GenerateUsersAndTweetsResponseDto: добавление поля createdFollows
+- [x] (P1) #5: Обновление GenerateUsersAndTweetsResponseDto: добавление поля createdFollows
   acceptance: "Добавлено поле List<UUID> createdFollows, обновлены JavaDoc и @Schema аннотации"
-- [ ] (P1) #6: Обновление ScriptStatisticsDto: добавление поля totalFollowsCreated
+  metadata: priority=P1, done=2025-01-27T14:15, note="Добавлено поле List<UUID> createdFollows в GenerateUsersAndTweetsResponseDto после поля createdUsers, обновлен JavaDoc класса (добавлен @param createdFollows), добавлен JavaDoc для нового поля с описанием, добавлена @Schema аннотация с description, example и requiredMode, обновлен пример JSON в @Schema на уровне класса"
+- [x] (P1) #6: Обновление ScriptStatisticsDto: добавление поля totalFollowsCreated
   acceptance: "Добавлено поле int totalFollowsCreated, обновлены JavaDoc"
+  metadata: priority=P1, done=2025-01-27T14:30, note="Добавлено поле Integer totalFollowsCreated в ScriptStatisticsDto после поля totalTweetsCreated, обновлен JavaDoc класса (добавлен @param totalFollowsCreated), добавлен JavaDoc для нового поля с описанием, добавлена @Schema аннотация с description, example и requiredMode, обновлен пример JSON в @Schema на уровне класса"
 - [ ] (P1) #7: Обновление GenerateUsersAndTweetsServiceImpl: добавление логики создания follow-отношений
   acceptance: "Добавлен новый шаг Step 1.5 после создания пользователей: выбор центрального пользователя, вычисление половины, создание follow-отношений, обработка ошибок, сбор статистики"
 - [ ] (P1) #8: Обновление application.yml: добавление настройки app.follower-api.base-url
