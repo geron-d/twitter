@@ -13,5 +13,3 @@ import org.springframework.context.annotation.Configuration;
 @EnableFeignClients(basePackages = "com.twitter.client")
 public class FeignConfig {
 }
-
-

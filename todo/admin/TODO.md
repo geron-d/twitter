@@ -101,4 +101,3 @@
   - [UsersGateway.java](../../services/admin-script-api/src/main/java/com/twitter/gateway/UsersGateway.java)
   - [FollowController.java](../../services/follower-api/src/main/java/com/twitter/controller/FollowController.java)
   - [FollowRequestDto.java](../../services/follower-api/src/main/java/com/twitter/dto/request/FollowRequestDto.java)
-
