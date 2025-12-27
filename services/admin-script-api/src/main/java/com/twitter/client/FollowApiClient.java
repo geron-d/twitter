@@ -2,6 +2,7 @@ package com.twitter.client;
 
 import com.twitter.common.dto.request.FollowRequestDto;
 import com.twitter.common.dto.response.FollowResponseDto;
+import feign.FeignException;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,6 +29,7 @@ public interface FollowApiClient {
      *
      * @param request DTO containing followerId and followingId for the relationship
      * @return FollowResponseDto containing the created follow relationship information including ID
+     * @throws FeignException if the HTTP request fails (e.g., service unavailable, validation error)
      */
     @PostMapping
     FollowResponseDto createFollow(@RequestBody FollowRequestDto request);

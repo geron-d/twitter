@@ -177,6 +177,158 @@
 **Примечание:**
 - Поле готово к использованию в `GenerateUsersAndTweetsServiceImpl` для отслеживания статистики созданных follow-отношений
 
+### Step #7 (TODO_1.md): Обновление GenerateUsersAndTweetsServiceImpl: добавление логики создания follow-отношений
+**Время:** 2025-01-27 15:00  
+**Автор:** assistant
+
+**Выполнено:**
+- Обновлён `GenerateUsersAndTweetsServiceImpl` в пакете `com.twitter.service`:
+  - Добавлен импорт `FollowRequestDto` из `com.twitter.common.dto.request`
+  - Добавлена зависимость `FollowGateway` через конструктор (final поле)
+  - Добавлен список `List<UUID> createdFollows` для сбора ID созданных follow-отношений
+  - Добавлен шаг **Step 1.5: Create follow relationships** после Step 1 (создание пользователей):
+    - Проверка: минимум 2 пользователя для создания follow-отношений
+    - Выбор центрального пользователя: первый созданный пользователь (`createdUsers.get(0)`)
+    - Создание списка остальных пользователей: `otherUsers = createdUsers.subList(1, createdUsers.size())`
+    - Вычисление половины: `halfCount = (createdUsers.size() - 1) / 2` (целочисленное деление)
+    - Проверка: если `halfCount == 0`, пропуск создания follow-отношений
+    - **Step 1.5.1: Центральный пользователь фолловит половину остальных:**
+      - Перемешивание списка остальных пользователей: `Collections.shuffle(otherUsers)`
+      - Выбор первых `halfCount` пользователей: `usersToFollow = otherUsers.subList(0, Math.min(halfCount, otherUsers.size()))`
+      - Для каждого пользователя: создание `FollowRequestDto`, вызов `followGateway.createFollow()`, добавление ID в `createdFollows`, обработка ошибок
+    - **Step 1.5.2: Половина остальных фолловят центрального пользователя:**
+      - Новое перемешивание списка остальных пользователей: `Collections.shuffle(otherUsers)`
+      - Выбор первых `halfCount` пользователей: `usersToFollowBack = otherUsers.subList(0, Math.min(halfCount, otherUsers.size()))`
+      - Для каждого пользователя: создание `FollowRequestDto`, вызов `followGateway.createFollow()`, добавление ID в `createdFollows`, обработка ошибок
+    - Логирование всех операций: INFO для основных шагов, DEBUG для деталей, ERROR для ошибок
+    - Обработка ошибок: graceful degradation (логирование, добавление в errors, продолжение выполнения)
+  - Обновлено создание `ScriptStatisticsDto`: добавлен параметр `totalFollowsCreated` (между `totalTweetsCreated` и `totalTweetsDeleted`)
+  - Обновлено создание `GenerateUsersAndTweetsResponseDto`: добавлено поле `createdFollows` (между `createdUsers` и `createdTweets`)
+  - Обновлено финальное логирование: добавлена информация о созданных follow-отношениях
+- Логика полностью соответствует документации из `ANALYSIS_DESIGN_FOLLOW.md`:
+  - Выбор центрального пользователя (первый в списке)
+  - Вычисление половины (целочисленное деление)
+  - Создание follow-отношений в двух направлениях
+  - Обработка ошибок с graceful degradation
+- Все стандарты проекта соблюдены (STANDART_CODE.md, STANDART_PROJECT.md)
+- Проверка линтера: ошибок не обнаружено
+
+**Артефакты:**
+- `services/admin-script-api/src/main/java/com/twitter/service/GenerateUsersAndTweetsServiceImpl.java` - обновлён
+- `todo/admin/TODO_1.md` - обновлён (шаг #7 отмечен как выполненный)
+
+**Примечание:**
+- Логика создания follow-отношений интегрирована в основной поток выполнения скрипта
+- Следующий шаг: обновление `application.yml` с настройкой `app.follower-api.base-url`
+
+### Step #8 (TODO_1.md): Обновление application.yml: добавление настройки app.follower-api.base-url
+**Время:** 2025-01-27 15:15  
+**Автор:** assistant
+
+**Выполнено:**
+- Обновлён `application.yml` в `services/admin-script-api/src/main/resources/`:
+  - Добавлена настройка `app.follower-api.base-url: http://localhost:8084` в секцию `app:`
+  - Настройка размещена после `app.tweet-api.base-url` для консистентности структуры
+  - Порт 8084 выбран согласно проектированию (users-api: 8081, tweet-api: 8082, admin-script-api: 8083, follower-api: 8084)
+- Обновлён `application-docker.yml` в `services/admin-script-api/src/main/resources/`:
+  - Добавлена настройка `app.follower-api.base-url: http://follower-api:8084` в секцию `app:`
+  - Использован Docker hostname `follower-api` вместо `localhost` для корректной работы в Docker окружении
+  - Настройка размещена после `app.tweet-api.base-url` для консистентности структуры
+- Настройки соответствуют конфигурации `FollowApiClient`:
+  - `FollowApiClient` использует `${app.follower-api.base-url:http://localhost:8084}` в аннотации @FeignClient
+  - Значение по умолчанию совпадает с настройкой в `application.yml`
+- Все стандарты проекта соблюдены (STANDART_PROJECT.md)
+- Проверка линтера: ошибок не обнаружено
+
+**Артефакты:**
+- `services/admin-script-api/src/main/resources/application.yml` - обновлён
+- `services/admin-script-api/src/main/resources/application-docker.yml` - обновлён
+- `todo/admin/TODO_1.md` - обновлён (шаг #8 отмечен как выполненный)
+
+**Примечание:**
+- Конфигурация готова для использования `FollowApiClient` в локальном и Docker окружениях
+- Следующий шаг: JavaDoc для новых классов (FollowApiClient, FollowGateway) - шаг #9
+
+### Step #9 (TODO_1.md): JavaDoc для новых классов: FollowApiClient, FollowGateway
+**Время:** 2025-01-27 15:30  
+**Автор:** assistant
+
+**Выполнено:**
+- Проверена и улучшена JavaDoc документация для `FollowApiClient`:
+  - Улучшена класс-уровневая JavaDoc:
+    - Добавлено подробное описание назначения клиента и его интеграции с follower-api
+    - Добавлена информация о конфигурации (base URL из properties, default fallback, endpoint path)
+    - Добавлено упоминание использования Spring Cloud OpenFeign
+  - Улучшена метод-уровневая JavaDoc для `createFollow`:
+    - Добавлено описание поведения при ошибках (FeignException)
+    - Добавлен `@throws feign.FeignException` с описанием условий возникновения
+    - Добавлена информация о том, что исключения должны обрабатываться в Gateway слое
+  - Все обязательные теги присутствуют: @author geron, @version 1.0, @param, @return, @throws
+- Проверена JavaDoc документация для `FollowGateway`:
+  - Класс-уровневая JavaDoc: ✅ Полная, содержит @author geron, @version 1.0, подробное описание назначения и паттерна Gateway
+  - Метод-уровневая JavaDoc для `createFollow`: ✅ Полная, содержит @param, @return, @throws для всех исключений (IllegalArgumentException, RuntimeException)
+  - Документация соответствует стандартам STANDART_JAVADOC.md
+- Все классы соответствуют стандартам проекта:
+  - ✅ Использование английского языка
+  - ✅ Использование `<p>` тегов для разделения параграфов
+  - ✅ Полное описание назначения и использования
+  - ✅ Все обязательные теги присутствуют
+- Проверка линтера: ошибок не обнаружено
+
+**Артефакты:**
+- `services/admin-script-api/src/main/java/com/twitter/client/FollowApiClient.java` - обновлён (улучшена JavaDoc)
+- `services/admin-script-api/src/main/java/com/twitter/gateway/FollowGateway.java` - проверен (JavaDoc полный)
+- `todo/admin/TODO_1.md` - обновлён (шаг #9 отмечен как выполненный)
+
+**Примечание:**
+- JavaDoc документация для новых классов полная и соответствует стандартам
+- Следующий шаг: JavaDoc для обновленных классов (GenerateUsersAndTweetsServiceImpl, DTO) - шаг #10
+
+### Step #10 (TODO_1.md): JavaDoc для обновленных классов: GenerateUsersAndTweetsServiceImpl, DTO
+**Время:** 2025-01-27 15:45  
+**Автор:** assistant
+
+**Выполнено:**
+- Обновлён JavaDoc для класса `GenerateUsersAndTweetsServiceImpl`:
+  - Улучшена класс-уровневая JavaDoc:
+    - Добавлено подробное описание всех шагов выполнения скрипта с использованием нумерованного списка (`<ol>`)
+    - Добавлено детальное описание Step 1.5 (создание follow-отношений):
+      - Выбор центрального пользователя (первый созданный пользователь)
+      - Логика создания follow-отношений в двух направлениях
+      - Использование целочисленного деления для вычисления половины
+      - Требование минимум 2 пользователей
+    - Добавлена информация о graceful error handling
+  - Метод `executeScript` использует `@see` для ссылки на интерфейс (соответствует стандартам для реализации интерфейса)
+- Обновлён JavaDoc для поля `createdFollows` в `GenerateUsersAndTweetsResponseDto`:
+  - Добавлено подробное описание с использованием `<p>` тегов:
+    - Описание содержимого списка (UUID созданных follow-отношений)
+    - Упоминание Step 1.5
+    - Описание логики создания follow-отношений (центральный пользователь, половина остальных)
+    - Условия, при которых список будет пустым
+- Обновлён JavaDoc для поля `totalFollowsCreated` в `ScriptStatisticsDto`:
+  - Добавлено подробное описание с использованием `<p>` тегов:
+    - Описание подсчёта (общее количество созданных follow-отношений)
+    - Упоминание Step 1.5
+    - Описание логики подсчёта (оба направления: центральный → остальные, остальные → центральный)
+    - Условия, при которых значение будет 0
+- Все обновления соответствуют стандартам STANDART_JAVADOC.md:
+  - ✅ Использование английского языка
+  - ✅ Использование `<p>` тегов для разделения параграфов
+  - ✅ Использование `<ol>` и `<ul>` для списков
+  - ✅ Полное описание назначения и логики
+  - ✅ Упоминание контекста использования (Step 1.5)
+- Проверка линтера: ошибок не обнаружено
+
+**Артефакты:**
+- `services/admin-script-api/src/main/java/com/twitter/service/GenerateUsersAndTweetsServiceImpl.java` - обновлён (улучшена JavaDoc)
+- `services/admin-script-api/src/main/java/com/twitter/dto/response/GenerateUsersAndTweetsResponseDto.java` - обновлён (улучшена JavaDoc для поля createdFollows)
+- `services/admin-script-api/src/main/java/com/twitter/dto/response/ScriptStatisticsDto.java` - обновлён (улучшена JavaDoc для поля totalFollowsCreated)
+- `todo/admin/TODO_1.md` - обновлён (шаг #10 отмечен как выполненный)
+
+**Примечание:**
+- JavaDoc документация для всех обновленных классов полная и соответствует стандартам
+- Следующий шаг: Unit тесты для FollowGateway - шаг #11
+
 ### Рефакторинг: Вынос DTO в common-lib и удаление зависимости на follower-api
 **Время:** 2025-01-27 13:15  
 **Автор:** assistant

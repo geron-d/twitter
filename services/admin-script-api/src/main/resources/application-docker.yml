@@ -4,3 +4,5 @@ app:
     base-url: http://users-api:8081
   tweet-api:
     base-url: http://tweet-api:8082
+  follower-api:
+    base-url: http://follower-api:8084

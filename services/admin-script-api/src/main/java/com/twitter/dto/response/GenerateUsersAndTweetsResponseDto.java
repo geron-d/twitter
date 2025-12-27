@@ -71,6 +71,10 @@ public record GenerateUsersAndTweetsResponseDto(
 
     /**
      * List of IDs of successfully created follow relationships.
+     * <p>
+     * This list contains the UUIDs of all follow relationships that were successfully created
+     * during script execution (Step 1.5). The list will be empty if fewer than
+     * 2 users were created, or if all follow relationship creation attempts failed.
      */
     @Schema(
         description = "List of IDs of successfully created follow relationships",

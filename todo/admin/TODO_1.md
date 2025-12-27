@@ -34,16 +34,20 @@
 - [x] (P1) #6: Обновление ScriptStatisticsDto: добавление поля totalFollowsCreated
   acceptance: "Добавлено поле int totalFollowsCreated, обновлены JavaDoc"
   metadata: priority=P1, done=2025-01-27T14:30, note="Добавлено поле Integer totalFollowsCreated в ScriptStatisticsDto после поля totalTweetsCreated, обновлен JavaDoc класса (добавлен @param totalFollowsCreated), добавлен JavaDoc для нового поля с описанием, добавлена @Schema аннотация с description, example и requiredMode, обновлен пример JSON в @Schema на уровне класса"
-- [ ] (P1) #7: Обновление GenerateUsersAndTweetsServiceImpl: добавление логики создания follow-отношений
+- [x] (P1) #7: Обновление GenerateUsersAndTweetsServiceImpl: добавление логики создания follow-отношений
   acceptance: "Добавлен новый шаг Step 1.5 после создания пользователей: выбор центрального пользователя, вычисление половины, создание follow-отношений, обработка ошибок, сбор статистики"
-- [ ] (P1) #8: Обновление application.yml: добавление настройки app.follower-api.base-url
+  metadata: priority=P1, done=2025-01-27T15:00, note="Добавлена зависимость FollowGateway, список createdFollows, шаг 1.5 с логикой создания follow-отношений (центральный пользователь фолловит половину остальных, половина остальных фолловят центрального), обновлены ScriptStatisticsDto и GenerateUsersAndTweetsResponseDto с новыми полями, добавлена обработка ошибок и логирование"
+- [x] (P1) #8: Обновление application.yml: добавление настройки app.follower-api.base-url
   acceptance: "Добавлена настройка app.follower-api.base-url для URL follower-api"
+  metadata: priority=P1, done=2025-01-27T15:15, note="Добавлена настройка app.follower-api.base-url: http://localhost:8084 в application.yml и http://follower-api:8084 в application-docker.yml, настройка размещена после tweet-api для консистентности структуры"
 
 ### Документация кода (JavaDoc)
-- [ ] (P1) #9: JavaDoc для новых классов: FollowApiClient, FollowGateway
+- [x] (P1) #9: JavaDoc для новых классов: FollowApiClient, FollowGateway
   acceptance: "Все новые классы имеют JavaDoc с @author geron, @version 1.0, @param для всех параметров, @return для возвращаемых значений, @throws для исключений"
-- [ ] (P1) #10: JavaDoc для обновленных классов: GenerateUsersAndTweetsServiceImpl, DTO
+  metadata: priority=P1, done=2025-01-27T15:30, note="Проверена и улучшена JavaDoc документация: FollowApiClient - добавлено подробное описание класса с информацией о конфигурации и использовании, добавлен @throws для FeignException; FollowGateway - JavaDoc уже полный и соответствует стандартам (класс-уровневая и метод-уровневая документация с @param, @return, @throws)"
+- [x] (P1) #10: JavaDoc для обновленных классов: GenerateUsersAndTweetsServiceImpl, DTO
   acceptance: "Обновлен JavaDoc в GenerateUsersAndTweetsServiceImpl для нового шага, обновлен JavaDoc в DTO для новых полей"
+  metadata: priority=P1, done=2025-01-27T15:45, note="Обновлен JavaDoc в GenerateUsersAndTweetsServiceImpl: добавлено подробное описание всех шагов выполнения скрипта, включая Step 1.5 с деталями создания follow-отношений; обновлен JavaDoc в GenerateUsersAndTweetsResponseDto для поля createdFollows: добавлено подробное описание логики создания follow-отношений; обновлен JavaDoc в ScriptStatisticsDto для поля totalFollowsCreated: добавлено описание подсчёта и условий"
 
 ### Тестирование
 - [ ] (P1) #11: Unit тесты для FollowGateway
