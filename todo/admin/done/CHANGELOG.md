@@ -329,6 +329,54 @@
 - JavaDoc документация для всех обновленных классов полная и соответствует стандартам
 - Следующий шаг: Unit тесты для FollowGateway - шаг #11
 
+### Step #11 (TODO_1.md): Unit тесты для FollowGateway
+**Время:** 2025-01-27 16:00  
+**Автор:** assistant
+
+**Выполнено:**
+- Создан `FollowGatewayTest` в пакете `com.twitter.gateway`:
+  - Использование `@ExtendWith(MockitoExtension.class)` для интеграции с Mockito
+  - Мокирование `FollowApiClient` через `@Mock`
+  - Инъекция тестируемого класса через `@InjectMocks`
+  - Использование `@Nested` для группировки тестов по функциональности:
+    - `CreateFollowTests` - тесты успешного создания follow-отношений
+    - `ValidationTests` - тесты валидации входных параметров
+    - `ErrorHandlingTests` - тесты обработки ошибок
+  - Использование `@BeforeEach` для инициализации тестовых данных (UUID, DTO)
+- **Тесты успешного создания (CreateFollowTests):**
+  - `createFollow_WithValidRequest_ShouldReturnFollowResponseDto` - проверка успешного создания и возврата корректного ответа
+  - `createFollow_WithValidRequest_ShouldLogSuccess` - проверка вызова Feign Client
+- **Тесты валидации (ValidationTests):**
+  - `createFollow_WhenRequestIsNull_ShouldThrowIllegalArgumentException` - проверка валидации null request
+  - `createFollow_WhenFollowerIdIsNull_ShouldThrowIllegalArgumentException` - проверка валидации null followerId
+  - `createFollow_WhenFollowingIdIsNull_ShouldThrowIllegalArgumentException` - проверка валидации null followingId
+  - `createFollow_WhenBothIdsAreNull_ShouldThrowIllegalArgumentException` - проверка валидации обоих null ID
+  - Все тесты валидации проверяют, что Feign Client не вызывается (`verify(..., never())`)
+- **Тесты обработки ошибок (ErrorHandlingTests):**
+  - `createFollow_WhenFeignClientThrowsRuntimeException_ShouldThrowRuntimeException` - обработка RuntimeException
+  - `createFollow_WhenFeignClientThrowsIllegalArgumentException_ShouldThrowRuntimeException` - обработка IllegalArgumentException
+  - `createFollow_WhenFeignClientThrowsException_ShouldWrapInRuntimeException` - обработка общего Exception
+  - Все тесты проверяют, что исключения оборачиваются в RuntimeException с понятным сообщением
+  - Все тесты проверяют сохранение исходного исключения через `hasCause()`
+- Все тесты следуют стандартам проекта (STANDART_TEST.md):
+  - ✅ Именование: `methodName_WhenCondition_ShouldExpectedResult`
+  - ✅ Использование `@Nested` для группировки тестов
+  - ✅ Использование AssertJ для assertions (`assertThat`, `assertThatThrownBy`)
+  - ✅ Паттерн AAA (Arrange-Act-Assert)
+  - ✅ Проверка взаимодействий с моками через `verify()`
+  - ✅ Использование `@BeforeEach` для инициализации общих данных
+  - ✅ Документация на английском языке
+- Покрытие кода: все методы и ветки `FollowGateway.createFollow()` покрыты тестами
+- Проверка линтера: ошибок не обнаружено
+
+**Артефакты:**
+- `services/admin-script-api/src/test/java/com/twitter/gateway/FollowGatewayTest.java` - создан
+- `todo/admin/TODO_1.md` - обновлён (шаг #11 отмечен как выполненный)
+
+**Примечание:**
+- Unit тесты для FollowGateway полные и покрывают все сценарии
+- Следующий шаг: Unit тесты для обновленного GenerateUsersAndTweetsServiceImpl (follow-отношения) - шаг #12
+
 ### Рефакторинг: Вынос DTO в common-lib и удаление зависимости на follower-api
 **Время:** 2025-01-27 13:15  
 **Автор:** assistant

@@ -50,8 +50,9 @@
   metadata: priority=P1, done=2025-01-27T15:45, note="Обновлен JavaDoc в GenerateUsersAndTweetsServiceImpl: добавлено подробное описание всех шагов выполнения скрипта, включая Step 1.5 с деталями создания follow-отношений; обновлен JavaDoc в GenerateUsersAndTweetsResponseDto для поля createdFollows: добавлено подробное описание логики создания follow-отношений; обновлен JavaDoc в ScriptStatisticsDto для поля totalFollowsCreated: добавлено описание подсчёта и условий"
 
 ### Тестирование
-- [ ] (P1) #11: Unit тесты для FollowGateway
+- [x] (P1) #11: Unit тесты для FollowGateway
   acceptance: "Создан FollowGatewayTest с тестами: успешное создание follow-отношения, обработка ошибок, null request, используется @ExtendWith(MockitoExtension.class), AssertJ, паттерн AAA"
+  metadata: priority=P1, done=2025-01-27T16:00, note="Создан FollowGatewayTest с полным покрытием: успешное создание follow-отношения, валидация null request и null полей (followerId, followingId), обработка ошибок (RuntimeException, IllegalArgumentException, Exception), используется @ExtendWith(MockitoExtension.class), AssertJ для assertions, @Nested для группировки тестов, паттерн AAA (Arrange-Act-Assert), проверка взаимодействий с моками через verify"
 - [ ] (P1) #12: Unit тесты для обновленного GenerateUsersAndTweetsServiceImpl (follow-отношения)
   acceptance: "Обновлен GenerateUsersAndTweetsServiceImplTest с тестами: успешное создание follow-отношений, с одним пользователем, с двумя пользователями, с тремя пользователями, обработка ошибок, проверка статистики, используется @Nested для группировки"
 
