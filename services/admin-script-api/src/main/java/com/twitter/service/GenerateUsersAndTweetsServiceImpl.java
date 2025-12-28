@@ -2,12 +2,14 @@ package com.twitter.service;
 
 import com.twitter.common.dto.request.CreateTweetRequestDto;
 import com.twitter.common.dto.request.DeleteTweetRequestDto;
+import com.twitter.common.dto.request.FollowRequestDto;
 import com.twitter.common.dto.request.UserRequestDto;
 import com.twitter.common.dto.response.TweetResponseDto;
 import com.twitter.common.dto.response.UserResponseDto;
 import com.twitter.dto.request.GenerateUsersAndTweetsRequestDto;
 import com.twitter.dto.response.GenerateUsersAndTweetsResponseDto;
 import com.twitter.dto.response.ScriptStatisticsDto;
+import com.twitter.gateway.FollowGateway;
 import com.twitter.gateway.TweetsGateway;
 import com.twitter.gateway.UsersGateway;
 import com.twitter.util.RandomDataGenerator;
@@ -26,6 +28,28 @@ import java.util.UUID;
 
 /**
  * Implementation of the service for executing the administrative script to generate users and tweets.
+ * <p>
+ * This service executes a comprehensive administrative script that performs the following steps:
+ * <ol>
+ *   <li>Step 1: Create users - Generates the specified number of users with random data</li>
+ *   <li>Step 1.5: Create follow relationships - Creates follow relationships between users:
+ *     <ul>
+ *       <li>Selects the first created user as the central user</li>
+ *       <li>The central user follows half of the remaining users</li>
+ *       <li>Half of the remaining users follow the central user</li>
+ *       <li>Uses integer division (rounding down) to calculate half count</li>
+ *       <li>Requires at least 2 users to create follow relationships</li>
+ *     </ul>
+ *   </li>
+ *   <li>Step 2: Create tweets - Creates tweets for each successfully created user</li>
+ *   <li>Step 3: Calculate users with tweets - Determines which users have tweets</li>
+ *   <li>Step 4: Validate deletion count - Validates business rules for tweet deletion</li>
+ *   <li>Step 5: Delete tweets - Deletes one tweet from random users (if validation passes)</li>
+ *   <li>Step 6: Build response - Collects statistics and builds the response DTO</li>
+ * </ol>
+ * <p>
+ * The service handles partial failures gracefully: errors are logged and added to the
+ * statistics.errors list, but execution continues to maximize successful operations.
  *
  * @author geron
  * @version 1.0
@@ -37,6 +61,7 @@ public class GenerateUsersAndTweetsServiceImpl implements GenerateUsersAndTweets
 
     private final UsersGateway usersGateway;
     private final TweetsGateway tweetsGateway;
+    private final FollowGateway followGateway;
     private final RandomDataGenerator randomDataGenerator;
     private final GenerateUsersAndTweetsValidator validator;
 
@@ -50,6 +75,7 @@ public class GenerateUsersAndTweetsServiceImpl implements GenerateUsersAndTweets
             requestDto.nUsers(), requestDto.nTweetsPerUser(), requestDto.lUsersForDeletion());
 
         List<UUID> createdUsers = new ArrayList<>();
+        List<UUID> createdFollows = new ArrayList<>();
         List<UUID> createdTweets = new ArrayList<>();
         List<UUID> deletedTweets = new ArrayList<>();
         List<String> errors = new ArrayList<>();
@@ -76,6 +102,73 @@ public class GenerateUsersAndTweetsServiceImpl implements GenerateUsersAndTweets
             }
         }
         log.info("Step 1 completed: {} users created successfully out of {} requested", createdUsers.size(), requestDto.nUsers());
+
+        // Step 1.5: Create follow relationships
+        log.info("Step 1.5: Creating follow relationships");
+        int totalFollowsCreated = 0;
+        if (createdUsers.size() >= 2) {
+            UUID centralUser = createdUsers.get(0);
+            List<UUID> otherUsers = new ArrayList<>(createdUsers.subList(1, createdUsers.size()));
+            int halfCount = (createdUsers.size() - 1) / 2;
+
+            if (halfCount > 0) {
+                log.info("Step 1.5: Central user: {}, Other users: {}, Half count: {}",
+                    centralUser, otherUsers.size(), halfCount);
+
+                // Step 1.5.1: Central user follows half of others
+                Collections.shuffle(otherUsers);
+                List<UUID> usersToFollow = otherUsers.subList(0, Math.min(halfCount, otherUsers.size()));
+
+                for (UUID userToFollow : usersToFollow) {
+                    try {
+                        FollowRequestDto followRequest = FollowRequestDto.builder()
+                            .followerId(centralUser)
+                            .followingId(userToFollow)
+                            .build();
+
+                        var followResponse = followGateway.createFollow(followRequest);
+                        createdFollows.add(followResponse.id());
+                        totalFollowsCreated++;
+                        log.debug("Created follow relationship: {} -> {}", centralUser, userToFollow);
+                    } catch (Exception ex) {
+                        String errorMsg = String.format("Failed to create follow relationship %s -> %s: %s",
+                            centralUser, userToFollow, ex.getMessage());
+                        log.error(errorMsg, ex);
+                        errors.add(errorMsg);
+                    }
+                }
+
+                // Step 1.5.2: Half of others follow central user
+                Collections.shuffle(otherUsers); // New shuffle for different selection
+                List<UUID> usersToFollowBack = otherUsers.subList(0, Math.min(halfCount, otherUsers.size()));
+
+                for (UUID userToFollowBack : usersToFollowBack) {
+                    try {
+                        FollowRequestDto followRequest = FollowRequestDto.builder()
+                            .followerId(userToFollowBack)
+                            .followingId(centralUser)
+                            .build();
+
+                        var followResponse = followGateway.createFollow(followRequest);
+                        createdFollows.add(followResponse.id());
+                        totalFollowsCreated++;
+                        log.debug("Created follow relationship: {} -> {}", userToFollowBack, centralUser);
+                    } catch (Exception ex) {
+                        String errorMsg = String.format("Failed to create follow relationship %s -> %s: %s",
+                            userToFollowBack, centralUser, ex.getMessage());
+                        log.error(errorMsg, ex);
+                        errors.add(errorMsg);
+                    }
+                }
+
+                log.info("Step 1.5 completed: {} follow relationships created successfully out of {} attempted",
+                    totalFollowsCreated, halfCount * 2);
+            } else {
+                log.info("Step 1.5 skipped: halfCount is 0 (only 1-2 users)");
+            }
+        } else {
+            log.info("Step 1.5 skipped: insufficient users (need at least 2, got {})", createdUsers.size());
+        }
 
         // Step 2: Create tweets for each user
         log.info("Step 2: Creating {} tweets for each of {} users", requestDto.nTweetsPerUser(), createdUsers.size());
@@ -182,17 +275,18 @@ public class GenerateUsersAndTweetsServiceImpl implements GenerateUsersAndTweets
         long executionTimeMs = endTime - startTime;
 
         ScriptStatisticsDto statistics = new ScriptStatisticsDto(createdUsers.size(), createdTweets.size(),
-            deletedTweets.size(), usersWithTweetsCount, usersWithoutTweetsCount, executionTimeMs, errors);
+            totalFollowsCreated, deletedTweets.size(), usersWithTweetsCount, usersWithoutTweetsCount, executionTimeMs, errors);
 
         GenerateUsersAndTweetsResponseDto response = GenerateUsersAndTweetsResponseDto.builder()
             .createdUsers(createdUsers)
+            .createdFollows(createdFollows)
             .createdTweets(createdTweets)
             .deletedTweets(deletedTweets)
             .statistics(statistics)
             .build();
 
-        log.info("Script execution completed in {} ms. Created: {} users, {} tweets. Deleted: {} tweets. Errors: {}",
-            executionTimeMs, createdUsers.size(), createdTweets.size(), deletedTweets.size(), errors.size());
+        log.info("Script execution completed in {} ms. Created: {} users, {} follow relationships, {} tweets. Deleted: {} tweets. Errors: {}",
+            executionTimeMs, createdUsers.size(), totalFollowsCreated, createdTweets.size(), deletedTweets.size(), errors.size());
 
         return response;
     }

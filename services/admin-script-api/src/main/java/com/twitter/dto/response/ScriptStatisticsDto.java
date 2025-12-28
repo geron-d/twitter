@@ -11,8 +11,9 @@ import java.util.List;
  * script, including counts of created and deleted entities, execution time, and any
  * errors that occurred during execution.
  *
- * @param totalUsersCreated  total number of successfully created users
- * @param totalTweetsCreated total number of successfully created tweets
+ * @param totalUsersCreated   total number of successfully created users
+ * @param totalTweetsCreated  total number of successfully created tweets
+ * @param totalFollowsCreated total number of successfully created follow relationships
  * @param totalTweetsDeleted  total number of successfully deleted tweets
  * @param usersWithTweets     number of users who have tweets
  * @param usersWithoutTweets  number of users who do not have tweets
@@ -28,6 +29,7 @@ import java.util.List;
         {
           "totalUsersCreated": 10,
           "totalTweetsCreated": 50,
+          "totalFollowsCreated": 5,
           "totalTweetsDeleted": 3,
           "usersWithTweets": 10,
           "usersWithoutTweets": 0,
@@ -57,6 +59,16 @@ public record ScriptStatisticsDto(
         requiredMode = Schema.RequiredMode.REQUIRED
     )
     Integer totalTweetsCreated,
+
+    /**
+     * Total number of successfully created follow relationships.
+     */
+    @Schema(
+        description = "Total number of successfully created follow relationships",
+        example = "5",
+        requiredMode = Schema.RequiredMode.REQUIRED
+    )
+    Integer totalFollowsCreated,
 
     /**
      * Total number of successfully deleted tweets.

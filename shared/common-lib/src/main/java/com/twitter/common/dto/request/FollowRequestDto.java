@@ -1,4 +1,4 @@
-package com.twitter.dto.request;
+package com.twitter.common.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
@@ -49,4 +49,3 @@ public record FollowRequestDto(
     UUID followingId
 ) {
 }
-

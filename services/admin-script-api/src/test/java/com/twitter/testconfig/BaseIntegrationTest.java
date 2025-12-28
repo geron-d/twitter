@@ -70,6 +70,7 @@ public abstract class BaseIntegrationTest {
         registry.add("wiremock.server.port", () -> String.valueOf(wireMockPort));
         registry.add("app.users-api.base-url", () -> "http://localhost:" + wireMockPort);
         registry.add("app.tweet-api.base-url", () -> "http://localhost:" + wireMockPort);
+        registry.add("app.follower-api.base-url", () -> "http://localhost:" + wireMockPort);
     }
 
     @BeforeEach

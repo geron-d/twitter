@@ -1,4 +1,4 @@
-package com.twitter.dto.response;
+package com.twitter.common.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -65,4 +65,3 @@ public record FollowResponseDto(
     LocalDateTime createdAt
 ) {
 }
-

@@ -1,8 +1,8 @@
 package com.twitter.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.twitter.dto.request.FollowRequestDto;
-import com.twitter.dto.response.FollowResponseDto;
+import com.twitter.common.dto.request.FollowRequestDto;
+import com.twitter.common.dto.response.FollowResponseDto;
 import com.twitter.entity.Follow;
 import com.twitter.repository.FollowRepository;
 import com.twitter.testconfig.BaseIntegrationTest;
