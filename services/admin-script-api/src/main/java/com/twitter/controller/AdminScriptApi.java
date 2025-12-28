@@ -24,11 +24,12 @@ import org.springframework.http.ResponseEntity;
 public interface AdminScriptApi {
 
     /**
-     * Executes the administrative script to generate users and tweets.
+     * Executes the administrative script to generate users, follow relationships and tweets.
      * <p>
      * This endpoint executes an administrative script that performs the following operations:
      * <ul>
      *   <li>Creates nUsers users with random data (login, email, firstName, lastName, password)</li>
+     *   <li>Creates follow relationships between users (central user follows half of others, half of others follow central user)</li>
      *   <li>Creates nTweetsPerUser tweets for each successfully created user with random content</li>
      *   <li>Validates that lUsersForDeletion does not exceed the number of users with tweets</li>
      *   <li>Deletes one tweet from lUsersForDeletion random users (if lUsersForDeletion > 0)</li>
@@ -39,8 +40,9 @@ public interface AdminScriptApi {
      * @return ResponseEntity containing GenerateUsersAndTweetsResponseDto with lists of IDs and execution statistics
      */
     @Operation(
-        summary = "Generate users and tweets",
+        summary = "Generate users, follow relationships and tweets",
         description = "Executes an administrative script that creates multiple users with random data, " +
+            "creates follow relationships between users (central user follows half of others, half of others follow central user), " +
             "adds tweets for each user, and deletes one tweet from a specified number of random users. " +
             "Parameters: nUsers (1-1000), nTweetsPerUser (1-100), " +
             "lUsersForDeletion (0+, must not exceed number of users with tweets)."
@@ -63,6 +65,10 @@ public interface AdminScriptApi {
                                 "223e4567-e89b-12d3-a456-426614174001",
                                 "323e4567-e89b-12d3-a456-426614174002"
                               ],
+                              "createdFollows": [
+                                "723e4567-e89b-12d3-a456-426614174010",
+                                "823e4567-e89b-12d3-a456-426614174011"
+                              ],
                               "createdTweets": [
                                 "423e4567-e89b-12d3-a456-426614174003",
                                 "523e4567-e89b-12d3-a456-426614174004",
@@ -73,6 +79,7 @@ public interface AdminScriptApi {
                               ],
                               "statistics": {
                                 "totalUsersCreated": 3,
+                                "totalFollowsCreated": 2,
                                 "totalTweetsCreated": 15,
                                 "totalTweetsDeleted": 1,
                                 "usersWithTweets": 3,
@@ -92,6 +99,7 @@ public interface AdminScriptApi {
                                 "123e4567-e89b-12d3-a456-426614174000",
                                 "223e4567-e89b-12d3-a456-426614174001"
                               ],
+                              "createdFollows": [],
                               "createdTweets": [
                                 "423e4567-e89b-12d3-a456-426614174003",
                                 "523e4567-e89b-12d3-a456-426614174004"
@@ -99,6 +107,7 @@ public interface AdminScriptApi {
                               "deletedTweets": [],
                               "statistics": {
                                 "totalUsersCreated": 2,
+                                "totalFollowsCreated": 0,
                                 "totalTweetsCreated": 10,
                                 "totalTweetsDeleted": 0,
                                 "usersWithTweets": 2,

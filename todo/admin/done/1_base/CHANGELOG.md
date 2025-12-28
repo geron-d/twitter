@@ -377,6 +377,138 @@
 - Unit тесты для FollowGateway полные и покрывают все сценарии
 - Следующий шаг: Unit тесты для обновленного GenerateUsersAndTweetsServiceImpl (follow-отношения) - шаг #12
 
+### Step #14 (TODO_1.md): Обновление README.md: описание новой функциональности и примеры
+**Время:** 2025-01-27 17:30  
+**Автор:** assistant
+
+**Выполнено:**
+- Обновлён `README.md` в `services/admin-script-api/`:
+  - **Раздел 'Введение':** добавлено упоминание создания follow-отношений и интеграции с follower-api
+  - **Раздел 'Основные возможности':** добавлен пункт о создании follow-отношений между пользователями
+  - **Раздел 'Структура пакетов':** добавлены `FollowApiClient.java` и `FollowGateway.java` в соответствующие секции
+  - **Раздел 'Диаграмма компонентов':** добавлены `FollowGateway` и `FollowApiClient` в диаграмму, добавлен `Follower API (Port 8084)`
+  - **Раздел 'Бизнес-логика':** добавлен Step 1.5 с детальным описанием создания follow-отношений:
+    - Выбор центрального пользователя (первый созданный)
+    - Вычисление половины остальных пользователей
+    - Логика создания follow-отношений в двух направлениях
+    - Обработка ошибок
+  - Добавлено бизнес-правило #4 о создании follow-отношений с описанием логики и требований
+  - Обновлена статистика выполнения: добавлено упоминание totalFollowsCreated
+  - **Раздел 'Интеграция':** добавлена информация о follower-api:
+    - Обновлена секция 'Архитектура интеграции' с упоминанием follower-api (порт 8084)
+    - Добавлен компонент #2 `FollowApiClient` с описанием конфигурации, методов и использования
+    - Добавлен компонент #5 `FollowGateway` с описанием функциональности
+    - Обновлён процесс выполнения скрипта: добавлен шаг #2 'Создание follow-отношений'
+    - Обновлена обработка ошибок: добавлено упоминание follower-api
+  - **Раздел 'Примеры использования':** обновлён пример успешного ответа:
+    - Добавлено поле `createdFollows` с двумя UUID между `createdUsers` и `createdTweets`
+    - Добавлено поле `totalFollowsCreated: 2` в `statistics` между `totalUsersCreated` и `totalTweetsCreated`
+  - **Раздел 'Конфигурация':** добавлена настройка `app.follower-api.base-url: http://localhost:8084` в пример application.yml
+  - **Раздел 'Запуск и развертывание':** добавлен шаг проверки запуска follower-api на порту 8084
+- Все обновления соответствуют стандартам STANDART_README.md:
+  - ✅ Структура документа сохранена
+  - ✅ Все примеры используют реалистичные UUID
+  - ✅ Документация на русском языке
+  - ✅ Полное описание новой функциональности
+- Проверка линтера: ошибок не обнаружено
+
+**Артефакты:**
+- `services/admin-script-api/README.md` - обновлён (добавлена информация о follow-отношениях)
+- `todo/admin/TODO_1.md` - обновлён (шаг #14 отмечен как выполненный)
+
+**Примечание:**
+- README.md полностью обновлён с описанием новой функциональности создания follow-отношений
+- Следующий шаг: Проверка соответствия всем стандартам проекта - шаг #16
+
+### Step #16 (TODO_1.md): Проверка соответствия всем стандартам проекта
+**Время:** 2025-01-27 18:00  
+**Автор:** assistant
+
+**Выполнено:**
+- Проведена полная проверка соответствия всех стандартов проекта для admin-script-api
+- **STANDART_CODE.md:**
+  - ✅ Все DTO используют Records (GenerateUsersAndTweetsRequestDto, GenerateUsersAndTweetsResponseDto, ScriptStatisticsDto)
+  - ✅ Все классы используют @RequiredArgsConstructor для dependency injection
+  - ✅ Правильная структура пакетов (controller, service, dto, gateway, validation, util, config, client)
+  - ✅ Правильные naming conventions (PascalCase для классов, camelCase для методов)
+  - ✅ Использование @Slf4j для логирования во всех необходимых классах
+  - ✅ Правильное использование Spring аннотаций (@RestController, @Service, @Component)
+  - ✅ Использование Java 24 features (Records, text blocks)
+- **STANDART_PROJECT.md:**
+  - ✅ Использование @LoggableRequest на всех методах контроллера (AdminScriptController)
+  - ✅ Использование DTO из common-lib для межсервисного взаимодействия (FollowRequestDto, FollowResponseDto, UserRequestDto, UserResponseDto, CreateTweetRequestDto, DeleteTweetRequestDto, TweetResponseDto)
+  - ✅ Gateway паттерн для всех внешних сервисов (UsersGateway, TweetsGateway, FollowGateway)
+  - ✅ Правильная обработка ошибок в Gateway слое
+  - ✅ Использование Feign Clients для интеграции (UsersApiClient, TweetsApiClient, FollowApiClient)
+- **STANDART_TEST.md:**
+  - ✅ Все тесты используют @ExtendWith(MockitoExtension.class) для unit тестов
+  - ✅ Использование @Nested для группировки тестов по функциональности
+  - ✅ Использование AssertJ для assertions (assertThat, assertThatThrownBy)
+  - ✅ Паттерн именования: methodName_WhenCondition_ShouldExpectedResult
+  - ✅ Паттерн AAA (Arrange-Act-Assert) в тестах
+  - ✅ Использование @BeforeEach для инициализации тестовых данных
+  - ✅ Проверка взаимодействий с моками через verify()
+  - ✅ Integration тесты используют @SpringBootTest, MockMvc, WireMock
+- **STANDART_JAVADOC.md:**
+  - ✅ Все публичные классы имеют JavaDoc с @author geron и @version 1.0
+  - ✅ Все публичные методы имеют JavaDoc с @param, @return, @throws
+  - ✅ DTO Records имеют JavaDoc с @param для всех компонентов
+  - ✅ Использование @see для реализации интерфейсов
+  - ✅ Документация на английском языке
+  - ✅ Использование <p> тегов для разделения параграфов
+  - ✅ Использование <ol> и <ul> для списков
+  - ✅ Добавлен JavaDoc для Application.java (был пропущен ранее)
+- **STANDART_README.md:**
+  - ✅ README.md на русском языке
+  - ✅ Все обязательные секции присутствуют
+  - ✅ Правильная структура с использованием markdown
+  - ✅ Примеры использования с curl командами
+  - ✅ Документация интеграций
+  - ✅ Описание использования Datafaker
+  - ✅ Обновлён с информацией о follow-отношениях (выполнено в шаге #14)
+- Все стандарты соблюдены
+- Проверка линтера: ошибок не обнаружено
+
+**Артефакты:**
+- `services/admin-script-api/src/main/java/com/twitter/Application.java` - обновлён (добавлен JavaDoc)
+- `todo/admin/TODO_1.md` - обновлён (шаг #16 отмечен как выполненный)
+
+**Примечание:**
+- Все проверки соответствия стандартам пройдены успешно
+- Код полностью соответствует требованиям всех стандартов проекта
+
+### Step #15 (TODO_1.md): Postman коллекции
+**Время:** 2025-01-27 18:15  
+**Автор:** assistant
+
+**Выполнено:**
+- Обновлена Postman коллекция `twitter-admin-script-api.postman_collection.json`:
+  - **Описание коллекции (info.description):** добавлена информация о создании follow-отношений между пользователями в список возможностей API
+  - **Описание запроса:** добавлена информация о создании follow-отношений (центральный пользователь фолловит половину остальных, половина остальных фолловят центрального)
+  - **Пример ответа "script executed successfully" (200 OK):**
+    - Добавлено поле `createdFollows` с двумя UUID между `createdUsers` и `createdTweets`
+    - Добавлено поле `totalFollowsCreated: 2` в `statistics` между `totalUsersCreated` и `totalTweetsCreated`
+  - **Пример ответа "script executed with partial errors" (200 OK):**
+    - Добавлено поле `createdFollows: []` (пустой массив, так как для 2 пользователей follow-отношения не создаются)
+    - Добавлено поле `totalFollowsCreated: 0` в `statistics`
+- Все примеры ответов соответствуют реальной структуре `GenerateUsersAndTweetsResponseDto` и `ScriptStatisticsDto`
+- Примеры используют реалистичные UUID
+- Все изменения соответствуют стандартам STANDART_POSTMAN.md:
+  - ✅ Правильное именование запросов (lowercase с пробелами)
+  - ✅ Использование переменных окружения
+  - ✅ Правильные заголовки (Content-Type, Accept)
+  - ✅ Полные примеры для всех сценариев
+  - ✅ Правильный формат JSON в примерах ответов
+- Проверка линтера: ошибок не обнаружено
+
+**Артефакты:**
+- `postman/admin-script-api/twitter-admin-script-api.postman_collection.json` - обновлён (добавлена информация о follow-отношениях)
+- `todo/admin/TODO_1.md` - обновлён (шаг #15 отмечен как выполненный)
+
+**Примечание:**
+- Postman коллекция полностью обновлена с информацией о создании follow-отношений
+- Все примеры ответов соответствуют реальной структуре API
+
 ### Рефакторинг: Вынос DTO в common-lib и удаление зависимости на follower-api
 **Время:** 2025-01-27 13:15  
 **Автор:** assistant

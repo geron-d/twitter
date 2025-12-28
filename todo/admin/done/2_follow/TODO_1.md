@@ -62,16 +62,19 @@
   acceptance: "Не требуется, так как не добавляются новые эндпоинты в контроллере"
 
 ### Обновление README
-- [ ] (P2) #14: Обновление README.md: описание новой функциональности и примеры
+- [x] (P2) #14: Обновление README.md: описание новой функциональности и примеры
   acceptance: "Обновлен раздел 'Бизнес-логика' с описанием шага создания follow-отношений, обновлен раздел 'Примеры использования' с примером ответа с createdFollows, обновлен раздел 'Интеграция' с информацией об интеграции с follower-api"
+  metadata: priority=P2, done=2025-01-27T17:30, note="Обновлен README.md: добавлено описание создания follow-отношений в раздел 'Основные возможности', добавлены FollowApiClient и FollowGateway в структуру пакетов и диаграмму компонентов, добавлен Step 1.5 в раздел 'Бизнес-логика', добавлена информация о follower-api в раздел 'Интеграция', добавлено поле createdFollows и totalFollowsCreated в примеры ответов, обновлена конфигурация application.yml с настройкой follower-api"
 
 ### Postman коллекции
-- [ ] (P3) #15: Postman коллекции
+- [x] (P3) #15: Postman коллекции
   acceptance: "Не требуется, так как не добавляются новые эндпоинты"
+  metadata: priority=P3, done=2025-01-27T18:15, note="Обновлена Postman коллекция: добавлена информация о создании follow-отношений в описание коллекции и запроса, добавлено поле createdFollows и totalFollowsCreated в примеры ответов (успешный и с ошибками). Примеры соответствуют реальной структуре ответа API."
 
 ### Проверка соответствия стандартам
-- [ ] (P1) #16: Проверка соответствия всем стандартам проекта
+- [x] (P1) #16: Проверка соответствия всем стандартам проекта
   acceptance: "Проверено соответствие STANDART_CODE.md, STANDART_PROJECT.md, STANDART_TEST.md, STANDART_JAVADOC.md, STANDART_README.md, код соответствует требованиям"
+  metadata: priority=P1, done=2025-01-27T18:00, note="Проведена полная проверка соответствия всем стандартам проекта: STANDART_CODE.md (Records для DTO, @RequiredArgsConstructor, naming conventions, структура пакетов), STANDART_PROJECT.md (@LoggableRequest, использование DTO из common-lib, Gateway паттерн), STANDART_TEST.md (@ExtendWith, @Nested, AssertJ, паттерн AAA), STANDART_JAVADOC.md (@author geron, @version 1.0, полная документация), STANDART_README.md (обновлен ранее). Добавлен JavaDoc для Application.java. Все проверки пройдены успешно."
 
 ## Assumptions
 - DTO для follow-отношений (`FollowRequestDto`, `FollowResponseDto`) можно использовать напрямую из follower-api. Если это недопустимо, нужно будет создать shared DTO в common-lib.
@@ -103,14 +106,14 @@
 
 ## Notes
 - Ссылки на стандарты:
-  - [STANDART_CODE.md](../../standards/STANDART_CODE.md)
-  - [STANDART_PROJECT.md](../../standards/STANDART_PROJECT.md)
-  - [STANDART_TEST.md](../../standards/STANDART_TEST.md)
-  - [STANDART_JAVADOC.md](../../standards/STANDART_JAVADOC.md)
-  - [STANDART_README.md](../../standards/STANDART_README.md)
+  - [STANDART_CODE.md](../../../../standards/STANDART_CODE.md)
+  - [STANDART_PROJECT.md](../../../../standards/STANDART_PROJECT.md)
+  - [STANDART_TEST.md](../../../../standards/STANDART_TEST.md)
+  - [STANDART_JAVADOC.md](../../../../standards/STANDART_JAVADOC.md)
+  - [STANDART_README.md](../../../../standards/STANDART_README.md)
 - Ссылки на существующий код:
-  - [GenerateUsersAndTweetsServiceImpl.java](../../services/admin-script-api/src/main/java/com/twitter/service/GenerateUsersAndTweetsServiceImpl.java)
-  - [UsersGateway.java](../../services/admin-script-api/src/main/java/com/twitter/gateway/UsersGateway.java)
-  - [FollowController.java](../../services/follower-api/src/main/java/com/twitter/controller/FollowController.java)
+  - [GenerateUsersAndTweetsServiceImpl.java](../../../../services/admin-script-api/src/main/java/com/twitter/service/GenerateUsersAndTweetsServiceImpl.java)
+  - [UsersGateway.java](../../../../services/admin-script-api/src/main/java/com/twitter/gateway/UsersGateway.java)
+  - [FollowController.java](../../../../services/follower-api/src/main/java/com/twitter/controller/FollowController.java)
   - [FollowRequestDto.java](../../services/follower-api/src/main/java/com/twitter/dto/request/FollowRequestDto.java)
 
