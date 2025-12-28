@@ -1,1 +1,2 @@
-Проанализировать twitter и создать стандатры по docker (Dockerfile, docker-compose и т.д.) и сложить их в папку standards
+Есть промпт для создания плана реализации задачи D:\projects\twitter\.cursor\commands\main-plan.md
+Добавить в него пункт по доработкам по docker согласно D:\projects\twitter\standards\STANDART_DOCKER.md

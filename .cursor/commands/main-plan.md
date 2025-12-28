@@ -21,6 +21,7 @@
    - Swagger/OpenAPI (STANDART_SWAGGER.md)
    - README (STANDART_README.md)
    - Postman (STANDART_POSTMAN.md)
+   - Docker (STANDART_DOCKER.md)
 
 ## Составление плана
 
@@ -59,6 +60,16 @@
   - Использование исключений из common-lib (UniquenessValidationException, BusinessRuleValidationException, FormatValidationException)
   - Размещение shared DTOs в common-lib/dto
   - Размещение shared enums в common-lib/enums
+  
+- **STANDART_DOCKER.md**:
+  - Multi-stage build (gradle:jdk24 для build stage, eclipse-temurin:24-jre для runtime stage)
+  - Использование non-root user (appuser) для безопасности
+  - Health checks в Dockerfile и docker-compose.yml
+  - Правильный порядок копирования файлов для оптимизации кеширования слоев
+  - JVM опции через ENV переменную JAVA_OPTS
+  - .dockerignore для исключения ненужных файлов из build context
+  - Правильная конфигурация docker-compose.yml (networks, volumes, depends_on с health conditions)
+  - Использование конкретных версий образов (избегать latest)
 
 **Компоненты для реализации на этом этапе:**
 - Entity (если нужна новая или обновление существующей)
@@ -68,6 +79,9 @@
 - Validator интерфейс - создание/обновление интерфейса, без методов для конкретных эндпоинтов
 - Service интерфейс - создание/обновление интерфейса, без методов для конкретных эндпоинтов
 - Конфиги (OpenApiConfig, если нужно обновить)
+- Dockerfile (если создается новый сервис или требуется обновление согласно STANDART_DOCKER.md)
+- .dockerignore (если создается новый сервис)
+- docker-compose.yml (если добавляется новый сервис или изменяется конфигурация)
 
 ### 3. Реализация эндпоинтов (для каждого эндпоинта отдельно)
 
@@ -191,6 +205,29 @@
 - Проверить соответствие STANDART_SWAGGER.md (если добавлены эндпоинты)
 - Проверить соответствие STANDART_README.md
 - Проверить соответствие STANDART_POSTMAN.md (если добавлены эндпоинты)
+- Проверить соответствие STANDART_DOCKER.md (если создается новый сервис или изменяется Docker конфигурация)
+
+#### 4.4. Проверка Docker конфигурации
+**Обязательно, если создается новый сервис или изменяется Docker конфигурация.**
+**Учитывай STANDART_DOCKER.md:**
+
+- Проверить Dockerfile:
+  - Multi-stage build структура (gradle:jdk24 для build, eclipse-temurin:24-jre для runtime)
+  - Non-root user (appuser) создан и используется
+  - Health check настроен правильно
+  - Правильный порядок копирования файлов для кеширования
+  - JVM опции через ENV переменную
+  - Порт явно указан через EXPOSE
+- Проверить .dockerignore:
+  - Все ненужные файлы исключены (build/, .gradle/, IDE файлы, logs/, test файлы, etc.)
+  - Файл создан в директории сервиса
+- Проверить docker-compose.yml:
+  - Правильная конфигурация build context и dockerfile пути
+  - Health checks настроены для всех сервисов
+  - Правильные depends_on с health conditions
+  - Networks и volumes настроены корректно
+  - Environment variables настроены правильно
+  - Restart policy установлен (unless-stopped)
 
 ## Формат плана (TODO.md)
 
@@ -222,6 +259,7 @@
   - STANDART_SWAGGER.md (если добавляются эндпоинты)
   - STANDART_README.md
   - STANDART_POSTMAN.md (если добавляются эндпоинты)
+  - STANDART_DOCKER.md (если создается новый сервис или изменяется Docker конфигурация)
 
 ## Tasks
 
@@ -246,45 +284,51 @@
   acceptance: "Service interface создан/обновлен (без методов для конкретных эндпоинтов)"
 - [ ] (P2) #9: Обновление конфигов — Краткое описание.
   acceptance: "OpenApiConfig обновлен если нужно (новые серверы, описание)"
+- [ ] (P1) #10: Реализация Dockerfile — Краткое описание.
+  acceptance: "Dockerfile создан/обновлен с учетом STANDART_DOCKER.md (multi-stage build, non-root user, health checks, правильный порядок копирования файлов)"
+- [ ] (P1) #11: Реализация .dockerignore — Краткое описание.
+  acceptance: ".dockerignore создан/обновлен с исключением всех ненужных файлов (build/, .gradle/, IDE файлы, logs/, test файлы)"
+- [ ] (P2) #12: Обновление docker-compose.yml — Краткое описание.
+  acceptance: "docker-compose.yml обновлен если нужно (новый сервис, health checks, depends_on с health conditions, networks, volumes)"
 
 ### Эндпоинт 1: [Название эндпоинта] (например: POST /api/v1/users)
-- [ ] (P1) #10: DTO для эндпоинта 1 — Краткое описание.
+- [ ] (P1) #13: DTO для эндпоинта 1 — Краткое описание.
   acceptance: "Request/Response DTO созданы как Records с валидацией и @Schema аннотациями"
-- [ ] (P1) #11: Mapper методы для эндпоинта 1 — Краткое описание.
+- [ ] (P1) #14: Mapper методы для эндпоинта 1 — Краткое описание.
   acceptance: "Методы маппинга добавлены в Mapper интерфейс для эндпоинта 1"
-- [ ] (P1) #12: Validator методы для эндпоинта 1 — Краткое описание.
+- [ ] (P1) #15: Validator методы для эндпоинта 1 — Краткое описание.
   acceptance: "Методы валидации добавлены в Validator interface и implementation для эндпоинта 1"
-- [ ] (P1) #13: Service методы для эндпоинта 1 — Краткое описание.
+- [ ] (P1) #16: Service методы для эндпоинта 1 — Краткое описание.
   acceptance: "Методы добавлены в Service interface и implementation для эндпоинта 1, используют @Transactional где нужно"
-- [ ] (P1) #14: Controller метод для эндпоинта 1 — Краткое описание.
+- [ ] (P1) #17: Controller метод для эндпоинта 1 — Краткое описание.
   acceptance: "Метод добавлен в *Api интерфейс с OpenAPI аннотациями и в Controller с @LoggableRequest"
-- [ ] (P1) #15: JavaDoc для эндпоинта 1 — Краткое описание.
+- [ ] (P1) #18: JavaDoc для эндпоинта 1 — Краткое описание.
   acceptance: "JavaDoc добавлен для всех методов эндпоинта 1 с @author geron, @version 1.0"
-- [ ] (P1) #16: Unit тесты для эндпоинта 1 — Краткое описание.
+- [ ] (P1) #19: Unit тесты для эндпоинта 1 — Краткое описание.
   acceptance: "Unit тесты для Service, Validator, Mapper методов эндпоинта 1 с учетом STANDART_TEST.md"
-- [ ] (P2) #17: Integration тесты для эндпоинта 1 — Краткое описание.
+- [ ] (P2) #20: Integration тесты для эндпоинта 1 — Краткое описание.
   acceptance: "Integration тесты для эндпоинта 1 с MockMvc, все статус-коды проверены"
-- [ ] (P1) #18: Swagger документация для эндпоинта 1 — Краткое описание.
+- [ ] (P1) #21: Swagger документация для эндпоинта 1 — Краткое описание.
   acceptance: "OpenAPI документация для эндпоинта 1 полная с @ExampleObject для всех сценариев"
 
 ### Эндпоинт 2: [Название эндпоинта] (например: GET /api/v1/users/{id})
-- [ ] (P1) #19: DTO для эндпоинта 2 — Краткое описание.
+- [ ] (P1) #22: DTO для эндпоинта 2 — Краткое описание.
   acceptance: "Request/Response DTO созданы как Records с валидацией и @Schema аннотациями"
-- [ ] (P1) #20: Mapper методы для эндпоинта 2 — Краткое описание.
+- [ ] (P1) #23: Mapper методы для эндпоинта 2 — Краткое описание.
   acceptance: "Методы маппинга добавлены в Mapper интерфейс для эндпоинта 2"
-- [ ] (P1) #21: Validator методы для эндпоинта 2 — Краткое описание.
+- [ ] (P1) #24: Validator методы для эндпоинта 2 — Краткое описание.
   acceptance: "Методы валидации добавлены в Validator interface и implementation для эндпоинта 2"
-- [ ] (P1) #22: Service методы для эндпоинта 2 — Краткое описание.
+- [ ] (P1) #25: Service методы для эндпоинта 2 — Краткое описание.
   acceptance: "Методы добавлены в Service interface и implementation для эндпоинта 2, используют @Transactional где нужно"
-- [ ] (P1) #23: Controller метод для эндпоинта 2 — Краткое описание.
+- [ ] (P1) #26: Controller метод для эндпоинта 2 — Краткое описание.
   acceptance: "Метод добавлен в *Api интерфейс с OpenAPI аннотациями и в Controller с @LoggableRequest"
-- [ ] (P1) #24: JavaDoc для эндпоинта 2 — Краткое описание.
+- [ ] (P1) #27: JavaDoc для эндпоинта 2 — Краткое описание.
   acceptance: "JavaDoc добавлен для всех методов эндпоинта 2 с @author geron, @version 1.0"
-- [ ] (P1) #25: Unit тесты для эндпоинта 2 — Краткое описание.
+- [ ] (P1) #28: Unit тесты для эндпоинта 2 — Краткое описание.
   acceptance: "Unit тесты для Service, Validator, Mapper методов эндпоинта 2 с учетом STANDART_TEST.md"
-- [ ] (P2) #26: Integration тесты для эндпоинта 2 — Краткое описание.
+- [ ] (P2) #29: Integration тесты для эндпоинта 2 — Краткое описание.
   acceptance: "Integration тесты для эндпоинта 2 с MockMvc, все статус-коды проверены"
-- [ ] (P1) #27: Swagger документация для эндпоинта 2 — Краткое описание.
+- [ ] (P1) #30: Swagger документация для эндпоинта 2 — Краткое описание.
   acceptance: "OpenAPI документация для эндпоинта 2 полная с @ExampleObject для всех сценариев"
 
 ### ... (повторить для каждого следующего эндпоинта)
@@ -296,6 +340,8 @@
   acceptance: "Добавлены все новые запросы с примерами ответов для всех эндпоинтов, обновлены переменные окружения"
 - [ ] (P1) #N+2: Проверка соответствия стандартам — Краткое описание.
   acceptance: "Все стандарты проверены, код соответствует требованиям"
+- [ ] (P1) #N+3: Проверка Docker конфигурации — Краткое описание.
+  acceptance: "Dockerfile, .dockerignore и docker-compose.yml проверены на соответствие STANDART_DOCKER.md (multi-stage build, non-root user, health checks, правильная структура)"
 
 ## Assumptions
 - Список принятых предположений
@@ -361,6 +407,11 @@
   - Затем для каждого эндпоинта отдельно: все слои от DTO до тестов
   - В конце финальная инфраструктура (README, Postman, проверка стандартов)
 - **Всегда учитывай стандарты проекта** - они обязательны для соблюдения
+- **Если создается новый сервис или изменяется Docker конфигурация** - обязательно:
+  - Dockerfile с multi-stage build, non-root user, health checks
+  - .dockerignore для исключения ненужных файлов
+  - Обновление docker-compose.yml с правильной конфигурацией
+  - Проверка соответствия STANDART_DOCKER.md
 - **Если добавляются новые эндпоинты** - обязательно:
   - Integration тесты
   - Swagger документация
