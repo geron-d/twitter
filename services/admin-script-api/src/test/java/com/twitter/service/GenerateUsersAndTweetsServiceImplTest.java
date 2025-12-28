@@ -2,7 +2,9 @@ package com.twitter.service;
 
 import com.twitter.common.dto.request.CreateTweetRequestDto;
 import com.twitter.common.dto.request.DeleteTweetRequestDto;
+import com.twitter.common.dto.request.FollowRequestDto;
 import com.twitter.common.dto.request.UserRequestDto;
+import com.twitter.common.dto.response.FollowResponseDto;
 import com.twitter.common.dto.response.TweetResponseDto;
 import com.twitter.common.dto.response.UserResponseDto;
 import com.twitter.common.enums.UserRole;
@@ -10,6 +12,7 @@ import com.twitter.common.enums.UserStatus;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.dto.request.GenerateUsersAndTweetsRequestDto;
 import com.twitter.dto.response.GenerateUsersAndTweetsResponseDto;
+import com.twitter.gateway.FollowGateway;
 import com.twitter.gateway.TweetsGateway;
 import com.twitter.gateway.UsersGateway;
 import com.twitter.util.RandomDataGenerator;
@@ -44,6 +47,9 @@ class GenerateUsersAndTweetsServiceImplTest {
 
     @Mock
     private TweetsGateway tweetsGateway;
+
+    @Mock
+    private FollowGateway followGateway;
 
     @Mock
     private RandomDataGenerator randomDataGenerator;
@@ -359,7 +365,7 @@ class GenerateUsersAndTweetsServiceImplTest {
             when(randomDataGenerator.generateTweetContent()).thenReturn("Tweet 1");
 
             UserResponseDto userResponse1 = new UserResponseDto(userId1, "user1", "John", "Doe",
-                "user1@test.com",UserStatus.ACTIVE, UserRole.USER, LocalDateTime.now());
+                "user1@test.com", UserStatus.ACTIVE, UserRole.USER, LocalDateTime.now());
 
             when(usersGateway.createUser(any(UserRequestDto.class))).thenReturn(userResponse1);
 
@@ -387,6 +393,339 @@ class GenerateUsersAndTweetsServiceImplTest {
             assertThat(result.statistics().errors().getFirst()).contains("Failed to delete tweet");
 
             verify(tweetsGateway, times(1)).deleteTweet(any(UUID.class), any(DeleteTweetRequestDto.class));
+        }
+    }
+
+    @Nested
+    class FollowRelationshipsTests {
+
+        private UUID userId1;
+        private UUID userId2;
+        private UUID userId3;
+        private UUID userId4;
+        private UUID followId1;
+        private UUID followId2;
+        private UUID followId3;
+        private UUID followId4;
+
+        @BeforeEach
+        void setUp() {
+            userId1 = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+            userId2 = UUID.fromString("223e4567-e89b-12d3-a456-426614174001");
+            userId3 = UUID.fromString("323e4567-e89b-12d3-a456-426614174002");
+            userId4 = UUID.fromString("423e4567-e89b-12d3-a456-426614174003");
+            followId1 = UUID.fromString("523e4567-e89b-12d3-a456-426614174004");
+            followId2 = UUID.fromString("623e4567-e89b-12d3-a456-426614174005");
+            followId3 = UUID.fromString("723e4567-e89b-12d3-a456-426614174006");
+            followId4 = UUID.fromString("823e4567-e89b-12d3-a456-426614174007");
+        }
+
+        @Test
+        void executeScript_WithTwoUsers_ShouldSkipFollowRelationships() {
+            GenerateUsersAndTweetsRequestDto requestDto = GenerateUsersAndTweetsRequestDto.builder()
+                .nUsers(2)
+                .nTweetsPerUser(1)
+                .lUsersForDeletion(0)
+                .build();
+
+            when(randomDataGenerator.generateLogin()).thenReturn("user1", "user2");
+            when(randomDataGenerator.generateEmail()).thenReturn("user1@test.com", "user2@test.com");
+            when(randomDataGenerator.generateFirstName()).thenReturn("John", "Jane");
+            when(randomDataGenerator.generateLastName()).thenReturn("Doe", "Smith");
+            when(randomDataGenerator.generatePassword()).thenReturn("password123", "password456");
+            when(randomDataGenerator.generateTweetContent()).thenReturn("Tweet 1", "Tweet 2");
+
+            UserResponseDto userResponse1 = new UserResponseDto(userId1, "user1", "John", "Doe",
+                "user1@test.com", UserStatus.ACTIVE, UserRole.USER, LocalDateTime.now());
+            UserResponseDto userResponse2 = new UserResponseDto(userId2, "user2", "Jane", "Smith",
+                "user2@test.com", UserStatus.ACTIVE, UserRole.USER, LocalDateTime.now());
+
+            when(usersGateway.createUser(any(UserRequestDto.class))).thenReturn(userResponse1, userResponse2);
+
+            TweetResponseDto tweetResponse1 = new TweetResponseDto(
+                UUID.randomUUID(), userId1, "Tweet 1", LocalDateTime.now(), LocalDateTime.now(), false, null);
+            TweetResponseDto tweetResponse2 = new TweetResponseDto(
+                UUID.randomUUID(), userId2, "Tweet 2", LocalDateTime.now(), LocalDateTime.now(), false, null);
+
+            when(tweetsGateway.createTweet(any(CreateTweetRequestDto.class)))
+                .thenReturn(tweetResponse1, tweetResponse2);
+
+            Page<TweetResponseDto> user1TweetsPage = new PageImpl<>(List.of(tweetResponse1),
+                PageRequest.of(0, 1000), 1);
+            Page<TweetResponseDto> user2TweetsPage = new PageImpl<>(List.of(tweetResponse2),
+                PageRequest.of(0, 1000), 1);
+
+            when(tweetsGateway.getUserTweets(eq(userId1), any(Pageable.class))).thenReturn(user1TweetsPage);
+            when(tweetsGateway.getUserTweets(eq(userId2), any(Pageable.class))).thenReturn(user2TweetsPage);
+
+            doNothing().when(validator).validateDeletionCount(any(), eq(2));
+
+            GenerateUsersAndTweetsResponseDto result = service.executeScript(requestDto);
+
+            assertThat(result).isNotNull();
+            assertThat(result.createdUsers()).hasSize(2);
+            assertThat(result.createdFollows()).isEmpty();
+            assertThat(result.statistics().totalFollowsCreated()).isEqualTo(0);
+
+            verify(followGateway, never()).createFollow(any(FollowRequestDto.class));
+        }
+
+        @Test
+        void executeScript_WithThreeUsers_ShouldCreateFollowRelationships() {
+            GenerateUsersAndTweetsRequestDto requestDto = GenerateUsersAndTweetsRequestDto.builder()
+                .nUsers(3)
+                .nTweetsPerUser(1)
+                .lUsersForDeletion(0)
+                .build();
+
+            when(randomDataGenerator.generateLogin()).thenReturn("user1", "user2", "user3");
+            when(randomDataGenerator.generateEmail()).thenReturn("user1@test.com", "user2@test.com", "user3@test.com");
+            when(randomDataGenerator.generateFirstName()).thenReturn("John", "Jane", "Bob");
+            when(randomDataGenerator.generateLastName()).thenReturn("Doe", "Smith", "Johnson");
+            when(randomDataGenerator.generatePassword()).thenReturn("password123", "password456", "password789");
+            when(randomDataGenerator.generateTweetContent()).thenReturn("Tweet 1", "Tweet 2", "Tweet 3");
+
+            UserResponseDto userResponse1 = new UserResponseDto(userId1, "user1", "John", "Doe",
+                "user1@test.com", UserStatus.ACTIVE, UserRole.USER, LocalDateTime.now());
+            UserResponseDto userResponse2 = new UserResponseDto(userId2, "user2", "Jane", "Smith",
+                "user2@test.com", UserStatus.ACTIVE, UserRole.USER, LocalDateTime.now());
+            UserResponseDto userResponse3 = new UserResponseDto(userId3, "user3", "Bob", "Johnson",
+                "user3@test.com", UserStatus.ACTIVE, UserRole.USER, LocalDateTime.now());
+
+            when(usersGateway.createUser(any(UserRequestDto.class)))
+                .thenReturn(userResponse1, userResponse2, userResponse3);
+
+            when(followGateway.createFollow(any(FollowRequestDto.class)))
+                .thenAnswer(invocation -> {
+                    FollowRequestDto request = invocation.getArgument(0);
+                    UUID followId = UUID.randomUUID();
+                    if (request.followerId().equals(userId1) && request.followingId().equals(userId2)) {
+                        followId = followId1;
+                    } else if (request.followerId().equals(userId1) && request.followingId().equals(userId3)) {
+                        followId = followId1;
+                    } else if (request.followerId().equals(userId2) && request.followingId().equals(userId1)) {
+                        followId = followId2;
+                    } else if (request.followerId().equals(userId3) && request.followingId().equals(userId1)) {
+                        followId = followId2;
+                    }
+                    return FollowResponseDto.builder()
+                        .id(followId)
+                        .followerId(request.followerId())
+                        .followingId(request.followingId())
+                        .createdAt(LocalDateTime.now())
+                        .build();
+                });
+
+            TweetResponseDto tweetResponse1 = new TweetResponseDto(
+                UUID.randomUUID(), userId1, "Tweet 1", LocalDateTime.now(), LocalDateTime.now(), false, null);
+            TweetResponseDto tweetResponse2 = new TweetResponseDto(
+                UUID.randomUUID(), userId2, "Tweet 2", LocalDateTime.now(), LocalDateTime.now(), false, null);
+            TweetResponseDto tweetResponse3 = new TweetResponseDto(
+                UUID.randomUUID(), userId3, "Tweet 3", LocalDateTime.now(), LocalDateTime.now(), false, null);
+
+            when(tweetsGateway.createTweet(any(CreateTweetRequestDto.class)))
+                .thenReturn(tweetResponse1, tweetResponse2, tweetResponse3);
+
+            Page<TweetResponseDto> user1TweetsPage = new PageImpl<>(List.of(tweetResponse1),
+                PageRequest.of(0, 1000), 1);
+            Page<TweetResponseDto> user2TweetsPage = new PageImpl<>(List.of(tweetResponse2),
+                PageRequest.of(0, 1000), 1);
+            Page<TweetResponseDto> user3TweetsPage = new PageImpl<>(List.of(tweetResponse3),
+                PageRequest.of(0, 1000), 1);
+
+            when(tweetsGateway.getUserTweets(eq(userId1), any(Pageable.class))).thenReturn(user1TweetsPage);
+            when(tweetsGateway.getUserTweets(eq(userId2), any(Pageable.class))).thenReturn(user2TweetsPage);
+            when(tweetsGateway.getUserTweets(eq(userId3), any(Pageable.class))).thenReturn(user3TweetsPage);
+
+            doNothing().when(validator).validateDeletionCount(any(), eq(3));
+
+            GenerateUsersAndTweetsResponseDto result = service.executeScript(requestDto);
+
+            assertThat(result).isNotNull();
+            assertThat(result.createdUsers()).hasSize(3);
+            assertThat(result.createdFollows()).hasSize(2);
+            assertThat(result.statistics().totalFollowsCreated()).isEqualTo(2);
+
+            verify(followGateway, times(2)).createFollow(any(FollowRequestDto.class));
+        }
+
+        @Test
+        void executeScript_WhenFollowCreationFails_ShouldContinueAndAddError() {
+            GenerateUsersAndTweetsRequestDto requestDto = GenerateUsersAndTweetsRequestDto.builder()
+                .nUsers(3)
+                .nTweetsPerUser(1)
+                .lUsersForDeletion(0)
+                .build();
+
+            when(randomDataGenerator.generateLogin()).thenReturn("user1", "user2", "user3");
+            when(randomDataGenerator.generateEmail()).thenReturn("user1@test.com", "user2@test.com", "user3@test.com");
+            when(randomDataGenerator.generateFirstName()).thenReturn("John", "Jane", "Bob");
+            when(randomDataGenerator.generateLastName()).thenReturn("Doe", "Smith", "Johnson");
+            when(randomDataGenerator.generatePassword()).thenReturn("password123", "password456", "password789");
+            when(randomDataGenerator.generateTweetContent()).thenReturn("Tweet 1", "Tweet 2", "Tweet 3");
+
+            UserResponseDto userResponse1 = new UserResponseDto(userId1, "user1", "John", "Doe",
+                "user1@test.com", UserStatus.ACTIVE, UserRole.USER, LocalDateTime.now());
+            UserResponseDto userResponse2 = new UserResponseDto(userId2, "user2", "Jane", "Smith",
+                "user2@test.com", UserStatus.ACTIVE, UserRole.USER, LocalDateTime.now());
+            UserResponseDto userResponse3 = new UserResponseDto(userId3, "user3", "Bob", "Johnson",
+                "user3@test.com", UserStatus.ACTIVE, UserRole.USER, LocalDateTime.now());
+
+            when(usersGateway.createUser(any(UserRequestDto.class)))
+                .thenReturn(userResponse1, userResponse2, userResponse3);
+
+            when(followGateway.createFollow(any(FollowRequestDto.class)))
+                .thenAnswer(invocation -> {
+                    FollowRequestDto request = invocation.getArgument(0);
+                    if (request.followerId().equals(userId1) && request.followingId().equals(userId2)) {
+                        return FollowResponseDto.builder()
+                            .id(followId1)
+                            .followerId(userId1)
+                            .followingId(userId2)
+                            .createdAt(LocalDateTime.now())
+                            .build();
+                    } else if (request.followerId().equals(userId1) && request.followingId().equals(userId3)) {
+                        return FollowResponseDto.builder()
+                            .id(followId1)
+                            .followerId(userId1)
+                            .followingId(userId3)
+                            .createdAt(LocalDateTime.now())
+                            .build();
+                    } else {
+                        throw new RuntimeException("Follow creation failed");
+                    }
+                });
+
+            TweetResponseDto tweetResponse1 = new TweetResponseDto(
+                UUID.randomUUID(), userId1, "Tweet 1", LocalDateTime.now(), LocalDateTime.now(), false, null);
+            TweetResponseDto tweetResponse2 = new TweetResponseDto(
+                UUID.randomUUID(), userId2, "Tweet 2", LocalDateTime.now(), LocalDateTime.now(), false, null);
+            TweetResponseDto tweetResponse3 = new TweetResponseDto(
+                UUID.randomUUID(), userId3, "Tweet 3", LocalDateTime.now(), LocalDateTime.now(), false, null);
+
+            when(tweetsGateway.createTweet(any(CreateTweetRequestDto.class)))
+                .thenReturn(tweetResponse1, tweetResponse2, tweetResponse3);
+
+            Page<TweetResponseDto> user1TweetsPage = new PageImpl<>(List.of(tweetResponse1),
+                PageRequest.of(0, 1000), 1);
+            Page<TweetResponseDto> user2TweetsPage = new PageImpl<>(List.of(tweetResponse2),
+                PageRequest.of(0, 1000), 1);
+            Page<TweetResponseDto> user3TweetsPage = new PageImpl<>(List.of(tweetResponse3),
+                PageRequest.of(0, 1000), 1);
+
+            when(tweetsGateway.getUserTweets(eq(userId1), any(Pageable.class))).thenReturn(user1TweetsPage);
+            when(tweetsGateway.getUserTweets(eq(userId2), any(Pageable.class))).thenReturn(user2TweetsPage);
+            when(tweetsGateway.getUserTweets(eq(userId3), any(Pageable.class))).thenReturn(user3TweetsPage);
+
+            doNothing().when(validator).validateDeletionCount(any(), eq(3));
+
+            GenerateUsersAndTweetsResponseDto result = service.executeScript(requestDto);
+
+            assertThat(result).isNotNull();
+            assertThat(result.createdUsers()).hasSize(3);
+            assertThat(result.createdFollows()).hasSize(1);
+            assertThat(result.statistics().totalFollowsCreated()).isEqualTo(1);
+            assertThat(result.statistics().errors()).isNotEmpty();
+            assertThat(result.statistics().errors()).anyMatch(error -> error.contains("Failed to create follow relationship"));
+
+            verify(followGateway, times(2)).createFollow(any(FollowRequestDto.class));
+        }
+
+        @Test
+        void executeScript_WithFollowRelationships_ShouldIncludeInStatistics() {
+            GenerateUsersAndTweetsRequestDto requestDto = GenerateUsersAndTweetsRequestDto.builder()
+                .nUsers(3)
+                .nTweetsPerUser(2)
+                .lUsersForDeletion(0)
+                .build();
+
+            when(randomDataGenerator.generateLogin()).thenReturn("user1", "user2");
+            when(randomDataGenerator.generateEmail()).thenReturn("user1@test.com", "user2@test.com");
+            when(randomDataGenerator.generateFirstName()).thenReturn("John", "Jane");
+            when(randomDataGenerator.generateLastName()).thenReturn("Doe", "Smith");
+            when(randomDataGenerator.generatePassword()).thenReturn("password123", "password456");
+            when(randomDataGenerator.generateTweetContent()).thenReturn("Tweet 1", "Tweet 2", "Tweet 3", "Tweet 4");
+
+            UserResponseDto userResponse1 = new UserResponseDto(userId1, "user1", "John", "Doe",
+                "user1@test.com", UserStatus.ACTIVE, UserRole.USER, LocalDateTime.now());
+            UserResponseDto userResponse2 = new UserResponseDto(userId2, "user2", "Jane", "Smith",
+                "user2@test.com", UserStatus.ACTIVE, UserRole.USER, LocalDateTime.now());
+            UserResponseDto userResponse3 = new UserResponseDto(userId3, "user3", "Bob", "Johnson",
+                "user3@test.com", UserStatus.ACTIVE, UserRole.USER, LocalDateTime.now());
+
+            when(usersGateway.createUser(any(UserRequestDto.class)))
+                .thenReturn(userResponse1, userResponse2, userResponse3);
+
+            when(followGateway.createFollow(any(FollowRequestDto.class)))
+                .thenAnswer(invocation -> {
+                    FollowRequestDto request = invocation.getArgument(0);
+                    UUID followId = UUID.randomUUID();
+                    if (request.followerId().equals(userId1) && request.followingId().equals(userId2)) {
+                        followId = followId1;
+                    } else if (request.followerId().equals(userId1) && request.followingId().equals(userId3)) {
+                        followId = followId1;
+                    } else if (request.followerId().equals(userId2) && request.followingId().equals(userId1)) {
+                        followId = followId2;
+                    } else if (request.followerId().equals(userId3) && request.followingId().equals(userId1)) {
+                        followId = followId2;
+                    }
+                    return FollowResponseDto.builder()
+                        .id(followId)
+                        .followerId(request.followerId())
+                        .followingId(request.followingId())
+                        .createdAt(LocalDateTime.now())
+                        .build();
+                });
+
+            UUID tweetId1 = UUID.randomUUID();
+            UUID tweetId2 = UUID.randomUUID();
+            UUID tweetId3 = UUID.randomUUID();
+            UUID tweetId4 = UUID.randomUUID();
+            UUID tweetId5 = UUID.randomUUID();
+            UUID tweetId6 = UUID.randomUUID();
+
+            TweetResponseDto tweetResponse1 = new TweetResponseDto(
+                tweetId1, userId1, "Tweet 1", LocalDateTime.now(), LocalDateTime.now(), false, null);
+            TweetResponseDto tweetResponse2 = new TweetResponseDto(
+                tweetId2, userId1, "Tweet 2", LocalDateTime.now(), LocalDateTime.now(), false, null);
+            TweetResponseDto tweetResponse3 = new TweetResponseDto(
+                tweetId3, userId2, "Tweet 3", LocalDateTime.now(), LocalDateTime.now(), false, null);
+            TweetResponseDto tweetResponse4 = new TweetResponseDto(
+                tweetId4, userId2, "Tweet 4", LocalDateTime.now(), LocalDateTime.now(), false, null);
+            TweetResponseDto tweetResponse5 = new TweetResponseDto(
+                tweetId5, userId3, "Tweet 5", LocalDateTime.now(), LocalDateTime.now(), false, null);
+            TweetResponseDto tweetResponse6 = new TweetResponseDto(
+                tweetId6, userId3, "Tweet 6", LocalDateTime.now(), LocalDateTime.now(), false, null);
+
+            when(tweetsGateway.createTweet(any(CreateTweetRequestDto.class)))
+                .thenReturn(tweetResponse1, tweetResponse2, tweetResponse3, tweetResponse4, tweetResponse5, tweetResponse6);
+
+            List<TweetResponseDto> user1TweetsList = new ArrayList<>(List.of(tweetResponse1, tweetResponse2));
+            List<TweetResponseDto> user2TweetsList = new ArrayList<>(List.of(tweetResponse3, tweetResponse4));
+            List<TweetResponseDto> user3TweetsList = new ArrayList<>(List.of(tweetResponse5, tweetResponse6));
+
+            when(tweetsGateway.getUserTweets(eq(userId1), any(Pageable.class)))
+                .thenAnswer(_ -> new PageImpl<>(user1TweetsList, PageRequest.of(0, 1000), 2));
+            when(tweetsGateway.getUserTweets(eq(userId2), any(Pageable.class)))
+                .thenAnswer(_ -> new PageImpl<>(user2TweetsList, PageRequest.of(0, 1000), 2));
+            when(tweetsGateway.getUserTweets(eq(userId3), any(Pageable.class)))
+                .thenAnswer(_ -> new PageImpl<>(user3TweetsList, PageRequest.of(0, 1000), 2));
+
+            doNothing().when(validator).validateDeletionCount(any(), eq(3));
+
+            GenerateUsersAndTweetsResponseDto result = service.executeScript(requestDto);
+
+            assertThat(result).isNotNull();
+            assertThat(result.createdUsers()).hasSize(3);
+            assertThat(result.createdFollows()).hasSize(2);
+            assertThat(result.createdTweets()).hasSize(6);
+            assertThat(result.statistics().totalUsersCreated()).isEqualTo(3);
+            assertThat(result.statistics().totalFollowsCreated()).isEqualTo(2);
+            assertThat(result.statistics().totalTweetsCreated()).isEqualTo(6);
+            assertThat(result.statistics().usersWithTweets()).isEqualTo(3);
+            assertThat(result.statistics().usersWithoutTweets()).isEqualTo(0);
+
+            verify(followGateway, times(2)).createFollow(any(FollowRequestDto.class));
         }
     }
 }

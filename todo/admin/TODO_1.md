@@ -53,8 +53,9 @@
 - [x] (P1) #11: Unit тесты для FollowGateway
   acceptance: "Создан FollowGatewayTest с тестами: успешное создание follow-отношения, обработка ошибок, null request, используется @ExtendWith(MockitoExtension.class), AssertJ, паттерн AAA"
   metadata: priority=P1, done=2025-01-27T16:00, note="Создан FollowGatewayTest с полным покрытием: успешное создание follow-отношения, валидация null request и null полей (followerId, followingId), обработка ошибок (RuntimeException, IllegalArgumentException, Exception), используется @ExtendWith(MockitoExtension.class), AssertJ для assertions, @Nested для группировки тестов, паттерн AAA (Arrange-Act-Assert), проверка взаимодействий с моками через verify"
-- [ ] (P1) #12: Unit тесты для обновленного GenerateUsersAndTweetsServiceImpl (follow-отношения)
+- [x] (P1) #12: Unit тесты для обновленного GenerateUsersAndTweetsServiceImpl (follow-отношения)
   acceptance: "Обновлен GenerateUsersAndTweetsServiceImplTest с тестами: успешное создание follow-отношений, с одним пользователем, с двумя пользователями, с тремя пользователями, обработка ошибок, проверка статистики, используется @Nested для группировки"
+  metadata: priority=P1, done=2025-01-27T17:00, note="Добавлен новый @Nested класс FollowRelationshipsTests с тестами: executeScript_WithTwoUsers_ShouldSkipFollowRelationships (проверка, что для 2 пользователей follow-отношения не создаются, т.к. halfCount=0), executeScript_WithThreeUsers_ShouldCreateFollowRelationships (проверка создания 2 follow-отношений для 3 пользователей), executeScript_WithFourUsers_ShouldCreateFollowRelationships (проверка создания 2 follow-отношений для 4 пользователей), executeScript_WithOneUser_ShouldSkipFollowRelationships (проверка пропуска для 1 пользователя), executeScript_WhenFollowCreationFails_ShouldContinueAndAddError (проверка обработки ошибок), executeScript_WithFollowRelationships_ShouldIncludeInStatistics (проверка статистики). Использован thenAnswer для моков followGateway, чтобы корректно обрабатывать непредсказуемый порядок из-за Collections.shuffle(). Все тесты проходят успешно."
 
 ### Swagger/OpenAPI документация
 - [ ] (P3) #13: Swagger/OpenAPI документация
