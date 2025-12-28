@@ -4,7 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.twitter.common.dto.request.CreateTweetRequestDto;
+import com.twitter.common.dto.request.FollowRequestDto;
 import com.twitter.common.dto.request.UserRequestDto;
+import com.twitter.common.dto.response.FollowResponseDto;
 import com.twitter.common.dto.response.TweetResponseDto;
 import com.twitter.common.dto.response.UserResponseDto;
 import org.springframework.data.domain.PageImpl;
@@ -213,6 +215,72 @@ public final class WireMockStubHelper {
             delete(urlEqualTo("/api/v1/tweets/" + tweetId))
                 .willReturn(aResponse()
                     .withStatus(204))
+        );
+    }
+
+    /**
+     * Sets up WireMock stub for creating a follow relationship via follower-api.
+     * <p>
+     * This method configures a stub for POST /api/v1/follows endpoint that matches
+     * the request by followerId and followingId and returns the provided follow response
+     * with HTTP status 201 Created.
+     *
+     * @param wireMockServer   the WireMock server instance
+     * @param objectMapper     the ObjectMapper for JSON serialization
+     * @param followRequest    the follow request DTO (used for matching followerId and followingId in request body)
+     * @param followResponse   the follow response DTO to return
+     * @throws RuntimeException if JSON serialization fails
+     */
+    public static void setupCreateFollowStub(
+        WireMockServer wireMockServer,
+        ObjectMapper objectMapper,
+        FollowRequestDto followRequest,
+        FollowResponseDto followResponse) {
+        if (wireMockServer == null) {
+            return;
+        }
+
+        try {
+            String responseBody = objectMapper.writeValueAsString(followResponse);
+            String followerIdStr = followRequest.followerId().toString();
+            String followingIdStr = followRequest.followingId().toString();
+
+            wireMockServer.stubFor(
+                post(urlPathEqualTo("/api/v1/follows"))
+                    .withRequestBody(matchingJsonPath("$.followerId", equalTo(followerIdStr)))
+                    .withRequestBody(matchingJsonPath("$.followingId", equalTo(followingIdStr)))
+                    .willReturn(aResponse()
+                        .withStatus(201)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(responseBody))
+            );
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to setup create follow stub", e);
+        }
+    }
+
+    /**
+     * Sets up WireMock stub for creating a follow relationship with error response via follower-api.
+     * <p>
+     * This method configures a stub for POST /api/v1/follows endpoint that returns
+     * an error response with the specified HTTP status code.
+     *
+     * @param wireMockServer the WireMock server instance
+     * @param statusCode     the HTTP status code to return
+     */
+    public static void setupCreateFollowStubWithError(
+        WireMockServer wireMockServer,
+        int statusCode) {
+        if (wireMockServer == null) {
+            return;
+        }
+
+        wireMockServer.stubFor(
+            post(urlEqualTo("/api/v1/follows"))
+                .willReturn(aResponse()
+                    .withStatus(statusCode)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody("{\"error\":\"Internal Server Error\"}"))
         );
     }
 }
