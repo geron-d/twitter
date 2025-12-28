@@ -559,4 +559,3 @@ public record ScriptStatisticsDto(
 **Автор:** assistant  
 **Дата:** 2025-01-27  
 **Версия:** 1.0
-
