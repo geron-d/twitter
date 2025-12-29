@@ -17,14 +17,17 @@
 ## Tasks
 
 ### Анализ и проектирование
-- [ ] (P1) #1: Анализ требований — Определить входные/выходные данные, бизнес-правила, зависимости от follower-api
+- [x] (P1) [2025-01-27] #1: Анализ требований — Определить входные/выходные данные, бизнес-правила, зависимости от follower-api
   acceptance: "Понять вход/выход, определить затронутые стандарты, определить список всех эндпоинтов, спроектировать интеграцию с follower-api"
-- [ ] (P1) #2: Проектирование API и контрактов — Определить структуру эндпоинта и интеграцию с follower-api
+  note: "Выполнен полный анализ требований. Определены входные/выходные данные, бизнес-правила, зависимости от follower-api, затронутые стандарты, список эндпоинтов. Спроектирована интеграция с follower-api через Feign Client и Gateway паттерн. Создан документ: done/analysis-requirements.md"
+- [x] (P1) [2025-01-27] #2: Проектирование API и контрактов — Определить структуру эндпоинта и интеграцию с follower-api
   acceptance: "OpenAPI схема для эндпоинта, определение структуры ответа, определение контракта с follower-api, определение общих и специфичных компонентов"
+  note: "Выполнено проектирование API и контрактов. Определена OpenAPI схема для эндпоинта getTimeline с полной документацией всех сценариев (успех, пустая лента, ошибки). Определена структура ответа (использование существующего TweetResponseDto). Определен контракт с follower-api (эндпоинт, структура запроса/ответа, обработка ошибок). Определены общие компоненты (переиспользование) и специфичные компоненты (новые). Создан документ: done/design-api-contracts.md"
 
 ### Реализация инфраструктуры и конфигов
-- [ ] (P1) #3: Реализация Feign клиента для follower-api — Создать FollowerApiClient для интеграции с follower-api
+- [x] (P1) [2025-01-27] #3: Реализация Feign клиента для follower-api — Создать FollowerApiClient для интеграции с follower-api
   acceptance: "FollowerApiClient создан с методом getFollowing, использует @FeignClient с правильной конфигурацией, обработка ошибок"
+  note: "Создан FollowerApiClient с методом getFollowing. Использует @FeignClient с конфигурацией name='follower-api', url из application.yml, path='/api/v1/follows'. Метод использует @SpringQueryMap для передачи Pageable параметров. Возвращает PagedModel<FollowingResponseDto>. Создан FollowingResponseDto в common-lib для межсервисной коммуникации. Файлы: services/tweet-api/src/main/java/com/twitter/client/FollowerApiClient.java, shared/common-lib/src/main/java/com/twitter/common/dto/response/FollowingResponseDto.java"
 - [ ] (P1) #4: Реализация Gateway для follower-api — Создать FollowerGateway для абстракции работы с follower-api
   acceptance: "FollowerGateway создан с методом getFollowingUserIds, обработка ошибок с безопасными значениями, логирование операций"
 - [ ] (P1) #5: Реализация Repository метода — Добавить метод для получения твитов по списку userIds
