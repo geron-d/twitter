@@ -1,4 +1,3 @@
-- добавить в main-plan пункт про docker
 - реализовать остальные методы для tweet из TWEET_API_COMMON_2.md
 - перенести sql в admin-script с liquidbase
 - мягкое удаление подписки
