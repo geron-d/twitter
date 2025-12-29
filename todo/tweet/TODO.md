@@ -34,8 +34,9 @@
 - [x] (P1) [2025-01-27] #5: Реализация Repository метода — Добавить метод для получения твитов по списку userIds
   acceptance: "Метод findByUserIdInAndIsDeletedFalseOrderByCreatedAtDesc добавлен в TweetRepository, использует Derived Query Method (без JavaDoc)"
   note: "Добавлен метод findByUserIdInAndIsDeletedFalseOrderByCreatedAtDesc в TweetRepository. Использует Derived Query Method Spring Data JPA для выполнения IN запроса по списку userIds. Метод возвращает Page<Tweet> с пагинацией и сортировкой по createdAt DESC. Исключает удаленные твиты (isDeleted = false). Без JavaDoc согласно стандартам проекта. Файл: services/tweet-api/src/main/java/com/twitter/repository/TweetRepository.java"
-- [ ] (P2) #6: Обновление конфигов — Проверить и обновить FeignConfig если нужно
+- [x] (P2) [2025-01-27] #6: Обновление конфигов — Проверить и обновить FeignConfig если нужно
   acceptance: "FeignConfig проверен, Feign клиенты включены для пакета com.twitter.client, конфигурация для follower-api добавлена если нужно"
+  note: "Проверен FeignConfig. Конфигурация корректна: @EnableFeignClients(basePackages = \"com.twitter.client\") автоматически включает FollowerApiClient. Общие настройки Feign из application.yml (таймауты, logger-level) применяются ко всем клиентам. Дополнительных изменений не требуется. Файл: services/tweet-api/src/main/java/com/twitter/config/FeignConfig.java"
 - [x] (P1) [2025-01-27] #6.1: Обновление application.yml — Добавить настройки для follower-api
   acceptance: "Добавлена секция app.follower-api.base-url в application.yml со значением http://localhost:8084 для локальной разработки"
   note: "Добавлена секция app.follower-api.base-url в application.yml со значением http://localhost:8084 для локальной разработки. Настройка следует паттерну app.users-api.base-url. Файл: services/tweet-api/src/main/resources/application.yml"
@@ -47,16 +48,21 @@
   note: "Добавлена зависимость tweet-api от follower-api с condition: service_healthy в секции depends_on. Добавлена переменная окружения FOLLOWER_API_URL=http://follower-api:8084 в секции environment. Конфигурация следует паттерну зависимости от users-api и соответствует стандартам STANDART_DOCKER.md. Файл: docker-compose.yml"
 
 ### Эндпоинт: GET /api/v1/tweets/timeline/{userId}
-- [ ] (P1) #7: DTO для эндпоинта — Проверить необходимость специфичных DTO
+- [x] (P1) [2025-01-27] #7: DTO для эндпоинта — Проверить необходимость специфичных DTO
   acceptance: "Определено что используется существующий TweetResponseDto, path и query параметры обрабатываются через Spring"
-- [ ] (P1) #8: Mapper методы для эндпоинта — Проверить необходимость новых методов маппинга
+  note: "Проверена необходимость специфичных DTO для эндпоинта getTimeline. Определено: используется существующий TweetResponseDto из shared/common-lib (аналогично getUserTweets). Path параметр userId обрабатывается через @PathVariable UUID. Query параметры (page, size, sort) обрабатываются через Spring Pageable с @PageableDefault. Ответ - PagedModel<TweetResponseDto>. Новых DTO не требуется. Следует паттерну getUserTweets для консистентности."
+- [x] (P1) [2025-01-27] #8: Mapper методы для эндпоинта — Проверить необходимость новых методов маппинга
   acceptance: "Определено что используются существующие методы TweetMapper, новых методов не требуется"
-- [ ] (P1) #9: Validator методы для эндпоинта — Добавить метод validateForTimeline
+  note: "Проверена необходимость новых методов маппинга для эндпоинта getTimeline. Определено: используется существующий метод TweetMapper.toResponseDto(Tweet tweet) (аналогично getUserTweets). Паттерн использования: tweetRepository.findByUserIdInAndIsDeletedFalseOrderByCreatedAtDesc(userIds, pageable).map(tweetMapper::toResponseDto). Spring Data Page поддерживает метод .map() для преобразования элементов. Оба метода (getUserTweets и getTimeline) возвращают Page<Tweet> и используют один и тот же метод маппера. Новых методов маппинга не требуется."
+- [x] (P1) [2025-01-27] #9: Validator методы для эндпоинта — Добавить метод validateForTimeline
   acceptance: "Метод validateForTimeline добавлен в TweetValidator интерфейс и реализацию, проверка существования пользователя через UserGateway"
-- [ ] (P1) #10: Service методы для эндпоинта — Добавить метод getTimeline
+  note: "Добавлен метод validateForTimeline(UUID userId) в TweetValidator интерфейс и TweetValidatorImpl реализацию. Метод выполняет валидацию существования пользователя через validateUserExists, который использует UserGateway.existsUser. Следует паттерну других методов валидации (validateForCreate). Метод проверяет, что userId не null и пользователь существует в системе. Файлы: services/tweet-api/src/main/java/com/twitter/validation/TweetValidator.java, services/tweet-api/src/main/java/com/twitter/validation/TweetValidatorImpl.java"
+- [x] (P1) [2025-01-27] #10: Service методы для эндпоинта — Добавить метод getTimeline
   acceptance: "Метод getTimeline добавлен в TweetService интерфейс и реализацию, использует @Transactional(readOnly = true), интеграция с FollowerGateway"
-- [ ] (P1) #11: Controller метод для эндпоинта — Добавить метод getTimeline в TweetApi и TweetController
+  note: "Добавлен метод getTimeline(UUID userId, Pageable pageable) в TweetService интерфейс и TweetServiceImpl реализацию. Метод использует @Transactional(readOnly = true) для оптимизации производительности. Реализована интеграция с FollowerGateway для получения списка подписок. Если список подписок пустой, возвращается пустая страница. Используется Repository метод findByUserIdInAndIsDeletedFalseOrderByCreatedAtDesc для получения твитов. Маппинг выполняется через tweetMapper.toResponseDto. Добавлен FollowerGateway в зависимости TweetServiceImpl. Файлы: services/tweet-api/src/main/java/com/twitter/service/TweetService.java, services/tweet-api/src/main/java/com/twitter/service/TweetServiceImpl.java"
+- [x] (P1) [2025-01-27] #11: Controller метод для эндпоинта — Добавить метод getTimeline в TweetApi и TweetController
   acceptance: "Метод добавлен в TweetApi интерфейс с OpenAPI аннотациями и в TweetController с @LoggableRequest, использует @PageableDefault"
+  note: "Добавлен метод getTimeline в TweetApi интерфейс с полной OpenAPI документацией (@Operation, @ApiResponses с примерами для всех сценариев: успех, пустая лента, ошибки). Реализован метод в TweetController с @LoggableRequest для логирования запросов, @GetMapping(\"/timeline/{userId}\") для маппинга пути, @PageableDefault(size = 20, sort = \"createdAt\", direction = Sort.Direction.DESC) для пагинации по умолчанию. Метод вызывает tweetService.getTimeline и возвращает PagedModel<TweetResponseDto>. Следует паттерну getUserTweets для консистентности. Файлы: services/tweet-api/src/main/java/com/twitter/controller/TweetApi.java, services/tweet-api/src/main/java/com/twitter/controller/TweetController.java"
 - [ ] (P1) #12: JavaDoc для эндпоинта — Добавить JavaDoc для всех новых методов
   acceptance: "JavaDoc добавлен для всех методов эндпоинта с @author geron, @version 1.0, @param, @return, @throws"
 - [ ] (P1) #13: Unit тесты для эндпоинта — Написать unit тесты для Service и Validator

@@ -63,3 +63,57 @@
   - Соответствует стандартам STANDART_DOCKER.md
   - Файл: `docker-compose.yml`
 
+- **2025-01-27** — step #6 done — Обновление конфигов (FeignConfig) — автор: assistant
+  - Проверен FeignConfig на корректность конфигурации
+  - Подтверждено, что @EnableFeignClients(basePackages = "com.twitter.client") автоматически включает FollowerApiClient
+  - Общие настройки Feign из application.yml (таймауты, logger-level) применяются ко всем клиентам
+  - Дополнительных изменений в FeignConfig не требуется
+  - Файл: `services/tweet-api/src/main/java/com/twitter/config/FeignConfig.java`
+
+- **2025-01-27** — step #7 done — Проверка необходимости специфичных DTO для эндпоинта — автор: assistant
+  - Проверена необходимость специфичных DTO для эндпоинта getTimeline
+  - Определено: используется существующий TweetResponseDto из shared/common-lib (аналогично getUserTweets)
+  - Path параметр userId обрабатывается через @PathVariable UUID (стандартный Spring механизм)
+  - Query параметры (page, size, sort) обрабатываются через Spring Pageable с @PageableDefault
+  - Ответ - PagedModel<TweetResponseDto> (аналогично getUserTweets)
+  - Новых DTO не требуется, следует паттерну getUserTweets для консистентности
+
+- **2025-01-27** — step #8 done — Проверка необходимости новых методов маппинга для эндпоинта — автор: assistant
+  - Проверена необходимость новых методов маппинга для эндпоинта getTimeline
+  - Определено: используется существующий метод TweetMapper.toResponseDto(Tweet tweet) (аналогично getUserTweets)
+  - Паттерн использования: tweetRepository.findByUserIdInAndIsDeletedFalseOrderByCreatedAtDesc(userIds, pageable).map(tweetMapper::toResponseDto)
+  - Spring Data Page поддерживает метод .map() для преобразования элементов
+  - Оба метода (getUserTweets и getTimeline) возвращают Page<Tweet> и используют один и тот же метод маппера
+  - Новых методов маппинга не требуется
+
+- **2025-01-27** — step #9 done — Добавление метода validateForTimeline в TweetValidator — автор: assistant
+  - Добавлен метод validateForTimeline(UUID userId) в TweetValidator интерфейс
+  - Реализован метод в TweetValidatorImpl с использованием validateUserExists
+  - Метод проверяет существование пользователя через UserGateway.existsUser
+  - Следует паттерну других методов валидации (validateForCreate)
+  - Метод проверяет, что userId не null и пользователь существует в системе
+  - Файлы: `services/tweet-api/src/main/java/com/twitter/validation/TweetValidator.java`, `services/tweet-api/src/main/java/com/twitter/validation/TweetValidatorImpl.java`
+
+- **2025-01-27** — step #10 done — Добавление метода getTimeline в TweetService — автор: assistant
+  - Добавлен метод getTimeline(UUID userId, Pageable pageable) в TweetService интерфейс
+  - Реализован метод в TweetServiceImpl с полной JavaDoc документацией
+  - Метод использует @Transactional(readOnly = true) для оптимизации производительности
+  - Реализована интеграция с FollowerGateway для получения списка подписок
+  - Если список подписок пустой, возвращается пустая страница (не ошибка)
+  - Используется Repository метод findByUserIdInAndIsDeletedFalseOrderByCreatedAtDesc для получения твитов
+  - Маппинг выполняется через tweetMapper.toResponseDto
+  - Добавлен FollowerGateway в зависимости TweetServiceImpl
+  - Файлы: `services/tweet-api/src/main/java/com/twitter/service/TweetService.java`, `services/tweet-api/src/main/java/com/twitter/service/TweetServiceImpl.java`
+
+- **2025-01-27** — step #11 done — Добавление метода getTimeline в TweetApi и TweetController — автор: assistant
+  - Добавлен метод getTimeline в TweetApi интерфейс с полной OpenAPI документацией
+  - OpenAPI аннотации включают @Operation с описанием, @ApiResponses с примерами для всех сценариев
+  - Примеры ответов: успешный ответ с твитами, пустая лента (нет подписок), пустая лента (нет твитов)
+  - Примеры ошибок: невалидный UUID, пользователь не существует, невалидные параметры пагинации, недоступность follower-api
+  - Реализован метод в TweetController с @LoggableRequest для логирования запросов
+  - Используется @GetMapping("/timeline/{userId}") для маппинга пути
+  - Используется @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) для пагинации по умолчанию
+  - Метод вызывает tweetService.getTimeline и возвращает PagedModel<TweetResponseDto>
+  - Следует паттерну getUserTweets для консистентности
+  - Файлы: `services/tweet-api/src/main/java/com/twitter/controller/TweetApi.java`, `services/tweet-api/src/main/java/com/twitter/controller/TweetController.java`
+

@@ -110,4 +110,25 @@ public interface TweetService {
      * @throws BusinessRuleValidationException if user doesn't exist (optional validation)
      */
     Page<TweetResponseDto> getUserTweets(UUID userId, Pageable pageable);
+
+    /**
+     * Retrieves a paginated timeline (news feed) of tweets for a specific user.
+     * <p>
+     * This method retrieves tweets from all users that the specified user is following.
+     * The timeline includes tweets from all followed users, sorted by creation date in
+     * descending order (newest first). Deleted tweets (soft delete) are automatically
+     * excluded from the results. Supports pagination with page, size, and sort parameters.
+     * If the user has no following relationships, an empty page is returned (not an error).
+     * Integration with follower-api is used to retrieve the list of followed users.
+     * <p>
+     * The method is read-only and transactional, ensuring data consistency. The Page object
+     * contains pagination metadata (totalElements, totalPages, number, size) that can be
+     * used by the controller to create HATEOAS links.
+     *
+     * @param userId   the unique identifier of the user whose timeline to retrieve
+     * @param pageable pagination parameters (page, size, sorting)
+     * @return Page containing paginated list of tweets with metadata
+     * @throws BusinessRuleValidationException if userId is null or user doesn't exist
+     */
+    Page<TweetResponseDto> getTimeline(UUID userId, Pageable pageable);
 }

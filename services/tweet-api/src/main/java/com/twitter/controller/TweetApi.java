@@ -608,5 +608,204 @@ public interface TweetApi {
         UUID userId,
         @Parameter(description = "Pagination parameters (page, size, sorting)", required = false)
         Pageable pageable);
+
+    /**
+     * Retrieves a paginated timeline (news feed) of tweets for a specific user.
+     * <p>
+     * This endpoint retrieves tweets from all users that the specified user is following.
+     * The timeline includes tweets from all followed users, sorted by creation date in
+     * descending order (newest first). Deleted tweets (soft delete) are automatically
+     * excluded from the results. Supports pagination with page, size, and sort parameters.
+     * If the user has no following relationships, an empty page is returned (not an error).
+     * Integration with follower-api is used to retrieve the list of followed users.
+     *
+     * @param userId   the unique identifier of the user whose timeline to retrieve
+     * @param pageable pagination parameters (page, size, sorting)
+     * @return PagedModel containing paginated list of tweets with metadata and HATEOAS links
+     */
+    @Operation(
+        summary = "Get user timeline with pagination",
+        description = "Retrieves a paginated timeline (news feed) of tweets for a specific user. " +
+            "The timeline includes tweets from all users that the specified user is following. " +
+            "Tweets are sorted by creation date in descending order (newest first). " +
+            "Deleted tweets (soft delete) are excluded from the results. " +
+            "Supports pagination with page, size, and sort parameters. " +
+            "If the user has no following relationships, an empty page is returned (not an error). " +
+            "Integration with follower-api is used to retrieve the list of followed users. " +
+            "Default pagination: page=0, size=20, sort=createdAt,DESC."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Timeline retrieved successfully",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = PagedModel.class),
+                examples = {
+                    @ExampleObject(
+                        name = "Timeline with Tweets",
+                        summary = "Example timeline response with tweets from followed users",
+                        value = """
+                            {
+                              "content": [
+                                {
+                                  "id": "111e4567-e89b-12d3-a456-426614174000",
+                                  "userId": "222e4567-e89b-12d3-a456-426614174111",
+                                  "content": "This is a tweet from a followed user!",
+                                  "createdAt": "2025-01-27T15:30:00Z",
+                                  "updatedAt": "2025-01-27T15:30:00Z",
+                                  "isDeleted": false,
+                                  "deletedAt": null
+                                },
+                                {
+                                  "id": "333e4567-e89b-12d3-a456-426614174222",
+                                  "userId": "444e4567-e89b-12d3-a456-426614174333",
+                                  "content": "Another tweet from another followed user",
+                                  "createdAt": "2025-01-27T14:20:00Z",
+                                  "updatedAt": "2025-01-27T14:20:00Z",
+                                  "isDeleted": false,
+                                  "deletedAt": null
+                                }
+                              ],
+                              "page": {
+                                "size": 20,
+                                "number": 0,
+                                "totalElements": 150,
+                                "totalPages": 8,
+                                "first": true,
+                                "last": false
+                              }
+                            }
+                            """
+                    ),
+                    @ExampleObject(
+                        name = "Empty Timeline",
+                        summary = "Example response when user has no following relationships",
+                        value = """
+                            {
+                              "content": [],
+                              "page": {
+                                "size": 20,
+                                "number": 0,
+                                "totalElements": 0,
+                                "totalPages": 0,
+                                "first": true,
+                                "last": true
+                              }
+                            }
+                            """
+                    ),
+                    @ExampleObject(
+                        name = "Empty Timeline - No Tweets",
+                        summary = "Example response when followed users have no tweets",
+                        value = """
+                            {
+                              "content": [],
+                              "page": {
+                                "size": 20,
+                                "number": 0,
+                                "totalElements": 0,
+                                "totalPages": 0,
+                                "first": true,
+                                "last": true
+                              }
+                            }
+                            """
+                    )
+                }
+            )
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Invalid UUID format for userId",
+            content = @Content(
+                mediaType = "application/problem+json",
+                examples = @ExampleObject(
+                    name = "Invalid UUID Format Error",
+                    summary = "Invalid user ID format",
+                    value = """
+                        {
+                          "type": "https://example.com/errors/validation-error",
+                          "title": "Validation Error",
+                          "status": 400,
+                          "detail": "Invalid UUID format for userId parameter",
+                          "timestamp": "2025-01-27T15:30:00Z"
+                        }
+                        """
+                )
+            )
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "User does not exist",
+            content = @Content(
+                mediaType = "application/problem+json",
+                examples = @ExampleObject(
+                    name = "User Not Found Error",
+                    summary = "User does not exist",
+                    value = """
+                        {
+                          "type": "https://example.com/errors/business-rule-validation",
+                          "title": "Business Rule Validation Error",
+                          "status": 400,
+                          "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+                          "ruleName": "USER_NOT_EXISTS",
+                          "context": "123e4567-e89b-12d3-a456-426614174000",
+                          "timestamp": "2025-01-27T15:30:00Z"
+                        }
+                        """
+                )
+            )
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Invalid pagination parameters",
+            content = @Content(
+                mediaType = "application/problem+json",
+                examples = @ExampleObject(
+                    name = "Invalid Pagination Error",
+                    summary = "Invalid page or size parameters",
+                    value = """
+                        {
+                          "type": "https://example.com/errors/validation-error",
+                          "title": "Validation Error",
+                          "status": 400,
+                          "detail": "Invalid pagination parameters: page must be >= 0, size must be between 1 and 100",
+                          "timestamp": "2025-01-27T15:30:00Z"
+                        }
+                        """
+                )
+            )
+        ),
+        @ApiResponse(
+            responseCode = "503",
+            description = "Follower API service unavailable",
+            content = @Content(
+                mediaType = "application/problem+json",
+                examples = @ExampleObject(
+                    name = "Service Unavailable Error",
+                    summary = "Follower API is unavailable",
+                    value = """
+                        {
+                          "type": "https://example.com/errors/service-unavailable",
+                          "title": "Service Unavailable",
+                          "status": 503,
+                          "detail": "Follower API service is currently unavailable. Please try again later.",
+                          "timestamp": "2025-01-27T15:30:00Z"
+                        }
+                        """
+                )
+            )
+        )
+    })
+    PagedModel<TweetResponseDto> getTimeline(
+        @Parameter(
+            description = "Unique identifier of the user whose timeline to retrieve",
+            required = true,
+            example = "123e4567-e89b-12d3-a456-426614174000"
+        )
+        UUID userId,
+        @Parameter(description = "Pagination parameters (page, size, sorting)", required = false)
+        Pageable pageable);
 }
 

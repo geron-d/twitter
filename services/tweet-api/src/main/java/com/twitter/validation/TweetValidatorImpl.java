@@ -156,6 +156,14 @@ public class TweetValidatorImpl implements TweetValidator {
     }
 
     /**
+     * @see TweetValidator#validateForTimeline
+     */
+    @Override
+    public void validateForTimeline(UUID userId) {
+        validateUserExists(userId);
+    }
+
+    /**
      * Validates tweet content string using custom rules.
      * <p>
      * This method is reused for both CreateTweetRequestDto and UpdateTweetRequestDto
