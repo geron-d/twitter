@@ -90,8 +90,8 @@ services:
       SPRING_JPA_SHOW_SQL: false
       LOGGING_LEVEL_COM_TWITTER: DEBUG
       LOGGING_LEVEL_ORG_HIBERNATE_SQL: DEBUG
-      # Feign client для интеграции с users-api
       USERS_API_URL: http://users-api:8081
+      FOLLOWER_API_URL: http://follower-api:8084
     depends_on:
       postgres:
         condition: service_healthy

@@ -28,18 +28,23 @@
 - [x] (P1) [2025-01-27] #3: Реализация Feign клиента для follower-api — Создать FollowerApiClient для интеграции с follower-api
   acceptance: "FollowerApiClient создан с методом getFollowing, использует @FeignClient с правильной конфигурацией, обработка ошибок"
   note: "Создан FollowerApiClient с методом getFollowing. Использует @FeignClient с конфигурацией name='follower-api', url из application.yml, path='/api/v1/follows'. Метод использует @SpringQueryMap для передачи Pageable параметров. Возвращает PagedModel<FollowingResponseDto>. Создан FollowingResponseDto в common-lib для межсервисной коммуникации. Файлы: services/tweet-api/src/main/java/com/twitter/client/FollowerApiClient.java, shared/common-lib/src/main/java/com/twitter/common/dto/response/FollowingResponseDto.java"
-- [ ] (P1) #4: Реализация Gateway для follower-api — Создать FollowerGateway для абстракции работы с follower-api
+- [x] (P1) [2025-01-27] #4: Реализация Gateway для follower-api — Создать FollowerGateway для абстракции работы с follower-api
   acceptance: "FollowerGateway создан с методом getFollowingUserIds, обработка ошибок с безопасными значениями, логирование операций"
-- [ ] (P1) #5: Реализация Repository метода — Добавить метод для получения твитов по списку userIds
+  note: "Создан FollowerGateway с методом getFollowingUserIds. Реализовано получение всех подписок через пагинацию (размер страницы 100). Обработка ошибок с возвратом пустого списка (graceful degradation). Логирование операций на уровнях debug и info. Следует паттерну UserGateway. Файл: services/tweet-api/src/main/java/com/twitter/gateway/FollowerGateway.java"
+- [x] (P1) [2025-01-27] #5: Реализация Repository метода — Добавить метод для получения твитов по списку userIds
   acceptance: "Метод findByUserIdInAndIsDeletedFalseOrderByCreatedAtDesc добавлен в TweetRepository, использует Derived Query Method (без JavaDoc)"
+  note: "Добавлен метод findByUserIdInAndIsDeletedFalseOrderByCreatedAtDesc в TweetRepository. Использует Derived Query Method Spring Data JPA для выполнения IN запроса по списку userIds. Метод возвращает Page<Tweet> с пагинацией и сортировкой по createdAt DESC. Исключает удаленные твиты (isDeleted = false). Без JavaDoc согласно стандартам проекта. Файл: services/tweet-api/src/main/java/com/twitter/repository/TweetRepository.java"
 - [ ] (P2) #6: Обновление конфигов — Проверить и обновить FeignConfig если нужно
   acceptance: "FeignConfig проверен, Feign клиенты включены для пакета com.twitter.client, конфигурация для follower-api добавлена если нужно"
-- [ ] (P1) #6.1: Обновление application.yml — Добавить настройки для follower-api
+- [x] (P1) [2025-01-27] #6.1: Обновление application.yml — Добавить настройки для follower-api
   acceptance: "Добавлена секция app.follower-api.base-url в application.yml со значением http://localhost:8084 для локальной разработки"
-- [ ] (P1) #6.2: Обновление application-docker.yml — Добавить настройки для follower-api в Docker окружении
+  note: "Добавлена секция app.follower-api.base-url в application.yml со значением http://localhost:8084 для локальной разработки. Настройка следует паттерну app.users-api.base-url. Файл: services/tweet-api/src/main/resources/application.yml"
+- [x] (P1) [2025-01-27] #6.2: Обновление application-docker.yml — Добавить настройки для follower-api в Docker окружении
   acceptance: "Добавлена секция app.follower-api.base-url в application-docker.yml со значением http://follower-api:8084 для Docker окружения"
-- [ ] (P1) #6.3: Обновление docker-compose.yml — Добавить зависимость tweet-api от follower-api и переменную окружения
+  note: "Добавлена секция app.follower-api.base-url в application-docker.yml со значением http://follower-api:8084 для Docker окружения. Настройка следует паттерну app.users-api.base-url. Используется имя сервиса Docker (follower-api) вместо localhost. Файл: services/tweet-api/src/main/resources/application-docker.yml"
+- [x] (P1) [2025-01-27] #6.3: Обновление docker-compose.yml — Добавить зависимость tweet-api от follower-api и переменную окружения
   acceptance: "Добавлена зависимость tweet-api от follower-api с condition: service_healthy, добавлена переменная окружения FOLLOWER_API_URL=http://follower-api:8084"
+  note: "Добавлена зависимость tweet-api от follower-api с condition: service_healthy в секции depends_on. Добавлена переменная окружения FOLLOWER_API_URL=http://follower-api:8084 в секции environment. Конфигурация следует паттерну зависимости от users-api и соответствует стандартам STANDART_DOCKER.md. Файл: docker-compose.yml"
 
 ### Эндпоинт: GET /api/v1/tweets/timeline/{userId}
 - [ ] (P1) #7: DTO для эндпоинта — Проверить необходимость специфичных DTO
