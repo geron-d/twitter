@@ -49,3 +49,4 @@ public record FollowRequestDto(
     UUID followingId
 ) {
 }
+

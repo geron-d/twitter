@@ -47,3 +47,4 @@ public record FollowStatusResponseDto(
     LocalDateTime createdAt
 ) {
 }
+
