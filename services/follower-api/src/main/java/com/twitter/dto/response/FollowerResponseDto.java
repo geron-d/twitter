@@ -55,3 +55,4 @@ public record FollowerResponseDto(
     LocalDateTime createdAt
 ) {
 }
+
