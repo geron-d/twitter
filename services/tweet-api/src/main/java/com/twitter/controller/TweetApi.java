@@ -622,6 +622,8 @@ public interface TweetApi {
      * @param userId   the unique identifier of the user whose timeline to retrieve
      * @param pageable pagination parameters (page, size, sorting)
      * @return PagedModel containing paginated list of tweets with metadata and HATEOAS links
+     * @throws BusinessRuleValidationException if userId is null or user doesn't exist
+     * @throws ConstraintViolationException   if pagination parameters are invalid
      */
     @Operation(
         summary = "Get user timeline with pagination",

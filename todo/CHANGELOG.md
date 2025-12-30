@@ -117,3 +117,42 @@
   - Следует паттерну getUserTweets для консистентности
   - Файлы: `services/tweet-api/src/main/java/com/twitter/controller/TweetApi.java`, `services/tweet-api/src/main/java/com/twitter/controller/TweetController.java`
 
+- **2025-01-27** — step #12 done — JavaDoc для эндпоинта — автор: assistant
+  - Проверена JavaDoc документация для всех методов эндпоинта getTimeline
+  - Все методы имеют полную JavaDoc документацию согласно STANDART_JAVADOC.md
+  - TweetApi#getTimeline: добавлены @throws теги для BusinessRuleValidationException и ConstraintViolationException
+  - TweetService#getTimeline: имеет @param, @return, @throws
+  - TweetValidator#validateForTimeline: имеет @param, @throws
+  - TweetServiceImpl#getTimeline: имеет @see (соответствует стандартам для простых реализаций)
+  - TweetController#getTimeline: имеет @see (соответствует стандартам для простых реализаций)
+  - TweetValidatorImpl#validateForTimeline: имеет @see (соответствует стандартам для простых реализаций)
+  - FollowerGateway#getFollowingUserIds: имеет @param, @return
+  - FollowerApiClient#getFollowing: имеет @param, @return
+  - Все методы соответствуют стандартам STANDART_JAVADOC.md
+  - Файл: `services/tweet-api/src/main/java/com/twitter/controller/TweetApi.java`
+
+- **2025-01-27** — step #13 done — Unit тесты для эндпоинта — автор: assistant
+  - Добавлены unit тесты для метода getTimeline в TweetServiceImplTest (6 тестов)
+  - Тесты для getTimeline: успешный сценарий с твитами, пустая страница (нет подписок), пустая страница (нет твитов), проверка вызовов зависимостей, проверка отсутствия вызовов при пустых подписках, проверка валидации
+  - Добавлены unit тесты для метода validateForTimeline в TweetValidatorImplTest (3 теста)
+  - Тесты для validateForTimeline: успешный сценарий (пользователь существует), userId is null, пользователь не существует
+  - Все тесты следуют стандартам STANDART_TEST.md
+  - Используется паттерн именования methodName_WhenCondition_ShouldExpectedResult
+  - Используется @Nested для группировки тестов
+  - Проверяются успешные и ошибочные сценарии
+  - Проверяется взаимодействие с зависимостями через verify
+  - Добавлен мок для FollowerGateway в TweetServiceImplTest
+  - Все тесты успешно проходят
+  - Файлы: `services/tweet-api/src/test/java/com/twitter/service/TweetServiceImplTest.java`, `services/tweet-api/src/test/java/com/twitter/validation/TweetValidatorImplTest.java`
+
+- **2025-01-27** — step #14 done — Integration тесты для эндпоинта — автор: assistant
+  - Добавлены integration тесты для эндпоинта getTimeline в TweetControllerTest (9 тестов)
+  - Тесты используют MockMvc и WireMock для мокирования follower-api и users-api
+  - Добавлены helper методы в BaseIntegrationTest для настройки follower-api stubs
+  - Helper методы: setupFollowingStub, setupFollowingStubEmpty, setupFollowingStubWithError
+  - Обновлена конфигурация BaseIntegrationTest для добавления app.follower-api.base-url
+  - Тесты проверяют: успешный сценарий с твитами (200 OK), пустая лента когда нет подписок (200 OK), пустая лента когда нет твитов (200 OK), невалидный UUID (400 Bad Request), пользователь не существует (409 Conflict, так как BusinessRuleValidationException возвращает 409), недоступность follower-api (graceful degradation, 200 OK с пустым списком), исключение удаленных твитов, сортировка по createdAt DESC
+  - Все тесты следуют стандартам STANDART_TEST.md
+  - Используется @Nested для группировки тестов
+  - Файлы: `services/tweet-api/src/test/java/com/twitter/controller/TweetControllerTest.java`, `services/tweet-api/src/test/java/com/twitter/testconfig/BaseIntegrationTest.java`
+

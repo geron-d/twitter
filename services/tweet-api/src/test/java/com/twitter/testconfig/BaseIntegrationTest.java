@@ -1,5 +1,6 @@
 package com.twitter.testconfig;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -8,7 +9,11 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
@@ -69,6 +74,7 @@ public abstract class BaseIntegrationTest {
         int wireMockPort = wireMockServer.port();
         registry.add("wiremock.server.port", () -> String.valueOf(wireMockPort));
         registry.add("app.users-api.base-url", () -> "http://localhost:" + wireMockPort);
+        registry.add("app.follower-api.base-url", () -> "http://localhost:" + wireMockPort);
     }
 
     @BeforeEach
@@ -119,6 +125,92 @@ public abstract class BaseIntegrationTest {
 
         wireMockServer.stubFor(
             get(urlEqualTo("/api/v1/users/" + userId + "/exists"))
+                .willReturn(aResponse()
+                    .withStatus(statusCode)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody("{\"error\":\"Internal Server Error\"}"))
+        );
+    }
+
+    /**
+     * Sets up WireMock stub for follower-api getFollowing endpoint.
+     *
+     * @param userId          the user ID whose following list to retrieve
+     * @param followingUserIds list of following user IDs to return
+     * @param page            page number (default: 0)
+     * @param size            page size (default: 100)
+     */
+    protected void setupFollowingStub(UUID userId, List<UUID> followingUserIds, int page, int size) {
+        if (wireMockServer == null) {
+            return;
+        }
+
+        List<Map<String, String>> content = followingUserIds.stream()
+            .map(followingId -> Map.of(
+                "id", followingId.toString(),
+                "login", "user_" + followingId.toString().substring(0, 8),
+                "createdAt", "2025-01-20T15:30:00Z"
+            ))
+            .collect(Collectors.toList());
+
+        Map<String, Object> responseBody = Map.of(
+            "content", content,
+            "page", Map.of(
+                "size", size,
+                "number", page,
+                "totalElements", followingUserIds.size(),
+                "totalPages", (followingUserIds.size() + size - 1) / size
+            )
+        );
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            String responseJson = objectMapper.writeValueAsString(responseBody);
+
+            wireMockServer.stubFor(
+                get(urlPathEqualTo("/api/v1/follows/" + userId + "/following"))
+                    .withQueryParam("page", equalTo(String.valueOf(page)))
+                    .withQueryParam("size", equalTo(String.valueOf(size)))
+                    .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(responseJson))
+            );
+        } catch (Exception e) {
+            // Ignore JSON serialization errors in tests
+        }
+    }
+
+    /**
+     * Sets up WireMock stub for follower-api getFollowing endpoint with empty result.
+     *
+     * @param userId the user ID whose following list to retrieve
+     */
+    protected void setupFollowingStubEmpty(UUID userId) {
+        setupFollowingStub(userId, Collections.emptyList(), 0, 100);
+    }
+
+    /**
+     * Sets up WireMock stub for follower-api getFollowing endpoint with error response.
+     *
+     * @param userId     the user ID whose following list to retrieve
+     * @param statusCode HTTP status code to return
+     */
+    protected void setupFollowingStubWithError(UUID userId, int statusCode) {
+        if (wireMockServer == null) {
+            return;
+        }
+
+        wireMockServer.stubFor(
+            get(urlPathMatching("/api/v1/follows/" + userId + "/following.*"))
+                .willReturn(aResponse()
+                    .withStatus(statusCode)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody("{\"error\":\"Internal Server Error\"}"))
+        );
+        
+        wireMockServer.stubFor(
+            get(urlPathEqualTo("/api/v1/follows/" + userId + "/following"))
                 .willReturn(aResponse()
                     .withStatus(statusCode)
                     .withHeader("Content-Type", "application/json")
