@@ -4,9 +4,9 @@ import com.twitter.client.FollowerApiClient;
 import com.twitter.common.dto.response.FollowingResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -57,7 +57,7 @@ public class FollowerGateway {
 
             do {
                 Pageable pageable = PageRequest.of(page, size);
-                PagedModel<FollowingResponseDto> pageResult = followerApiClient.getFollowing(userId, pageable);
+                Page<FollowingResponseDto> pageResult = followerApiClient.getFollowing(userId, pageable);
 
                 List<UUID> pageFollowingIds = pageResult.getContent().stream()
                     .map(FollowingResponseDto::id)

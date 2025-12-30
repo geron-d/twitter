@@ -3,8 +3,8 @@ package com.twitter.client;
 import com.twitter.common.dto.response.FollowingResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.SpringQueryMap;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PagedModel;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -31,7 +31,7 @@ public interface FollowerApiClient {
      * @return PagedModel containing paginated list of FollowingResponseDto with metadata
      */
     @GetMapping("/{userId}/following")
-    PagedModel<FollowingResponseDto> getFollowing(
+    Page<FollowingResponseDto> getFollowing(
         @PathVariable("userId") UUID userId,
         @SpringQueryMap Pageable pageable
     );
