@@ -41,4 +41,3 @@ public record FollowStatsResponseDto(
     long followingCount
 ) {
 }
-
