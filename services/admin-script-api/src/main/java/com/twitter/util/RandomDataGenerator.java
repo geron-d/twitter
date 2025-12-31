@@ -112,12 +112,19 @@ public class RandomDataGenerator {
      * @return random password string (8-20 characters)
      */
     public String generatePassword() {
-        String part1 = faker.name().firstName().substring(0, Math.min(3, faker.name().firstName().length()));
-        String part2 = faker.name().lastName().substring(0, Math.min(2, faker.name().lastName().length()));
+        String firstName = faker.name().firstName();
+        String lastName = faker.name().lastName();
+        String part1 = firstName.substring(0, Math.min(3, firstName.length()));
+        String part2 = lastName.substring(0, Math.min(2, lastName.length()));
         String numbers = String.valueOf(faker.number().numberBetween(1000, 9999));
         String password = (part1 + part2 + numbers).replaceAll("[^a-zA-Z0-9]", "");
 
-        password = password.substring(0, 1).toUpperCase() + password.substring(1).toLowerCase() + numbers;
+        if (password.length() > 0) {
+            password = password.substring(0, 1).toUpperCase() + 
+                (password.length() > 1 ? password.substring(1).toLowerCase() : "") + numbers;
+        } else {
+            password = "A" + numbers;
+        }
 
         if (password.length() < 8) {
             password = password + faker.number().numberBetween(10, 99);
