@@ -2,6 +2,26 @@
 
 ## 2025-01-27
 
+### tweet-api: Like tweet endpoint implementation
+
+- **2025-01-27** — step #1 done — Анализ требований для эндпоинта "Лайкнуть твит" — автор: assistant
+  - Выполнен полный анализ требований для эндпоинта POST /api/v1/tweets/{tweetId}/like
+  - Определены входные/выходные данные (tweetId, userId, LikeResponseDto)
+  - Определены бизнес-правила (уникальность, запрет самолайка, существование твита/пользователя, атомарность, обновление счетчика)
+  - Определены затронутые стандарты проекта (STANDART_CODE, STANDART_PROJECT, STANDART_TEST, STANDART_JAVADOC, STANDART_SWAGGER, STANDART_README, STANDART_POSTMAN)
+  - Определены компоненты для реализации (Entity Like, LikeRepository, DTO, Mapper, Validator, Service, Controller)
+  - Определены HTTP статус-коды (201, 400, 404, 409, 500)
+  - Создан документ: `todo/tweet/done/like/analysis-requirements.md`
+
+- **2025-01-27** — step #2 done — Проектирование API и контрактов для эндпоинта "Лайкнуть твит" — автор: assistant
+  - Определена OpenAPI схема для эндпоинта POST /api/v1/tweets/{tweetId}/like с полной документацией всех сценариев (201, 400, 404, 409)
+  - Определена структура DTO: LikeTweetRequestDto (Record с userId, @NotNull, @Schema), LikeResponseDto (Record с id, tweetId, userId, createdAt, @Schema)
+  - Определена структура Entity Like (UUID id, tweetId, userId, createdAt, уникальное ограничение на паре tweetId+userId, бизнес-методы isByUser, isForTweet)
+  - Определены общие компоненты (переиспользование UserGateway, TweetRepository, TweetValidator, TweetMapper) и специфичные компоненты (новые Entity, Repository, DTO, методы валидации/сервиса/контроллера)
+  - Определена структура базы данных (таблица tweet_likes, обновление таблицы tweets с likesCount)
+  - Определены методы маппинга, валидации, сервиса и контроллера
+  - Создан документ: `todo/tweet/done/like/design-api-contracts.md`
+
 ### tweet-api: Timeline endpoint implementation
 
 - **2025-01-27** — step #1 done — Анализ требований для эндпоинта получения ленты новостей — автор: assistant
