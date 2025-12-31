@@ -65,3 +65,4 @@ public record FollowResponseDto(
     LocalDateTime createdAt
 ) {
 }
+

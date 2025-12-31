@@ -352,3 +352,4 @@ app:
 - [STANDART_CODE.md](../../../standards/STANDART_CODE.md)
 - [STANDART_PROJECT.md](../../../standards/STANDART_PROJECT.md)
 - [Follower API README](../../../services/follower-api/README.md)
+

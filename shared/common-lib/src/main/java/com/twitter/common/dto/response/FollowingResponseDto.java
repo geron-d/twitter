@@ -56,3 +56,4 @@ public record FollowingResponseDto(
     LocalDateTime createdAt
 ) {
 }
+
