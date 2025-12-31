@@ -22,6 +22,68 @@
   - Определены методы маппинга, валидации, сервиса и контроллера
   - Создан документ: `todo/tweet/done/like/design-api-contracts.md`
 
+- **2025-01-27** — step #3 done — Реализация Entity Like для эндпоинта "Лайкнуть твит" — автор: assistant
+  - Создана JPA Entity Like в services/tweet-api/src/main/java/com/twitter/entity/Like.java
+  - Реализованы все поля: UUID id с автогенерацией (GenerationType.UUID), UUID tweetId (NOT NULL), UUID userId (NOT NULL), LocalDateTime createdAt с @CreationTimestamp
+  - Добавлено уникальное ограничение на паре (tweetId, userId) через @UniqueConstraint(name = "uk_tweet_likes_tweet_user")
+  - Реализованы бизнес-методы: isByUser(UUID userId) и isForTweet(UUID tweetId)
+  - Использованы Lombok аннотации: @Data, @Builder, @NoArgsConstructor, @AllArgsConstructor
+  - Добавлена полная JavaDoc документация согласно STANDART_JAVADOC.md (@author geron, @version 1.0, описания полей и методов)
+  - Entity соответствует стандартам STANDART_CODE.md (JPA Entity с правильными аннотациями, валидация через @NotNull, использование @CreationTimestamp)
+  - Таблица: tweet_likes с колонками id (UUID), tweet_id (UUID), user_id (UUID), created_at (TIMESTAMP)
+
+- **2025-01-27** — step #4 done — Реализация LikeRepository для эндпоинта "Лайкнуть твит" — автор: assistant
+  - Создан LikeRepository в services/tweet-api/src/main/java/com/twitter/repository/LikeRepository.java
+  - Реализованы Derived Query Methods: Optional<Like> findByTweetIdAndUserId(UUID tweetId, UUID userId) и boolean existsByTweetIdAndUserId(UUID tweetId, UUID userId)
+  - Методы являются Derived Query Methods Spring Data JPA, поэтому JavaDoc для них не добавлен (согласно STANDART_CODE.md - derived methods self-documenting)
+  - Добавлен JavaDoc для интерфейса (@author geron, @version 1.0)
+  - Repository расширяет JpaRepository<Like, UUID> и помечен аннотацией @Repository
+  - Методы будут использоваться для проверки существования лайка (existsByTweetIdAndUserId) и получения лайка (findByTweetIdAndUserId) в валидации и сервисе
+
+- **2025-01-27** — step #5 done — Реализация общих DTO для эндпоинта "Лайкнуть твит" — автор: assistant
+  - Создан LikeTweetRequestDto в services/tweet-api/src/main/java/com/twitter/dto/request/LikeTweetRequestDto.java
+  - Создан LikeResponseDto в services/tweet-api/src/main/java/com/twitter/dto/response/LikeResponseDto.java
+  - Оба DTO реализованы как Records (Java 24 feature) согласно STANDART_CODE.md
+  - LikeTweetRequestDto содержит UUID userId с валидацией @NotNull(message = "User ID cannot be null")
+  - LikeTweetRequestDto имеет @Schema аннотации для Swagger документации с примером
+  - LikeResponseDto содержит UUID id, UUID tweetId, UUID userId, LocalDateTime createdAt
+  - LikeResponseDto имеет @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC") для форматирования даты
+  - Оба DTO имеют @Builder аннотацию (Lombok) для удобного создания
+  - Оба DTO имеют полную JavaDoc документацию (@author geron, @version 1.0, описания параметров)
+  - Оба DTO имеют @Schema аннотации для Swagger документации с примерами
+  - DTO размещены в правильных пакетах: dto/request/ и dto/response/ (service-specific, не в common-lib)
+  - DTO соответствуют стандартам STANDART_CODE.md (Records для DTO, Bean Validation, OpenAPI аннотации)
+
+- **2025-01-27** — step #6 done — Реализация Mapper интерфейса для эндпоинта "Лайкнуть твит" — автор: assistant
+  - Создан отдельный LikeMapper в services/tweet-api/src/main/java/com/twitter/mapper/LikeMapper.java
+  - Добавлены методы маппинга: Like toLike(LikeTweetRequestDto requestDto, UUID tweetId) и LikeResponseDto toLikeResponseDto(Like like)
+  - Метод toLike принимает два параметра (requestDto и tweetId) и маппит их в Like entity
+  - Используются @Mapping аннотации для игнорирования служебных полей: @Mapping(target = "id", ignore = true), @Mapping(target = "createdAt", ignore = true)
+  - Используются @Mapping аннотации для явного указания источников: @Mapping(target = "tweetId", source = "tweetId"), @Mapping(target = "userId", source = "requestDto.userId")
+  - Метод toLikeResponseDto выполняет простой маппинг всех полей из Like entity в LikeResponseDto (автоматический маппинг MapStruct)
+  - LikeMapper имеет полную JavaDoc документацию (@author geron, @version 1.0, @param, @return, описания методов)
+  - Создание отдельного маппера соответствует принципу разделения ответственности (Single Responsibility Principle)
+  - Следует паттерну, используемому в проекте (аналогично FollowMapper в follower-api)
+  - Методы соответствуют стандартам STANDART_CODE.md (MapStruct для маппинга, игнорирование служебных полей при создании)
+  - Файлы: services/tweet-api/src/main/java/com/twitter/mapper/LikeMapper.java (создан), services/tweet-api/src/main/java/com/twitter/mapper/TweetMapper.java (очищен от методов лайков)
+
+- **2025-01-27** — step #7 done — Реализация Validator интерфейса для эндпоинта "Лайкнуть твит" — автор: assistant
+  - Создан отдельный LikeValidator в services/tweet-api/src/main/java/com/twitter/validation/LikeValidator.java
+  - Создан LikeValidatorImpl в services/tweet-api/src/main/java/com/twitter/validation/LikeValidatorImpl.java
+  - Реализован метод validateForLike(UUID tweetId, LikeTweetRequestDto requestDto) с полной валидацией для операции лайка
+  - Валидация включает: проверку tweetId (не null), проверку существования твита (findByIdAndIsDeletedFalse), проверку requestDto (не null), проверку userId (не null), проверку существования пользователя (validateUserExists), проверку самолайка (validateNoSelfLike), проверку дублирования (validateUniqueness)
+  - Валидация разделена на приватные методы для лучшей читаемости: validateUserExists, validateNoSelfLike, validateUniqueness
+  - Для дублирования используется UniquenessValidationException (409 Conflict) с fieldName="like" и fieldValue
+  - Для остальных ошибок используется BusinessRuleValidationException с соответствующими ruleName (TWEET_ID_NULL, TWEET_NOT_FOUND, LIKE_REQUEST_NULL, USER_ID_NULL, USER_NOT_EXISTS, SELF_LIKE_NOT_ALLOWED)
+  - LikeValidatorImpl имеет зависимости: TweetRepository, LikeRepository, UserGateway через @RequiredArgsConstructor
+  - Метод validateForLike удален из TweetValidator и TweetValidatorImpl
+  - LikeRepository удален из зависимостей TweetValidatorImpl (больше не нужен)
+  - Создание отдельного валидатора соответствует принципу разделения ответственности (Single Responsibility Principle)
+  - Следует паттерну, используемому в проекте (аналогично FollowValidator в follower-api)
+  - LikeValidator имеет полную JavaDoc документацию (@author geron, @version 1.0, @param, @throws)
+  - Валидатор соответствует стандартам STANDART_CODE.md (валидация через отдельный компонент, использование исключений из common-lib, логирование через @Slf4j)
+  - Файлы: services/tweet-api/src/main/java/com/twitter/validation/LikeValidator.java (создан), services/tweet-api/src/main/java/com/twitter/validation/LikeValidatorImpl.java (создан), services/tweet-api/src/main/java/com/twitter/validation/TweetValidator.java (очищен от метода validateForLike), services/tweet-api/src/main/java/com/twitter/validation/TweetValidatorImpl.java (очищен от метода validateForLike и зависимости LikeRepository)
+
 ### tweet-api: Timeline endpoint implementation
 
 - **2025-01-27** — step #1 done — Анализ требований для эндпоинта получения ленты новостей — автор: assistant
