@@ -36,5 +36,3 @@ public interface FollowerApiClient {
         @SpringQueryMap Pageable pageable
     );
 }
-
-
