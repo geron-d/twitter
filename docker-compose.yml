@@ -95,8 +95,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      users-api:
-        condition: service_healthy
     networks:
       - twitter-network
     volumes:
@@ -130,10 +128,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      users-api:
-        condition: service_healthy
-      tweet-api:
-        condition: service_healthy
     networks:
       - twitter-network
     volumes:
@@ -166,8 +160,6 @@ services:
       LOGGING_LEVEL_ORG_HIBERNATE_SQL: DEBUG
     depends_on:
       postgres:
-        condition: service_healthy
-      users-api:
         condition: service_healthy
     networks:
       - twitter-network

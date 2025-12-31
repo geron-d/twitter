@@ -156,3 +156,128 @@
   - Используется @Nested для группировки тестов
   - Файлы: `services/tweet-api/src/test/java/com/twitter/controller/TweetControllerTest.java`, `services/tweet-api/src/test/java/com/twitter/testconfig/BaseIntegrationTest.java`
 
+- **2025-01-27** — step #15 done — Swagger документация для эндпоинта — автор: assistant
+  - Проверена OpenAPI документация для эндпоинта getTimeline
+  - Документация полная и соответствует стандартам STANDART_SWAGGER.md
+  - Включены @ExampleObject для всех сценариев:
+    - Успешный ответ с твитами (200 OK) - пример "Timeline with Tweets"
+    - Пустая лента без подписок (200 OK) - пример "Empty Timeline"
+    - Пустая лента без твитов (200 OK) - пример "Empty Timeline - No Tweets"
+    - Невалидный UUID (400 Bad Request) - пример "Invalid UUID Format Error"
+    - Пользователь не существует (400 Bad Request) - пример "User Not Found Error"
+    - Невалидные параметры пагинации (400 Bad Request) - пример "Invalid Pagination Error"
+    - Недоступность follower-api (503 Service Unavailable) - пример "Service Unavailable Error"
+  - Все примеры используют реалистичные данные (UUID, даты)
+  - Все примеры ошибок соответствуют формату RFC 7807 Problem Details
+  - @Operation с полным summary и description
+  - @Parameter для всех параметров (userId, pageable)
+  - @ApiResponses со всеми возможными статус-кодами
+  - Документация соответствует acceptance criteria
+  - Файл: `services/tweet-api/src/main/java/com/twitter/controller/TweetApi.java`
+
+- **2025-01-27** — step #16 done — Обновление README.md — автор: assistant
+  - Обновлен README.md для tweet-api согласно стандартам STANDART_README.md
+  - Добавлено описание эндпоинта getTimeline в раздел "Основные возможности"
+  - Добавлен эндпоинт GET /timeline/{userId} в таблицу эндпоинтов
+  - Добавлено детальное описание эндпоинта getTimeline с параметрами, валидацией, бизнес-правилами, ответами
+  - Добавлены примеры успешных ответов (с твитами, пустая лента без подписок, пустая лента без твитов)
+  - Добавлены примеры ошибок (пользователь не существует, невалидный UUID)
+  - Добавлен раздел "Интеграция с follower-api" с описанием:
+    - Архитектуры интеграции
+    - Компонентов интеграции (FollowerApiClient, FollowerGateway)
+    - Процесса получения ленты новостей
+    - Обработки ошибок (graceful degradation)
+  - Обновлена диаграмма компонентов (добавлены FollowerGateway, FollowerApiClient, Follower API)
+  - Обновлена структура пакетов (добавлены FollowerGateway, FollowerApiClient)
+  - Добавлен метод getTimeline в раздел бизнес-логики с описанием логики работы
+  - Добавлено бизнес-правило #7 для получения ленты новостей
+  - Добавлены примеры использования getTimeline с curl командами
+  - Обновлены требования к окружению (добавлен Follower API)
+  - Все изменения соответствуют стандартам STANDART_README.md
+  - Файл: `services/tweet-api/README.md`
+
+- **2025-01-27** — step #17 done — Обновление Postman коллекции — автор: assistant
+  - Добавлен запрос "get timeline" в Postman коллекцию tweet-api
+  - Запрос использует GET метод, путь /api/v1/tweets/timeline/{{userId}}
+  - Query параметры: page (default: 0), size (default: 20, max: 100), sort (default: createdAt,DESC)
+  - Добавлены примеры ответов для всех сценариев:
+    - Успешный ответ с твитами (200 OK) - "timeline with tweets"
+    - Пустая лента без подписок (200 OK) - "empty timeline - no following"
+    - Пустая лента без твитов (200 OK) - "empty timeline - no tweets"
+    - Невалидный UUID (400 Bad Request) - "invalid uuid format error"
+    - Пользователь не существует (400 Bad Request) - "user not exists error"
+    - Невалидные параметры пагинации (400 Bad Request) - "invalid pagination parameters error"
+  - Все примеры ответов следуют формату RFC 7807 Problem Details для ошибок
+  - Используются переменные {{baseUrl}} и {{userId}}
+  - Обновлено описание коллекции с упоминанием timeline эндпоинта и интеграции с follower-api
+  - Запрос следует стандартам STANDART_POSTMAN.md
+  - Файл: `postman/tweet-api/twitter-tweet-api.postman_collection.json`
+
+- **2025-01-27** — step #18 done — Проверка соответствия стандартам — автор: assistant
+  - Проверено соответствие всех стандартов проекта для эндпоинта getTimeline
+  - **STANDART_CODE.md**: ✅ Все требования соблюдены
+    - Используется @LoggableRequest на всех методах контроллера
+    - Используется @RequiredArgsConstructor для dependency injection
+    - Используется @Slf4j для логирования
+    - Используется @Transactional для методов сервиса
+    - Используется Gateway pattern для интеграции с follower-api
+    - Используется Feign Client для внешних сервисов
+    - Используются Records для DTOs (из common-lib)
+    - Используется MapStruct для маппинга
+    - Используется валидация через @Valid
+    - Используется Pageable для пагинации
+    - Используется PagedModel для ответов
+    - Используются Java 24 features (Records)
+    - Используются Spring Boot 3.5.5 practices
+  - **STANDART_PROJECT.md**: ✅ Все требования соблюдены
+    - Используется @LoggableRequest на всех методах контроллера
+    - Используется GlobalExceptionHandler из common-lib
+    - Используется ValidationException hierarchy из common-lib
+    - Используются shared DTOs из common-lib (FollowingResponseDto)
+  - **STANDART_JAVADOC.md**: ✅ Все требования соблюдены
+    - Все классы имеют JavaDoc с @author и @version
+    - Все методы имеют JavaDoc с @param, @return, @throws
+    - Используется @see для методов-реализаций интерфейсов
+    - Repository методы (derived query methods) не документированы (правильно)
+  - **STANDART_TEST.md**: ✅ Все требования соблюдены
+    - Тесты используют правильное именование (methodName_WhenCondition_ShouldExpectedResult)
+    - Используется @Nested для группировки тестов
+    - Используется @ExtendWith(MockitoExtension.class) для unit тестов
+    - Используется @SpringBootTest для integration тестов
+    - Используется AssertJ для assertions
+    - Используется WireMock для мокирования внешних сервисов
+    - Тесты покрывают успешные и ошибочные сценарии
+    - Используется паттерн AAA (Arrange-Act-Assert)
+  - **STANDART_SWAGGER.md**: ✅ Проверено на шаге #15
+  - **STANDART_README.md**: ✅ Проверено на шаге #16
+  - **STANDART_POSTMAN.md**: ✅ Проверено на шаге #17
+  - **STANDART_DOCKER.md**: ⏳ Будет проверено на шаге #19
+
+- **2025-01-27** — step #19 done — Проверка Docker конфигурации — автор: assistant
+  - Проверено соответствие Docker конфигурации стандартам STANDART_DOCKER.md
+  - **docker-compose.yml**: ✅ Все требования соблюдены
+    - Версия 3.8 ✅
+    - Правильные имена сервисов (kebab-case) и контейнеров (twitter-[service-name]) ✅
+    - Build конфигурация с правильным context и dockerfile ✅
+    - Порты: 8082 для tweet-api ✅
+    - Environment переменные: SPRING_PROFILES_ACTIVE, SPRING_DATASOURCE_*, LOGGING_LEVEL_*, USERS_API_URL, FOLLOWER_API_URL ✅
+    - depends_on с health conditions: postgres, users-api, follower-api (добавлена зависимость от follower-api) ✅
+    - Networks: twitter-network с правильной конфигурацией ✅
+    - Volumes: ./logs:/app/logs ✅
+    - Restart: unless-stopped ✅
+    - Healthcheck для всех сервисов ✅
+  - **Dockerfile для tweet-api**: ✅ Все требования соблюдены
+    - Multi-stage build (build + runtime) ✅
+    - Build stage: gradle:jdk24, правильный порядок копирования файлов, оптимизация кэширования ✅
+    - Runtime stage: eclipse-temurin:24-jre ✅
+    - Non-root user (appuser) создан и используется ✅
+    - Healthcheck с правильными параметрами ✅
+    - EXPOSE 8082 ✅
+    - JVM options (JAVA_OPTS) ✅
+    - Entrypoint с поддержкой переменных окружения ✅
+  - **.dockerignore для tweet-api**: ✅ Все требования соблюдены
+    - Исключены build файлы, IDE файлы, OS файлы, логи, тесты, Git, Docker файлы, документация, конфигурационные файлы ✅
+  - **Исправления**:
+    - Добавлена зависимость tweet-api от follower-api в depends_on для правильного порядка запуска сервисов
+  - Файлы: `docker-compose.yml`, `services/tweet-api/Dockerfile`, `services/tweet-api/.dockerignore`
+

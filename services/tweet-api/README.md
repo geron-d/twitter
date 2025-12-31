@@ -11,9 +11,11 @@
 - ✅ Создание твитов с валидацией контента
 - ✅ Получение твита по уникальному идентификатору
 - ✅ Получение твитов пользователя с пагинацией
+- ✅ Получение ленты новостей (timeline) с пагинацией
 - ✅ Обновление твитов с проверкой прав автора
 - ✅ Удаление твитов (soft delete) с проверкой прав автора
 - ✅ Интеграция с users-api для проверки существования пользователей
+- ✅ Интеграция с follower-api для получения списка подписок
 - ✅ Валидация данных (длина контента 1-280 символов)
 - ✅ OpenAPI/Swagger документация
 - ✅ Обработка ошибок по стандарту RFC 7807 Problem Details
@@ -39,9 +41,11 @@ com.twitter/
 ├── entity/
 │   └── Tweet.java               # JPA сущность
 ├── gateway/
-│   └── UserGateway.java        # Gateway для интеграции с users-api
+│   ├── UserGateway.java        # Gateway для интеграции с users-api
+│   └── FollowerGateway.java   # Gateway для интеграции с follower-api
 ├── client/
-│   └── UsersApiClient.java     # Feign клиент для users-api
+│   ├── UsersApiClient.java     # Feign клиент для users-api
+│   └── FollowerApiClient.java # Feign клиент для follower-api
 ├── mapper/
 │   └── TweetMapper.java        # MapStruct маппер
 ├── repository/
@@ -57,51 +61,6 @@ com.twitter/
     └── OpenApiConfig.java      # Конфигурация OpenAPI
 ```
 
-### Диаграмма компонентов
-
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│ TweetController │────│  TweetService   │────│ TweetRepository │
-│                 │    │                 │    │                 │
-│ - REST Endpoint │    │ - Business Logic│    │ - Data Access   │
-│ - Error Handling│    │ - Orchestration │    │ - Queries       │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-                                │                       │
-         │──────────────────────│                       │
-         ▼                      ▼                       ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│ TweetValidator  │    │   TweetMapper   │    │   PostgreSQL    │
-│                 │    │                 │    │                 │
-│ - Data Validation│   │ - Entity Mapping│    │ - Database      │
-│ - Business Rules│    │ - DTO Conversion│    │ - Tables        │
-│ - User Check    │    │                 │    │                 │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │
-         │                       │
-         ▼                       ▼
-┌─────────────────┐    ┌─────────────────┐
-│   UserGateway   │    │      DTOs       │
-│                 │    │                 │
-│ - User Existence│    │ - Request/Response│
-│ - Feign Client  │    │ - Validation    │
-│                 │    │ - Constraints   │
-└─────────────────┘    └─────────────────┘
-         │
-         ▼
-┌─────────────────┐
-│ UsersApiClient  │
-│                 │
-│ - Feign Client  │
-│ - HTTP Calls    │
-└─────────────────┘
-         │
-         ▼
-┌─────────────────┐
-│   Users API     │
-│   (Port 8081)   │
-└─────────────────┘
-```
-
 ## REST API
 
 ### Базовый URL
@@ -112,13 +71,14 @@ http://localhost:8082/api/v1/tweets
 
 ### Эндпоинты
 
-| Метод    | Путь              | Описание                      | Тело запроса            | Ответ                        |
-|----------|-------------------|-------------------------------|-------------------------|------------------------------|
-| `POST`   | `/`               | Создать новый твит            | `CreateTweetRequestDto` | `TweetResponseDto`           |
-| `GET`    | `/{tweetId}`      | Получить твит по ID            | -                       | `TweetResponseDto`           |
-| `GET`    | `/user/{userId}`  | Получить твиты пользователя   | -                       | `PagedModel<TweetResponseDto>`|
-| `PUT`    | `/{tweetId}`      | Обновить твит                 | `UpdateTweetRequestDto` | `TweetResponseDto`           |
-| `DELETE` | `/{tweetId}`      | Удалить твит (soft delete)    | `DeleteTweetRequestDto` | -                            |
+| Метод    | Путь                  | Описание                      | Тело запроса            | Ответ                        |
+|----------|-----------------------|-------------------------------|-------------------------|------------------------------|
+| `POST`   | `/`                   | Создать новый твит            | `CreateTweetRequestDto` | `TweetResponseDto`           |
+| `GET`    | `/{tweetId}`          | Получить твит по ID            | -                       | `TweetResponseDto`           |
+| `GET`    | `/user/{userId}`      | Получить твиты пользователя   | -                       | `PagedModel<TweetResponseDto>`|
+| `GET`    | `/timeline/{userId}`  | Получить ленту новостей        | -                       | `PagedModel<TweetResponseDto>`|
+| `PUT`    | `/{tweetId}`          | Обновить твит                 | `UpdateTweetRequestDto` | `TweetResponseDto`           |
+| `DELETE` | `/{tweetId}`          | Удалить твит (soft delete)    | `DeleteTweetRequestDto` | -                            |
 
 ### Детальное описание эндпоинтов
 
@@ -404,7 +364,214 @@ GET /api/v1/tweets/user/{userId}?page=0&size=20&sort=createdAt,DESC
 }
 ```
 
-#### 5. Удалить твит
+#### 5. Получить ленту новостей (timeline)
+
+```http
+GET /api/v1/tweets/timeline/{userId}?page=0&size=20&sort=createdAt,DESC
+```
+
+**Параметры пути:**
+
+- `userId` - обязательный, UUID пользователя, чьи твиты нужно получить
+
+**Параметры запроса (query parameters):**
+
+- `page` - необязательный, номер страницы (по умолчанию 0)
+- `size` - необязательный, размер страницы (по умолчанию 20, максимум 100)
+- `sort` - необязательный, параметры сортировки (по умолчанию `createdAt,DESC`)
+
+**Валидация:**
+
+- `userId` - обязательный, должен быть валидным UUID форматом
+- `page` - должен быть >= 0
+- `size` - должен быть > 0 и <= 100
+- `sort` - должен быть валидным форматом сортировки Spring Data JPA
+
+**Бизнес-правила:**
+
+- Твиты сортируются по дате создания в порядке убывания (новые первыми)
+- Удаленные твиты (soft delete) исключаются из результатов
+- Поддерживается пагинация для работы с большими объемами данных
+
+**Ответы:**
+
+- `200 OK` - твиты успешно получены (может быть пустой список)
+- `400 Bad Request` - ошибка валидации (некорректный UUID, неверные параметры пагинации)
+
+**Пример успешного ответа (200 OK) с твитами:**
+
+```json
+{
+  "content": [
+    {
+      "id": "111e4567-e89b-12d3-a456-426614174000",
+      "userId": "123e4567-e89b-12d3-a456-426614174000",
+      "content": "This is my latest tweet!",
+      "createdAt": "2025-01-27T15:30:00Z",
+      "updatedAt": "2025-01-27T15:30:00Z",
+      "isDeleted": false,
+      "deletedAt": null
+    },
+    {
+      "id": "222e4567-e89b-12d3-a456-426614174000",
+      "userId": "123e4567-e89b-12d3-a456-426614174000",
+      "content": "Another tweet from yesterday",
+      "createdAt": "2025-01-26T10:15:00Z",
+      "updatedAt": "2025-01-26T10:15:00Z",
+      "isDeleted": false,
+      "deletedAt": null
+    }
+  ],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 150,
+    "totalPages": 8
+  }
+}
+```
+
+**Пример успешного ответа (200 OK) с пустым списком:**
+
+```json
+{
+  "content": [],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 0,
+    "totalPages": 0
+  }
+}
+```
+
+**Параметры пути:**
+
+- `userId` - обязательный, UUID пользователя, чью ленту новостей нужно получить
+
+**Параметры запроса (query parameters):**
+
+- `page` - необязательный, номер страницы (по умолчанию 0)
+- `size` - необязательный, размер страницы (по умолчанию 20, максимум 100)
+- `sort` - необязательный, параметры сортировки (по умолчанию `createdAt,DESC`)
+
+**Валидация:**
+
+- `userId` - обязательный, должен быть валидным UUID форматом и существовать в системе
+- `page` - должен быть >= 0
+- `size` - должен быть > 0 и <= 100
+- `sort` - должен быть валидным форматом сортировки Spring Data JPA
+
+**Бизнес-правила:**
+
+- Лента новостей содержит твиты от всех пользователей, на которых подписан указанный пользователь
+- Твиты сортируются по дате создания в порядке убывания (новые первыми)
+- Удаленные твиты (soft delete) исключаются из результатов
+- Если пользователь не имеет подписок, возвращается пустая страница (не ошибка)
+- Если подписанные пользователи не имеют твитов, возвращается пустая страница (не ошибка)
+- Поддерживается пагинация для работы с большими объемами данных
+- Интеграция с follower-api используется для получения списка подписок
+
+**Ответы:**
+
+- `200 OK` - лента новостей успешно получена (может быть пустой список)
+- `400 Bad Request` - ошибка валидации (некорректный UUID, неверные параметры пагинации, пользователь не существует)
+- `503 Service Unavailable` - follower-api недоступен (graceful degradation - возвращается пустая страница)
+
+**Пример успешного ответа (200 OK) с твитами:**
+
+```json
+{
+  "content": [
+    {
+      "id": "111e4567-e89b-12d3-a456-426614174000",
+      "userId": "222e4567-e89b-12d3-a456-426614174111",
+      "content": "This is a tweet from a followed user!",
+      "createdAt": "2025-01-27T15:30:00Z",
+      "updatedAt": "2025-01-27T15:30:00Z",
+      "isDeleted": false,
+      "deletedAt": null
+    },
+    {
+      "id": "333e4567-e89b-12d3-a456-426614174222",
+      "userId": "444e4567-e89b-12d3-a456-426614174333",
+      "content": "Another tweet from another followed user",
+      "createdAt": "2025-01-27T14:20:00Z",
+      "updatedAt": "2025-01-27T14:20:00Z",
+      "isDeleted": false,
+      "deletedAt": null
+    }
+  ],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 150,
+    "totalPages": 8,
+    "first": true,
+    "last": false
+  }
+}
+```
+
+**Пример успешного ответа (200 OK) с пустой лентой (нет подписок):**
+
+```json
+{
+  "content": [],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 0,
+    "totalPages": 0,
+    "first": true,
+    "last": true
+  }
+}
+```
+
+**Пример успешного ответа (200 OK) с пустой лентой (нет твитов):**
+
+```json
+{
+  "content": [],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 0,
+    "totalPages": 0,
+    "first": true,
+    "last": true
+  }
+}
+```
+
+**Пример ошибки пользователь не существует (400 Bad Request):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 400,
+  "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+  "ruleName": "USER_NOT_EXISTS",
+  "context": "123e4567-e89b-12d3-a456-426614174000",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки невалидный UUID (400 Bad Request):**
+
+```json
+{
+  "type": "https://example.com/errors/validation-error",
+  "title": "Validation Error",
+  "status": 400,
+  "detail": "Invalid UUID format for userId parameter",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+#### 6. Удалить твит
 
 ```http
 DELETE /api/v1/tweets/{tweetId}
@@ -592,7 +759,24 @@ open http://localhost:8082/swagger-ui.html
         - Маппинг сущностей в DTO ответа
         - Возврат Page с метаданными пагинации
 
-5. **`deleteTweet(UUID tweetId, DeleteTweetRequestDto requestDto)`**
+5. **`getTimeline(UUID userId, Pageable pageable)`**
+    - Получает пагинированную ленту новостей (timeline) для пользователя
+    - Возвращает `Page<TweetResponseDto>`
+    - Логика:
+        - Валидация существования пользователя через UserGateway
+        - Получение списка подписок через FollowerGateway (интеграция с follower-api)
+        - Если список подписок пустой, возвращается пустая страница (не ошибка)
+        - Получение твитов из БД по списку userIds (IN запрос) с фильтрацией (isDeleted = false)
+        - Сортировка по createdAt DESC (новые первыми)
+        - Применение пагинации (page, size, sort)
+        - Маппинг сущностей в DTO ответа
+        - Возврат Page с метаданными пагинации
+    - Особенности:
+        - Интеграция с follower-api для получения списка подписок
+        - Graceful degradation: при недоступности follower-api возвращается пустая страница
+        - Поддержка пагинации для работы с большими объемами данных
+
+6. **`deleteTweet(UUID tweetId, DeleteTweetRequestDto requestDto)`**
     - Удаляет твит (soft delete)
     - Возвращает `void` (ответ 204 No Content)
     - Логика:
@@ -635,6 +819,18 @@ open http://localhost:8082/swagger-ui.html
     - Поддержка пагинации для работы с большими объемами данных
     - Сортировка по дате создания в порядке убывания (новые первыми)
     - Автоматическое исключение удаленных твитов (isDeleted = false)
+    - Дефолтные значения пагинации: page=0, size=20, sort=createdAt,DESC
+    - Максимальный размер страницы: 100 элементов
+
+7. **Получение ленты новостей (timeline):**
+    - Лента содержит твиты от всех пользователей, на которых подписан указанный пользователь
+    - Интеграция с follower-api для получения списка подписок
+    - Поддержка пагинации для работы с большими объемами данных
+    - Сортировка по дате создания в порядке убывания (новые первыми)
+    - Автоматическое исключение удаленных твитов (isDeleted = false)
+    - Если пользователь не имеет подписок, возвращается пустая страница (не ошибка)
+    - Если подписанные пользователи не имеют твитов, возвращается пустая страница (не ошибка)
+    - Graceful degradation: при недоступности follower-api возвращается пустая страница
     - Дефолтные значения пагинации: page=0, size=20, sort=createdAt,DESC
     - Максимальный размер страницы: 100 элементов
 
@@ -786,9 +982,11 @@ open http://localhost:8082/swagger-ui.html
     - Удаленные твиты не возвращаются в обычных запросах (используется `findByIdAndIsDeletedFalse()`)
     - Индекс `idx_tweets_is_deleted` для оптимизации запросов активных твитов
 
-## Интеграция с users-api
+## Интеграция с другими сервисами
 
-### Архитектура интеграции
+### Интеграция с users-api
+
+#### Архитектура интеграции
 
 Tweet API интегрируется с Users API через Feign Client для проверки существования пользователей перед созданием твитов.
 
@@ -847,6 +1045,91 @@ Gateway компонент для абстракции работы с users-api
     - Feign выбрасывает `FeignException`
     - `UserGateway` обрабатывает и возвращает `false`
     - Выбрасывается `BusinessRuleValidationException`
+
+### Интеграция с follower-api
+
+#### Архитектура интеграции
+
+Tweet API интегрируется с Follower API через Feign Client для получения списка подписок пользователя при построении ленты новостей (timeline).
+
+#### Компоненты интеграции
+
+##### 1. FollowerApiClient (Feign Client)
+
+Интерфейс Feign Client для вызова follower-api
+
+**Конфигурация:**
+
+- Базовый URL: `http://localhost:8084` (настраивается через `app.follower-api.base-url`)
+- Путь: `/api/v1/follows`
+- Эндпоинт: `GET /{userId}/following`
+
+**Метод:**
+
+- `PagedModel<FollowingResponseDto> getFollowing(UUID userId, Pageable pageable)` - получает пагинированный список подписок пользователя
+
+##### 2. FollowerGateway
+
+Gateway компонент для абстракции работы с follower-api
+
+**Особенности:**
+
+- Обрабатывает `null` userId (возвращает пустой список)
+- Обрабатывает исключения при вызове follower-api (graceful degradation)
+- Логирует операции для отладки
+- Получает все подписки через пагинацию (размер страницы 100)
+
+**Метод:**
+
+- `List<UUID> getFollowingUserIds(UUID userId)` - получает список идентификаторов пользователей, на которых подписан указанный пользователь
+
+#### Процесс получения ленты новостей
+
+1. **Валидация userId:**
+    - Проверка, что `userId` не равен `null`
+    - Проверка существования пользователя через `UserGateway.existsUser()`
+    - Если пользователь не существует, выбрасывается `BusinessRuleValidationException`
+
+2. **Получение списка подписок:**
+    - `TweetService` вызывает `FollowerGateway.getFollowingUserIds(userId)`
+    - `FollowerGateway` делает пагинированные запросы к follower-api до получения всех подписок
+    - Используется размер страницы 100 для минимизации количества запросов
+    - Если список подписок пустой, возвращается пустая страница (не ошибка)
+
+3. **Получение твитов:**
+    - Используется Repository метод `findByUserIdInAndIsDeletedFalseOrderByCreatedAtDesc` для получения твитов по списку userIds
+    - Применяется пагинация и сортировка по createdAt DESC
+    - Маппинг сущностей в DTO ответа
+    - Возврат Page с метаданными пагинации
+
+#### Обработка ошибок
+
+##### Сценарии ошибок:
+
+1. **Пользователь не имеет подписок:**
+    - HTTP 200 OK с пустым списком подписок
+    - Возвращается пустая страница твитов (не ошибка)
+
+2. **Ошибка сети:**
+    - Feign выбрасывает исключение
+    - `FollowerGateway` обрабатывает и возвращает пустой список (graceful degradation)
+    - Возвращается пустая страница твитов (не ошибка)
+
+3. **Таймаут:**
+    - Feign выбрасывает `FeignException`
+    - `FollowerGateway` обрабатывает и возвращает пустой список (graceful degradation)
+    - Возвращается пустая страница твитов (не ошибка)
+
+4. **Follower-api недоступен (503 Service Unavailable):**
+    - `FollowerGateway` обрабатывает и возвращает пустой список (graceful degradation)
+    - Возвращается пустая страница твитов (не ошибка)
+    - Логируется предупреждение для мониторинга
+
+**Логирование:**
+
+- Все вызовы к follower-api логируются на уровне DEBUG
+- Ошибки логируются с предупреждением
+- Успешные операции логируются на уровне INFO
 
 ## Примеры использования
 
@@ -960,6 +1243,100 @@ curl -X GET "http://localhost:8082/api/v1/tweets/user/123e4567-e89b-12d3-a456-42
     "totalElements": 0,
     "totalPages": 0
   }
+}
+```
+
+### Получение ленты новостей (timeline)
+
+```bash
+# Получить первую страницу ленты новостей (20 твитов по умолчанию)
+curl -X GET "http://localhost:8082/api/v1/tweets/timeline/123e4567-e89b-12d3-a456-426614174000"
+
+# Получить вторую страницу с размером 10
+curl -X GET "http://localhost:8082/api/v1/tweets/timeline/123e4567-e89b-12d3-a456-426614174000?page=1&size=10"
+
+# Получить с кастомной сортировкой
+curl -X GET "http://localhost:8082/api/v1/tweets/timeline/123e4567-e89b-12d3-a456-426614174000?sort=createdAt,ASC"
+```
+
+**Ответ (200 OK) с твитами из ленты:**
+
+```json
+{
+  "content": [
+    {
+      "id": "111e4567-e89b-12d3-a456-426614174000",
+      "userId": "222e4567-e89b-12d3-a456-426614174111",
+      "content": "This is a tweet from a followed user!",
+      "createdAt": "2025-01-27T15:30:00Z",
+      "updatedAt": "2025-01-27T15:30:00Z",
+      "isDeleted": false,
+      "deletedAt": null
+    },
+    {
+      "id": "333e4567-e89b-12d3-a456-426614174222",
+      "userId": "444e4567-e89b-12d3-a456-426614174333",
+      "content": "Another tweet from another followed user",
+      "createdAt": "2025-01-27T14:20:00Z",
+      "updatedAt": "2025-01-27T14:20:00Z",
+      "isDeleted": false,
+      "deletedAt": null
+    }
+  ],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 150,
+    "totalPages": 8,
+    "first": true,
+    "last": false
+  }
+}
+```
+
+**Ответ (200 OK) с пустой лентой (нет подписок):**
+
+```json
+{
+  "content": [],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 0,
+    "totalPages": 0,
+    "first": true,
+    "last": true
+  }
+}
+```
+
+**Ответ (200 OK) с пустой лентой (нет твитов):**
+
+```json
+{
+  "content": [],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 0,
+    "totalPages": 0,
+    "first": true,
+    "last": true
+  }
+}
+```
+
+**Ответ при ошибке пользователь не существует (400 Bad Request):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 400,
+  "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+  "ruleName": "USER_NOT_EXISTS",
+  "context": "123e4567-e89b-12d3-a456-426614174000",
+  "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -1085,6 +1462,7 @@ docker run -p 8082:8082 tweet-api
 - **Java 24** - версия Java для сборки и запуска
 - **PostgreSQL** - база данных (порт 5432)
 - **Users API** - должен быть запущен на порту 8081 для проверки существования пользователей
+- **Follower API** - должен быть запущен на порту 8084 для получения списка подписок (опционально, при недоступности возвращается пустая лента)
 
 ## Безопасность
 
