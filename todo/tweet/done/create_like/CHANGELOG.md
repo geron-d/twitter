@@ -566,3 +566,108 @@
   - Все изменения соответствуют стандартам STANDART_README.md (структура, форматирование, примеры)
   - Файл: services/tweet-api/README.md (обновлен)
 
+- **2025-01-27** — step #20 done — Обновление Postman коллекции для эндпоинта "Лайкнуть твит" — автор: assistant
+  - Добавлен запрос 'like tweet' в Postman коллекцию tweet-api
+  - Запрос использует POST метод, путь {{baseUrl}}/api/v1/tweets/{{tweetId}}/likes
+  - Тело запроса: { "userId": "{{userId}}" } с использованием переменных окружения
+  - Добавлены примеры ответов для всех сценариев:
+    - Успешное создание лайка (201 Created) - "tweet liked" с полным LikeResponseDto
+    - Валидация null userId (400 Bad Request) - "validation error - null userId"
+    - Отсутствие body (400 Bad Request) - "validation error - missing body"
+    - Пользователь не существует (409 Conflict) - "user not exists error" с BusinessRuleValidationException
+    - Самолайк (409 Conflict) - "self-like error" с BusinessRuleValidationException и ruleName SELF_LIKE_NOT_ALLOWED
+    - Твит не найден (409 Conflict) - "tweet not found error" с BusinessRuleValidationException и ruleName TWEET_NOT_FOUND
+    - Дублирование лайка (409 Conflict) - "duplicate like error" с UniquenessValidationException, fieldName="like", fieldValue
+    - Невалидный UUID (400 Bad Request) - "invalid uuid format error"
+  - Все примеры ответов следуют формату RFC 7807 Problem Details для ошибок
+  - Все примеры используют правильные Content-Type (application/json для успешных ответов, application/problem+json для ошибок)
+  - Обновлено описание коллекции с упоминанием лайков твитов и бизнес-правил (no self-likes, uniqueness)
+  - Запрос следует стандартам STANDART_POSTMAN.md:
+    - Имя запроса в lowercase с пробелами: "like tweet"
+    - Полное описание запроса с указанием всех операций (валидация, проверка существования, бизнес-правила)
+    - Использование переменных {{baseUrl}}, {{tweetId}}, {{userId}}
+    - Правильные заголовки (Content-Type, Accept)
+    - Примеры для всех сценариев (201, 400, 409)
+    - Правильные статус-коды и форматы ответов
+  - Файл: postman/tweet-api/twitter-tweet-api.postman_collection.json (обновлен)
+
+- **2025-01-27** — step #21 done — Проверка соответствия стандартам для эндпоинта "Лайкнуть твит" — автор: assistant
+  - Выполнена полная проверка соответствия всех компонентов эндпоинта POST /api/v1/tweets/{tweetId}/likes стандартам проекта
+  - **STANDART_CODE.md**: ✅ Все требования соблюдены
+    - Используются Records для DTO (LikeTweetRequestDto, LikeResponseDto) - Java 24 feature
+    - Используется Lombok для Entity (Like) - @Data, @Builder, @NoArgsConstructor, @AllArgsConstructor
+    - Используется MapStruct для маппинга (LikeMapper) с правильной конфигурацией
+    - Используется @RequiredArgsConstructor для dependency injection во всех компонентах
+    - Используется @Slf4j для логирования во всех компонентах
+    - Используется @Transactional для методов сервиса (LikeServiceImpl#likeTweet)
+    - Используется Gateway pattern для интеграции с users-api (UserGateway)
+    - Правильная структура пакетов (controller, service, validation, mapper, repository, entity, dto)
+    - Используется UUID для ID во всех Entity и DTO
+    - Используется @CreationTimestamp для audit полей (createdAt)
+    - Используется @LoggableRequest на всех методах контроллера
+    - Используется @Valid для валидации DTO в контроллере
+    - Используется правильная структура слоёв (Controller -> Service -> Repository)
+    - Используется разделение интерфейса и реализации для Service и Validator
+  - **STANDART_PROJECT.md**: ✅ Все требования соблюдены
+    - Используется @LoggableRequest на всех методах контроллера (LikeController#likeTweet)
+    - Используется GlobalExceptionHandler из common-lib для обработки исключений (автоматически)
+    - Используются исключения из common-lib:
+      - BusinessRuleValidationException для бизнес-правил (TWEET_ID_NULL, TWEET_NOT_FOUND, LIKE_REQUEST_NULL, USER_ID_NULL, USER_NOT_EXISTS, SELF_LIKE_NOT_ALLOWED)
+      - UniquenessValidationException для дублирования лайка
+    - Используется UserGateway для интеграции с users-api (проверка существования пользователя)
+    - DTO размещены в service-specific пакетах (dto/request, dto/response), не в common-lib (правильно, так как используются только в tweet-api)
+  - **STANDART_TEST.md**: ✅ Проверено на шаге #16
+    - Unit тесты для LikeServiceImpl, LikeValidatorImpl, LikeMapper следуют стандартам
+    - Integration тесты для LikeController следуют стандартам
+    - Используется паттерн именования methodName_WhenCondition_ShouldExpectedResult
+    - Используется @Nested для группировки тестов
+    - Используется AssertJ для assertions
+    - Используется Mockito для моков
+    - Используется @ExtendWith(MockitoExtension.class) для unit тестов
+    - Используется @SpringBootTest для integration тестов
+    - Используется WireMock для мокирования users-api
+    - Используется Testcontainers для PostgreSQL
+    - Используется @Transactional для изоляции тестов
+  - **STANDART_JAVADOC.md**: ✅ Проверено на шаге #15
+    - Все классы имеют JavaDoc с @author geron и @version 1.0
+    - Все методы имеют JavaDoc с @param, @return, @throws
+    - Используется @see для методов-реализаций интерфейсов
+    - Repository методы (derived query methods) не документированы (правильно, согласно стандартам)
+    - Используются <p> теги для разделения параграфов
+    - Документация на английском языке
+  - **STANDART_SWAGGER.md**: ✅ Проверено на шаге #18
+    - Отдельный интерфейс LikeApi с OpenAPI аннотациями
+    - @Tag на уровне интерфейса
+    - @Operation с summary и description для всех методов
+    - @ApiResponses со всеми возможными статус-кодами (201, 400, 409)
+    - @ExampleObject для всех сценариев (успех, ошибки)
+    - @Parameter для всех параметров
+    - @Schema на уровне DTO и полей
+    - Все примеры соответствуют формату RFC 7807 Problem Details
+    - Все примеры используют реалистичные данные (UUID, даты)
+  - Все компоненты соответствуют стандартам проекта
+  - Файлы проверены: Like.java, LikeRepository.java, LikeTweetRequestDto.java, LikeResponseDto.java, LikeMapper.java, LikeValidator.java, LikeValidatorImpl.java, LikeService.java, LikeServiceImpl.java, LikeApi.java, LikeController.java
+  - Добавлен запрос 'like tweet' в Postman коллекцию tweet-api
+  - Запрос использует POST метод, путь {{baseUrl}}/api/v1/tweets/{{tweetId}}/likes
+  - Тело запроса: { "userId": "{{userId}}" } с использованием переменных окружения
+  - Добавлены примеры ответов для всех сценариев:
+    - Успешное создание лайка (201 Created) - "tweet liked" с полным LikeResponseDto
+    - Валидация null userId (400 Bad Request) - "validation error - null userId"
+    - Отсутствие body (400 Bad Request) - "validation error - missing body"
+    - Пользователь не существует (409 Conflict) - "user not exists error" с BusinessRuleValidationException
+    - Самолайк (409 Conflict) - "self-like error" с BusinessRuleValidationException и ruleName SELF_LIKE_NOT_ALLOWED
+    - Твит не найден (409 Conflict) - "tweet not found error" с BusinessRuleValidationException и ruleName TWEET_NOT_FOUND
+    - Дублирование лайка (409 Conflict) - "duplicate like error" с UniquenessValidationException, fieldName="like", fieldValue
+    - Невалидный UUID (400 Bad Request) - "invalid uuid format error"
+  - Все примеры ответов следуют формату RFC 7807 Problem Details для ошибок
+  - Все примеры используют правильные Content-Type (application/json для успешных ответов, application/problem+json для ошибок)
+  - Обновлено описание коллекции с упоминанием лайков твитов и бизнес-правил (no self-likes, uniqueness)
+  - Запрос следует стандартам STANDART_POSTMAN.md:
+    - Имя запроса в lowercase с пробелами: "like tweet"
+    - Полное описание запроса с указанием всех операций (валидация, проверка существования, бизнес-правила)
+    - Использование переменных {{baseUrl}}, {{tweetId}}, {{userId}}
+    - Правильные заголовки (Content-Type, Accept)
+    - Примеры для всех сценариев (201, 400, 409)
+    - Правильные статус-коды и форматы ответов
+  - Файл: postman/tweet-api/twitter-tweet-api.postman_collection.json (обновлен)
+
