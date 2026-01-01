@@ -1,3 +1,14 @@
+# Отключаем автоматическое преобразование окончаний строк для всех файлов
+* -text
+
+# Скрипты с явным указанием окончаний строк
 /gradlew text eol=lf
+*.sh text eol=lf
 *.bat text eol=crlf
+
+# Бинарные файлы
 *.jar binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
