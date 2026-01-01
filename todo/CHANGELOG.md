@@ -170,6 +170,20 @@
   - Валидатор соответствует стандартам STANDART_CODE.md (валидация через отдельный компонент, использование исключений из common-lib, логирование через @Slf4j)
   - Файлы: services/tweet-api/src/main/java/com/twitter/validation/LikeValidator.java (создан в шаге #7), services/tweet-api/src/main/java/com/twitter/validation/LikeValidatorImpl.java (создан в шаге #7)
 
+- **2025-01-27** — step #14 done — Controller метод для эндпоинта "Лайкнуть твит" — автор: assistant
+  - Добавлен метод likeTweet в интерфейс TweetApi с полной OpenAPI документацией
+  - OpenAPI аннотации включают @Operation с summary и description, описывающим все операции метода
+  - @ApiResponses включает все возможные статус-коды: 201 (успешное создание), 400 (валидация, бизнес-правила), 404 (твит не найден), 409 (дублирование лайка)
+  - Добавлены @ExampleObject для всех сценариев: успешное создание лайка, ошибки валидации (userId null), бизнес-правила (пользователь не существует, самолайк), твит не найден, дублирование лайка, невалидный UUID
+  - Все примеры ошибок соответствуют формату RFC 7807 Problem Details
+  - Добавлена реализация метода в TweetController с аннотацией @LoggableRequest для логирования запросов
+  - Используется @PostMapping("/{tweetId}/like") для маппинга пути эндпоинта
+  - Используется @Valid для валидации LikeTweetRequestDto
+  - Метод вызывает likeService.likeTweet и возвращает ResponseEntity.status(HttpStatus.CREATED).body(createdLike)
+  - Добавлена зависимость LikeService в TweetController через @RequiredArgsConstructor
+  - Метод соответствует стандартам STANDART_SWAGGER.md (полная OpenAPI документация, RFC 7807 Problem Details для ошибок) и STANDART_CODE.md (использование @LoggableRequest, валидация, правильные HTTP статус-коды)
+  - Файлы: services/tweet-api/src/main/java/com/twitter/controller/TweetApi.java (обновлен), services/tweet-api/src/main/java/com/twitter/controller/TweetController.java (обновлен)
+
 ### tweet-api: Timeline endpoint implementation
 
 - **2025-01-27** — step #1 done — Анализ требований для эндпоинта получения ленты новостей — автор: assistant
