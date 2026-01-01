@@ -184,6 +184,32 @@
   - Метод соответствует стандартам STANDART_SWAGGER.md (полная OpenAPI документация, RFC 7807 Problem Details для ошибок) и STANDART_CODE.md (использование @LoggableRequest, валидация, правильные HTTP статус-коды)
   - Файлы: services/tweet-api/src/main/java/com/twitter/controller/TweetApi.java (обновлен), services/tweet-api/src/main/java/com/twitter/controller/TweetController.java (обновлен)
 
+- **2025-01-27** — step #15 done — JavaDoc для эндпоинта "Лайкнуть твит" — автор: assistant
+  - Проверена и улучшена JavaDoc документация для всех методов эндпоинта POST /api/v1/tweets/{tweetId}/like
+  - Все методы имеют полную JavaDoc документацию согласно STANDART_JAVADOC.md
+  - LikeApi#likeTweet: полная документация с @param, @return, @throws для всех параметров и исключений
+  - LikeController#likeTweet: использует @see LikeApi#likeTweet для делегирования (соответствует стандартам для простых реализаций)
+  - LikeService#likeTweet: полная документация с описанием всех операций метода (валидация, создание, сохранение, маппинг, возврат)
+  - LikeServiceImpl#likeTweet: использует @see LikeService#likeTweet для делегирования (соответствует стандартам для простых реализаций)
+  - LikeValidator#validateForLike: полная документация с @param, @throws, описанием всех проверок (существование твита, пользователя, самолайк, дублирование)
+  - LikeValidatorImpl#validateForLike: использует @see LikeValidator#validateForLike для делегирования (соответствует стандартам для простых реализаций)
+  - LikeMapper#toLike: улучшена документация с добавлением детального описания с <p> тегами, описывающим маппинг и игнорирование служебных полей
+  - LikeMapper#toLikeResponseDto: улучшена документация с добавлением детального описания с <p> тегами, описывающим автоматический маппинг MapStruct
+  - Все классы имеют JavaDoc на уровне класса с @author geron и @version 1.0
+  - Документация соответствует стандартам STANDART_JAVADOC.md (полные описания, использование @see для реализаций, детальные описания с <p> тегами)
+  - Файлы: services/tweet-api/src/main/java/com/twitter/controller/LikeApi.java, services/tweet-api/src/main/java/com/twitter/controller/LikeController.java, services/tweet-api/src/main/java/com/twitter/service/LikeService.java, services/tweet-api/src/main/java/com/twitter/service/LikeServiceImpl.java, services/tweet-api/src/main/java/com/twitter/validation/LikeValidator.java, services/tweet-api/src/main/java/com/twitter/validation/LikeValidatorImpl.java, services/tweet-api/src/main/java/com/twitter/mapper/LikeMapper.java (обновлен)
+
+- **2025-01-27** — step #16 done — Unit тесты для эндпоинта "Лайкнуть твит" — автор: assistant
+  - Созданы unit тесты для всех компонентов эндпоинта POST /api/v1/tweets/{tweetId}/like
+  - LikeServiceImplTest: 6 тестов для метода likeTweet (успешный сценарий, проверка вызовов зависимостей, проверка инкремента счетчика, ошибки валидации, твит не найден после валидации, ошибка уникальности)
+  - LikeValidatorImplTest: 8 тестов для метода validateForLike (успешный сценарий, tweetId null, твит не найден, requestDto null, userId null, пользователь не существует, самолайк, дублирование лайка)
+  - LikeMapperTest: 8 тестов для методов toLike и toLikeResponseDto (успешный маппинг, игнорирование id и createdAt, null значения)
+  - Все тесты следуют стандартам STANDART_TEST.md: паттерн именования methodName_WhenCondition_ShouldExpectedResult, использование @Nested для группировки, AssertJ для assertions, Mockito для моков, @ExtendWith(MockitoExtension.class) для unit тестов, Mappers.getMapper для реального MapStruct маппера
+  - Тесты покрывают успешные и ошибочные сценарии, проверяют взаимодействие с зависимостями через verify
+  - Тесты используют паттерн AAA (Arrange-Act-Assert) для структурирования
+  - Все тесты изолированы и независимы, используют @BeforeEach для инициализации тестовых данных
+  - Файлы: services/tweet-api/src/test/java/com/twitter/service/LikeServiceImplTest.java (создан), services/tweet-api/src/test/java/com/twitter/validation/LikeValidatorImplTest.java (создан), services/tweet-api/src/test/java/com/twitter/mapper/LikeMapperTest.java (создан)
+
 ### tweet-api: Timeline endpoint implementation
 
 - **2025-01-27** — step #1 done — Анализ требований для эндпоинта получения ленты новостей — автор: assistant
