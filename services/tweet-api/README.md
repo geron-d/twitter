@@ -14,6 +14,7 @@
 - ✅ Получение ленты новостей (timeline) с пагинацией
 - ✅ Обновление твитов с проверкой прав автора
 - ✅ Удаление твитов (soft delete) с проверкой прав автора
+- ✅ Лайк твитов с проверкой бизнес-правил
 - ✅ Интеграция с users-api для проверки существования пользователей
 - ✅ Интеграция с follower-api для получения списка подписок
 - ✅ Валидация данных (длина контента 1-280 символов)
@@ -30,16 +31,21 @@
 com.twitter/
 ├── Application.java              # Главный класс приложения
 ├── controller/
-│   ├── TweetApi.java            # OpenAPI интерфейс
-│   └── TweetController.java     # REST контроллер
+│   ├── TweetApi.java            # OpenAPI интерфейс для твитов
+│   ├── TweetController.java     # REST контроллер для твитов
+│   ├── LikeApi.java             # OpenAPI интерфейс для лайков
+│   └── LikeController.java      # REST контроллер для лайков
 ├── dto/
 │   ├── request/
 │   │   ├── CreateTweetRequestDto.java  # DTO для создания твита
-│   │   └── UpdateTweetRequestDto.java   # DTO для обновления твита
+│   │   ├── UpdateTweetRequestDto.java   # DTO для обновления твита
+│   │   └── LikeTweetRequestDto.java     # DTO для лайка твита
 │   └── response/
-│       └── TweetResponseDto.java       # DTO для ответа
+│       ├── TweetResponseDto.java       # DTO для ответа твита
+│       └── LikeResponseDto.java        # DTO для ответа лайка
 ├── entity/
-│   └── Tweet.java               # JPA сущность
+│   ├── Tweet.java               # JPA сущность твита
+│   └── Like.java                # JPA сущность лайка
 ├── gateway/
 │   ├── UserGateway.java        # Gateway для интеграции с users-api
 │   └── FollowerGateway.java   # Gateway для интеграции с follower-api
@@ -47,15 +53,21 @@ com.twitter/
 │   ├── UsersApiClient.java     # Feign клиент для users-api
 │   └── FollowerApiClient.java # Feign клиент для follower-api
 ├── mapper/
-│   └── TweetMapper.java        # MapStruct маппер
+│   ├── TweetMapper.java        # MapStruct маппер для твитов
+│   └── LikeMapper.java         # MapStruct маппер для лайков
 ├── repository/
-│   └── TweetRepository.java    # JPA репозиторий
+│   ├── TweetRepository.java    # JPA репозиторий для твитов
+│   └── LikeRepository.java     # JPA репозиторий для лайков
 ├── service/
-│   ├── TweetService.java       # Интерфейс сервиса
-│   └── TweetServiceImpl.java   # Реализация сервиса
+│   ├── TweetService.java       # Интерфейс сервиса для твитов
+│   ├── TweetServiceImpl.java   # Реализация сервиса для твитов
+│   ├── LikeService.java        # Интерфейс сервиса для лайков
+│   └── LikeServiceImpl.java    # Реализация сервиса для лайков
 ├── validation/
-│   ├── TweetValidator.java     # Интерфейс валидатора
-│   └── TweetValidatorImpl.java # Реализация валидатора
+│   ├── TweetValidator.java     # Интерфейс валидатора для твитов
+│   ├── TweetValidatorImpl.java # Реализация валидатора для твитов
+│   ├── LikeValidator.java      # Интерфейс валидатора для лайков
+│   └── LikeValidatorImpl.java  # Реализация валидатора для лайков
 └── config/
     ├── FeignConfig.java        # Конфигурация Feign
     └── OpenApiConfig.java      # Конфигурация OpenAPI
@@ -79,6 +91,7 @@ http://localhost:8082/api/v1/tweets
 | `GET`    | `/timeline/{userId}`  | Получить ленту новостей        | -                       | `PagedModel<TweetResponseDto>`|
 | `PUT`    | `/{tweetId}`          | Обновить твит                 | `UpdateTweetRequestDto` | `TweetResponseDto`           |
 | `DELETE` | `/{tweetId}`          | Удалить твит (soft delete)    | `DeleteTweetRequestDto` | -                            |
+| `POST`   | `/{tweetId}/likes`    | Лайкнуть твит                 | `LikeTweetRequestDto`   | `LikeResponseDto`            |
 
 ### Детальное описание эндпоинтов
 
@@ -666,6 +679,124 @@ Content-Type: application/json
 }
 ```
 
+#### 7. Лайкнуть твит
+
+```http
+POST /api/v1/tweets/{tweetId}/likes
+Content-Type: application/json
+```
+
+**Параметры пути:**
+
+- `tweetId` - обязательный, UUID существующего твита
+
+**Тело запроса:**
+
+```json
+{
+  "userId": "123e4567-e89b-12d3-a456-426614174000"
+}
+```
+
+**Валидация:**
+
+- `userId` - обязательное, UUID существующего пользователя
+- `tweetId` - обязательный, должен быть валидным UUID форматом
+
+**Бизнес-правила:**
+
+- Твит должен существовать в системе и не быть удаленным
+- Пользователь должен существовать в системе
+- Пользователь не может лайкнуть свой собственный твит (самолайк запрещен)
+- Пользователь может лайкнуть твит только один раз (уникальность)
+- Операция атомарна - создается запись лайка и обновляется счетчик `likesCount` в твите
+
+**Ответы:**
+
+- `201 Created` - твит успешно лайкнут
+- `400 Bad Request` - ошибка валидации (некорректный UUID, отсутствует userId)
+- `409 Conflict` - нарушение бизнес-правил (твит не найден, пользователь не существует, самолайк)
+- `409 Conflict` - дублирование лайка (пользователь уже лайкнул этот твит)
+
+**Пример успешного ответа (201 Created):**
+
+```json
+{
+  "id": "987e6543-e21b-43d2-b654-321987654321",
+  "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+  "userId": "123e4567-e89b-12d3-a456-426614174000",
+  "createdAt": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки валидации userId (400 Bad Request):**
+
+```json
+{
+  "type": "https://example.com/errors/validation-error",
+  "title": "Validation Error",
+  "status": 400,
+  "detail": "Validation failed: userId: User ID cannot be null",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки твит не найден (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
+  "ruleName": "TWEET_NOT_FOUND",
+  "context": "223e4567-e89b-12d3-a456-426614174001",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки пользователь не существует (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+  "ruleName": "USER_NOT_EXISTS",
+  "context": "123e4567-e89b-12d3-a456-426614174000",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки самолайк (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'SELF_LIKE_NOT_ALLOWED' violated for context: Users cannot like their own tweets",
+  "ruleName": "SELF_LIKE_NOT_ALLOWED",
+  "context": "Users cannot like their own tweets",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки дублирование лайка (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/uniqueness-validation",
+  "title": "Uniqueness Validation Error",
+  "status": 409,
+  "detail": "A like already exists for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+  "fieldName": "like",
+  "fieldValue": "tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
 ## OpenAPI/Swagger Документация
 
 ### Обзор
@@ -834,13 +965,62 @@ open http://localhost:8082/swagger-ui.html
     - Дефолтные значения пагинации: page=0, size=20, sort=createdAt,DESC
     - Максимальный размер страницы: 100 элементов
 
+### LikeService
+
+Основной сервис для работы с лайками твитов, реализующий следующие операции:
+
+#### Методы сервиса:
+
+1. **`likeTweet(UUID tweetId, LikeTweetRequestDto requestDto)`**
+    - Создает лайк для твита
+    - Возвращает `LikeResponseDto`
+    - Логика:
+        - Валидация запроса (существование твита, пользователя, самолайк, дублирование)
+        - Маппинг DTO в сущность Like
+        - Сохранение лайка в БД
+        - Обновление счетчика `likesCount` в твите (инкремент на 1)
+        - Маппинг сущности в DTO ответа
+    - Особенности:
+        - Операция атомарна (выполняется в транзакции)
+        - Обновление счетчика выполняется синхронно при создании лайка
+        - Используется денормализация для оптимизации операций чтения
+
+### Ключевые бизнес-правила для лайков:
+
+1. **Валидация твита:**
+    - Твит должен существовать в системе и не быть удаленным
+    - При отсутствии твита выбрасывается `BusinessRuleValidationException` с правилом `TWEET_NOT_FOUND`
+
+2. **Валидация пользователя:**
+    - Пользователь должен существовать в системе users-api
+    - Проверка выполняется через интеграцию с users-api
+    - При отсутствии пользователя выбрасывается `BusinessRuleValidationException` с правилом `USER_NOT_EXISTS`
+
+3. **Запрет самолайка:**
+    - Пользователь не может лайкнуть свой собственный твит
+    - При попытке самолайка выбрасывается `BusinessRuleValidationException` с правилом `SELF_LIKE_NOT_ALLOWED`
+
+4. **Уникальность лайка:**
+    - Пользователь может лайкнуть твит только один раз
+    - Уникальность обеспечивается на уровне БД (UNIQUE constraint на паре tweetId+userId)
+    - При попытке повторного лайка выбрасывается `UniquenessValidationException`
+
+5. **Обновление счетчика:**
+    - При создании лайка счетчик `likesCount` в твите инкрементируется на 1
+    - Операция выполняется атомарно в рамках транзакции
+    - Используется денормализация для оптимизации операций чтения
+
+6. **Временные метки:**
+    - `createdAt` устанавливается автоматически при создании лайка
+    - Управление выполняется Hibernate через `@CreationTimestamp`
+
 ## Слой валидации
 
 ### Архитектура валидации
 
-Сервис использует централизованный слой валидации через `TweetValidator`, который обеспечивает:
+Сервис использует централизованный слой валидации через `TweetValidator` и `LikeValidator`, которые обеспечивают:
 
-- **Единообразную валидацию** для всех операций с твитами
+- **Единообразную валидацию** для всех операций с твитами и лайками
 - **Разделение ответственности** между бизнес-логикой и валидацией
 - **Типизированные исключения** для различных видов ошибок
 - **Интеграцию с Jakarta Validation** для проверки формата данных
@@ -947,6 +1127,42 @@ open http://localhost:8082/swagger-ui.html
     - Сравнение `userId` из запроса с `userId` твита
     - При несовпадении выбрасывается `BusinessRuleValidationException` с правилом `TWEET_ACCESS_DENIED`
 
+### LikeValidator
+
+Интерфейс `LikeValidator` определяет методы валидации для операций с лайками. Он включает методы для валидации создания лайка, проверки существования твита и пользователя, предотвращения самолайка и дублирования.
+
+#### Лайк твита (LIKE)
+
+Выполняется многоэтапная валидация:
+
+1. **Проверка tweetId:**
+    - Проверка, что `tweetId` не равен `null`
+    - При отсутствии выбрасывается `BusinessRuleValidationException` с правилом `TWEET_ID_NULL`
+
+2. **Проверка существования твита:**
+    - Поиск твита в БД по UUID с фильтрацией (isDeleted = false)
+    - При отсутствии твита выбрасывается `BusinessRuleValidationException` с правилом `TWEET_NOT_FOUND`
+
+3. **Проверка requestDto:**
+    - Проверка, что `requestDto` не равен `null`
+    - При отсутствии выбрасывается `BusinessRuleValidationException` с правилом `LIKE_REQUEST_NULL`
+
+4. **Проверка userId:**
+    - Проверка, что `userId` не равен `null`
+    - При отсутствии выбрасывается `BusinessRuleValidationException` с правилом `USER_ID_NULL`
+
+5. **Проверка существования пользователя:**
+    - Вызов `UserGateway.existsUser()` для проверки существования
+    - При отсутствии пользователя выбрасывается `BusinessRuleValidationException` с правилом `USER_NOT_EXISTS`
+
+6. **Проверка самолайка:**
+    - Сравнение `userId` из запроса с `userId` твита
+    - При совпадении выбрасывается `BusinessRuleValidationException` с правилом `SELF_LIKE_NOT_ALLOWED`
+
+7. **Проверка уникальности:**
+    - Проверка существования лайка через `LikeRepository.existsByTweetIdAndUserId()`
+    - При существовании лайка выбрасывается `UniquenessValidationException` (409 Conflict)
+
 ## Работа с базой данных
 
 ### Таблица tweets
@@ -960,6 +1176,7 @@ open http://localhost:8082/swagger-ui.html
 | `updated_at` | TIMESTAMP    | NOT NULL              | Время последнего обновления           |
 | `is_deleted` | BOOLEAN      | NOT NULL, DEFAULT false | Флаг мягкого удаления                |
 | `deleted_at` | TIMESTAMP    | NULL                  | Время мягкого удаления                |
+| `likes_count`| INTEGER      | NOT NULL, DEFAULT 0   | Счетчик лайков (денормализация)       |
 
 ### Ограничения базы данных
 
@@ -975,6 +1192,26 @@ open http://localhost:8082/swagger-ui.html
 
 3. **Автоматическое обновление updated_at:**
     - Триггер `update_tweets_updated_at` автоматически обновляет `updated_at` при изменении записи
+
+### Таблица tweet_likes
+
+| Поле         | Тип          | Ограничения           | Описание                              |
+|--------------|--------------|-----------------------|---------------------------------------|
+| `id`         | UUID         | PRIMARY KEY, NOT NULL | Уникальный идентификатор              |
+| `tweet_id`   | UUID         | NOT NULL              | ID твита (ссылка на tweets)           |
+| `user_id`    | UUID         | NOT NULL              | ID пользователя (ссылка на users-api) |
+| `created_at` | TIMESTAMP    | NOT NULL              | Время создания лайка                  |
+
+### Ограничения базы данных для лайков
+
+1. **UNIQUE constraint для уникальности лайка:**
+   ```sql
+   CONSTRAINT uk_tweet_likes_tweet_user UNIQUE (tweet_id, user_id)
+   ```
+   Обеспечивает, что пользователь может лайкнуть твит только один раз.
+
+2. **Индексы для оптимизации:**
+    - `uk_tweet_likes_tweet_user` - уникальный индекс на паре (tweet_id, user_id) для быстрой проверки существования лайка
 
 4. **Soft Delete (мягкое удаление):**
     - Поле `is_deleted` используется для пометки удаленных твитов (по умолчанию `false`)
@@ -1416,6 +1653,69 @@ curl -X DELETE http://localhost:8082/api/v1/tweets/123e4567-e89b-12d3-a456-42661
   "ruleName": "TWEET_NOT_FOUND",
   "context": "123e4567-e89b-12d3-a456-426614174000",
   "timestamp": "2025-01-27T15:45:00Z"
+}
+```
+
+### Лайк твита
+
+```bash
+curl -X POST http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/likes \
+  -H "Content-Type: application/json" \
+  -d '{
+    "userId": "123e4567-e89b-12d3-a456-426614174000"
+  }'
+```
+
+**Ответ (201 Created):**
+
+```json
+{
+  "id": "987e6543-e21b-43d2-b654-321987654321",
+  "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+  "userId": "123e4567-e89b-12d3-a456-426614174000",
+  "createdAt": "2025-01-27T15:30:00Z"
+}
+```
+
+**Ответ при дублировании лайка (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/uniqueness-validation",
+  "title": "Uniqueness Validation Error",
+  "status": 409,
+  "detail": "A like already exists for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+  "fieldName": "like",
+  "fieldValue": "tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Ответ при самолайке (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'SELF_LIKE_NOT_ALLOWED' violated for context: Users cannot like their own tweets",
+  "ruleName": "SELF_LIKE_NOT_ALLOWED",
+  "context": "Users cannot like their own tweets",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Ответ при отсутствии твита (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
+  "ruleName": "TWEET_NOT_FOUND",
+  "context": "223e4567-e89b-12d3-a456-426614174001",
+  "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 

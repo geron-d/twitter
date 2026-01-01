@@ -90,7 +90,7 @@ public interface LikeApi {
             )
         ),
         @ApiResponse(
-            responseCode = "400",
+            responseCode = "409",
             description = "Business rule violation",
             content = @Content(
                 mediaType = "application/problem+json",
@@ -102,7 +102,7 @@ public interface LikeApi {
                             {
                               "type": "https://example.com/errors/business-rule-validation",
                               "title": "Business Rule Validation Error",
-                              "status": 400,
+                              "status": 409,
                               "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
                               "ruleName": "USER_NOT_EXISTS",
                               "context": "123e4567-e89b-12d3-a456-426614174000",
@@ -117,37 +117,30 @@ public interface LikeApi {
                             {
                               "type": "https://example.com/errors/business-rule-validation",
                               "title": "Business Rule Validation Error",
-                              "status": 400,
+                              "status": 409,
                               "detail": "Business rule 'SELF_LIKE_NOT_ALLOWED' violated for context: Users cannot like their own tweets",
                               "ruleName": "SELF_LIKE_NOT_ALLOWED",
                               "context": "Users cannot like their own tweets",
                               "timestamp": "2025-01-27T15:30:00Z"
                             }
                             """
+                    ),
+                    @ExampleObject(
+                        name = "Tweet Not Found Error",
+                        summary = "Tweet does not exist or is deleted",
+                        value = """
+                            {
+                              "type": "https://example.com/errors/business-rule-validation",
+                              "title": "Business Rule Validation Error",
+                              "status": 409,
+                              "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
+                              "ruleName": "TWEET_NOT_FOUND",
+                              "context": "223e4567-e89b-12d3-a456-426614174001",
+                              "timestamp": "2025-01-27T15:30:00Z"
+                            }
+                            """
                     )
                 }
-            )
-        ),
-        @ApiResponse(
-            responseCode = "404",
-            description = "Tweet not found",
-            content = @Content(
-                mediaType = "application/problem+json",
-                examples = @ExampleObject(
-                    name = "Tweet Not Found Error",
-                    summary = "Tweet does not exist or is deleted",
-                    value = """
-                        {
-                          "type": "https://example.com/errors/business-rule-validation",
-                          "title": "Business Rule Validation Error",
-                          "status": 404,
-                          "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
-                          "ruleName": "TWEET_NOT_FOUND",
-                          "context": "223e4567-e89b-12d3-a456-426614174001",
-                          "timestamp": "2025-01-27T15:30:00Z"
-                        }
-                        """
-                )
             )
         ),
         @ApiResponse(
@@ -163,9 +156,9 @@ public interface LikeApi {
                           "type": "https://example.com/errors/uniqueness-validation",
                           "title": "Uniqueness Validation Error",
                           "status": 409,
-                          "detail": "Uniqueness constraint violated: A like already exists for tweet 223e4567-e89b-12d3-a456-426614174001 by user 123e4567-e89b-12d3-a456-426614174000",
-                          "fieldName": "tweetId, userId",
-                          "constraintName": "UNIQUE_TWEET_USER_LIKE",
+                          "detail": "A like already exists for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+                          "fieldName": "like",
+                          "fieldValue": "tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
                           "timestamp": "2025-01-27T15:30:00Z"
                         }
                         """

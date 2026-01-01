@@ -489,3 +489,80 @@
     - Добавлена зависимость tweet-api от follower-api в depends_on для правильного порядка запуска сервисов
   - Файлы: `docker-compose.yml`, `services/tweet-api/Dockerfile`, `services/tweet-api/.dockerignore`
 
+- **2025-01-27** — step #17 done — Integration тесты для эндпоинта "Лайкнуть твит" — автор: assistant
+  - Созданы integration тесты для эндпоинта POST /api/v1/tweets/{tweetId}/likes в вложенном классе LikeTweetTests в TweetControllerTest
+  - Реализованы 9 тестов, покрывающих все статус-коды и сценарии:
+    - Успешное создание лайка (201 Created) с проверкой сохранения в БД и инкремента счетчика likesCount
+    - Валидация null userId (400 Bad Request)
+    - Отсутствие body в запросе (400 Bad Request)
+    - Твит не найден (404 Not Found) с проверкой Problem Details
+    - Пользователь не существует (409 Conflict) с проверкой Problem Details
+    - Самолайк (409 Conflict) с проверкой Problem Details и ruleName SELF_LIKE_NOT_ALLOWED
+    - Дублирование лайка (409 Conflict) с проверкой Problem Details и ruleName LIKE_ALREADY_EXISTS
+    - Ошибка users-api (500) обрабатывается как 409 Conflict
+    - Проверка инкремента счетчика likesCount при множественных лайках
+  - Все тесты используют MockMvc для тестирования REST эндпоинта
+  - Все тесты используют WireMock для мокирования users-api через setupUserExistsStub и setupUserExistsStubWithError
+  - Все тесты используют Testcontainers для PostgreSQL через BaseIntegrationTest
+  - Все тесты используют @Transactional для изоляции (автоматическая откатка после каждого теста)
+  - Тесты следуют стандартам STANDART_TEST.md:
+    - Паттерн именования methodName_WhenCondition_ShouldExpectedResult
+    - Использование @Nested для группировки тестов (LikeTweetTests)
+    - AssertJ для assertions (assertThat)
+    - Проверка всех статус-кодов: 201, 400, 404, 409
+    - Проверка структуры ответов через jsonPath
+    - Проверка сохранения данных в БД через репозитории
+    - Проверка обновления счетчика likesCount в Tweet Entity
+  - Тесты проверяют взаимодействие с зависимостями (TweetRepository, LikeRepository, UserGateway через WireMock)
+  - Тесты используют helper методы из BaseIntegrationTest (setupUserExistsStub, setupUserExistsStubWithError)
+  - Тесты используют helper методы из TweetControllerTest (createAndSaveTweet)
+  - Все тесты изолированы и независимы, используют @BeforeEach для инициализации тестовых данных
+  - Тесты созданы в отдельном файле LikeControllerTest для LikeController, что соответствует структуре проекта (один контроллер - один тестовый класс)
+  - Файл: services/tweet-api/src/test/java/com/twitter/controller/LikeControllerTest.java (создан)
+
+- **2025-01-27** — step #18 done — Swagger документация для эндпоинта "Лайкнуть твит" — автор: assistant
+  - Проверена и исправлена OpenAPI документация для эндпоинта POST /api/v1/tweets/{tweetId}/likes в LikeApi.java
+  - Исправлены статус-коды в примерах ответов для соответствия реальному поведению API:
+    - USER_NOT_EXISTS: изменен с 400 на 409 (CONFLICT), так как BusinessRuleValidationException обрабатывается как 409
+    - SELF_LIKE_NOT_ALLOWED: изменен с 400 на 409 (CONFLICT)
+    - TWEET_NOT_FOUND: изменен с 404 на 409 (CONFLICT)
+  - Исправлен пример для дублирования лайка: используется fieldName="like" и fieldValue вместо constraintName, что соответствует обработке UniquenessValidationException в GlobalExceptionHandler
+  - Документация включает @ExampleObject для всех сценариев:
+    - Успешное создание лайка (201 Created) - пример "Created Like"
+    - Валидация userId null (400 Bad Request) - пример "User ID Validation Error"
+    - Пользователь не существует (409 Conflict) - пример "User Not Found Error"
+    - Самолайк (409 Conflict) - пример "Self-Like Error"
+    - Твит не найден (409 Conflict) - пример "Tweet Not Found Error"
+    - Дублирование лайка (409 Conflict) - пример "Duplicate Like Error"
+    - Невалидный UUID (400 Bad Request) - пример "Invalid UUID Format Error"
+  - Все примеры соответствуют формату RFC 7807 Problem Details
+  - Все примеры соответствуют реальному поведению API и обработке исключений в GlobalExceptionHandler
+  - Документация соответствует стандартам STANDART_SWAGGER.md (полная OpenAPI документация, @ExampleObject для всех сценариев, правильные статус-коды)
+  - Файл: services/tweet-api/src/main/java/com/twitter/controller/LikeApi.java (обновлен)
+
+- **2025-01-27** — step #19 done — Обновление README.md для эндпоинта "Лайкнуть твит" — автор: assistant
+  - Обновлен README.md для tweet-api согласно стандартам STANDART_README.md
+  - Добавлено описание эндпоинта POST /api/v1/tweets/{tweetId}/likes в раздел 'Основные возможности' (лайк твитов с проверкой бизнес-правил)
+  - Добавлен эндпоинт в таблицу эндпоинтов (POST /{tweetId}/likes)
+  - Добавлено детальное описание эндпоинта 'Лайкнуть твит' (раздел 7) с:
+    - Параметрами пути и тела запроса
+    - Валидацией (userId, tweetId)
+    - Бизнес-правилами (существование твита/пользователя, запрет самолайка, уникальность, атомарность)
+    - Ответами (201, 400, 409) с примерами
+    - Примерами ошибок (валидация, твит не найден, пользователь не существует, самолайк, дублирование)
+  - Добавлен пример использования в раздел 'Примеры использования' с curl командами и примерами ответов (успех, дублирование, самолайк, твит не найден)
+  - Обновлена структура пакетов:
+    - Добавлены LikeController, LikeApi в controller/
+    - Добавлены LikeTweetRequestDto, LikeResponseDto в dto/
+    - Добавлена Like entity в entity/
+    - Добавлены LikeService, LikeServiceImpl в service/
+    - Добавлены LikeValidator, LikeValidatorImpl в validation/
+    - Добавлены LikeMapper в mapper/
+    - Добавлен LikeRepository в repository/
+  - Добавлено описание LikeService в раздел 'Бизнес-логика' с описанием метода likeTweet и бизнес-правил для лайков (6 правил)
+  - Добавлено описание LikeValidator в раздел 'Слой валидации' с описанием всех 7 этапов валидации (tweetId, существование твита, requestDto, userId, существование пользователя, самолайк, уникальность)
+  - Добавлена информация о таблице tweet_likes в раздел 'Работа с базой данных' с описанием полей и ограничений (UNIQUE constraint на паре tweet_id+user_id)
+  - Добавлено поле likes_count в таблицу tweets с описанием (денормализация для оптимизации)
+  - Все изменения соответствуют стандартам STANDART_README.md (структура, форматирование, примеры)
+  - Файл: services/tweet-api/README.md (обновлен)
+
