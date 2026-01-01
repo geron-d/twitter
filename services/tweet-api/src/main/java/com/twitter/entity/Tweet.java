@@ -87,6 +87,18 @@ public class Tweet {
     private LocalDateTime deletedAt;
 
     /**
+     * Counter for the number of likes on this tweet.
+     * <p>
+     * This field stores the denormalized count of likes to optimize read operations.
+     * The counter is incremented when a like is created and should be decremented
+     * when a like is removed (if like removal functionality is implemented).
+     * Default value is 0 for new tweets.
+     */
+    @Column(name = "likes_count", nullable = false)
+    @Builder.Default
+    private Integer likesCount = 0;
+
+    /**
      * Custom validation method to ensure content is not just whitespace.
      * This complements the database CHECK constraint.
      */
@@ -122,5 +134,20 @@ public class Tweet {
      */
     public boolean isActive() {
         return !Boolean.TRUE.equals(isDeleted);
+    }
+
+    /**
+     * Increments the likes count for this tweet.
+     * <p>
+     * This method atomically increments the likesCount field by 1.
+     * It should be called when a new like is created for this tweet.
+     * The method handles null values by initializing the counter to 1.
+     */
+    public void incrementLikesCount() {
+        if (this.likesCount == null) {
+            this.likesCount = 1;
+        } else {
+            this.likesCount++;
+        }
     }
 }

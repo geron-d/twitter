@@ -1,3 +1,5 @@
+- добавить поле likesCount в сущность tweet в sql
+- добавить сущность like в sql
 - реализовать остальные методы для tweet из TWEET_API_COMMON_2.md
 - просмотреть сервисы и вынести общие дто в common
 - перенести sql в admin-script с liquidbase
