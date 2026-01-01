@@ -15,10 +15,6 @@ import java.util.UUID;
 
 /**
  * Implementation of the like validator for Twitter system.
- * <p>
- * This validator centralizes all validation logic for like operations,
- * ensuring business rules are enforced before creating likes.
- * It validates tweet existence, user existence, self-like prevention, and uniqueness.
  *
  * @author geron
  * @version 1.0
@@ -109,6 +105,54 @@ public class LikeValidatorImpl implements LikeValidator {
         if (likeExists) {
             log.warn("Like already exists for tweet {} and user {}", tweetId, userId);
             throw new UniquenessValidationException("like", String.format("tweet %s and user %s", tweetId, userId));
+        }
+    }
+
+    /**
+     * @see LikeValidator#validateForUnlike
+     */
+    @Override
+    public void validateForUnlike(UUID tweetId, LikeTweetRequestDto requestDto) {
+        if (tweetId == null) {
+            log.warn("Tweet ID is null");
+            throw new BusinessRuleValidationException("TWEET_ID_NULL", "Tweet ID cannot be null");
+        }
+
+        tweetRepository.findByIdAndIsDeletedFalse(tweetId)
+            .orElseThrow(() -> {
+                log.warn("Tweet with ID {} not found or is deleted", tweetId);
+                return new BusinessRuleValidationException("TWEET_NOT_FOUND", tweetId);
+            });
+
+        if (requestDto == null) {
+            log.warn("Like request is null");
+            throw new BusinessRuleValidationException("LIKE_REQUEST_NULL", "Like request cannot be null");
+        }
+
+        if (requestDto.userId() == null) {
+            log.warn("User ID is null");
+            throw new BusinessRuleValidationException("USER_ID_NULL", "User ID cannot be null");
+        }
+
+        validateUserExists(requestDto.userId());
+        validateLikeExists(tweetId, requestDto.userId());
+    }
+
+    /**
+     * Validates that the like exists for the given tweet and user.
+     * <p>
+     * This method checks if a like exists for the given tweet and user
+     * using the repository. This validation is required before removing a like.
+     *
+     * @param tweetId the ID of the tweet being unliked
+     * @param userId  the ID of the user attempting to unlike the tweet
+     * @throws BusinessRuleValidationException if like doesn't exist
+     */
+    private void validateLikeExists(UUID tweetId, UUID userId) {
+        boolean likeExists = likeRepository.existsByTweetIdAndUserId(tweetId, userId);
+        if (!likeExists) {
+            log.warn("Like does not exist for tweet {} and user {}", tweetId, userId);
+            throw new BusinessRuleValidationException("LIKE_NOT_FOUND", String.format("Like not found for tweet %s and user %s", tweetId, userId));
         }
     }
 }

@@ -8,9 +8,6 @@ import java.util.UUID;
 
 /**
  * Interface for like validation in Twitter system.
- * <p>
- * This interface centralizes all validation logic for like operations,
- * ensuring business rules are enforced before creating likes.
  *
  * @author geron
  * @version 1.0
@@ -34,5 +31,21 @@ public interface LikeValidator {
      * @throws UniquenessValidationException   if duplicate like attempt
      */
     void validateForLike(UUID tweetId, LikeTweetRequestDto requestDto);
+
+    /**
+     * Performs complete validation for tweet unlike operation.
+     * <p>
+     * This method validates unlike data including:
+     * <ul>
+     *   <li>Existence of the tweet (tweetId must not be null and tweet must exist and not be deleted)</li>
+     *   <li>Existence of the user (userId must not be null and user must exist)</li>
+     *   <li>Existence of the like (like must exist for the given tweet and user)</li>
+     * </ul>
+     *
+     * @param tweetId    the unique identifier of the tweet to unlike
+     * @param requestDto DTO containing userId for the unlike
+     * @throws BusinessRuleValidationException if tweetId is null, tweet doesn't exist, user doesn't exist, or like doesn't exist
+     */
+    void validateForUnlike(UUID tweetId, LikeTweetRequestDto requestDto);
 }
 
