@@ -43,10 +43,12 @@
 - [x] (P1) #29: Controller метод для эндпоинта — Добавить метод removeLike в LikeApi и LikeController
   acceptance: "Метод removeLike добавлен в LikeApi интерфейс с OpenAPI аннотациями и в LikeController с @LoggableRequest, возвращает 204 No Content"
   note: "Добавлен метод removeLike() в интерфейс LikeApi с полной OpenAPI документацией (все статус-коды 204, 400, 404 с примерами). Реализован метод removeLike() в LikeController с @LoggableRequest и @DeleteMapping. Метод возвращает 204 No Content. Все соответствует стандартам проекта (STANDART_CODE, STANDART_SWAGGER). Выполнено: 2025-01-27"
-- [ ] (P1) #30: JavaDoc для эндпоинта — Добавить JavaDoc для всех методов
+- [x] (P1) #30: JavaDoc для эндпоинта — Добавить JavaDoc для всех методов
   acceptance: "JavaDoc добавлен для всех методов эндпоинта с @author geron, @version 1.0, @param, @return, @throws"
-- [ ] (P1) #31: Unit тесты для эндпоинта — Создать unit тесты для Service и Validator
+  note: "Добавлена полная JavaDoc документация для всех методов эндпоинта DELETE /api/v1/tweets/{tweetId}/like. Обновлены методы: LikeServiceImpl.removeLike(), LikeController.removeLike(), LikeValidatorImpl.validateForUnlike(). Все методы теперь содержат полную документацию с @param, @return, @throws согласно STANDART_JAVADOC.md. Выполнено: 2025-01-27"
+- [x] (P1) #31: Unit тесты для эндпоинта — Создать unit тесты для Service и Validator
   acceptance: "Unit тесты для Service и Validator методов с учетом STANDART_TEST.md (naming pattern, @Nested, AssertJ)"
+  note: "Созданы unit тесты для всех методов эндпоинта DELETE /api/v1/tweets/{tweetId}/like. LikeServiceImplTest: 6 тестов для метода removeLike (успешный сценарий, проверка вызовов зависимостей, проверка декремента счетчика, ошибки валидации, лайк не найден после валидации, твит не найден после валидации). LikeValidatorImplTest: 7 тестов для метода validateForUnlike (успешный сценарий, tweetId null, твит не найден, requestDto null, userId null, пользователь не существует, лайк не существует). Все тесты следуют стандартам STANDART_TEST.md: паттерн именования methodName_WhenCondition_ShouldExpectedResult, использование @Nested для группировки, AssertJ для assertions, Mockito для моков. Выполнено: 2025-01-27"
 - [ ] (P2) #32: Integration тесты для эндпоинта — Создать integration тесты с MockMvc
   acceptance: "Integration тесты для эндпоинта с MockMvc, все статус-коды проверены (204, 400, 404, 409)"
 - [ ] (P1) #33: Swagger документация для эндпоинта — Добавить OpenAPI аннотации

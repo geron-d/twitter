@@ -31,7 +31,7 @@ public class LikeController implements LikeApi {
      * @see LikeApi#likeTweet
      */
     @LoggableRequest
-    @PostMapping("/{tweetId}/likes")
+    @PostMapping("/{tweetId}/like")
     @Override
     public ResponseEntity<LikeResponseDto> likeTweet(
         @PathVariable("tweetId") UUID tweetId,

@@ -1,5 +1,26 @@
 # Changelog
 
+2025-01-27 — step #31 done — Unit тесты для эндпоинта DELETE /api/v1/tweets/{tweetId}/like — автор: assistant
+  - Созданы unit тесты для всех методов эндпоинта DELETE /api/v1/tweets/{tweetId}/like
+  - LikeServiceImplTest: добавлен @Nested класс RemoveLikeTests с 6 тестами для метода removeLike
+  - Тесты для removeLike: успешный сценарий, проверка вызовов зависимостей, проверка декремента счетчика, ошибки валидации, лайк не найден после валидации, твит не найден после валидации
+  - LikeValidatorImplTest: добавлен @Nested класс ValidateForUnlikeTests с 7 тестами для метода validateForUnlike
+  - Тесты для validateForUnlike: успешный сценарий, tweetId null, твит не найден, requestDto null, userId null, пользователь не существует, лайк не существует
+  - Все тесты следуют стандартам STANDART_TEST.md: паттерн именования methodName_WhenCondition_ShouldExpectedResult, использование @Nested для группировки, AssertJ для assertions, Mockito для моков, @ExtendWith(MockitoExtension.class) для unit тестов
+  - Тесты покрывают успешные и ошибочные сценарии, проверяют взаимодействие с зависимостями через verify
+  - Тесты используют паттерн AAA (Arrange-Act-Assert) для структурирования
+  - Все тесты изолированы и независимы, используют @BeforeEach для инициализации тестовых данных
+  - Файлы: services/tweet-api/src/test/java/com/twitter/service/LikeServiceImplTest.java (обновлен), services/tweet-api/src/test/java/com/twitter/validation/LikeValidatorImplTest.java (обновлен)
+
+2025-01-27 — step #30 done — JavaDoc для эндпоинта DELETE /api/v1/tweets/{tweetId}/like — автор: assistant
+  - Добавлена полная JavaDoc документация для всех методов эндпоинта
+  - Обновлен метод LikeServiceImpl.removeLike() с полной документацией (@param, @return, @throws)
+  - Обновлен метод LikeController.removeLike() с полной документацией (@param, @return, @throws)
+  - Обновлен метод LikeValidatorImpl.validateForUnlike() с полной документацией (@param, @throws)
+  - Все методы соответствуют стандартам проекта (STANDART_JAVADOC.md)
+  - Добавлены необходимые импорты для BusinessRuleValidationException
+  - Файлы: services/tweet-api/src/main/java/com/twitter/service/LikeServiceImpl.java, controller/LikeController.java, validation/LikeValidatorImpl.java
+
 2025-01-27 — step #29 done — Controller метод для эндпоинта DELETE /api/v1/tweets/{tweetId}/like — автор: assistant
   - Добавлен метод removeLike() в интерфейс LikeApi с полной OpenAPI документацией
   - Документированы все статус-коды: 204 (успех), 400 (валидация), 404 (не найдено)

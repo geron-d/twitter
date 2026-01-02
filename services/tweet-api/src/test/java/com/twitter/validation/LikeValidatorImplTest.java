@@ -208,5 +208,153 @@ class LikeValidatorImplTest {
             verify(likeRepository, times(1)).existsByTweetIdAndUserId(testTweetId, testUserId);
         }
     }
+
+    @Nested
+    class ValidateForUnlikeTests {
+
+        private UUID testTweetId;
+        private UUID testUserId;
+        private UUID testAuthorId;
+        private LikeTweetRequestDto requestDto;
+        private Tweet existingTweet;
+
+        @BeforeEach
+        void setUp() {
+            testTweetId = UUID.fromString("223e4567-e89b-12d3-a456-426614174001");
+            testUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+            testAuthorId = UUID.fromString("333e4567-e89b-12d3-a456-426614174002");
+
+            requestDto = LikeTweetRequestDto.builder()
+                .userId(testUserId)
+                .build();
+
+            existingTweet = Tweet.builder()
+                .id(testTweetId)
+                .userId(testAuthorId)
+                .content("Test tweet content")
+                .likesCount(5)
+                .createdAt(LocalDateTime.of(2025, 1, 27, 10, 0, 0))
+                .updatedAt(LocalDateTime.of(2025, 1, 27, 10, 0, 0))
+                .isDeleted(false)
+                .build();
+        }
+
+        @Test
+        void validateForUnlike_WhenValidData_ShouldCompleteWithoutExceptions() {
+            when(tweetRepository.findByIdAndIsDeletedFalse(testTweetId)).thenReturn(Optional.of(existingTweet));
+            when(userGateway.existsUser(testUserId)).thenReturn(true);
+            when(likeRepository.existsByTweetIdAndUserId(testTweetId, testUserId)).thenReturn(true);
+
+            assertThatCode(() -> likeValidator.validateForUnlike(testTweetId, requestDto))
+                .doesNotThrowAnyException();
+
+            verify(tweetRepository, times(1)).findByIdAndIsDeletedFalse(testTweetId);
+            verify(userGateway, times(1)).existsUser(testUserId);
+            verify(likeRepository, times(1)).existsByTweetIdAndUserId(testTweetId, testUserId);
+        }
+
+        @Test
+        void validateForUnlike_WhenTweetIdIsNull_ShouldThrowBusinessRuleValidationException() {
+            assertThatThrownBy(() -> likeValidator.validateForUnlike(null, requestDto))
+                .isInstanceOf(BusinessRuleValidationException.class)
+                .satisfies(exception -> {
+                    BusinessRuleValidationException ex = (BusinessRuleValidationException) exception;
+                    assertThat(ex.getRuleName()).isEqualTo("TWEET_ID_NULL");
+                });
+
+            verify(tweetRepository, never()).findByIdAndIsDeletedFalse(any());
+            verify(userGateway, never()).existsUser(any());
+            verify(likeRepository, never()).existsByTweetIdAndUserId(any(), any());
+        }
+
+        @Test
+        void validateForUnlike_WhenTweetNotFound_ShouldThrowBusinessRuleValidationException() {
+            when(tweetRepository.findByIdAndIsDeletedFalse(testTweetId)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> likeValidator.validateForUnlike(testTweetId, requestDto))
+                .isInstanceOf(BusinessRuleValidationException.class)
+                .satisfies(exception -> {
+                    BusinessRuleValidationException ex = (BusinessRuleValidationException) exception;
+                    assertThat(ex.getRuleName()).isEqualTo("TWEET_NOT_FOUND");
+                    assertThat(ex.getContext()).isEqualTo(testTweetId);
+                });
+
+            verify(tweetRepository, times(1)).findByIdAndIsDeletedFalse(testTweetId);
+            verify(userGateway, never()).existsUser(any());
+            verify(likeRepository, never()).existsByTweetIdAndUserId(any(), any());
+        }
+
+        @Test
+        void validateForUnlike_WhenRequestDtoIsNull_ShouldThrowBusinessRuleValidationException() {
+            when(tweetRepository.findByIdAndIsDeletedFalse(testTweetId)).thenReturn(Optional.of(existingTweet));
+
+            assertThatThrownBy(() -> likeValidator.validateForUnlike(testTweetId, null))
+                .isInstanceOf(BusinessRuleValidationException.class)
+                .satisfies(exception -> {
+                    BusinessRuleValidationException ex = (BusinessRuleValidationException) exception;
+                    assertThat(ex.getRuleName()).isEqualTo("LIKE_REQUEST_NULL");
+                });
+
+            verify(tweetRepository, times(1)).findByIdAndIsDeletedFalse(testTweetId);
+            verify(userGateway, never()).existsUser(any());
+            verify(likeRepository, never()).existsByTweetIdAndUserId(any(), any());
+        }
+
+        @Test
+        void validateForUnlike_WhenUserIdIsNull_ShouldThrowBusinessRuleValidationException() {
+            LikeTweetRequestDto nullUserIdRequest = LikeTweetRequestDto.builder()
+                .userId(null)
+                .build();
+
+            when(tweetRepository.findByIdAndIsDeletedFalse(testTweetId)).thenReturn(Optional.of(existingTweet));
+
+            assertThatThrownBy(() -> likeValidator.validateForUnlike(testTweetId, nullUserIdRequest))
+                .isInstanceOf(BusinessRuleValidationException.class)
+                .satisfies(exception -> {
+                    BusinessRuleValidationException ex = (BusinessRuleValidationException) exception;
+                    assertThat(ex.getRuleName()).isEqualTo("USER_ID_NULL");
+                });
+
+            verify(tweetRepository, times(1)).findByIdAndIsDeletedFalse(testTweetId);
+            verify(userGateway, never()).existsUser(any());
+            verify(likeRepository, never()).existsByTweetIdAndUserId(any(), any());
+        }
+
+        @Test
+        void validateForUnlike_WhenUserDoesNotExist_ShouldThrowBusinessRuleValidationException() {
+            when(tweetRepository.findByIdAndIsDeletedFalse(testTweetId)).thenReturn(Optional.of(existingTweet));
+            when(userGateway.existsUser(testUserId)).thenReturn(false);
+
+            assertThatThrownBy(() -> likeValidator.validateForUnlike(testTweetId, requestDto))
+                .isInstanceOf(BusinessRuleValidationException.class)
+                .satisfies(exception -> {
+                    BusinessRuleValidationException ex = (BusinessRuleValidationException) exception;
+                    assertThat(ex.getRuleName()).isEqualTo("USER_NOT_EXISTS");
+                    assertThat(ex.getContext()).isEqualTo(testUserId);
+                });
+
+            verify(tweetRepository, times(1)).findByIdAndIsDeletedFalse(testTweetId);
+            verify(userGateway, times(1)).existsUser(testUserId);
+            verify(likeRepository, never()).existsByTweetIdAndUserId(any(), any());
+        }
+
+        @Test
+        void validateForUnlike_WhenLikeDoesNotExist_ShouldThrowBusinessRuleValidationException() {
+            when(tweetRepository.findByIdAndIsDeletedFalse(testTweetId)).thenReturn(Optional.of(existingTweet));
+            when(userGateway.existsUser(testUserId)).thenReturn(true);
+            when(likeRepository.existsByTweetIdAndUserId(testTweetId, testUserId)).thenReturn(false);
+
+            assertThatThrownBy(() -> likeValidator.validateForUnlike(testTweetId, requestDto))
+                .isInstanceOf(BusinessRuleValidationException.class)
+                .satisfies(exception -> {
+                    BusinessRuleValidationException ex = (BusinessRuleValidationException) exception;
+                    assertThat(ex.getRuleName()).isEqualTo("LIKE_NOT_FOUND");
+                });
+
+            verify(tweetRepository, times(1)).findByIdAndIsDeletedFalse(testTweetId);
+            verify(userGateway, times(1)).existsUser(testUserId);
+            verify(likeRepository, times(1)).existsByTweetIdAndUserId(testTweetId, testUserId);
+        }
+    }
 }
 

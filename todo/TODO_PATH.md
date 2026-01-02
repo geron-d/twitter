@@ -66,3 +66,6 @@ public class Follow {
 - заменить feign client на http interfaces
 - написать тесты для перформанса на JMH benchmark (https://github.com/hibernate/beanvalidation-benchmark/blob/451727417cf64d7e55efcfd5e98631841a567c13/README.md , https://github.com/hibernate/hibernate-validator/blob/main/performance/README.md , https://habr.com/ru/companies/spring_aio/articles/975422/)
 - разобраться как собираться конкретный образ из докер компосе и сделать так чтобы он участвовал в докер компос
+- сделать для лайков статус и мягкое удаление
+- мягкое удаление подписки
+- переделать фильтрацию подписок по логину с join (может вынести сущности User и Follow в common и прописать зависимости)
