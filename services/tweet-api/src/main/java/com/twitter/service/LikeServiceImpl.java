@@ -53,5 +53,23 @@ public class LikeServiceImpl implements LikeService {
 
         return likeMapper.toLikeResponseDto(savedLike);
     }
+
+    /**
+     * @see LikeService#removeLike
+     */
+    @Override
+    @Transactional
+    public void removeLike(UUID tweetId, LikeTweetRequestDto requestDto) {
+        likeValidator.validateForUnlike(tweetId, requestDto);
+
+        Like like = likeRepository.findByTweetIdAndUserId(tweetId, requestDto.userId())
+            .orElseThrow(() -> new IllegalStateException("Like not found after validation"));
+        likeRepository.delete(like);
+
+        Tweet tweet = tweetRepository.findByIdAndIsDeletedFalse(tweetId)
+            .orElseThrow(() -> new IllegalStateException("Tweet not found after validation"));
+        tweet.decrementLikesCount();
+        tweetRepository.saveAndFlush(tweet);
+    }
 }
 

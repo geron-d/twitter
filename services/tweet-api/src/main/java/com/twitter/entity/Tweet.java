@@ -150,4 +150,20 @@ public class Tweet {
             this.likesCount++;
         }
     }
+
+    /**
+     * Decrements the likes count for this tweet.
+     * <p>
+     * This method atomically decrements the likesCount field by 1.
+     * It should be called when a like is removed from this tweet.
+     * The method handles null values and prevents negative counts by setting the counter to 0
+     * if it would become negative.
+     */
+    public void decrementLikesCount() {
+        if (this.likesCount == null || this.likesCount <= 0) {
+            this.likesCount = 0;
+        } else {
+            this.likesCount--;
+        }
+    }
 }

@@ -195,5 +195,135 @@ public interface LikeApi {
         UUID tweetId,
         @Parameter(description = "Like request containing userId", required = true)
         LikeTweetRequestDto likeTweetRequest);
+
+    /**
+     * Removes a like from a tweet by deleting the like record.
+     * <p>
+     * This method removes a like record for a specific tweet. It performs validation
+     * on the request data, checks if the tweet exists and is not deleted, verifies that
+     * the user exists, and ensures that the like exists before removal. The unlike operation
+     * is atomic and updates the tweet's likes count by decrementing it.
+     *
+     * @param tweetId            the unique identifier of the tweet to unlike (UUID format)
+     * @param likeTweetRequest   DTO containing userId for the unlike operation
+     * @return ResponseEntity with HTTP 204 No Content status (no response body)
+     * @throws BusinessRuleValidationException if tweetId is null, tweet doesn't exist, user doesn't exist, or like doesn't exist
+     */
+    @Operation(
+        summary = "Remove like from tweet",
+        description = "Removes a like from a tweet by deleting the like record. " +
+            "It performs validation on the request data, checks if the tweet exists and is not deleted, " +
+            "verifies that the user exists, and ensures that the like exists before removal. " +
+            "The unlike operation is atomic and updates the tweet's likes count by decrementing it."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "204",
+            description = "Like removed successfully"
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Validation error",
+            content = @Content(
+                mediaType = "application/problem+json",
+                examples = @ExampleObject(
+                    name = "User ID Validation Error",
+                    summary = "User ID is null or invalid",
+                    value = """
+                        {
+                          "type": "https://example.com/errors/validation-error",
+                          "title": "Validation Error",
+                          "status": 400,
+                          "detail": "Validation failed: userId: User ID cannot be null",
+                          "timestamp": "2025-01-27T15:30:00Z"
+                        }
+                        """
+                )
+            )
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Resource not found",
+            content = @Content(
+                mediaType = "application/problem+json",
+                examples = {
+                    @ExampleObject(
+                        name = "Tweet Not Found Error",
+                        summary = "Tweet does not exist or is deleted",
+                        value = """
+                            {
+                              "type": "https://example.com/errors/business-rule-validation",
+                              "title": "Business Rule Validation Error",
+                              "status": 404,
+                              "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
+                              "ruleName": "TWEET_NOT_FOUND",
+                              "context": "223e4567-e89b-12d3-a456-426614174001",
+                              "timestamp": "2025-01-27T15:30:00Z"
+                            }
+                            """
+                    ),
+                    @ExampleObject(
+                        name = "User Not Found Error",
+                        summary = "User does not exist",
+                        value = """
+                            {
+                              "type": "https://example.com/errors/business-rule-validation",
+                              "title": "Business Rule Validation Error",
+                              "status": 404,
+                              "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+                              "ruleName": "USER_NOT_EXISTS",
+                              "context": "123e4567-e89b-12d3-a456-426614174000",
+                              "timestamp": "2025-01-27T15:30:00Z"
+                            }
+                            """
+                    ),
+                    @ExampleObject(
+                        name = "Like Not Found Error",
+                        summary = "Like does not exist",
+                        value = """
+                            {
+                              "type": "https://example.com/errors/business-rule-validation",
+                              "title": "Business Rule Validation Error",
+                              "status": 404,
+                              "detail": "Business rule 'LIKE_NOT_FOUND' violated for context: Like not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+                              "ruleName": "LIKE_NOT_FOUND",
+                              "context": "Like not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+                              "timestamp": "2025-01-27T15:30:00Z"
+                            }
+                            """
+                    )
+                }
+            )
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Invalid UUID format",
+            content = @Content(
+                mediaType = "application/problem+json",
+                examples = @ExampleObject(
+                    name = "Invalid UUID Format Error",
+                    summary = "Invalid tweet ID format",
+                    value = """
+                        {
+                          "type": "https://example.com/errors/validation-error",
+                          "title": "Validation Error",
+                          "status": 400,
+                          "detail": "Invalid UUID format for tweetId parameter",
+                          "timestamp": "2025-01-27T15:30:00Z"
+                        }
+                        """
+                )
+            )
+        )
+    })
+    ResponseEntity<Void> removeLike(
+        @Parameter(
+            description = "Unique identifier of the tweet to unlike",
+            required = true,
+            example = "223e4567-e89b-12d3-a456-426614174001"
+        )
+        UUID tweetId,
+        @Parameter(description = "Unlike request containing userId", required = true)
+        LikeTweetRequestDto likeTweetRequest);
 }
 

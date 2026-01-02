@@ -38,5 +38,24 @@ public interface LikeService {
      * @throws UniquenessValidationException   if duplicate like attempt
      */
     LikeResponseDto likeTweet(UUID tweetId, LikeTweetRequestDto requestDto);
+
+    /**
+     * Removes a like from a tweet by deleting the like record.
+     * <p>
+     * This method performs the following operations:
+     * 1. Validates the unlike request (tweet existence, user existence, like existence)
+     * 2. Finds the like record in the database
+     * 3. Deletes the like record
+     * 4. Decrements the tweet's likes count
+     * 5. Saves the updated tweet
+     * <p>
+     * The operation is atomic and executed within a transaction. If any step fails,
+     * the entire operation is rolled back.
+     *
+     * @param tweetId    the unique identifier of the tweet to unlike
+     * @param requestDto the unlike request containing userId
+     * @throws BusinessRuleValidationException if tweetId is null, tweet doesn't exist, user doesn't exist, or like doesn't exist
+     */
+    void removeLike(UUID tweetId, LikeTweetRequestDto requestDto);
 }
 

@@ -16,10 +16,11 @@
 ## Tasks
 
 ### Анализ и проектирование
-- [ ] (P1) #22: Анализ требований — Определить входные/выходные данные, бизнес-правила, затронутые стандарты
+- [X] (P1) #22: Анализ требований — Определить входные/выходные данные, бизнес-правила, затронутые стандарты
   acceptance: "Понять вход/выход (tweetId, userId, 204 No Content), бизнес-правила (существование лайка, обновление счетчика), определить затронутые стандарты"
-- [ ] (P1) #23: Проектирование API и контрактов — Определить структуру валидации и бизнес-логики
+- [x] (P1) #23: Проектирование API и контрактов — Определить структуру валидации и бизнес-логики
   acceptance: "OpenAPI схема для DELETE эндпоинта, определение методов валидации (validateForUnlike), определение методов сервиса (removeLike), переиспользование существующих DTO"
+  note: "Выполнено проектирование API и контрактов. Определена OpenAPI схема для DELETE эндпоинта с полной документацией всех статус-кодов и примеров. Определена структура метода removeLike в LikeService и LikeServiceImpl. Определена структура метода decrementLikesCount в Entity Tweet. Подтверждено переиспользование LikeTweetRequestDto. Создан документ api_design.md с детальным проектированием. Выполнено: 2025-01-27"
 
 ### Реализация инфраструктуры и конфигов
 - [x] (P1) #24: Инфраструктура уже существует — Entity, Repository, DTO, Mapper
@@ -36,10 +37,12 @@
 - [x] (P1) #27: Validator методы для эндпоинта — Добавить метод validateForUnlike
   acceptance: "Метод validateForUnlike добавлен в LikeValidator interface и implementation (проверка существования твита, пользователя, лайка)"
   note: "Метод validateForUnlike добавлен в LikeValidator интерфейс и LikeValidatorImpl реализацию. Валидация включает проверку tweetId, существования твита, requestDto, userId, существования пользователя и существования лайка. Добавлен приватный метод validateLikeExists для проверки существования лайка перед удалением. Выполнено: 2026-01-02 00:41"
-- [ ] (P1) #28: Service методы для эндпоинта — Добавить метод removeLike
+- [x] (P1) #28: Service методы для эндпоинта — Добавить метод removeLike
   acceptance: "Метод removeLike добавлен в LikeService interface и implementation, использует @Transactional, удаляет лайк, обновляет счетчик"
-- [ ] (P1) #29: Controller метод для эндпоинта — Добавить метод removeLike в LikeApi и LikeController
+  note: "Добавлен метод removeLike() в интерфейс LikeService с полной JavaDoc документацией. Реализован метод removeLike() в LikeServiceImpl с использованием @Transactional для атомарности операции. Добавлен метод decrementLikesCount() в Entity Tweet с защитой от отрицательных значений. Все методы соответствуют стандартам проекта. Выполнено: 2025-01-27"
+- [x] (P1) #29: Controller метод для эндпоинта — Добавить метод removeLike в LikeApi и LikeController
   acceptance: "Метод removeLike добавлен в LikeApi интерфейс с OpenAPI аннотациями и в LikeController с @LoggableRequest, возвращает 204 No Content"
+  note: "Добавлен метод removeLike() в интерфейс LikeApi с полной OpenAPI документацией (все статус-коды 204, 400, 404 с примерами). Реализован метод removeLike() в LikeController с @LoggableRequest и @DeleteMapping. Метод возвращает 204 No Content. Все соответствует стандартам проекта (STANDART_CODE, STANDART_SWAGGER). Выполнено: 2025-01-27"
 - [ ] (P1) #30: JavaDoc для эндпоинта — Добавить JavaDoc для всех методов
   acceptance: "JavaDoc добавлен для всех методов эндпоинта с @author geron, @version 1.0, @param, @return, @throws"
 - [ ] (P1) #31: Unit тесты для эндпоинта — Создать unit тесты для Service и Validator

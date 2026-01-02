@@ -39,5 +39,18 @@ public class LikeController implements LikeApi {
         LikeResponseDto createdLike = likeService.likeTweet(tweetId, likeTweetRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdLike);
     }
+
+    /**
+     * @see LikeApi#removeLike
+     */
+    @LoggableRequest
+    @DeleteMapping("/{tweetId}/like")
+    @Override
+    public ResponseEntity<Void> removeLike(
+        @PathVariable("tweetId") UUID tweetId,
+        @RequestBody @Valid LikeTweetRequestDto likeTweetRequest) {
+        likeService.removeLike(tweetId, likeTweetRequest);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
 }
 
