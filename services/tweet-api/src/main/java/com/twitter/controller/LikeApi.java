@@ -242,8 +242,8 @@ public interface LikeApi {
             )
         ),
         @ApiResponse(
-            responseCode = "404",
-            description = "Resource not found",
+            responseCode = "409",
+            description = "Business rule violation",
             content = @Content(
                 mediaType = "application/problem+json",
                 examples = {
@@ -254,7 +254,7 @@ public interface LikeApi {
                             {
                               "type": "https://example.com/errors/business-rule-validation",
                               "title": "Business Rule Validation Error",
-                              "status": 404,
+                              "status": 409,
                               "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
                               "ruleName": "TWEET_NOT_FOUND",
                               "context": "223e4567-e89b-12d3-a456-426614174001",
@@ -269,7 +269,7 @@ public interface LikeApi {
                             {
                               "type": "https://example.com/errors/business-rule-validation",
                               "title": "Business Rule Validation Error",
-                              "status": 404,
+                              "status": 409,
                               "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
                               "ruleName": "USER_NOT_EXISTS",
                               "context": "123e4567-e89b-12d3-a456-426614174000",
@@ -284,7 +284,7 @@ public interface LikeApi {
                             {
                               "type": "https://example.com/errors/business-rule-validation",
                               "title": "Business Rule Validation Error",
-                              "status": 404,
+                              "status": 409,
                               "detail": "Business rule 'LIKE_NOT_FOUND' violated for context: Like not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
                               "ruleName": "LIKE_NOT_FOUND",
                               "context": "Like not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",

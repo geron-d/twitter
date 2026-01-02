@@ -15,6 +15,7 @@
 - ✅ Обновление твитов с проверкой прав автора
 - ✅ Удаление твитов (soft delete) с проверкой прав автора
 - ✅ Лайк твитов с проверкой бизнес-правил
+- ✅ Убрать лайк твита с проверкой бизнес-правил
 - ✅ Интеграция с users-api для проверки существования пользователей
 - ✅ Интеграция с follower-api для получения списка подписок
 - ✅ Валидация данных (длина контента 1-280 символов)
@@ -91,7 +92,8 @@ http://localhost:8082/api/v1/tweets
 | `GET`    | `/timeline/{userId}`  | Получить ленту новостей        | -                       | `PagedModel<TweetResponseDto>`|
 | `PUT`    | `/{tweetId}`          | Обновить твит                 | `UpdateTweetRequestDto` | `TweetResponseDto`           |
 | `DELETE` | `/{tweetId}`          | Удалить твит (soft delete)    | `DeleteTweetRequestDto` | -                            |
-| `POST`   | `/{tweetId}/likes`    | Лайкнуть твит                 | `LikeTweetRequestDto`   | `LikeResponseDto`            |
+| `POST`   | `/{tweetId}/like`     | Лайкнуть твит                 | `LikeTweetRequestDto`   | `LikeResponseDto`            |
+| `DELETE` | `/{tweetId}/like`     | Убрать лайк твита             | `LikeTweetRequestDto`   | -                            |
 
 ### Детальное описание эндпоинтов
 
@@ -682,7 +684,7 @@ Content-Type: application/json
 #### 7. Лайкнуть твит
 
 ```http
-POST /api/v1/tweets/{tweetId}/likes
+POST /api/v1/tweets/{tweetId}/like
 Content-Type: application/json
 ```
 
@@ -793,6 +795,101 @@ Content-Type: application/json
   "detail": "A like already exists for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
   "fieldName": "like",
   "fieldValue": "tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+#### 8. Убрать лайк твита
+
+```http
+DELETE /api/v1/tweets/{tweetId}/like
+Content-Type: application/json
+```
+
+**Параметры пути:**
+
+- `tweetId` - обязательный, UUID существующего твита
+
+**Тело запроса:**
+
+```json
+{
+  "userId": "123e4567-e89b-12d3-a456-426614174000"
+}
+```
+
+**Валидация:**
+
+- `userId` - обязательное, UUID существующего пользователя
+- `tweetId` - обязательный, должен быть валидным UUID форматом
+
+**Бизнес-правила:**
+
+- Твит должен существовать в системе и не быть удаленным
+- Пользователь должен существовать в системе
+- Лайк должен существовать в системе (пользователь должен был ранее лайкнуть этот твит)
+- Операция атомарна - удаляется запись лайка и обновляется счетчик `likesCount` в твите (декремент на 1)
+
+**Ответы:**
+
+- `204 No Content` - лайк успешно удален (без тела ответа)
+- `400 Bad Request` - ошибка валидации (некорректный UUID, отсутствует userId)
+- `409 Conflict` - нарушение бизнес-правил (твит не найден, пользователь не существует, лайк не найден)
+
+**Пример успешного ответа (204 No Content):**
+
+Ответ не содержит тела, только HTTP статус 204.
+
+**Пример ошибки валидации userId (400 Bad Request):**
+
+```json
+{
+  "type": "https://example.com/errors/validation-error",
+  "title": "Validation Error",
+  "status": 400,
+  "detail": "Validation failed: userId: User ID cannot be null",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки твит не найден (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
+  "ruleName": "TWEET_NOT_FOUND",
+  "context": "223e4567-e89b-12d3-a456-426614174001",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки пользователь не существует (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+  "ruleName": "USER_NOT_EXISTS",
+  "context": "123e4567-e89b-12d3-a456-426614174000",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки лайк не найден (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'LIKE_NOT_FOUND' violated for context: Like not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+  "ruleName": "LIKE_NOT_FOUND",
+  "context": "Like not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
   "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
@@ -985,6 +1082,21 @@ open http://localhost:8082/swagger-ui.html
         - Обновление счетчика выполняется синхронно при создании лайка
         - Используется денормализация для оптимизации операций чтения
 
+2. **`removeLike(UUID tweetId, LikeTweetRequestDto requestDto)`**
+    - Удаляет лайк для твита
+    - Возвращает `void` (ответ 204 No Content)
+    - Логика:
+        - Валидация запроса (существование твита, пользователя, лайка)
+        - Поиск лайка в БД по tweetId и userId
+        - Удаление лайка из БД
+        - Обновление счетчика `likesCount` в твите (декремент на 1, с защитой от отрицательных значений)
+        - Сохранение изменений в БД
+    - Особенности:
+        - Операция атомарна (выполняется в транзакции)
+        - Обновление счетчика выполняется синхронно при удалении лайка
+        - Используется денормализация для оптимизации операций чтения
+        - Счетчик не может стать отрицательным (защита на уровне Entity)
+
 ### Ключевые бизнес-правила для лайков:
 
 1. **Валидация твита:**
@@ -1013,6 +1125,12 @@ open http://localhost:8082/swagger-ui.html
 6. **Временные метки:**
     - `createdAt` устанавливается автоматически при создании лайка
     - Управление выполняется Hibernate через `@CreationTimestamp`
+
+7. **Удаление лайка:**
+    - При удалении лайка счетчик `likesCount` в твите декрементируется на 1
+    - Операция выполняется атомарно в рамках транзакции
+    - Счетчик не может стать отрицательным (защита на уровне Entity через метод `decrementLikesCount()`)
+    - Используется денормализация для оптимизации операций чтения
 
 ## Слой валидации
 
@@ -1162,6 +1280,34 @@ open http://localhost:8082/swagger-ui.html
 7. **Проверка уникальности:**
     - Проверка существования лайка через `LikeRepository.existsByTweetIdAndUserId()`
     - При существовании лайка выбрасывается `UniquenessValidationException` (409 Conflict)
+
+#### Убрать лайк твита (UNLIKE)
+
+Выполняется многоэтапная валидация:
+
+1. **Проверка tweetId:**
+    - Проверка, что `tweetId` не равен `null`
+    - При отсутствии выбрасывается `BusinessRuleValidationException` с правилом `TWEET_ID_NULL`
+
+2. **Проверка существования твита:**
+    - Поиск твита в БД по UUID с фильтрацией (isDeleted = false)
+    - При отсутствии твита выбрасывается `BusinessRuleValidationException` с правилом `TWEET_NOT_FOUND`
+
+3. **Проверка requestDto:**
+    - Проверка, что `requestDto` не равен `null`
+    - При отсутствии выбрасывается `BusinessRuleValidationException` с правилом `LIKE_REQUEST_NULL`
+
+4. **Проверка userId:**
+    - Проверка, что `userId` не равен `null`
+    - При отсутствии выбрасывается `BusinessRuleValidationException` с правилом `USER_ID_NULL`
+
+5. **Проверка существования пользователя:**
+    - Вызов `UserGateway.existsUser()` для проверки существования
+    - При отсутствии пользователя выбрасывается `BusinessRuleValidationException` с правилом `USER_NOT_EXISTS`
+
+6. **Проверка существования лайка:**
+    - Проверка существования лайка через `LikeRepository.findByTweetIdAndUserId()`
+    - При отсутствии лайка выбрасывается `BusinessRuleValidationException` с правилом `LIKE_NOT_FOUND` (409 Conflict)
 
 ## Работа с базой данных
 
@@ -1659,7 +1805,7 @@ curl -X DELETE http://localhost:8082/api/v1/tweets/123e4567-e89b-12d3-a456-42661
 ### Лайк твита
 
 ```bash
-curl -X POST http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/likes \
+curl -X POST http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/like \
   -H "Content-Type: application/json" \
   -d '{
     "userId": "123e4567-e89b-12d3-a456-426614174000"
@@ -1715,6 +1861,62 @@ curl -X POST http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-4266141
   "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
   "ruleName": "TWEET_NOT_FOUND",
   "context": "223e4567-e89b-12d3-a456-426614174001",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+### Убрать лайк твита
+
+```bash
+curl -X DELETE http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/like \
+  -H "Content-Type: application/json" \
+  -d '{
+    "userId": "123e4567-e89b-12d3-a456-426614174000"
+  }'
+```
+
+**Ответ (204 No Content):**
+
+Ответ не содержит тела, только HTTP статус 204.
+
+**Ответ при отсутствии лайка (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'LIKE_NOT_FOUND' violated for context: Like not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+  "ruleName": "LIKE_NOT_FOUND",
+  "context": "Like not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Ответ при отсутствии твита (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
+  "ruleName": "TWEET_NOT_FOUND",
+  "context": "223e4567-e89b-12d3-a456-426614174001",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Ответ при отсутствии пользователя (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+  "ruleName": "USER_NOT_EXISTS",
+  "context": "123e4567-e89b-12d3-a456-426614174000",
   "timestamp": "2025-01-27T15:30:00Z"
 }
 ```

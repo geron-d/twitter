@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "twitter-tweet-api-collection",
 		"name": "twitter",
-		"description": "REST API for tweet management in the Twitter microservices system.\n\nThis API provides comprehensive tweet management capabilities including:\n- Tweet creation with content validation\n- Tweet retrieval by ID\n- User tweets retrieval with pagination\n- Timeline (news feed) retrieval with pagination\n- Tweet update with authorization checks\n- Tweet deletion (soft delete) with authorization checks\n- Tweet likes with business rule validation (no self-likes, uniqueness)\n- User existence validation via users-api integration\n- Following list retrieval via follower-api integration\n- Content length validation (1-280 characters)\n- Business rule enforcement\n\n## Authentication\nCurrently, the API does not require authentication for basic operations.\nFuture versions will implement JWT-based authentication.\n\n## Rate Limiting\nAPI requests are subject to rate limiting to ensure system stability.\nPlease refer to response headers for current rate limit information.\n\n## Error Handling\nThe API uses standard HTTP status codes and follows RFC 7807 Problem Details\nfor error responses, providing detailed information about validation failures\nand business rule violations.",
+		"description": "REST API for tweet management in the Twitter microservices system.\n\nThis API provides comprehensive tweet management capabilities including:\n- Tweet creation with content validation\n- Tweet retrieval by ID\n- User tweets retrieval with pagination\n- Timeline (news feed) retrieval with pagination\n- Tweet update with authorization checks\n- Tweet deletion (soft delete) with authorization checks\n- Tweet likes with business rule validation (no self-likes, uniqueness)\n- Tweet unlike (remove like) with business rule validation\n- User existence validation via users-api integration\n- Following list retrieval via follower-api integration\n- Content length validation (1-280 characters)\n- Business rule enforcement\n\n## Authentication\nCurrently, the API does not require authentication for basic operations.\nFuture versions will implement JWT-based authentication.\n\n## Rate Limiting\nAPI requests are subject to rate limiting to ensure system stability.\nPlease refer to response headers for current rate limit information.\n\n## Error Handling\nThe API uses standard HTTP status codes and follows RFC 7807 Problem Details\nfor error responses, providing detailed information about validation failures\nand business rule violations.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "twitter-tweet-api"
 	},
@@ -1969,6 +1969,401 @@
 										"tweets",
 										"invalid-uuid",
 										"likes"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/problem+json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"type\": \"https://example.com/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"Invalid UUID format for tweetId parameter\",\n  \"timestamp\": \"2025-01-27T15:30:00Z\"\n}"
+						}
+					]
+				},
+				{
+					"name": "remove like",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": \"{{userId}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tweets/{{tweetId}}/like",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tweets",
+								"{{tweetId}}",
+								"like"
+							]
+						},
+						"description": "Removes a like from a tweet by deleting the like record. It performs validation on the request data, checks if the tweet exists and is not deleted, verifies that the user exists, and ensures that the like exists before removal. The unlike operation is atomic and updates the tweet's likes count by decrementing it."
+					},
+					"response": [
+						{
+							"name": "like removed",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userId\": \"123e4567-e89b-12d3-a456-426614174000\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/like",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"tweets",
+										"223e4567-e89b-12d3-a456-426614174001",
+										"like"
+									]
+								}
+							},
+							"status": "No Content",
+							"code": 204,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "validation error - null userId",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userId\": null\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/like",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"tweets",
+										"223e4567-e89b-12d3-a456-426614174001",
+										"like"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/problem+json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"type\": \"https://example.com/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"Validation failed: userId: User ID cannot be null\",\n  \"timestamp\": \"2025-01-27T15:30:00Z\"\n}"
+						},
+						{
+							"name": "validation error - missing body",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/like",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"tweets",
+										"223e4567-e89b-12d3-a456-426614174001",
+										"like"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/problem+json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"type\": \"https://example.com/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"Required request body is missing\",\n  \"timestamp\": \"2025-01-27T15:30:00Z\"\n}"
+						},
+						{
+							"name": "tweet not found error",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userId\": \"123e4567-e89b-12d3-a456-426614174000\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/tweets/00000000-0000-0000-0000-000000000000/like",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"tweets",
+										"00000000-0000-0000-0000-000000000000",
+										"like"
+									]
+								}
+							},
+							"status": "Conflict",
+							"code": 409,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/problem+json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"type\": \"https://example.com/errors/business-rule-validation\",\n  \"title\": \"Business Rule Validation Error\",\n  \"status\": 409,\n  \"detail\": \"Business rule 'TWEET_NOT_FOUND' violated for context: 00000000-0000-0000-0000-000000000000\",\n  \"ruleName\": \"TWEET_NOT_FOUND\",\n  \"context\": \"00000000-0000-0000-0000-000000000000\",\n  \"timestamp\": \"2025-01-27T15:30:00Z\"\n}"
+						},
+						{
+							"name": "user not exists error",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userId\": \"00000000-0000-0000-0000-000000000000\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/like",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"tweets",
+										"223e4567-e89b-12d3-a456-426614174001",
+										"like"
+									]
+								}
+							},
+							"status": "Conflict",
+							"code": 409,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/problem+json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"type\": \"https://example.com/errors/business-rule-validation\",\n  \"title\": \"Business Rule Validation Error\",\n  \"status\": 409,\n  \"detail\": \"Business rule 'USER_NOT_EXISTS' violated for context: 00000000-0000-0000-0000-000000000000\",\n  \"ruleName\": \"USER_NOT_EXISTS\",\n  \"context\": \"00000000-0000-0000-0000-000000000000\",\n  \"timestamp\": \"2025-01-27T15:30:00Z\"\n}"
+						},
+						{
+							"name": "like not found error",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userId\": \"123e4567-e89b-12d3-a456-426614174000\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/like",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"tweets",
+										"223e4567-e89b-12d3-a456-426614174001",
+										"like"
+									]
+								}
+							},
+							"status": "Conflict",
+							"code": 409,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/problem+json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"type\": \"https://example.com/errors/business-rule-validation\",\n  \"title\": \"Business Rule Validation Error\",\n  \"status\": 409,\n  \"detail\": \"Business rule 'LIKE_NOT_FOUND' violated for context: Like not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000\",\n  \"ruleName\": \"LIKE_NOT_FOUND\",\n  \"context\": \"Like not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000\",\n  \"timestamp\": \"2025-01-27T15:30:00Z\"\n}"
+						},
+						{
+							"name": "invalid uuid format error",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userId\": \"123e4567-e89b-12d3-a456-426614174000\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/tweets/invalid-uuid/like",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"tweets",
+										"invalid-uuid",
+										"like"
 									]
 								}
 							},

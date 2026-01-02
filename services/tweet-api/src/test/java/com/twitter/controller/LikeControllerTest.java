@@ -24,6 +24,7 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -67,6 +68,21 @@ public class LikeControllerTest extends BaseIntegrationTest {
         return tweetRepository.saveAndFlush(tweet);
     }
 
+    /**
+     * Creates and saves a like in the database for testing.
+     *
+     * @param tweetId the tweet ID
+     * @param userId  the user ID
+     * @return the saved Like entity
+     */
+    protected Like createAndSaveLike(UUID tweetId, UUID userId) {
+        Like like = Like.builder()
+            .tweetId(tweetId)
+            .userId(userId)
+            .build();
+        return likeRepository.saveAndFlush(like);
+    }
+
     @Nested
     class LikeTweetTests {
 
@@ -91,7 +107,7 @@ public class LikeControllerTest extends BaseIntegrationTest {
                 .userId(differentUserId)
                 .build();
 
-            String responseJson = mockMvc.perform(post("/api/v1/tweets/{tweetId}/likes", testTweetId)
+            String responseJson = mockMvc.perform(post("/api/v1/tweets/{tweetId}/like", testTweetId)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -128,7 +144,7 @@ public class LikeControllerTest extends BaseIntegrationTest {
                 .userId(null)
                 .build();
 
-            mockMvc.perform(post("/api/v1/tweets/{tweetId}/likes", testTweetId)
+            mockMvc.perform(post("/api/v1/tweets/{tweetId}/like", testTweetId)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -144,7 +160,7 @@ public class LikeControllerTest extends BaseIntegrationTest {
             Tweet savedTweet = createAndSaveTweet(testUserId, content);
             testTweetId = savedTweet.getId();
 
-            int status = mockMvc.perform(post("/api/v1/tweets/{tweetId}/likes", testTweetId)
+            int status = mockMvc.perform(post("/api/v1/tweets/{tweetId}/like", testTweetId)
                     .contentType(MediaType.APPLICATION_JSON))
                 .andReturn()
                 .getResponse()
@@ -163,7 +179,7 @@ public class LikeControllerTest extends BaseIntegrationTest {
                 .userId(differentUserId)
                 .build();
 
-            mockMvc.perform(post("/api/v1/tweets/{tweetId}/likes", testTweetId)
+            mockMvc.perform(post("/api/v1/tweets/{tweetId}/like", testTweetId)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
@@ -184,7 +200,7 @@ public class LikeControllerTest extends BaseIntegrationTest {
                 .userId(differentUserId)
                 .build();
 
-            mockMvc.perform(post("/api/v1/tweets/{tweetId}/likes", testTweetId)
+            mockMvc.perform(post("/api/v1/tweets/{tweetId}/like", testTweetId)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
@@ -207,7 +223,7 @@ public class LikeControllerTest extends BaseIntegrationTest {
                 .userId(testUserId)
                 .build();
 
-            mockMvc.perform(post("/api/v1/tweets/{tweetId}/likes", testTweetId)
+            mockMvc.perform(post("/api/v1/tweets/{tweetId}/like", testTweetId)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
@@ -230,7 +246,7 @@ public class LikeControllerTest extends BaseIntegrationTest {
                 .userId(differentUserId)
                 .build();
 
-            mockMvc.perform(post("/api/v1/tweets/{tweetId}/likes", testTweetId)
+            mockMvc.perform(post("/api/v1/tweets/{tweetId}/like", testTweetId)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated());
@@ -239,7 +255,7 @@ public class LikeControllerTest extends BaseIntegrationTest {
             Tweet tweet = tweetRepository.findById(testTweetId).orElseThrow();
             assertThat(tweet.getLikesCount()).isEqualTo(1);
 
-            mockMvc.perform(post("/api/v1/tweets/{tweetId}/likes", testTweetId)
+            mockMvc.perform(post("/api/v1/tweets/{tweetId}/like", testTweetId)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
@@ -263,7 +279,7 @@ public class LikeControllerTest extends BaseIntegrationTest {
                 .userId(differentUserId)
                 .build();
 
-            mockMvc.perform(post("/api/v1/tweets/{tweetId}/likes", testTweetId)
+            mockMvc.perform(post("/api/v1/tweets/{tweetId}/like", testTweetId)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
@@ -296,7 +312,7 @@ public class LikeControllerTest extends BaseIntegrationTest {
                 .userId(user3)
                 .build();
 
-            mockMvc.perform(post("/api/v1/tweets/{tweetId}/likes", testTweetId)
+            mockMvc.perform(post("/api/v1/tweets/{tweetId}/like", testTweetId)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request1)))
                 .andExpect(status().isCreated());
@@ -304,7 +320,7 @@ public class LikeControllerTest extends BaseIntegrationTest {
             Tweet tweet = tweetRepository.findById(testTweetId).orElseThrow();
             assertThat(tweet.getLikesCount()).isEqualTo(1);
 
-            mockMvc.perform(post("/api/v1/tweets/{tweetId}/likes", testTweetId)
+            mockMvc.perform(post("/api/v1/tweets/{tweetId}/like", testTweetId)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request2)))
                 .andExpect(status().isCreated());
@@ -312,7 +328,7 @@ public class LikeControllerTest extends BaseIntegrationTest {
             tweet = tweetRepository.findById(testTweetId).orElseThrow();
             assertThat(tweet.getLikesCount()).isEqualTo(2);
 
-            mockMvc.perform(post("/api/v1/tweets/{tweetId}/likes", testTweetId)
+            mockMvc.perform(post("/api/v1/tweets/{tweetId}/like", testTweetId)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request3)))
                 .andExpect(status().isCreated());
@@ -320,6 +336,243 @@ public class LikeControllerTest extends BaseIntegrationTest {
             tweet = tweetRepository.findById(testTweetId).orElseThrow();
             assertThat(tweet.getLikesCount()).isEqualTo(3);
             assertThat(likeRepository.count()).isEqualTo(3);
+        }
+    }
+
+    @Nested
+    class RemoveLikeTests {
+
+        private UUID testUserId;
+        private UUID testTweetId;
+        private UUID differentUserId;
+
+        @BeforeEach
+        void setUp() {
+            testUserId = UUID.randomUUID();
+            differentUserId = UUID.randomUUID();
+        }
+
+        @Test
+        void removeLike_WithValidData_ShouldReturn204NoContent() throws Exception {
+            String content = "Test tweet for unlike";
+            Tweet savedTweet = createAndSaveTweet(testUserId, content);
+            testTweetId = savedTweet.getId();
+            setupUserExistsStub(differentUserId, true);
+
+            Like savedLike = createAndSaveLike(testTweetId, differentUserId);
+            savedTweet.setLikesCount(1);
+            tweetRepository.saveAndFlush(savedTweet);
+
+            LikeTweetRequestDto request = LikeTweetRequestDto.builder()
+                .userId(differentUserId)
+                .build();
+
+            mockMvc.perform(delete("/api/v1/tweets/{tweetId}/like", testTweetId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNoContent());
+
+            assertThat(likeRepository.findById(savedLike.getId())).isEmpty();
+            Tweet updatedTweet = tweetRepository.findById(testTweetId).orElseThrow();
+            assertThat(updatedTweet.getLikesCount()).isEqualTo(0);
+        }
+
+        @Test
+        void removeLike_WithNullUserId_ShouldReturn400BadRequest() throws Exception {
+            String content = "Test tweet for unlike";
+            Tweet savedTweet = createAndSaveTweet(testUserId, content);
+            testTweetId = savedTweet.getId();
+
+            Like savedLike = createAndSaveLike(testTweetId, differentUserId);
+            savedTweet.setLikesCount(1);
+            tweetRepository.saveAndFlush(savedTweet);
+
+            LikeTweetRequestDto request = LikeTweetRequestDto.builder()
+                .userId(null)
+                .build();
+
+            mockMvc.perform(delete("/api/v1/tweets/{tweetId}/like", testTweetId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+
+            assertThat(likeRepository.findById(savedLike.getId())).isPresent();
+            Tweet tweet = tweetRepository.findById(testTweetId).orElseThrow();
+            assertThat(tweet.getLikesCount()).isEqualTo(1);
+        }
+
+        @Test
+        void removeLike_WithMissingBody_ShouldReturn400BadRequest() throws Exception {
+            String content = "Test tweet for unlike";
+            Tweet savedTweet = createAndSaveTweet(testUserId, content);
+            testTweetId = savedTweet.getId();
+
+            Like savedLike = createAndSaveLike(testTweetId, differentUserId);
+            savedTweet.setLikesCount(1);
+            tweetRepository.saveAndFlush(savedTweet);
+
+            int status = mockMvc.perform(delete("/api/v1/tweets/{tweetId}/like", testTweetId)
+                    .contentType(MediaType.APPLICATION_JSON))
+                .andReturn()
+                .getResponse()
+                .getStatus();
+
+            assertThat(status).isGreaterThanOrEqualTo(400);
+            assertThat(likeRepository.findById(savedLike.getId())).isPresent();
+        }
+
+        @Test
+        void removeLike_WhenTweetDoesNotExist_ShouldReturn409Conflict() throws Exception {
+            testTweetId = UUID.randomUUID();
+            setupUserExistsStub(differentUserId, true);
+
+            LikeTweetRequestDto request = LikeTweetRequestDto.builder()
+                .userId(differentUserId)
+                .build();
+
+            mockMvc.perform(delete("/api/v1/tweets/{tweetId}/like", testTweetId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.type").exists())
+                .andExpect(jsonPath("$.ruleName").value("TWEET_NOT_FOUND"));
+
+            assertThat(likeRepository.count()).isEqualTo(0);
+        }
+
+        @Test
+        void removeLike_WhenUserDoesNotExist_ShouldReturn409Conflict() throws Exception {
+            String content = "Test tweet for unlike";
+            Tweet savedTweet = createAndSaveTweet(testUserId, content);
+            testTweetId = savedTweet.getId();
+            setupUserExistsStub(differentUserId, false);
+
+            Like savedLike = createAndSaveLike(testTweetId, differentUserId);
+            savedTweet.setLikesCount(1);
+            tweetRepository.saveAndFlush(savedTweet);
+
+            LikeTweetRequestDto request = LikeTweetRequestDto.builder()
+                .userId(differentUserId)
+                .build();
+
+            mockMvc.perform(delete("/api/v1/tweets/{tweetId}/like", testTweetId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.type").exists())
+                .andExpect(jsonPath("$.ruleName").value("USER_NOT_EXISTS"));
+
+            assertThat(likeRepository.findById(savedLike.getId())).isPresent();
+            Tweet tweet = tweetRepository.findById(testTweetId).orElseThrow();
+            assertThat(tweet.getLikesCount()).isEqualTo(1);
+        }
+
+        @Test
+        void removeLike_WhenLikeDoesNotExist_ShouldReturn409Conflict() throws Exception {
+            String content = "Test tweet for unlike";
+            Tweet savedTweet = createAndSaveTweet(testUserId, content);
+            testTweetId = savedTweet.getId();
+            setupUserExistsStub(differentUserId, true);
+
+            LikeTweetRequestDto request = LikeTweetRequestDto.builder()
+                .userId(differentUserId)
+                .build();
+
+            mockMvc.perform(delete("/api/v1/tweets/{tweetId}/like", testTweetId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.type").exists())
+                .andExpect(jsonPath("$.ruleName").value("LIKE_NOT_FOUND"));
+
+            assertThat(likeRepository.count()).isEqualTo(0);
+            Tweet tweet = tweetRepository.findById(testTweetId).orElseThrow();
+            assertThat(tweet.getLikesCount()).isEqualTo(0);
+        }
+
+        @Test
+        void removeLike_ShouldDecrementLikesCount() throws Exception {
+            String content = "Test tweet for unlike";
+            Tweet savedTweet = createAndSaveTweet(testUserId, content);
+            testTweetId = savedTweet.getId();
+            UUID user1 = UUID.randomUUID();
+            UUID user2 = UUID.randomUUID();
+            UUID user3 = UUID.randomUUID();
+            setupUserExistsStub(user1, true);
+            setupUserExistsStub(user2, true);
+            setupUserExistsStub(user3, true);
+
+            Like like1 = createAndSaveLike(testTweetId, user1);
+            Like like2 = createAndSaveLike(testTweetId, user2);
+            Like like3 = createAndSaveLike(testTweetId, user3);
+            savedTweet.setLikesCount(3);
+            tweetRepository.saveAndFlush(savedTweet);
+
+            LikeTweetRequestDto request1 = LikeTweetRequestDto.builder()
+                .userId(user1)
+                .build();
+
+            mockMvc.perform(delete("/api/v1/tweets/{tweetId}/like", testTweetId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request1)))
+                .andExpect(status().isNoContent());
+
+            Tweet tweet = tweetRepository.findById(testTweetId).orElseThrow();
+            assertThat(tweet.getLikesCount()).isEqualTo(2);
+            assertThat(likeRepository.findById(like1.getId())).isEmpty();
+
+            LikeTweetRequestDto request2 = LikeTweetRequestDto.builder()
+                .userId(user2)
+                .build();
+
+            mockMvc.perform(delete("/api/v1/tweets/{tweetId}/like", testTweetId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request2)))
+                .andExpect(status().isNoContent());
+
+            tweet = tweetRepository.findById(testTweetId).orElseThrow();
+            assertThat(tweet.getLikesCount()).isEqualTo(1);
+            assertThat(likeRepository.findById(like2.getId())).isEmpty();
+
+            LikeTweetRequestDto request3 = LikeTweetRequestDto.builder()
+                .userId(user3)
+                .build();
+
+            mockMvc.perform(delete("/api/v1/tweets/{tweetId}/like", testTweetId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request3)))
+                .andExpect(status().isNoContent());
+
+            tweet = tweetRepository.findById(testTweetId).orElseThrow();
+            assertThat(tweet.getLikesCount()).isEqualTo(0);
+            assertThat(likeRepository.findById(like3.getId())).isEmpty();
+            assertThat(likeRepository.count()).isEqualTo(0);
+        }
+
+        @Test
+        void removeLike_WhenUsersApiReturns500_ShouldReturn409Conflict() throws Exception {
+            String content = "Test tweet for unlike";
+            Tweet savedTweet = createAndSaveTweet(testUserId, content);
+            testTweetId = savedTweet.getId();
+            setupUserExistsStubWithError(differentUserId, 500);
+
+            Like savedLike = createAndSaveLike(testTweetId, differentUserId);
+            savedTweet.setLikesCount(1);
+            tweetRepository.saveAndFlush(savedTweet);
+
+            LikeTweetRequestDto request = LikeTweetRequestDto.builder()
+                .userId(differentUserId)
+                .build();
+
+            mockMvc.perform(delete("/api/v1/tweets/{tweetId}/like", testTweetId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.type").exists());
+
+            assertThat(likeRepository.findById(savedLike.getId())).isPresent();
+            Tweet tweet = tweetRepository.findById(testTweetId).orElseThrow();
+            assertThat(tweet.getLikesCount()).isEqualTo(1);
         }
     }
 }
