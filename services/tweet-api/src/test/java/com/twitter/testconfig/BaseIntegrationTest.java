@@ -31,25 +31,35 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
  */
 @Testcontainers
 public abstract class BaseIntegrationTest {
-
-    @Container
-    @SuppressWarnings("resource")
+    
     protected static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine")
         .withDatabaseName("twitter_test")
         .withUsername("test")
         .withPassword("test");
 
     private static WireMockServer wireMockServer;
+    private static boolean containersStarted = false;
 
     static {
-        // Register shutdown hook to ensure WireMock server is stopped when JVM exits
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            synchronized (BaseIntegrationTest.class) {
-                if (wireMockServer != null && wireMockServer.isRunning()) {
-                    wireMockServer.stop();
-                }
+        // Запускаем контейнеры только один раз
+        synchronized (BaseIntegrationTest.class) {
+            if (!containersStarted) {
+                postgres.start();
+                wireMockServer = new WireMockServer(0);
+                wireMockServer.start();
+                containersStarted = true;
+
+                // Регистрируем shutdown hook
+                Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                    if (wireMockServer != null && wireMockServer.isRunning()) {
+                        wireMockServer.stop();
+                    }
+                    if (postgres != null && postgres.isRunning()) {
+                        postgres.stop();
+                    }
+                }));
             }
-        }));
+        }
     }
 
     @DynamicPropertySource
@@ -61,16 +71,6 @@ public abstract class BaseIntegrationTest {
         registry.add("spring.jpa.database-platform", () -> "org.hibernate.dialect.PostgreSQLDialect");
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
 
-        synchronized (BaseIntegrationTest.class) {
-            if (wireMockServer == null || !wireMockServer.isRunning()) {
-                if (wireMockServer != null) {
-                    wireMockServer.stop();
-                }
-                wireMockServer = new WireMockServer(0); // Random port
-                wireMockServer.start();
-            }
-        }
-
         int wireMockPort = wireMockServer.port();
         registry.add("wiremock.server.port", () -> String.valueOf(wireMockPort));
         registry.add("app.users-api.base-url", () -> "http://localhost:" + wireMockPort);
@@ -79,17 +79,7 @@ public abstract class BaseIntegrationTest {
 
     @BeforeEach
     void resetWireMock() {
-        synchronized (BaseIntegrationTest.class) {
-            if (wireMockServer == null || !wireMockServer.isRunning()) {
-                if (wireMockServer == null) {
-                    wireMockServer = new WireMockServer(0);
-                }
-                if (!wireMockServer.isRunning()) {
-                    wireMockServer.start();
-                }
-            }
-            wireMockServer.resetAll();
-        }
+        wireMockServer.resetAll();
     }
 
     /**
