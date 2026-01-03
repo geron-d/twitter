@@ -4,4 +4,4 @@
 Архитектура сервиса tweet-api todo\tweet\TWEET_API_ARCHITECTURE.md
 План todo\tweet\TWEET_API_COMMON_2.md
 Нужно составить план реализации запроса: Ретвитнуть с опциональным комментарием
-DELETE /api/v1/tweets/{tweetId}/retweet  # Убрать ретвит
+POST   /api/v1/tweets/{tweetId}/retweet  # Ретвитнуть с опциональным комментарием
