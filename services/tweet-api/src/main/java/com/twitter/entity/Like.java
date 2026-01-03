@@ -87,4 +87,3 @@ public class Like {
         return this.tweetId != null && this.tweetId.equals(tweetId);
     }
 }
-

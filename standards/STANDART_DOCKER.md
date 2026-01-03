@@ -728,4 +728,3 @@ environment:
 - [Spring Boot Docker Guide](https://spring.io/guides/gs/spring-boot-docker/)
 - [Project Standards](./STANDART_PROJECT.md)
 - [Code Standards](./STANDART_CODE.md)
-

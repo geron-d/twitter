@@ -34,4 +34,3 @@ public record FollowerFilter(
     String login
 ) {
 }
-

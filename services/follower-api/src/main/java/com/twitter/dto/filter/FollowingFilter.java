@@ -34,4 +34,3 @@ public record FollowingFilter(
     String login
 ) {
 }
-

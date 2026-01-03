@@ -14,4 +14,3 @@ public interface LikeRepository extends JpaRepository<Like, UUID> {
 
     boolean existsByTweetIdAndUserId(UUID tweetId, UUID userId);
 }
-
