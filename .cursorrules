@@ -1,1 +1,11 @@
 Do not change the indentation or whitespace of the files unless explicitly asked. Maintain the existing formatting style (tabs/spaces) of the project strictly.
+
+CRITICAL FORMATTING RULES:
+- Do NOT add trailing whitespace at the end of any line
+- Do NOT add empty lines at the end of files
+- Do NOT add final newline if the file doesn't have one
+- Do NOT modify lines that are not part of the actual change
+- When using search_replace, include EXACT whitespace from the original file
+- Preserve the exact line endings (LF, not CRLF)
+- Strictly adhere to the existing file formatting
+- When reading a file before editing, preserve its exact ending (with or without newline)
