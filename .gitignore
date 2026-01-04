@@ -33,8 +33,9 @@ bin/
 /nbdist/
 /.nb-gradle/
 
-# VS Code
-.vscode/
+# VS Code (except settings.json for project-wide settings)
+.vscode/*
+!.vscode/settings.json
 
 # Mac
 .DS_Store
@@ -100,4 +101,4 @@ node_modules/
 .dynamodb/
 
 # TernJS port file
-.tern-port
+.tern-port
