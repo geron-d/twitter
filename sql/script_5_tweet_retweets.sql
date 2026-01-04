@@ -11,3 +11,4 @@ CREATE TABLE IF NOT EXISTS tweet_retweets (
     CONSTRAINT uk_tweet_retweets_tweet_user UNIQUE (tweet_id, user_id)
 );
 
+
