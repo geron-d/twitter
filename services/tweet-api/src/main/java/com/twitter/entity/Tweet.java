@@ -99,6 +99,17 @@ public class Tweet {
     private Integer likesCount = 0;
 
     /**
+     * Counter for the number of retweets on this tweet.
+     * <p>
+     * This field stores the denormalized count of retweets to optimize read operations.
+     * The counter is incremented when a retweet is created.
+     * Default value is 0 for new tweets.
+     */
+    @Column(name = "retweets_count", nullable = false)
+    @Builder.Default
+    private Integer retweetsCount = 0;
+
+    /**
      * Custom validation method to ensure content is not just whitespace.
      * This complements the database CHECK constraint.
      */
@@ -164,6 +175,21 @@ public class Tweet {
             this.likesCount = 0;
         } else {
             this.likesCount--;
+        }
+    }
+
+    /**
+     * Increments the retweets count for this tweet.
+     * <p>
+     * This method atomically increments the retweetsCount field by 1.
+     * It should be called when a new retweet is created for this tweet.
+     * The method handles null values by initializing the counter to 1.
+     */
+    public void incrementRetweetsCount() {
+        if (this.retweetsCount == null) {
+            this.retweetsCount = 1;
+        } else {
+            this.retweetsCount++;
         }
     }
 }

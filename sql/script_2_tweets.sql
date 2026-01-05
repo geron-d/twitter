@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS tweets (
     is_deleted BOOLEAN NOT NULL DEFAULT false,
     deleted_at TIMESTAMP NULL,
     likes_count INTEGER NOT NULL DEFAULT 0,
+    retweets_count INTEGER NOT NULL DEFAULT 0,
 
     CONSTRAINT chk_content_length CHECK (LENGTH(TRIM(content)) > 0),
     CONSTRAINT chk_content_max_length CHECK (LENGTH(content) <= 280)

@@ -255,3 +255,93 @@
 - Валидация комментария учитывает, что null разрешен, но пустая строка - нет
 - Используются правильные типы исключений: `BusinessRuleValidationException`, `UniquenessValidationException`, `FormatValidationException`
 - Логирование добавлено для всех случаев валидации
+
+### Step #11: Service реализация RetweetServiceImpl — выполнено
+**Время**: 2026-01-05 16:40  
+**Автор**: assistant
+
+**Выполнено**:
+- Создана реализация `RetweetServiceImpl` в `services/tweet-api/src/main/java/com/twitter/service/RetweetServiceImpl.java`
+- Реализован метод `retweetTweet(UUID tweetId, RetweetRequestDto requestDto)` с полной бизнес-логикой:
+  1. Валидация запроса через `RetweetValidator.validateForRetweet()`
+  2. Маппинг DTO в Entity через `RetweetMapper.toRetweet()`
+  3. Сохранение ретвита в БД через `RetweetRepository.saveAndFlush()`
+  4. Обновление счетчика `retweetsCount` в Tweet entity через `tweet.incrementRetweetsCount()`
+  5. Сохранение обновленного твита через `TweetRepository.saveAndFlush()`
+  6. Маппинг Entity в Response DTO через `RetweetMapper.toRetweetResponseDto()`
+  7. Возврат Response DTO
+- Метод использует `@Transactional` для обеспечения атомарности операции
+- Добавлен полный JavaDoc для класса и метода
+- Использованы аннотации: `@Service`, `@RequiredArgsConstructor`, `@Slf4j`
+- Реализация создана по аналогии с существующим `LikeServiceImpl`
+- Добавлено поле `retweetsCount` и метод `incrementRetweetsCount()` в `Tweet` entity для поддержки функционала
+
+**Артефакты**:
+- `services/tweet-api/src/main/java/com/twitter/service/RetweetServiceImpl.java` - реализация сервиса для управления ретвитами
+- `services/tweet-api/src/main/java/com/twitter/entity/Tweet.java` - добавлено поле `retweetsCount` и метод `incrementRetweetsCount()`
+
+**Примечания**:
+- Реализация соответствует стандартам проекта (STANDART_CODE.md, STANDART_JAVADOC.md)
+- Структура полностью соответствует требованиям из `design-api-contracts.md`
+- Все шаги бизнес-логики реализованы согласно интерфейсу `RetweetService`
+- Операция выполняется в транзакции для обеспечения атомарности
+- Счетчик `retweetsCount` обновляется атомарно через метод `incrementRetweetsCount()` в Tweet entity
+- Поле `retweetsCount` добавлено в Tweet entity по аналогии с `likesCount`
+
+### Step #12: OpenAPI интерфейс RetweetApi — выполнено
+**Время**: 2026-01-05 16:40  
+**Автор**: assistant
+
+**Выполнено**:
+- Создан интерфейс `RetweetApi` в `services/tweet-api/src/main/java/com/twitter/controller/RetweetApi.java`
+- Добавлена аннотация `@Tag(name = "Retweet Management", description = "API for managing retweets in the Twitter system")`
+- Реализован метод `retweetTweet(UUID tweetId, RetweetRequestDto retweetRequest)` с полными OpenAPI аннотациями
+- Добавлена аннотация `@Operation` с summary и description
+- Добавлены `@ApiResponses` с примерами для всех статус-кодов:
+  - **201 Created**: примеры с комментарием и без комментария
+  - **400 Bad Request**: валидация userId, валидация комментария, неверный формат UUID
+  - **404 Not Found**: твит не найден, пользователь не найден
+  - **409 Conflict**: self-retweet запрещен, дублирование ретвита
+- Все примеры используют RFC 7807 Problem Details формат для ошибок
+- Добавлены `@Parameter` аннотации для параметров метода
+- Добавлен полный JavaDoc для интерфейса и метода с описанием всех исключений
+- Интерфейс создан по аналогии с существующим `LikeApi`
+
+**Артефакты**:
+- `services/tweet-api/src/main/java/com/twitter/controller/RetweetApi.java` - OpenAPI интерфейс для управления ретвитами
+
+**Примечания**:
+- Интерфейс соответствует стандартам проекта (STANDART_CODE.md, STANDART_JAVADOC.md, STANDART_SWAGGER.md)
+- Структура полностью соответствует требованиям из `design-api-contracts.md`
+- Все примеры документированы с использованием `@ExampleObject`
+- Примеры покрывают все возможные сценарии успешных и ошибочных ответов
+- Документация готова для генерации Swagger UI
+
+### Step #13: Controller RetweetController — выполнено
+**Время**: 2026-01-05 16:40  
+**Автор**: assistant
+
+**Выполнено**:
+- Создан контроллер `RetweetController` в `services/tweet-api/src/main/java/com/twitter/controller/RetweetController.java`
+- Контроллер реализует интерфейс `RetweetApi`
+- Реализован метод `retweetTweet(UUID tweetId, RetweetRequestDto retweetRequest)` с правильными аннотациями:
+  - `@LoggableRequest` - для автоматического логирования запросов
+  - `@PostMapping("/{tweetId}/retweet")` - маппинг эндпоинта POST /api/v1/tweets/{tweetId}/retweet
+  - `@PathVariable("tweetId")` - извлечение tweetId из пути
+  - `@RequestBody @Valid` - валидация тела запроса
+  - `@Override` - реализация метода интерфейса
+- Метод возвращает `ResponseEntity.status(HttpStatus.CREATED).body(createdRetweet)`
+- Добавлен полный JavaDoc с `@see` ссылкой на интерфейс `RetweetApi`
+- Использованы аннотации: `@Slf4j`, `@RestController`, `@RequestMapping("/api/v1/tweets")`, `@RequiredArgsConstructor`
+- Контроллер создан по аналогии с существующим `LikeController`
+
+**Артефакты**:
+- `services/tweet-api/src/main/java/com/twitter/controller/RetweetController.java` - REST контроллер для управления ретвитами
+
+**Примечания**:
+- Контроллер соответствует стандартам проекта (STANDART_CODE.md, STANDART_JAVADOC.md)
+- Структура полностью соответствует требованиям из `design-api-contracts.md`
+- Эндпоинт: POST /api/v1/tweets/{tweetId}/retweet
+- Валидация запроса выполняется автоматически через `@Valid` аннотацию
+- Логирование запросов выполняется автоматически через `@LoggableRequest` аспект
+- HTTP статус-код 201 Created возвращается при успешном создании ретвита
