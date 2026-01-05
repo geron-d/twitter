@@ -345,3 +345,72 @@
 - Валидация запроса выполняется автоматически через `@Valid` аннотацию
 - Логирование запросов выполняется автоматически через `@LoggableRequest` аспект
 - HTTP статус-код 201 Created возвращается при успешном создании ретвита
+
+### Step #14: JavaDoc для эндпоинта — выполнено
+**Время**: 2026-01-05 16:50  
+**Автор**: assistant
+
+**Выполнено**:
+- Добавлен полный JavaDoc для метода `retweetTweet` в `RetweetController`
+- JavaDoc включает все требуемые теги:
+  - `@author geron` - информация об авторе
+  - `@version 1.0` - версия документации
+  - `@param tweetId` - описание параметра tweetId (UUID формат)
+  - `@param retweetRequest` - описание параметра retweetRequest (DTO с userId и опциональным комментарием)
+  - `@return` - описание возвращаемого значения (ResponseEntity с HTTP 201 статусом)
+  - `@throws BusinessRuleValidationException` - описание исключения для бизнес-правил
+  - `@throws UniquenessValidationException` - описание исключения для дублирования
+  - `@throws FormatValidationException` - описание исключения для валидации формата
+- JavaDoc включает подробное описание метода, его поведения и всех возможных исключений
+- Добавлена ссылка `@see RetweetApi#retweetTweet` на интерфейс
+- JavaDoc соответствует стандартам проекта (STANDART_JAVADOC.md)
+
+**Артефакты**:
+- `services/tweet-api/src/main/java/com/twitter/controller/RetweetController.java` - обновлен JavaDoc для метода retweetTweet
+
+**Примечания**:
+- JavaDoc полностью документирует метод контроллера согласно требованиям задачи #14
+- Все теги (`@author`, `@version`, `@param`, `@return`, `@throws`) добавлены в соответствии со стандартами проекта
+- Описания параметров, возвращаемого значения и исключений соответствуют интерфейсу `RetweetApi`
+
+### Step #15: Unit тесты для эндпоинта — выполнено
+**Время**: 2026-01-05 17:00  
+**Автор**: assistant
+
+**Выполнено**:
+- Созданы unit тесты для всех компонентов эндпоинта ретвита:
+  1. **RetweetServiceImplTest** - тесты для сервиса:
+     - Успешные сценарии: retweetTweet с валидными данными (с комментарием и без)
+     - Проверка вызовов зависимостей: каждый метод вызывается ровно один раз
+     - Проверка инкремента счетчика: retweetsCount увеличивается на 1
+     - Ошибочные сценарии: валидация не прошла, твит не найден после валидации, дублирование ретвита
+  2. **RetweetValidatorImplTest** - тесты для валидатора:
+     - Успешные сценарии: валидация с валидными данными (с комментарием и без)
+     - Проверка всех валидаций:
+       - tweetId null
+       - Твит не найден
+       - requestDto null
+       - userId null
+       - Пользователь не существует
+       - Self-retweet (пользователь ретвитит свой твит)
+       - Дублирование ретвита
+       - Валидация комментария: пустая строка, только пробелы, превышение максимальной длины (281 символ), точная максимальная длина (280 символов)
+  3. **RetweetMapperTest** - тесты для маппера:
+     - Тесты для toRetweet: успешные сценарии с комментарием и без, проверка игнорирования полей id и createdAt, проверка null значений
+     - Тесты для toRetweetResponseDto: успешные сценарии с комментарием и без, проверка null входных данных, проверка null полей
+
+**Артефакты**:
+- `services/tweet-api/src/test/java/com/twitter/service/RetweetServiceImplTest.java` - unit тесты для RetweetServiceImpl
+- `services/tweet-api/src/test/java/com/twitter/validation/RetweetValidatorImplTest.java` - unit тесты для RetweetValidatorImpl
+- `services/tweet-api/src/test/java/com/twitter/mapper/RetweetMapperTest.java` - unit тесты для RetweetMapper
+
+**Примечания**:
+- Все тесты следуют стандартам проекта (STANDART_TEST.md)
+- Используется @Nested для группировки тестов по функциональности
+- Используется паттерн именования methodName_WhenCondition_ShouldExpectedResult
+- Используется AssertJ для assertions (предпочтительно над JUnit assertions)
+- Используется Mockito для моков зависимостей
+- Покрыты все успешные и ошибочные сценарии
+- Тесты изолированы и независимы друг от друга
+- Используется паттерн AAA (Arrange-Act-Assert) для структуры тестов
+- Все тесты проверяют взаимодействие с зависимостями через verify()
