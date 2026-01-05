@@ -655,5 +655,3 @@ public class RetweetController implements RetweetApi {
 9. Тестирование (#15-16)
 10. Документация (#17-19)
 11. Проверка стандартов (#20)
-
-

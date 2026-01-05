@@ -10,5 +10,3 @@ CREATE TABLE IF NOT EXISTS tweet_retweets (
     CONSTRAINT tweet_retweets_user_fk FOREIGN KEY (user_id) REFERENCES users(id),
     CONSTRAINT uk_tweet_retweets_tweet_user UNIQUE (tweet_id, user_id)
 );
-
-
