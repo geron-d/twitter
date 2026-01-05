@@ -27,12 +27,15 @@
 - [x] (P1) [2025-01-27] #3: SQL скрипт для таблицы tweet_retweets — Создать script_5_tweet_retweets.sql
   acceptance: "SQL скрипт создан с таблицей, уникальным ограничением на (tweet_id, user_id), foreign keys, индексами"
   note: "Создан SQL скрипт script_5_tweet_retweets.sql с таблицей tweet_retweets, полями (id, tweet_id, user_id, comment, created_at), уникальным ограничением на (tweet_id, user_id), foreign keys на tweets(id) и users(id), индексами для оптимизации. Примечание: требуется добавить поле retweets_count в таблицу tweets (отдельный скрипт или миграция)."
-- [ ] (P1) #4: Реализация Entity Retweet — Создать JPA сущность
+- [x] (P1) [2025-01-27] #4: Реализация Entity Retweet — Создать JPA сущность
   acceptance: "Entity создана с полями id, tweetId, userId, comment, createdAt, бизнес-методами isByUser(), isForTweet(), hasComment(), с учетом STANDART_CODE.md"
-- [ ] (P1) #5: Реализация Repository RetweetRepository — Создать Spring Data JPA репозиторий
+  note: "Создана JPA сущность Retweet в services/tweet-api/src/main/java/com/twitter/entity/Retweet.java с полями id, tweetId, userId, comment (nullable), createdAt, уникальным ограничением на (tweet_id, user_id), бизнес-методами isByUser(), isForTweet(), hasComment(). Entity соответствует стандартам проекта и структуре таблицы tweet_retweets."
+- [x] (P1) [2025-01-27] #5: Реализация Repository RetweetRepository — Создать Spring Data JPA репозиторий
   acceptance: "Repository создан с Derived Query Methods (findByTweetIdAndUserId, existsByTweetIdAndUserId) без JavaDoc"
-- [ ] (P1) #6: Реализация DTO для ретвита — Создать RetweetRequestDto и RetweetResponseDto
+  note: "Создан Spring Data JPA репозиторий RetweetRepository в services/tweet-api/src/main/java/com/twitter/repository/RetweetRepository.java, расширяющий JpaRepository<Retweet, UUID>. Реализованы Derived Query Methods: findByTweetIdAndUserId(UUID, UUID) и existsByTweetIdAndUserId(UUID, UUID) без JavaDoc (согласно стандартам)."
+- [x] (P1) [2025-01-27] #6: Реализация DTO для ретвита — Создать RetweetRequestDto и RetweetResponseDto
   acceptance: "DTO созданы как Records с валидацией (@NotNull для userId, @Size(max=280) для comment), @Schema аннотациями, размещены в правильных пакетах"
+  note: "Созданы DTO: RetweetRequestDto (com.twitter.dto.request) с полями userId (@NotNull) и comment (@Size(max=280), nullable), RetweetResponseDto (com.twitter.dto.response) с полями id, tweetId, userId, comment (nullable), createdAt. Оба DTO созданы как Records с @Builder, полными @Schema аннотациями, JavaDoc и примерами."
 - [ ] (P1) #7: Реализация Mapper интерфейса RetweetMapper — Создать MapStruct интерфейс
   acceptance: "Mapper интерфейс создан с методами toRetweet(RetweetRequestDto, UUID tweetId) и toRetweetResponseDto(Retweet)"
 - [ ] (P1) #8: Реализация Validator интерфейса RetweetValidator — Создать интерфейс
@@ -101,4 +104,3 @@
   - [STANDART_SWAGGER.md](../../standards/STANDART_SWAGGER.md)
   - [STANDART_README.md](../../standards/STANDART_README.md)
   - [STANDART_POSTMAN.md](../../standards/STANDART_POSTMAN.md)
-

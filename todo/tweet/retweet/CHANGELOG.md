@@ -66,3 +66,81 @@
 - Используется `CREATE INDEX IF NOT EXISTS` для индексов
 - Требуется добавить поле `retweets_count` в таблицу `tweets` (отдельный скрипт или миграция) перед использованием функционала ретвита
 
+### Step #4: Реализация Entity Retweet — выполнено
+**Время**: 2025-01-27  
+**Автор**: assistant
+
+**Выполнено**:
+- Создана JPA сущность `Retweet` в `services/tweet-api/src/main/java/com/twitter/entity/Retweet.java`
+- Определены поля: id (UUID, автогенерация), tweetId (UUID, NOT NULL), userId (UUID, NOT NULL), comment (String, nullable, max 280), createdAt (LocalDateTime, автогенерация)
+- Добавлено уникальное ограничение `uk_tweet_retweets_tweet_user` на паре `(tweet_id, user_id)` через `@Table` аннотацию
+- Реализованы бизнес-методы: `isByUser(UUID userId)`, `isForTweet(UUID tweetId)`, `hasComment()`
+- Добавлены валидационные аннотации: `@NotNull` для tweetId и userId, `@Size(max=280)` для comment
+- Использованы Lombok аннотации: `@Data`, `@Builder`, `@NoArgsConstructor`, `@AllArgsConstructor`
+- Использована `@CreationTimestamp` для автоматической установки createdAt
+- Добавлен полный JavaDoc с описанием класса, полей и методов
+
+**Артефакты**:
+- `services/tweet-api/src/main/java/com/twitter/entity/Retweet.java` - JPA сущность Retweet
+
+**Примечания**:
+- Entity создана по аналогии с существующей Entity `Like`
+- Структура соответствует SQL скрипту `script_5_tweet_retweets.sql`
+- Все поля соответствуют требованиям из `design-api-contracts.md`
+- Бизнес-методы реализованы согласно проектированию
+- Код соответствует стандартам проекта (STANDART_CODE.md)
+
+### Step #5: Реализация Repository RetweetRepository — выполнено
+**Время**: 2025-01-27  
+**Автор**: assistant
+
+**Выполнено**:
+- Создан Spring Data JPA репозиторий `RetweetRepository` в `services/tweet-api/src/main/java/com/twitter/repository/RetweetRepository.java`
+- Репозиторий расширяет `JpaRepository<Retweet, UUID>`
+- Добавлена аннотация `@Repository`
+- Реализованы Derived Query Methods:
+  - `Optional<Retweet> findByTweetIdAndUserId(UUID tweetId, UUID userId)` - поиск ретвита по паре tweetId и userId
+  - `boolean existsByTweetIdAndUserId(UUID tweetId, UUID userId)` - проверка существования ретвита по паре tweetId и userId
+- Методы созданы без JavaDoc (согласно стандартам проекта для Derived Query Methods)
+
+**Артефакты**:
+- `services/tweet-api/src/main/java/com/twitter/repository/RetweetRepository.java` - Spring Data JPA репозиторий для Retweet
+
+**Примечания**:
+- Репозиторий создан по аналогии с существующим `LikeRepository`
+- Структура соответствует требованиям из `design-api-contracts.md`
+- Derived Query Methods самодокументируемые, JavaDoc не требуется (согласно STANDART_CODE.md)
+- Методы будут использоваться в `RetweetValidator` для проверки уникальности и существования ретвитов
+
+### Step #6: Реализация DTO для ретвита — выполнено
+**Время**: 2025-01-27  
+**Автор**: assistant
+
+**Выполнено**:
+- Создан `RetweetRequestDto` в `services/tweet-api/src/main/java/com/twitter/dto/request/RetweetRequestDto.java`
+- Создан `RetweetResponseDto` в `services/tweet-api/src/main/java/com/twitter/dto/response/RetweetResponseDto.java`
+- Оба DTO созданы как Records с аннотацией `@Builder`
+- `RetweetRequestDto` содержит:
+  - `userId` (UUID, @NotNull, required) - ID пользователя, который ретвитит
+  - `comment` (String, @Size(max=280), nullable) - опциональный комментарий (1-280 символов)
+- `RetweetResponseDto` содержит:
+  - `id` (UUID) - уникальный идентификатор ретвита
+  - `tweetId` (UUID) - ID твита, который был ретвитнут
+  - `userId` (UUID) - ID пользователя, который ретвитнул
+  - `comment` (String, nullable) - опциональный комментарий
+  - `createdAt` (LocalDateTime, @JsonFormat) - время создания ретвита
+- Добавлены полные `@Schema` аннотации для всех полей с описаниями, примерами и форматами
+- Добавлены валидационные аннотации: `@NotNull` для userId, `@Size(max=280)` для comment
+- Добавлен полный JavaDoc с описанием DTO и параметров
+- Добавлены примеры в `@Schema` аннотациях для Swagger документации
+
+**Артефакты**:
+- `services/tweet-api/src/main/java/com/twitter/dto/request/RetweetRequestDto.java` - DTO для запроса ретвита
+- `services/tweet-api/src/main/java/com/twitter/dto/response/RetweetResponseDto.java` - DTO для ответа ретвита
+
+**Примечания**:
+- DTO созданы по аналогии с существующими `LikeTweetRequestDto` и `LikeResponseDto`
+- Структура полностью соответствует требованиям из `design-api-contracts.md`
+- Валидация comment: null разрешен, пустая строка - нет, максимум 280 символов (дополнительная проверка будет в Validator)
+- Все поля имеют полную документацию для Swagger
+- Использован `@JsonFormat` для правильного форматирования даты в JSON ответах
