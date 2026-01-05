@@ -1,5 +1,6 @@
 - реализовать остальные методы для tweet из TWEET_API_COMMON_2.md
 - добавить в admin-script лайки
+- добавить в admin-script ретвиты
 - просмотреть сервисы и вынести общие дто в common
 - перенести sql в admin-script с liquidbase
 - сделать стандарты на sql
