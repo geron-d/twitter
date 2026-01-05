@@ -36,16 +36,20 @@
 - [x] (P1) [2025-01-27] #6: Реализация DTO для ретвита — Создать RetweetRequestDto и RetweetResponseDto
   acceptance: "DTO созданы как Records с валидацией (@NotNull для userId, @Size(max=280) для comment), @Schema аннотациями, размещены в правильных пакетах"
   note: "Созданы DTO: RetweetRequestDto (com.twitter.dto.request) с полями userId (@NotNull) и comment (@Size(max=280), nullable), RetweetResponseDto (com.twitter.dto.response) с полями id, tweetId, userId, comment (nullable), createdAt. Оба DTO созданы как Records с @Builder, полными @Schema аннотациями, JavaDoc и примерами."
-- [ ] (P1) #7: Реализация Mapper интерфейса RetweetMapper — Создать MapStruct интерфейс
+- [x] (P1) [2026-01-05 16:40] #7: Реализация Mapper интерфейса RetweetMapper — Создать MapStruct интерфейс
   acceptance: "Mapper интерфейс создан с методами toRetweet(RetweetRequestDto, UUID tweetId) и toRetweetResponseDto(Retweet)"
-- [ ] (P1) #8: Реализация Validator интерфейса RetweetValidator — Создать интерфейс
+  note: "Создан MapStruct интерфейс RetweetMapper в services/tweet-api/src/main/java/com/twitter/mapper/RetweetMapper.java с методами toRetweet(RetweetRequestDto, UUID tweetId) и toRetweetResponseDto(Retweet). Метод toRetweet игнорирует service-managed поля (id, createdAt), маппит tweetId из параметра, userId и comment из requestDto. Метод toRetweetResponseDto преобразует Retweet entity в RetweetResponseDto. Интерфейс создан по аналогии с LikeMapper, соответствует стандартам проекта."
+- [x] (P1) [2026-01-05 16:40] #8: Реализация Validator интерфейса RetweetValidator — Создать интерфейс
   acceptance: "Validator interface создан с методом validateForRetweet(UUID tweetId, RetweetRequestDto requestDto)"
-- [ ] (P1) #9: Реализация Service интерфейса RetweetService — Создать интерфейс
+  note: "Создан интерфейс RetweetValidator в services/tweet-api/src/main/java/com/twitter/validation/RetweetValidator.java с методом validateForRetweet(UUID tweetId, RetweetRequestDto requestDto). Метод документирован с описанием всех проверок: существование твита, существование пользователя, запрет self-retweet, проверка уникальности, валидация комментария. Определены исключения: BusinessRuleValidationException, UniquenessValidationException, FormatValidationException. Интерфейс создан по аналогии с LikeValidator, соответствует стандартам проекта."
+- [x] (P1) [2026-01-05 16:40] #9: Реализация Service интерфейса RetweetService — Создать интерфейс
   acceptance: "Service interface создан с методом retweetTweet(UUID tweetId, RetweetRequestDto requestDto)"
+  note: "Создан интерфейс RetweetService в services/tweet-api/src/main/java/com/twitter/service/RetweetService.java с методом retweetTweet(UUID tweetId, RetweetRequestDto requestDto). Метод документирован с описанием всех шагов бизнес-логики: валидация, создание Entity, сохранение в БД, обновление счетчика retweetsCount, маппинг в Response DTO. Определены исключения: BusinessRuleValidationException, UniquenessValidationException, FormatValidationException. Интерфейс создан по аналогии с LikeService, соответствует стандартам проекта."
 
 ### Эндпоинт: POST /api/v1/tweets/{tweetId}/retweet
-- [ ] (P1) #10: Validator реализация RetweetValidatorImpl — Реализовать все проверки валидации
+- [x] (P1) [2026-01-05 16:40] #10: Validator реализация RetweetValidatorImpl — Реализовать все проверки валидации
   acceptance: "Методы валидации реализованы в RetweetValidatorImpl для эндпоинта: существование твита, существование пользователя, запрет self-retweet, проверка дублирования, валидация комментария"
+  note: "Создана реализация RetweetValidatorImpl в services/tweet-api/src/main/java/com/twitter/validation/RetweetValidatorImpl.java. Реализован метод validateForRetweet с проверками: tweetId не null, существование твита (не удален), requestDto не null, userId не null, существование пользователя через UserGateway, запрет self-retweet, проверка уникальности ретвита, валидация комментария (null разрешен, но если не null - не пустая строка и не более 280 символов). Добавлены приватные методы: validateUserExists, validateNoSelfRetweet, validateUniqueness, validateComment. Все методы документированы JavaDoc. Реализация создана по аналогии с LikeValidatorImpl, соответствует стандартам проекта."
 - [ ] (P1) #11: Service реализация RetweetServiceImpl — Реализовать бизнес-логику
   acceptance: "Методы добавлены в RetweetServiceImpl для эндпоинта, используют @Transactional, вызывают валидацию, обновляют счетчик retweetsCount"
 - [ ] (P1) #12: OpenAPI интерфейс RetweetApi — Создать интерфейс с аннотациями
