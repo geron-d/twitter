@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "twitter-tweet-api-collection",
 		"name": "twitter",
-		"description": "REST API for tweet management in the Twitter microservices system.\n\nThis API provides comprehensive tweet management capabilities including:\n- Tweet creation with content validation\n- Tweet retrieval by ID\n- User tweets retrieval with pagination\n- Timeline (news feed) retrieval with pagination\n- Tweet update with authorization checks\n- Tweet deletion (soft delete) with authorization checks\n- Tweet likes with business rule validation (no self-likes, uniqueness)\n- Tweet unlike (remove like) with business rule validation\n- User existence validation via users-api integration\n- Following list retrieval via follower-api integration\n- Content length validation (1-280 characters)\n- Business rule enforcement\n\n## Authentication\nCurrently, the API does not require authentication for basic operations.\nFuture versions will implement JWT-based authentication.\n\n## Rate Limiting\nAPI requests are subject to rate limiting to ensure system stability.\nPlease refer to response headers for current rate limit information.\n\n## Error Handling\nThe API uses standard HTTP status codes and follows RFC 7807 Problem Details\nfor error responses, providing detailed information about validation failures\nand business rule violations.",
+		"description": "REST API for tweet management in the Twitter microservices system.\n\nThis API provides comprehensive tweet management capabilities including:\n- Tweet creation with content validation\n- Tweet retrieval by ID\n- User tweets retrieval with pagination\n- Timeline (news feed) retrieval with pagination\n- Tweet update with authorization checks\n- Tweet deletion (soft delete) with authorization checks\n- Tweet likes with business rule validation (no self-likes, uniqueness)\n- Tweet unlike (remove like) with business rule validation\n- Tweet retweets with optional comment (no self-retweets, uniqueness)\n- User existence validation via users-api integration\n- Following list retrieval via follower-api integration\n- Content length validation (1-280 characters)\n- Business rule enforcement\n\n## Authentication\nCurrently, the API does not require authentication for basic operations.\nFuture versions will implement JWT-based authentication.\n\n## Rate Limiting\nAPI requests are subject to rate limiting to ensure system stability.\nPlease refer to response headers for current rate limit information.\n\n## Error Handling\nThe API uses standard HTTP status codes and follows RFC 7807 Problem Details\nfor error responses, providing detailed information about validation failures\nand business rule violations.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "twitter-tweet-api"
 	},
@@ -2380,6 +2380,610 @@
 							"body": "{\n  \"type\": \"https://example.com/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"Invalid UUID format for tweetId parameter\",\n  \"timestamp\": \"2025-01-27T15:30:00Z\"\n}"
 						}
 					]
+				},
+				{
+					"name": "retweet tweet",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": \"{{userId}}\",\n  \"comment\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tweets/{{tweetId}}/retweet",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tweets",
+								"{{tweetId}}",
+								"retweet"
+							]
+						},
+						"description": "Retweets a tweet by creating a retweet record. It performs validation on the request data, checks if the tweet exists and is not deleted, verifies that the user exists, prevents self-retweets (users cannot retweet their own tweets), ensures uniqueness (a user can only retweet a tweet once), and validates the optional comment (if provided, must be between 1 and 280 characters and cannot be an empty string). The retweet operation is atomic and updates the tweet's retweets count."
+					},
+					"response": [
+						{
+							"name": "tweet retweeted with comment",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userId\": \"123e4567-e89b-12d3-a456-426614174000\",\n  \"comment\": \"Great tweet!\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/retweet",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"tweets",
+										"223e4567-e89b-12d3-a456-426614174001",
+										"retweet"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"id\": \"987e6543-e21b-43d2-b654-321987654321\",\n  \"tweetId\": \"223e4567-e89b-12d3-a456-426614174001\",\n  \"userId\": \"123e4567-e89b-12d3-a456-426614174000\",\n  \"comment\": \"Great tweet!\",\n  \"createdAt\": \"2025-01-27T15:30:00Z\"\n}"
+						},
+						{
+							"name": "tweet retweeted without comment",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userId\": \"123e4567-e89b-12d3-a456-426614174000\",\n  \"comment\": null\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/retweet",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"tweets",
+										"223e4567-e89b-12d3-a456-426614174001",
+										"retweet"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"id\": \"987e6543-e21b-43d2-b654-321987654321\",\n  \"tweetId\": \"223e4567-e89b-12d3-a456-426614174001\",\n  \"userId\": \"123e4567-e89b-12d3-a456-426614174000\",\n  \"comment\": null,\n  \"createdAt\": \"2025-01-27T15:30:00Z\"\n}"
+						},
+						{
+							"name": "validation error - null userId",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userId\": null,\n  \"comment\": \"Great tweet!\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/retweet",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"tweets",
+										"223e4567-e89b-12d3-a456-426614174001",
+										"retweet"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/problem+json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"type\": \"https://example.com/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"Validation failed: userId: User ID cannot be null\",\n  \"timestamp\": \"2025-01-27T15:30:00Z\"\n}"
+						},
+						{
+							"name": "validation error - missing body",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/retweet",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"tweets",
+										"223e4567-e89b-12d3-a456-426614174001",
+										"retweet"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/problem+json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"type\": \"https://example.com/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"Required request body is missing\",\n  \"timestamp\": \"2025-01-27T15:30:00Z\"\n}"
+						},
+						{
+							"name": "validation error - empty comment",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userId\": \"123e4567-e89b-12d3-a456-426614174000\",\n  \"comment\": \"\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/retweet",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"tweets",
+										"223e4567-e89b-12d3-a456-426614174001",
+										"retweet"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/problem+json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"type\": \"https://example.com/errors/format-validation\",\n  \"title\": \"Format Validation Error\",\n  \"status\": 400,\n  \"detail\": \"Comment cannot be empty string. If provided, it must be between 1 and 280 characters.\",\n  \"timestamp\": \"2025-01-27T15:30:00Z\"\n}"
+						},
+						{
+							"name": "validation error - comment too long",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userId\": \"123e4567-e89b-12d3-a456-426614174000\",\n  \"comment\": \"This is a very long comment that exceeds the maximum allowed length of 280 characters. This is a very long comment that exceeds the maximum allowed length of 280 characters. This is a very long comment that exceeds the maximum allowed length of 280 characters. This is a very long comment that exceeds the maximum allowed length of 280 characters.\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/retweet",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"tweets",
+										"223e4567-e89b-12d3-a456-426614174001",
+										"retweet"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/problem+json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"type\": \"https://example.com/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"Validation failed: comment: Comment must not exceed 280 characters\",\n  \"timestamp\": \"2025-01-27T15:30:00Z\"\n}"
+						},
+						{
+							"name": "tweet not found error",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userId\": \"123e4567-e89b-12d3-a456-426614174000\",\n  \"comment\": \"Great tweet!\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/tweets/00000000-0000-0000-0000-000000000000/retweet",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"tweets",
+										"00000000-0000-0000-0000-000000000000",
+										"retweet"
+									]
+								}
+							},
+							"status": "Conflict",
+							"code": 409,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/problem+json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"type\": \"https://example.com/errors/business-rule-validation\",\n  \"title\": \"Business Rule Validation Error\",\n  \"status\": 409,\n  \"detail\": \"Business rule 'TWEET_NOT_FOUND' violated for context: 00000000-0000-0000-0000-000000000000\",\n  \"ruleName\": \"TWEET_NOT_FOUND\",\n  \"context\": \"00000000-0000-0000-0000-000000000000\",\n  \"timestamp\": \"2025-01-27T15:30:00Z\"\n}"
+						},
+						{
+							"name": "user not exists error",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userId\": \"00000000-0000-0000-0000-000000000000\",\n  \"comment\": \"Great tweet!\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/retweet",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"tweets",
+										"223e4567-e89b-12d3-a456-426614174001",
+										"retweet"
+									]
+								}
+							},
+							"status": "Conflict",
+							"code": 409,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/problem+json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"type\": \"https://example.com/errors/business-rule-validation\",\n  \"title\": \"Business Rule Validation Error\",\n  \"status\": 409,\n  \"detail\": \"Business rule 'USER_NOT_EXISTS' violated for context: 00000000-0000-0000-0000-000000000000\",\n  \"ruleName\": \"USER_NOT_EXISTS\",\n  \"context\": \"00000000-0000-0000-0000-000000000000\",\n  \"timestamp\": \"2025-01-27T15:30:00Z\"\n}"
+						},
+						{
+							"name": "self-retweet error",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userId\": \"123e4567-e89b-12d3-a456-426614174000\",\n  \"comment\": \"Great tweet!\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/tweets/123e4567-e89b-12d3-a456-426614174000/retweet",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"tweets",
+										"123e4567-e89b-12d3-a456-426614174000",
+										"retweet"
+									]
+								}
+							},
+							"status": "Conflict",
+							"code": 409,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/problem+json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"type\": \"https://example.com/errors/business-rule-validation\",\n  \"title\": \"Business Rule Validation Error\",\n  \"status\": 409,\n  \"detail\": \"Business rule 'SELF_RETWEET_NOT_ALLOWED' violated for context: Users cannot retweet their own tweets\",\n  \"ruleName\": \"SELF_RETWEET_NOT_ALLOWED\",\n  \"context\": \"Users cannot retweet their own tweets\",\n  \"timestamp\": \"2025-01-27T15:30:00Z\"\n}"
+						},
+						{
+							"name": "duplicate retweet error",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userId\": \"123e4567-e89b-12d3-a456-426614174000\",\n  \"comment\": \"Great tweet!\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/retweet",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"tweets",
+										"223e4567-e89b-12d3-a456-426614174001",
+										"retweet"
+									]
+								}
+							},
+							"status": "Conflict",
+							"code": 409,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/problem+json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"type\": \"https://example.com/errors/uniqueness-validation\",\n  \"title\": \"Uniqueness Validation Error\",\n  \"status\": 409,\n  \"detail\": \"A retweet already exists for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000\",\n  \"fieldName\": \"retweet\",\n  \"fieldValue\": \"tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000\",\n  \"timestamp\": \"2025-01-27T15:30:00Z\"\n}"
+						},
+						{
+							"name": "invalid uuid format error",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userId\": \"123e4567-e89b-12d3-a456-426614174000\",\n  \"comment\": \"Great tweet!\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/tweets/invalid-uuid/retweet",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"tweets",
+										"invalid-uuid",
+										"retweet"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/problem+json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"type\": \"https://example.com/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"Invalid UUID format for tweetId parameter\",\n  \"timestamp\": \"2025-01-27T15:30:00Z\"\n}"
+						}
+					]
 				}
 			]
 		}
@@ -2407,4 +3011,3 @@
 		}
 	]
 }
-

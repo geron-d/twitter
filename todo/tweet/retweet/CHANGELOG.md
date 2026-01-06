@@ -471,3 +471,119 @@
 - Исправление статус-кодов было критически важно, так как документация не соответствовала реальному поведению API
 - Все примеры соответствуют реальным ответам API, проверенным через интеграционные тесты
 - Документация полная и готова для использования в Swagger UI
+
+### Step #18: Обновление README.md — выполнено
+**Время**: 2026-01-05 17:30  
+**Автор**: assistant
+
+**Выполнено**:
+- Обновлен README.md для tweet-api с информацией о новом эндпоинте POST /api/v1/tweets/{tweetId}/retweet
+- Добавлено в основные возможности: ретвит твитов с опциональным комментарием
+- Обновлена структура пакетов: добавлены все компоненты для ретвитов (RetweetApi, RetweetController, RetweetService, RetweetValidator, RetweetRepository, RetweetMapper, RetweetRequestDto, RetweetResponseDto, Retweet entity)
+- Добавлен эндпоинт в таблицу эндпоинтов
+- Добавлено детальное описание эндпоинта ретвита (раздел 9) с:
+  - Параметрами пути и тела запроса
+  - Валидацией (userId, comment, tweetId)
+  - Бизнес-правилами (существование твита/пользователя, запрет self-retweet, уникальность, валидация комментария)
+  - Ответами (201, 400, 409) с примерами для всех сценариев
+- Добавлено описание RetweetService в раздел "Бизнес-логика":
+  - Описание метода retweetTweet
+  - Ключевые бизнес-правила для ретвитов (7 правил)
+- Добавлено описание RetweetValidator в раздел "Слой валидации":
+  - Описание интерфейса RetweetValidator
+  - Многоэтапная валидация для операции RETWEET (8 этапов)
+- Добавлена информация о таблице tweet_retweets в раздел "Работа с базой данных":
+  - Таблица с полями (id, tweet_id, user_id, comment, created_at)
+  - Ограничения базы данных (UNIQUE constraint, foreign keys, индексы)
+  - Описание комментария и обновления счетчика
+- Обновлена таблица tweets: добавлено поле retweets_count
+- Добавлен пример использования ретвита в раздел "Примеры использования":
+  - Примеры curl команд (с комментарием и без комментария)
+  - Примеры успешных ответов (201 Created)
+  - Примеры ошибочных ответов (409 Conflict для всех сценариев)
+
+**Артефакты**:
+- `services/tweet-api/README.md` - обновлена документация с информацией о ретвитах
+
+**Примечания**:
+- Документация соответствует стандартам проекта (STANDART_README.md)
+- Вся документация написана на русском языке
+- Все примеры соответствуют реальному поведению API
+- Документация полная и готова для использования разработчиками
+
+### Step #19: Обновление Postman коллекции — выполнено
+**Время**: 2026-01-05 17:40  
+**Автор**: assistant
+
+**Выполнено**:
+- Добавлен запрос "retweet tweet" в Postman коллекцию `twitter-tweet-api.postman_collection.json`
+- Запрос размещен после запроса "remove like" в структуре коллекции
+- Реализован запрос с правильной структурой:
+  - Метод: POST
+  - Путь: `/api/v1/tweets/{{tweetId}}/retweet`
+  - Заголовки: Content-Type: application/json, Accept: application/json
+  - Тело запроса: JSON с userId (обязательный) и comment (опциональный, null по умолчанию)
+  - Полное описание запроса с валидацией и бизнес-правилами
+- Добавлены примеры ответов для всех сценариев:
+  - **201 Created**: tweet retweeted with comment, tweet retweeted without comment
+  - **400 Bad Request**: validation error - null userId, validation error - missing body, validation error - empty comment, validation error - comment too long, invalid uuid format error
+  - **409 Conflict**: tweet not found error, user not exists error, self-retweet error, duplicate retweet error
+- Все примеры ответов используют правильные Content-Type:
+  - `application/json` для успешных ответов (201)
+  - `application/problem+json` для ошибок (400, 409)
+- Все примеры ошибок следуют RFC 7807 Problem Details формату
+- Обновлено описание коллекции: добавлена информация о ретвитах в список возможностей API
+- Запрос соответствует стандартам проекта (STANDART_POSTMAN.md)
+
+**Артефакты**:
+- `postman/tweet-api/twitter-tweet-api.postman_collection.json` - добавлен запрос "retweet tweet" с примерами ответов
+
+**Примечания**:
+- Запрос создан по аналогии с запросом "like tweet"
+- Все примеры ответов соответствуют реальному поведению API, проверенному через интеграционные тесты
+- Структура запроса полностью соответствует стандартам проекта (STANDART_POSTMAN.md)
+- Именование запроса в lowercase с пробелами: "retweet tweet"
+- Все примеры ответов имеют правильные статус-коды и форматы
+- Переменные окружения не требуют обновления (используются существующие userId и tweetId)
+
+### Step #20: Проверка соответствия стандартам — выполнено
+**Время**: 2026-01-05 17:50  
+**Автор**: assistant
+
+**Выполнено**:
+- Проведена полная проверка соответствия всех стандартов проекта для функционала ретвита
+- Проверены все компоненты:
+  - **Entity**: Retweet (Lombok аннотации, @CreationTimestamp, валидация, бизнес-методы)
+  - **Repository**: RetweetRepository (Derived Query Methods без JavaDoc - соответствует стандартам)
+  - **DTO**: RetweetRequestDto, RetweetResponseDto (Records, @Schema аннотации, валидация)
+  - **Mapper**: RetweetMapper (MapStruct интерфейс, @Mapping для игнорирования полей)
+  - **Validator**: RetweetValidator, RetweetValidatorImpl (правильные исключения из common-lib)
+  - **Service**: RetweetService, RetweetServiceImpl (@Transactional, правильная структура)
+  - **Controller**: RetweetController, RetweetApi (@LoggableRequest, OpenAPI аннотации)
+  - **Тесты**: RetweetServiceImplTest, RetweetValidatorImplTest, RetweetMapperTest, RetweetControllerTest
+- Проверены все стандарты:
+  - **STANDART_CODE.md**: ✅ Records для DTO, Lombok, MapStruct, валидация, структура пакетов
+  - **STANDART_PROJECT.md**: ✅ @LoggableRequest, правильные исключения из common-lib (BusinessRuleValidationException, UniquenessValidationException, FormatValidationException)
+  - **STANDART_TEST.md**: ✅ Структура тестов, именование methodName_WhenCondition_ShouldExpectedResult, @Nested, AssertJ, Mockito
+  - **STANDART_JAVADOC.md**: ✅ Полный JavaDoc для всех публичных классов и методов, @author geron, @version 1.0, отсутствие JavaDoc для Derived Query Methods
+  - **STANDART_SWAGGER.md**: ✅ Полные OpenAPI аннотации, @ExampleObject для всех сценариев, @Schema для DTO
+  - **STANDART_README.md**: ✅ Обновлен в шаге #18
+  - **STANDART_POSTMAN.md**: ✅ Обновлен в шаге #19
+
+**Результаты проверки**:
+- ✅ Все компоненты соответствуют STANDART_CODE.md
+- ✅ Все компоненты соответствуют STANDART_PROJECT.md
+- ✅ Все тесты соответствуют STANDART_TEST.md
+- ✅ Все компоненты имеют полный JavaDoc согласно STANDART_JAVADOC.md
+- ✅ Все компоненты имеют полные OpenAPI аннотации согласно STANDART_SWAGGER.md
+- ✅ README.md обновлен согласно STANDART_README.md
+- ✅ Postman коллекция обновлена согласно STANDART_POSTMAN.md
+
+**Артефакты**:
+- Отчет о проверке соответствия стандартам (в CHANGELOG.md)
+
+**Примечания**:
+- Все проверки пройдены успешно
+- Код полностью соответствует всем стандартам проекта
+- Функционал ретвита готов к использованию
+- Все компоненты следуют лучшим практикам проекта
