@@ -44,4 +44,23 @@ public interface RetweetService {
      * @throws FormatValidationException       if comment validation fails (empty string or exceeds 280 characters)
      */
     RetweetResponseDto retweetTweet(UUID tweetId, RetweetRequestDto requestDto);
+
+    /**
+     * Removes a retweet from a tweet by deleting the retweet record.
+     * <p>
+     * This method performs the following operations:
+     * 1. Validates the retweet removal request (tweet existence, user existence, retweet existence)
+     * 2. Finds the retweet record in the database
+     * 3. Deletes the retweet record
+     * 4. Decrements the tweet's retweets count
+     * 5. Saves the updated tweet
+     * <p>
+     * The operation is atomic and executed within a transaction. If any step fails,
+     * the entire operation is rolled back.
+     *
+     * @param tweetId    the unique identifier of the tweet to remove retweet from
+     * @param requestDto the retweet removal request containing userId
+     * @throws BusinessRuleValidationException if tweetId is null, tweet doesn't exist, user doesn't exist, or retweet doesn't exist
+     */
+    void removeRetweet(UUID tweetId, RetweetRequestDto requestDto);
 }

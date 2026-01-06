@@ -53,4 +53,22 @@ public class RetweetServiceImpl implements RetweetService {
 
         return retweetMapper.toRetweetResponseDto(savedRetweet);
     }
+
+    /**
+     * @see RetweetService#removeRetweet
+     */
+    @Override
+    @Transactional
+    public void removeRetweet(UUID tweetId, RetweetRequestDto requestDto) {
+        retweetValidator.validateForRemoveRetweet(tweetId, requestDto);
+
+        Retweet retweet = retweetRepository.findByTweetIdAndUserId(tweetId, requestDto.userId())
+            .orElseThrow(() -> new IllegalStateException("Retweet not found after validation"));
+        retweetRepository.delete(retweet);
+
+        Tweet tweet = tweetRepository.findByIdAndIsDeletedFalse(tweetId)
+            .orElseThrow(() -> new IllegalStateException("Tweet not found after validation"));
+        tweet.decrementRetweetsCount();
+        tweetRepository.saveAndFlush(tweet);
+    }
 }

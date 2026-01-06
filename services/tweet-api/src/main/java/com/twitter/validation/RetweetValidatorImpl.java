@@ -139,4 +139,52 @@ public class RetweetValidatorImpl implements RetweetValidator {
             throw new FormatValidationException("comment", "MAX_LENGTH", String.format("Comment must not exceed 280 characters, but was %d characters", trimmedComment.length()));
         }
     }
+
+    /**
+     * @see RetweetValidator#validateForRemoveRetweet
+     */
+    @Override
+    public void validateForRemoveRetweet(UUID tweetId, RetweetRequestDto requestDto) {
+        if (tweetId == null) {
+            log.warn("Tweet ID is null");
+            throw new BusinessRuleValidationException("TWEET_ID_NULL", "Tweet ID cannot be null");
+        }
+
+        tweetRepository.findByIdAndIsDeletedFalse(tweetId)
+            .orElseThrow(() -> {
+                log.warn("Tweet with ID {} not found or is deleted", tweetId);
+                return new BusinessRuleValidationException("TWEET_NOT_FOUND", tweetId);
+            });
+
+        if (requestDto == null) {
+            log.warn("Retweet request is null");
+            throw new BusinessRuleValidationException("RETWEET_REQUEST_NULL", "Retweet request cannot be null");
+        }
+
+        if (requestDto.userId() == null) {
+            log.warn("User ID is null");
+            throw new BusinessRuleValidationException("USER_ID_NULL", "User ID cannot be null");
+        }
+
+        validateUserExists(requestDto.userId());
+        validateRetweetExists(tweetId, requestDto.userId());
+    }
+
+    /**
+     * Validates that the retweet exists for the given tweet and user.
+     * <p>
+     * This method checks if a retweet exists for the given tweet and user
+     * using the repository. This validation is required before removing a retweet.
+     *
+     * @param tweetId the ID of the tweet being unretweeted
+     * @param userId  the ID of the user attempting to remove the retweet
+     * @throws BusinessRuleValidationException if retweet doesn't exist
+     */
+    private void validateRetweetExists(UUID tweetId, UUID userId) {
+        boolean retweetExists = retweetRepository.existsByTweetIdAndUserId(tweetId, userId);
+        if (!retweetExists) {
+            log.warn("Retweet does not exist for tweet {} and user {}", tweetId, userId);
+            throw new BusinessRuleValidationException("RETWEET_NOT_FOUND", String.format("Retweet not found for tweet %s and user %s", tweetId, userId));
+        }
+    }
 }

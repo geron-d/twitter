@@ -34,4 +34,20 @@ public interface RetweetValidator {
      * @throws FormatValidationException       if comment validation fails (empty string or exceeds 280 characters)
      */
     void validateForRetweet(UUID tweetId, RetweetRequestDto requestDto);
+
+    /**
+     * Performs complete validation for tweet retweet removal operation.
+     * <p>
+     * This method validates retweet removal data including:
+     * <ul>
+     *   <li>Existence of the tweet (tweetId must not be null and tweet must exist and not be deleted)</li>
+     *   <li>Existence of the user (userId must not be null and user must exist)</li>
+     *   <li>Existence of the retweet (retweet must exist for the given tweet and user)</li>
+     * </ul>
+     *
+     * @param tweetId    the unique identifier of the tweet to remove retweet from
+     * @param requestDto DTO containing userId for the retweet removal
+     * @throws BusinessRuleValidationException if tweetId is null, tweet doesn't exist, user doesn't exist, or retweet doesn't exist
+     */
+    void validateForRemoveRetweet(UUID tweetId, RetweetRequestDto requestDto);
 }

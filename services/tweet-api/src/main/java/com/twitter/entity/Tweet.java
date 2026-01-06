@@ -192,4 +192,20 @@ public class Tweet {
             this.retweetsCount++;
         }
     }
+
+    /**
+     * Decrements the retweets count for this tweet.
+     * <p>
+     * This method atomically decrements the retweetsCount field by 1.
+     * It should be called when a retweet is removed from this tweet.
+     * The method handles null values and prevents negative counts by setting the counter to 0
+     * if it would become negative.
+     */
+    public void decrementRetweetsCount() {
+        if (this.retweetsCount == null || this.retweetsCount <= 0) {
+            this.retweetsCount = 0;
+        } else {
+            this.retweetsCount--;
+        }
+    }
 }
