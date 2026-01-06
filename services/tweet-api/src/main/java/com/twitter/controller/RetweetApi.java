@@ -140,8 +140,8 @@ public interface RetweetApi {
             )
         ),
         @ApiResponse(
-            responseCode = "404",
-            description = "Resource not found",
+            responseCode = "409",
+            description = "Business rule violation or uniqueness violation",
             content = @Content(
                 mediaType = "application/problem+json",
                 examples = {
@@ -152,7 +152,7 @@ public interface RetweetApi {
                             {
                               "type": "https://example.com/errors/business-rule-validation",
                               "title": "Business Rule Validation Error",
-                              "status": 404,
+                              "status": 409,
                               "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
                               "ruleName": "TWEET_NOT_FOUND",
                               "context": "223e4567-e89b-12d3-a456-426614174001",
@@ -167,23 +167,14 @@ public interface RetweetApi {
                             {
                               "type": "https://example.com/errors/business-rule-validation",
                               "title": "Business Rule Validation Error",
-                              "status": 404,
+                              "status": 409,
                               "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
                               "ruleName": "USER_NOT_EXISTS",
                               "context": "123e4567-e89b-12d3-a456-426614174000",
                               "timestamp": "2025-01-27T15:30:00Z"
                             }
                             """
-                    )
-                }
-            )
-        ),
-        @ApiResponse(
-            responseCode = "409",
-            description = "Business rule violation or uniqueness violation",
-            content = @Content(
-                mediaType = "application/problem+json",
-                examples = {
+                    ),
                     @ExampleObject(
                         name = "Self-Retweet Error",
                         summary = "User cannot retweet their own tweet",

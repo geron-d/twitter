@@ -414,3 +414,60 @@
 - Тесты изолированы и независимы друг от друга
 - Используется паттерн AAA (Arrange-Act-Assert) для структуры тестов
 - Все тесты проверяют взаимодействие с зависимостями через verify()
+
+### Step #16: Integration тесты для эндпоинта — выполнено
+**Время**: 2026-01-05 17:10  
+**Автор**: assistant
+
+**Выполнено**:
+- Создан интеграционный тест `RetweetControllerTest` в `services/tweet-api/src/test/java/com/twitter/controller/RetweetControllerTest.java`
+- Реализованы тесты для всех статус-кодов:
+  - **201 Created**: успешные сценарии с комментарием и без комментария
+  - **400 Bad Request**: валидация (null userId, отсутствие тела запроса, пустой комментарий, превышение максимальной длины комментария, комментарий точной максимальной длины)
+  - **409 Conflict**: твит не найден, пользователь не найден, self-retweet запрещен, дублирование ретвита, ошибка users-api
+- Добавлены тесты для проверки инкремента счетчика `retweetsCount` в Tweet entity
+- Все тесты используют:
+  - `@Nested` для группировки тестов по функциональности
+  - Паттерн именования `methodName_WhenCondition_ShouldExpectedResult`
+  - `BaseIntegrationTest` для настройки окружения (PostgreSQL, WireMock)
+  - `MockMvc` для тестирования REST эндпоинтов
+  - `WireMock` для мокирования users-api
+  - `@Transactional` для изоляции тестов
+  - AssertJ для assertions
+- Тесты следуют стандартам проекта (STANDART_TEST.md)
+- Тесты созданы по аналогии с `LikeControllerTest`
+
+**Артефакты**:
+- `services/tweet-api/src/test/java/com/twitter/controller/RetweetControllerTest.java` - интеграционные тесты для RetweetController
+
+**Примечания**:
+- Все тесты проверяют корректность работы эндпоинта POST /api/v1/tweets/{tweetId}/retweet
+- Тесты проверяют как успешные, так и ошибочные сценарии
+- Тесты проверяют инкремент счетчика retweetsCount в Tweet entity
+- Тесты проверяют сохранение ретвита в БД через RetweetRepository
+- Тесты используют WireMock для мокирования внешних сервисов (users-api)
+
+### Step #17: Swagger документация для эндпоинта — выполнено
+**Время**: 2026-01-05 17:20  
+**Автор**: assistant
+
+**Выполнено**:
+- Проверена полнота Swagger документации для эндпоинта POST /api/v1/tweets/{tweetId}/retweet
+- Исправлены статус-коды в `RetweetApi`: все `BusinessRuleValidationException` (TWEET_NOT_FOUND, USER_NOT_EXISTS, SELF_RETWEET_NOT_ALLOWED) теперь документированы с правильным статус-кодом 409 (вместо 404), что соответствует реальному поведению `GlobalExceptionHandler`
+- Проверено наличие всех `@ExampleObject` для всех сценариев:
+  - **201 Created**: примеры с комментарием и без комментария
+  - **400 Bad Request**: валидация userId, комментария, неверный формат UUID
+  - **409 Conflict**: твит не найден, пользователь не найден, self-retweet запрещен, дублирование ретвита
+- Проверено наличие полных `@Schema` аннотаций для всех DTO:
+  - `RetweetRequestDto`: класс и все поля имеют `@Schema` аннотации
+  - `RetweetResponseDto`: класс и все поля имеют `@Schema` аннотации
+- Все примеры используют RFC 7807 Problem Details формат для ошибок
+- Документация соответствует стандартам проекта (STANDART_SWAGGER.md)
+
+**Артефакты**:
+- `services/tweet-api/src/main/java/com/twitter/controller/RetweetApi.java` - исправлены статус-коды в документации
+
+**Примечания**:
+- Исправление статус-кодов было критически важно, так как документация не соответствовала реальному поведению API
+- Все примеры соответствуют реальным ответам API, проверенным через интеграционные тесты
+- Документация полная и готова для использования в Swagger UI
