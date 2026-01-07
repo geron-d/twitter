@@ -261,4 +261,154 @@ class RetweetServiceImplTest {
             verify(tweetRepository, never()).findByIdAndIsDeletedFalse(any());
         }
     }
+
+    @Nested
+    class RemoveRetweetTests {
+
+        private UUID testTweetId;
+        private UUID testUserId;
+        private UUID testAuthorId;
+        private RetweetRequestDto requestDto;
+        private Retweet existingRetweet;
+        private Tweet existingTweet;
+
+        @BeforeEach
+        void setUp() {
+            testTweetId = UUID.fromString("223e4567-e89b-12d3-a456-426614174001");
+            testUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+            testAuthorId = UUID.fromString("333e4567-e89b-12d3-a456-426614174002");
+
+            requestDto = RetweetRequestDto.builder()
+                .userId(testUserId)
+                .comment(null)
+                .build();
+
+            UUID retweetId = UUID.fromString("987e6543-e21b-43d2-b654-321987654321");
+            existingRetweet = Retweet.builder()
+                .id(retweetId)
+                .tweetId(testTweetId)
+                .userId(testUserId)
+                .comment(null)
+                .createdAt(LocalDateTime.of(2025, 1, 27, 15, 30, 0))
+                .build();
+
+            existingTweet = Tweet.builder()
+                .id(testTweetId)
+                .userId(testAuthorId)
+                .content("Test tweet content")
+                .retweetsCount(5)
+                .createdAt(LocalDateTime.of(2025, 1, 27, 10, 0, 0))
+                .updatedAt(LocalDateTime.of(2025, 1, 27, 10, 0, 0))
+                .build();
+        }
+
+        @Test
+        void removeRetweet_WithValidData_ShouldCompleteWithoutExceptions() {
+            doNothing().when(retweetValidator).validateForRemoveRetweet(testTweetId, requestDto);
+            when(retweetRepository.findByTweetIdAndUserId(testTweetId, testUserId)).thenReturn(Optional.of(existingRetweet));
+            doNothing().when(retweetRepository).delete(existingRetweet);
+            when(tweetRepository.findByIdAndIsDeletedFalse(testTweetId)).thenReturn(Optional.of(existingTweet));
+            when(tweetRepository.saveAndFlush(any(Tweet.class)))
+                .thenAnswer(invocation -> invocation.<Tweet>getArgument(0));
+
+            retweetService.removeRetweet(testTweetId, requestDto);
+
+            verify(retweetValidator, times(1)).validateForRemoveRetweet(eq(testTweetId), eq(requestDto));
+            verify(retweetRepository, times(1)).findByTweetIdAndUserId(eq(testTweetId), eq(testUserId));
+            verify(retweetRepository, times(1)).delete(eq(existingRetweet));
+            verify(tweetRepository, times(1)).findByIdAndIsDeletedFalse(eq(testTweetId));
+            verify(tweetRepository, times(1)).saveAndFlush(any(Tweet.class));
+        }
+
+        @Test
+        void removeRetweet_WithValidData_ShouldCallEachDependencyExactlyOnce() {
+            doNothing().when(retweetValidator).validateForRemoveRetweet(testTweetId, requestDto);
+            when(retweetRepository.findByTweetIdAndUserId(testTweetId, testUserId)).thenReturn(Optional.of(existingRetweet));
+            doNothing().when(retweetRepository).delete(existingRetweet);
+            when(tweetRepository.findByIdAndIsDeletedFalse(testTweetId)).thenReturn(Optional.of(existingTweet));
+            when(tweetRepository.saveAndFlush(any(Tweet.class)))
+                .thenAnswer(invocation -> invocation.<Tweet>getArgument(0));
+
+            retweetService.removeRetweet(testTweetId, requestDto);
+
+            verify(retweetValidator, times(1)).validateForRemoveRetweet(eq(testTweetId), eq(requestDto));
+            verify(retweetRepository, times(1)).findByTweetIdAndUserId(eq(testTweetId), eq(testUserId));
+            verify(retweetRepository, times(1)).delete(eq(existingRetweet));
+            verify(tweetRepository, times(1)).findByIdAndIsDeletedFalse(eq(testTweetId));
+            verify(tweetRepository, times(1)).saveAndFlush(any(Tweet.class));
+        }
+
+        @Test
+        void removeRetweet_WithValidData_ShouldDecrementRetweetsCount() {
+            doNothing().when(retweetValidator).validateForRemoveRetweet(testTweetId, requestDto);
+            when(retweetRepository.findByTweetIdAndUserId(testTweetId, testUserId)).thenReturn(Optional.of(existingRetweet));
+            doNothing().when(retweetRepository).delete(existingRetweet);
+            when(tweetRepository.findByIdAndIsDeletedFalse(testTweetId)).thenReturn(Optional.of(existingTweet));
+            when(tweetRepository.saveAndFlush(any(Tweet.class))).thenAnswer(invocation -> {
+                Tweet tweet = invocation.getArgument(0);
+                assertThat(tweet.getRetweetsCount()).isEqualTo(4);
+                return tweet;
+            });
+
+            retweetService.removeRetweet(testTweetId, requestDto);
+
+            verify(tweetRepository, times(1)).saveAndFlush(argThat(tweet ->
+                tweet.getRetweetsCount() == 4
+            ));
+        }
+
+        @Test
+        void removeRetweet_WhenValidationFails_ShouldThrowException() {
+            doThrow(new com.twitter.common.exception.validation.BusinessRuleValidationException("RETWEET_NOT_FOUND", "Retweet not found"))
+                .when(retweetValidator).validateForRemoveRetweet(testTweetId, requestDto);
+
+            assertThatThrownBy(() -> retweetService.removeRetweet(testTweetId, requestDto))
+                .isInstanceOf(com.twitter.common.exception.validation.BusinessRuleValidationException.class)
+                .satisfies(exception -> {
+                    com.twitter.common.exception.validation.BusinessRuleValidationException ex =
+                        (com.twitter.common.exception.validation.BusinessRuleValidationException) exception;
+                    assertThat(ex.getRuleName()).isEqualTo("RETWEET_NOT_FOUND");
+                });
+
+            verify(retweetValidator, times(1)).validateForRemoveRetweet(eq(testTweetId), eq(requestDto));
+            verify(retweetRepository, never()).findByTweetIdAndUserId(any(), any());
+            verify(retweetRepository, never()).delete(any());
+            verify(tweetRepository, never()).findByIdAndIsDeletedFalse(any());
+            verify(tweetRepository, never()).saveAndFlush(any());
+        }
+
+        @Test
+        void removeRetweet_WhenRetweetNotFoundAfterValidation_ShouldThrowIllegalStateException() {
+            doNothing().when(retweetValidator).validateForRemoveRetweet(testTweetId, requestDto);
+            when(retweetRepository.findByTweetIdAndUserId(testTweetId, testUserId)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> retweetService.removeRetweet(testTweetId, requestDto))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Retweet not found after validation");
+
+            verify(retweetValidator, times(1)).validateForRemoveRetweet(eq(testTweetId), eq(requestDto));
+            verify(retweetRepository, times(1)).findByTweetIdAndUserId(eq(testTweetId), eq(testUserId));
+            verify(retweetRepository, never()).delete(any());
+            verify(tweetRepository, never()).findByIdAndIsDeletedFalse(any());
+            verify(tweetRepository, never()).saveAndFlush(any());
+        }
+
+        @Test
+        void removeRetweet_WhenTweetNotFoundAfterValidation_ShouldThrowIllegalStateException() {
+            doNothing().when(retweetValidator).validateForRemoveRetweet(testTweetId, requestDto);
+            when(retweetRepository.findByTweetIdAndUserId(testTweetId, testUserId)).thenReturn(Optional.of(existingRetweet));
+            doNothing().when(retweetRepository).delete(existingRetweet);
+            when(tweetRepository.findByIdAndIsDeletedFalse(testTweetId)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> retweetService.removeRetweet(testTweetId, requestDto))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Tweet not found after validation");
+
+            verify(retweetValidator, times(1)).validateForRemoveRetweet(eq(testTweetId), eq(requestDto));
+            verify(retweetRepository, times(1)).findByTweetIdAndUserId(eq(testTweetId), eq(testUserId));
+            verify(retweetRepository, times(1)).delete(eq(existingRetweet));
+            verify(tweetRepository, times(1)).findByIdAndIsDeletedFalse(eq(testTweetId));
+            verify(tweetRepository, never()).saveAndFlush(any());
+        }
+    }
 }

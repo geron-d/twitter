@@ -39,4 +39,17 @@ public class RetweetController implements RetweetApi {
         RetweetResponseDto createdRetweet = retweetService.retweetTweet(tweetId, retweetRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdRetweet);
     }
+
+    /**
+     * @see RetweetApi#removeRetweet
+     */
+    @LoggableRequest
+    @DeleteMapping("/{tweetId}/retweet")
+    @Override
+    public ResponseEntity<Void> removeRetweet(
+        @PathVariable("tweetId") UUID tweetId,
+        @RequestBody @Valid RetweetRequestDto retweetRequest) {
+        retweetService.removeRetweet(tweetId, retweetRequest);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
 }

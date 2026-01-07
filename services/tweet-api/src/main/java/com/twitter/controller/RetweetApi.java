@@ -218,4 +218,134 @@ public interface RetweetApi {
         UUID tweetId,
         @Parameter(description = "Retweet request containing userId and optional comment", required = true)
         RetweetRequestDto retweetRequest);
+
+    /**
+     * Removes a retweet from a tweet by deleting the retweet record.
+     * <p>
+     * This method removes a retweet record for a specific tweet. It performs validation
+     * on the request data, checks if the tweet exists and is not deleted, verifies that
+     * the user exists, and ensures that the retweet exists before removal. The retweet removal operation
+     * is atomic and updates the tweet's retweets count by decrementing it.
+     *
+     * @param tweetId            the unique identifier of the tweet to remove retweet from (UUID format)
+     * @param retweetRequest     DTO containing userId for the retweet removal operation
+     * @return ResponseEntity with HTTP 204 No Content status (no response body)
+     * @throws BusinessRuleValidationException if tweetId is null, tweet doesn't exist, user doesn't exist, or retweet doesn't exist
+     */
+    @Operation(
+        summary = "Remove retweet from tweet",
+        description = "Removes a retweet from a tweet by deleting the retweet record. " +
+            "It performs validation on the request data, checks if the tweet exists and is not deleted, " +
+            "verifies that the user exists, and ensures that the retweet exists before removal. " +
+            "The retweet removal operation is atomic and updates the tweet's retweets count by decrementing it."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "204",
+            description = "Retweet removed successfully"
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Validation error",
+            content = @Content(
+                mediaType = "application/problem+json",
+                examples = @ExampleObject(
+                    name = "User ID Validation Error",
+                    summary = "User ID is null or invalid",
+                    value = """
+                        {
+                          "type": "https://example.com/errors/validation-error",
+                          "title": "Validation Error",
+                          "status": 400,
+                          "detail": "Validation failed: userId: User ID cannot be null",
+                          "timestamp": "2025-01-27T15:30:00Z"
+                        }
+                        """
+                )
+            )
+        ),
+        @ApiResponse(
+            responseCode = "409",
+            description = "Business rule violation",
+            content = @Content(
+                mediaType = "application/problem+json",
+                examples = {
+                    @ExampleObject(
+                        name = "Tweet Not Found Error",
+                        summary = "Tweet does not exist or is deleted",
+                        value = """
+                            {
+                              "type": "https://example.com/errors/business-rule-validation",
+                              "title": "Business Rule Validation Error",
+                              "status": 409,
+                              "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
+                              "ruleName": "TWEET_NOT_FOUND",
+                              "context": "223e4567-e89b-12d3-a456-426614174001",
+                              "timestamp": "2025-01-27T15:30:00Z"
+                            }
+                            """
+                    ),
+                    @ExampleObject(
+                        name = "User Not Found Error",
+                        summary = "User does not exist",
+                        value = """
+                            {
+                              "type": "https://example.com/errors/business-rule-validation",
+                              "title": "Business Rule Validation Error",
+                              "status": 409,
+                              "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+                              "ruleName": "USER_NOT_EXISTS",
+                              "context": "123e4567-e89b-12d3-a456-426614174000",
+                              "timestamp": "2025-01-27T15:30:00Z"
+                            }
+                            """
+                    ),
+                    @ExampleObject(
+                        name = "Retweet Not Found Error",
+                        summary = "Retweet does not exist",
+                        value = """
+                            {
+                              "type": "https://example.com/errors/business-rule-validation",
+                              "title": "Business Rule Validation Error",
+                              "status": 409,
+                              "detail": "Business rule 'RETWEET_NOT_FOUND' violated for context: Retweet not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+                              "ruleName": "RETWEET_NOT_FOUND",
+                              "context": "Retweet not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+                              "timestamp": "2025-01-27T15:30:00Z"
+                            }
+                            """
+                    )
+                }
+            )
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Invalid UUID format",
+            content = @Content(
+                mediaType = "application/problem+json",
+                examples = @ExampleObject(
+                    name = "Invalid UUID Format Error",
+                    summary = "Invalid tweet ID format",
+                    value = """
+                        {
+                          "type": "https://example.com/errors/validation-error",
+                          "title": "Validation Error",
+                          "status": 400,
+                          "detail": "Invalid UUID format for tweetId parameter",
+                          "timestamp": "2025-01-27T15:30:00Z"
+                        }
+                        """
+                )
+            )
+        )
+    })
+    ResponseEntity<Void> removeRetweet(
+        @Parameter(
+            description = "Unique identifier of the tweet to remove retweet from",
+            required = true,
+            example = "223e4567-e89b-12d3-a456-426614174001"
+        )
+        UUID tweetId,
+        @Parameter(description = "Retweet removal request containing userId", required = true)
+        RetweetRequestDto retweetRequest);
 }
