@@ -24,6 +24,7 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -438,6 +439,252 @@ public class RetweetControllerTest extends BaseIntegrationTest {
             tweet = tweetRepository.findById(testTweetId).orElseThrow();
             assertThat(tweet.getRetweetsCount()).isEqualTo(3);
             assertThat(retweetRepository.count()).isEqualTo(3);
+        }
+    }
+
+    @Nested
+    class RemoveRetweetTests {
+
+        private UUID testUserId;
+        private UUID testTweetId;
+        private UUID differentUserId;
+
+        @BeforeEach
+        void setUp() {
+            testUserId = UUID.randomUUID();
+            differentUserId = UUID.randomUUID();
+        }
+
+        @Test
+        void removeRetweet_WithValidData_ShouldReturn204NoContent() throws Exception {
+            String content = "Test tweet for remove retweet";
+            Tweet savedTweet = createAndSaveTweet(testUserId, content);
+            testTweetId = savedTweet.getId();
+            setupUserExistsStub(differentUserId, true);
+
+            Retweet savedRetweet = createAndSaveRetweet(testTweetId, differentUserId, null);
+            savedTweet.setRetweetsCount(1);
+            tweetRepository.saveAndFlush(savedTweet);
+
+            RetweetRequestDto request = RetweetRequestDto.builder()
+                .userId(differentUserId)
+                .comment(null)
+                .build();
+
+            mockMvc.perform(delete("/api/v1/tweets/{tweetId}/retweet", testTweetId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNoContent());
+
+            assertThat(retweetRepository.findById(savedRetweet.getId())).isEmpty();
+            Tweet updatedTweet = tweetRepository.findById(testTweetId).orElseThrow();
+            assertThat(updatedTweet.getRetweetsCount()).isEqualTo(0);
+        }
+
+        @Test
+        void removeRetweet_WithNullUserId_ShouldReturn400BadRequest() throws Exception {
+            String content = "Test tweet for remove retweet";
+            Tweet savedTweet = createAndSaveTweet(testUserId, content);
+            testTweetId = savedTweet.getId();
+
+            Retweet savedRetweet = createAndSaveRetweet(testTweetId, differentUserId, null);
+            savedTweet.setRetweetsCount(1);
+            tweetRepository.saveAndFlush(savedTweet);
+
+            RetweetRequestDto request = RetweetRequestDto.builder()
+                .userId(null)
+                .comment(null)
+                .build();
+
+            mockMvc.perform(delete("/api/v1/tweets/{tweetId}/retweet", testTweetId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+
+            assertThat(retweetRepository.findById(savedRetweet.getId())).isPresent();
+            Tweet tweet = tweetRepository.findById(testTweetId).orElseThrow();
+            assertThat(tweet.getRetweetsCount()).isEqualTo(1);
+        }
+
+        @Test
+        void removeRetweet_WithMissingBody_ShouldReturn400BadRequest() throws Exception {
+            String content = "Test tweet for remove retweet";
+            Tweet savedTweet = createAndSaveTweet(testUserId, content);
+            testTweetId = savedTweet.getId();
+
+            Retweet savedRetweet = createAndSaveRetweet(testTweetId, differentUserId, null);
+            savedTweet.setRetweetsCount(1);
+            tweetRepository.saveAndFlush(savedTweet);
+
+            int status = mockMvc.perform(delete("/api/v1/tweets/{tweetId}/retweet", testTweetId)
+                    .contentType(MediaType.APPLICATION_JSON))
+                .andReturn()
+                .getResponse()
+                .getStatus();
+
+            assertThat(status).isGreaterThanOrEqualTo(400);
+            assertThat(retweetRepository.findById(savedRetweet.getId())).isPresent();
+        }
+
+        @Test
+        void removeRetweet_WhenTweetDoesNotExist_ShouldReturn409Conflict() throws Exception {
+            testTweetId = UUID.randomUUID();
+            setupUserExistsStub(differentUserId, true);
+
+            RetweetRequestDto request = RetweetRequestDto.builder()
+                .userId(differentUserId)
+                .comment(null)
+                .build();
+
+            mockMvc.perform(delete("/api/v1/tweets/{tweetId}/retweet", testTweetId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.type").exists())
+                .andExpect(jsonPath("$.ruleName").value("TWEET_NOT_FOUND"));
+
+            assertThat(retweetRepository.count()).isEqualTo(0);
+        }
+
+        @Test
+        void removeRetweet_WhenUserDoesNotExist_ShouldReturn409Conflict() throws Exception {
+            String content = "Test tweet for remove retweet";
+            Tweet savedTweet = createAndSaveTweet(testUserId, content);
+            testTweetId = savedTweet.getId();
+            setupUserExistsStub(differentUserId, false);
+
+            Retweet savedRetweet = createAndSaveRetweet(testTweetId, differentUserId, null);
+            savedTweet.setRetweetsCount(1);
+            tweetRepository.saveAndFlush(savedTweet);
+
+            RetweetRequestDto request = RetweetRequestDto.builder()
+                .userId(differentUserId)
+                .comment(null)
+                .build();
+
+            mockMvc.perform(delete("/api/v1/tweets/{tweetId}/retweet", testTweetId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.type").exists())
+                .andExpect(jsonPath("$.ruleName").value("USER_NOT_EXISTS"));
+
+            assertThat(retweetRepository.findById(savedRetweet.getId())).isPresent();
+            Tweet tweet = tweetRepository.findById(testTweetId).orElseThrow();
+            assertThat(tweet.getRetweetsCount()).isEqualTo(1);
+        }
+
+        @Test
+        void removeRetweet_WhenRetweetDoesNotExist_ShouldReturn409Conflict() throws Exception {
+            String content = "Test tweet for remove retweet";
+            Tweet savedTweet = createAndSaveTweet(testUserId, content);
+            testTweetId = savedTweet.getId();
+            setupUserExistsStub(differentUserId, true);
+
+            RetweetRequestDto request = RetweetRequestDto.builder()
+                .userId(differentUserId)
+                .comment(null)
+                .build();
+
+            mockMvc.perform(delete("/api/v1/tweets/{tweetId}/retweet", testTweetId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.type").exists())
+                .andExpect(jsonPath("$.ruleName").value("RETWEET_NOT_FOUND"));
+
+            assertThat(retweetRepository.count()).isEqualTo(0);
+            Tweet tweet = tweetRepository.findById(testTweetId).orElseThrow();
+            assertThat(tweet.getRetweetsCount()).isEqualTo(0);
+        }
+
+        @Test
+        void removeRetweet_ShouldDecrementRetweetsCount() throws Exception {
+            String content = "Test tweet for remove retweet";
+            Tweet savedTweet = createAndSaveTweet(testUserId, content);
+            testTweetId = savedTweet.getId();
+            UUID user1 = UUID.randomUUID();
+            UUID user2 = UUID.randomUUID();
+            UUID user3 = UUID.randomUUID();
+            setupUserExistsStub(user1, true);
+            setupUserExistsStub(user2, true);
+            setupUserExistsStub(user3, true);
+
+            Retweet retweet1 = createAndSaveRetweet(testTweetId, user1, null);
+            Retweet retweet2 = createAndSaveRetweet(testTweetId, user2, "Nice!");
+            Retweet retweet3 = createAndSaveRetweet(testTweetId, user3, "Great tweet!");
+            savedTweet.setRetweetsCount(3);
+            tweetRepository.saveAndFlush(savedTweet);
+
+            RetweetRequestDto request1 = RetweetRequestDto.builder()
+                .userId(user1)
+                .comment(null)
+                .build();
+
+            mockMvc.perform(delete("/api/v1/tweets/{tweetId}/retweet", testTweetId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request1)))
+                .andExpect(status().isNoContent());
+
+            Tweet tweet = tweetRepository.findById(testTweetId).orElseThrow();
+            assertThat(tweet.getRetweetsCount()).isEqualTo(2);
+            assertThat(retweetRepository.findById(retweet1.getId())).isEmpty();
+
+            RetweetRequestDto request2 = RetweetRequestDto.builder()
+                .userId(user2)
+                .comment(null)
+                .build();
+
+            mockMvc.perform(delete("/api/v1/tweets/{tweetId}/retweet", testTweetId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request2)))
+                .andExpect(status().isNoContent());
+
+            tweet = tweetRepository.findById(testTweetId).orElseThrow();
+            assertThat(tweet.getRetweetsCount()).isEqualTo(1);
+            assertThat(retweetRepository.findById(retweet2.getId())).isEmpty();
+
+            RetweetRequestDto request3 = RetweetRequestDto.builder()
+                .userId(user3)
+                .comment(null)
+                .build();
+
+            mockMvc.perform(delete("/api/v1/tweets/{tweetId}/retweet", testTweetId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request3)))
+                .andExpect(status().isNoContent());
+
+            tweet = tweetRepository.findById(testTweetId).orElseThrow();
+            assertThat(tweet.getRetweetsCount()).isEqualTo(0);
+            assertThat(retweetRepository.findById(retweet3.getId())).isEmpty();
+            assertThat(retweetRepository.count()).isEqualTo(0);
+        }
+
+        @Test
+        void removeRetweet_WhenUsersApiReturns500_ShouldReturn409Conflict() throws Exception {
+            String content = "Test tweet for remove retweet";
+            Tweet savedTweet = createAndSaveTweet(testUserId, content);
+            testTweetId = savedTweet.getId();
+            setupUserExistsStubWithError(differentUserId, 500);
+
+            Retweet savedRetweet = createAndSaveRetweet(testTweetId, differentUserId, null);
+            savedTweet.setRetweetsCount(1);
+            tweetRepository.saveAndFlush(savedTweet);
+
+            RetweetRequestDto request = RetweetRequestDto.builder()
+                .userId(differentUserId)
+                .comment(null)
+                .build();
+
+            mockMvc.perform(delete("/api/v1/tweets/{tweetId}/retweet", testTweetId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.type").exists());
+
+            assertThat(retweetRepository.findById(savedRetweet.getId())).isPresent();
+            Tweet tweet = tweetRepository.findById(testTweetId).orElseThrow();
+            assertThat(tweet.getRetweetsCount()).isEqualTo(1);
         }
     }
 }

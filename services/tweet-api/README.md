@@ -17,6 +17,7 @@
 - ✅ Лайк твитов с проверкой бизнес-правил
 - ✅ Убрать лайк твита с проверкой бизнес-правил
 - ✅ Ретвит твитов с опциональным комментарием
+- ✅ Убрать ретвит твита
 - ✅ Интеграция с users-api для проверки существования пользователей
 - ✅ Интеграция с follower-api для получения списка подписок
 - ✅ Валидация данных (длина контента 1-280 символов)
@@ -107,6 +108,7 @@ http://localhost:8082/api/v1/tweets
 | `POST`   | `/{tweetId}/like`     | Лайкнуть твит                 | `LikeTweetRequestDto`   | `LikeResponseDto`            |
 | `DELETE` | `/{tweetId}/like`     | Убрать лайк твита             | `LikeTweetRequestDto`   | -                            |
 | `POST`   | `/{tweetId}/retweet`  | Ретвитнуть твит               | `RetweetRequestDto`     | `RetweetResponseDto`         |
+| `DELETE` | `/{tweetId}/retweet` | Убрать ретвит твита           | `RetweetRequestDto`     | -                            |
 
 ### Детальное описание эндпоинтов
 
@@ -1166,6 +1168,21 @@ open http://localhost:8082/swagger-ui.html
         - Используется денормализация для оптимизации операций чтения
         - Комментарий опционален: может быть `null`, но если указан, должен быть валидным (1-280 символов)
 
+2. **`removeRetweet(UUID tweetId, RetweetRequestDto requestDto)`**
+    - Удаляет ретвит для твита
+    - Возвращает `void` (ответ 204 No Content)
+    - Логика:
+        - Валидация запроса (существование твита, пользователя, ретвита)
+        - Поиск ретвита в БД по tweetId и userId
+        - Удаление ретвита из БД
+        - Обновление счетчика `retweetsCount` в твите (декремент на 1, с защитой от отрицательных значений)
+        - Сохранение изменений в БД
+    - Особенности:
+        - Операция атомарна (выполняется в транзакции)
+        - Обновление счетчика выполняется синхронно при удалении ретвита
+        - Используется денормализация для оптимизации операций чтения
+        - Счетчик не может стать отрицательным (защита на уровне Entity)
+
 ### Ключевые бизнес-правила для ретвитов:
 
 1. **Валидация твита:**
@@ -1197,6 +1214,13 @@ open http://localhost:8082/swagger-ui.html
     - При создании ретвита счетчик `retweetsCount` в твите инкрементируется на 1
     - Операция выполняется атомарно в рамках транзакции
     - Используется денормализация для оптимизации операций чтения
+
+7. **Удаление ретвита:**
+    - При удалении ретвита счетчик `retweetsCount` в твите декрементируется на 1
+    - Операция выполняется атомарно в рамках транзакции
+    - Счетчик не может стать отрицательным (защита на уровне Entity через метод `decrementRetweetsCount()`)
+    - Используется денормализация для оптимизации операций чтения
+    - Ретвит должен существовать в системе перед удалением (проверка через `RetweetRepository.existsByTweetIdAndUserId()`)
 
 7. **Временные метки:**
     - `createdAt` устанавливается автоматически при создании ретвита
@@ -1421,6 +1445,34 @@ open http://localhost:8082/swagger-ui.html
         - Комментарий не может превышать 280 символов
     - При невалидном комментарии выбрасывается `FormatValidationException`
     - `null` комментарий разрешен и проходит валидацию
+
+#### Убрать ретвит твита (REMOVE_RETWEET)
+
+Выполняется многоэтапная валидация:
+
+1. **Проверка tweetId:**
+    - Проверка, что `tweetId` не равен `null`
+    - При отсутствии выбрасывается `BusinessRuleValidationException` с правилом `TWEET_ID_NULL`
+
+2. **Проверка существования твита:**
+    - Поиск твита в БД по UUID с фильтрацией (isDeleted = false)
+    - При отсутствии твита выбрасывается `BusinessRuleValidationException` с правилом `TWEET_NOT_FOUND`
+
+3. **Проверка requestDto:**
+    - Проверка, что `requestDto` не равен `null`
+    - При отсутствии выбрасывается `BusinessRuleValidationException` с правилом `RETWEET_REQUEST_NULL`
+
+4. **Проверка userId:**
+    - Проверка, что `userId` не равен `null`
+    - При отсутствии выбрасывается `BusinessRuleValidationException` с правилом `USER_ID_NULL`
+
+5. **Проверка существования пользователя:**
+    - Вызов `UserGateway.existsUser()` для проверки существования
+    - При отсутствии пользователя выбрасывается `BusinessRuleValidationException` с правилом `USER_NOT_EXISTS`
+
+6. **Проверка существования ретвита:**
+    - Проверка существования ретвита через `RetweetRepository.existsByTweetIdAndUserId()`
+    - При отсутствии ретвита выбрасывается `BusinessRuleValidationException` с правилом `RETWEET_NOT_FOUND` (409 Conflict)
 
 ## Работа с базой данных
 
@@ -2311,6 +2363,157 @@ Content-Type: application/json
   "detail": "A retweet already exists for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
   "fieldName": "retweet",
   "fieldValue": "tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+#### 10. Убрать ретвит твита
+
+```http
+DELETE /api/v1/tweets/{tweetId}/retweet
+Content-Type: application/json
+```
+
+**Параметры пути:**
+
+- `tweetId` - обязательный, UUID существующего твита
+
+**Тело запроса:**
+
+```json
+{
+  "userId": "123e4567-e89b-12d3-a456-426614174000"
+}
+```
+
+**Валидация:**
+
+- `userId` - обязательное, UUID существующего пользователя
+- `tweetId` - обязательный, должен быть валидным UUID форматом
+
+**Бизнес-правила:**
+
+- Твит должен существовать в системе и не быть удаленным
+- Пользователь должен существовать в системе
+- Ретвит должен существовать в системе (пользователь должен был ранее ретвитнуть этот твит)
+- Операция атомарна - удаляется запись ретвита и обновляется счетчик `retweetsCount` в твите (декремент на 1)
+
+**Ответы:**
+
+- `204 No Content` - ретвит успешно удален (без тела ответа)
+- `400 Bad Request` - ошибка валидации (некорректный UUID, отсутствует userId)
+- `409 Conflict` - нарушение бизнес-правил (твит не найден, пользователь не существует, ретвит не найден)
+
+**Пример успешного ответа (204 No Content):**
+
+Ответ не содержит тела, только HTTP статус 204.
+
+**Пример ошибки валидации userId (400 Bad Request):**
+
+```json
+{
+  "type": "https://example.com/errors/validation-error",
+  "title": "Validation Error",
+  "status": 400,
+  "detail": "Validation failed: userId: User ID cannot be null",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки твит не найден (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
+  "ruleName": "TWEET_NOT_FOUND",
+  "context": "223e4567-e89b-12d3-a456-426614174001",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки пользователь не существует (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+  "ruleName": "USER_NOT_EXISTS",
+  "context": "123e4567-e89b-12d3-a456-426614174000",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки ретвит не найден (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'RETWEET_NOT_FOUND' violated for context: Retweet not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+  "ruleName": "RETWEET_NOT_FOUND",
+  "context": "Retweet not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+### Убрать ретвит твита
+
+```bash
+curl -X DELETE http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/retweet \
+  -H "Content-Type: application/json" \
+  -d '{
+    "userId": "123e4567-e89b-12d3-a456-426614174000"
+  }'
+```
+
+**Ответ (204 No Content):**
+
+Ответ не содержит тела, только HTTP статус 204.
+
+**Ответ при отсутствии ретвита (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'RETWEET_NOT_FOUND' violated for context: Retweet not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+  "ruleName": "RETWEET_NOT_FOUND",
+  "context": "Retweet not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Ответ при отсутствии твита (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
+  "ruleName": "TWEET_NOT_FOUND",
+  "context": "223e4567-e89b-12d3-a456-426614174001",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Ответ при отсутствии пользователя (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+  "ruleName": "USER_NOT_EXISTS",
+  "context": "123e4567-e89b-12d3-a456-426614174000",
   "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
