@@ -1,6 +1,8 @@
 package com.twitter.repository;
 
 import com.twitter.entity.Like;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -13,4 +15,6 @@ public interface LikeRepository extends JpaRepository<Like, UUID> {
     Optional<Like> findByTweetIdAndUserId(UUID tweetId, UUID userId);
 
     boolean existsByTweetIdAndUserId(UUID tweetId, UUID userId);
-}
+
+    Page<Like> findByTweetIdOrderByCreatedAtDesc(UUID tweetId, Pageable pageable);
+}

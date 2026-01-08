@@ -1,0 +1,91 @@
+# TODO: Реализация эндпоинта GET /api/v1/tweets/{tweetId}/likes
+
+## Meta
+- project: twitter-tweet-api
+- updated: 2025-01-27
+- changelog: todo/tweet/CHANGELOG.md
+- standards:
+  - STANDART_CODE.md
+  - STANDART_PROJECT.md
+  - STANDART_TEST.md
+  - STANDART_JAVADOC.md
+  - STANDART_SWAGGER.md
+  - STANDART_README.md
+  - STANDART_POSTMAN.md
+
+## Tasks
+
+### Анализ и проектирование
+- [x] (P1) #1: Анализ требований — Анализ существующего кода, определение структуры эндпоинта, проектирование API контракта.
+  acceptance: "Понять вход/выход, определить затронутые стандарты, определить структуру эндпоинта"
+
+### Реализация инфраструктуры и конфигов
+- [x] (P1) [2025-01-27] #2: Обновление LikeRepository — Добавить метод findByTweetIdOrderByCreatedAtDesc для получения лайков с пагинацией.
+  acceptance: "Метод findByTweetIdOrderByCreatedAtDesc(UUID tweetId, Pageable pageable) добавлен в LikeRepository (Derived Query Method, JavaDoc не требуется)"
+  note: "Добавлен метод findByTweetIdOrderByCreatedAtDesc в LikeRepository. Добавлены импорты Page и Pageable. Метод следует паттерну из TweetRepository. Derived Query Method - JavaDoc не требуется согласно STANDART_JAVADOC.md"
+  commit: "services/tweet-api/src/main/java/com/twitter/repository/LikeRepository.java"
+- [x] (P1) [2025-01-27] #3: Обновление LikeMapper — Добавить метод toLikeResponseDtoPage для маппинга Page<Like> в Page<LikeResponseDto>.
+  acceptance: "Метод toLikeResponseDtoPage(Page<Like>) добавлен в LikeMapper с default реализацией"
+  note: "Добавлен default метод toLikeResponseDtoPage в LikeMapper. Метод использует существующий toLikeResponseDto для маппинга каждого элемента Page, сохраняя метаданные пагинации. Добавлен импорт org.springframework.data.domain.Page. Метод следует паттерну маппинга Page из Spring Data."
+  commit: "services/tweet-api/src/main/java/com/twitter/mapper/LikeMapper.java"
+
+### Эндпоинт: GET /api/v1/tweets/{tweetId}/likes
+- [x] (P1) [2025-01-27] #4: Service метод для эндпоинта — Добавить метод getLikesByTweetId в LikeService интерфейс и реализацию.
+  acceptance: "Метод добавлен в LikeService интерфейс с JavaDoc, реализован в LikeServiceImpl с валидацией существования твита, использует @Transactional(readOnly = true)"
+  note: "Добавлен метод getLikesByTweetId в LikeService интерфейс с полным JavaDoc. Реализован в LikeServiceImpl с валидацией существования твита через likeValidator.validateTweetExists. Валидация вынесена в LikeValidator (добавлен метод validateTweetExists). Использует @Transactional(readOnly = true). Добавлены импорты Page и Pageable. Метод использует likeRepository.findByTweetIdOrderByCreatedAtDesc и likeMapper.toLikeResponseDtoPage для маппинга."
+  commit: "services/tweet-api/src/main/java/com/twitter/service/LikeService.java, services/tweet-api/src/main/java/com/twitter/service/LikeServiceImpl.java, services/tweet-api/src/main/java/com/twitter/validation/LikeValidator.java, services/tweet-api/src/main/java/com/twitter/validation/LikeValidatorImpl.java"
+- [ ] (P1) #5: Controller метод для эндпоинта — Добавить метод getLikesByTweetId в LikeApi интерфейс и LikeController.
+  acceptance: "Метод добавлен в LikeApi интерфейс с OpenAPI аннотациями (@Operation, @ApiResponses, @Parameter), реализован в LikeController с @LoggableRequest и @PageableDefault"
+- [ ] (P1) #6: JavaDoc для эндпоинта — Добавить JavaDoc для всех новых методов.
+  acceptance: "JavaDoc добавлен для всех методов эндпоинта с @author geron, @version 1.0, @param, @return, @throws"
+- [ ] (P1) #7: Unit тесты для эндпоинта — Написать Unit тесты для Service и Mapper методов.
+  acceptance: "Unit тесты для LikeServiceImpl.getLikesByTweetId и LikeMapper.toLikeResponseDtoPage с учетом STANDART_TEST.md (успешный сценарий, твит не найден, пустой список, пагинация)"
+- [ ] (P2) #8: Integration тесты для эндпоинта — Написать Integration тесты для контроллера.
+  acceptance: "Integration тесты для LikeController.getLikesByTweetId с MockMvc, все статус-коды проверены (200 OK, 404 Not Found, 400 Bad Request, пагинация)"
+- [ ] (P1) #9: Swagger документация для эндпоинта — Убедиться, что OpenAPI документация полная.
+  acceptance: "OpenAPI документация для эндпоинта полная с @ExampleObject для всех сценариев (200 OK, 404 Not Found, 400 Bad Request)"
+
+### Финальная инфраструктура
+- [ ] (P2) #10: Обновление README.md — Обновить README с описанием нового эндпоинта.
+  acceptance: "README обновлен с учетом STANDART_README.md, эндпоинт добавлен в таблицу эндпоинтов, детальное описание, примеры использования на русском языке"
+- [ ] (P2) #11: Обновление Postman коллекции — Добавить запрос в Postman коллекцию.
+  acceptance: "Добавлен запрос get likes by tweet id с примерами ответов для всех эндпоинтов (200 OK, 404 Not Found, 400 Bad Request), обновлены переменные окружения"
+- [ ] (P1) #12: Проверка соответствия стандартам — Проверить соответствие всем стандартам проекта.
+  acceptance: "Все стандарты проверены, код соответствует требованиям (CODE, TEST, JAVADOC, SWAGGER, POSTMAN, README)"
+
+## Assumptions
+- Используется существующий LikeResponseDto - дополнительных DTO не требуется
+- PagedModel из Spring Data Web уже используется в проекте
+- TweetRepository существует и может использоваться для валидации существования твита
+- Индекс на tweet_id в таблице tweet_likes уже существует (если нет - нужно добавить)
+- Пагинация по умолчанию: page=0, size=20, sort=createdAt,DESC
+
+## Risks
+- **Технические риски:**
+  - Производительность при большом количестве лайков: митигация - использование пагинации и индексов БД
+  - Отсутствие индекса на tweet_id: митигация - проверить наличие индекса, добавить если нужно
+  
+- **Организационные риски:**
+  - Зависимость от TweetRepository: риск минимален, репозиторий уже существует
+
+## Metrics & Success Criteria
+- Все тесты проходят (unit и integration)
+- Покрытие кода > 80% для новых методов
+- Время ответа < 200ms для типичного запроса
+- Соответствие всем стандартам проекта
+- Полная документация (OpenAPI, README, Postman)
+- Эндпоинт возвращает пагинированный список лайков
+- Поддерживается пагинация с параметрами page, size, sort
+- Лайки сортируются по createdAt DESC (новые первыми)
+- При отсутствии твита возвращается 404
+- При отсутствии лайков возвращается пустой список (200 OK)
+
+## Notes
+- Эндпоинт следует паттернам существующих GET эндпоинтов с пагинацией (getUserTweets, getTimeline)
+- Используется PagedModel для пагинации (как в TweetController)
+- Валидация существования твита выполняется в Service слое
+- Derived Query Methods в Repository не требуют JavaDoc согласно STANDART_JAVADOC.md
+- Все JavaDoc на английском языке
+- Все README на русском языке
+- Все Swagger документация на английском языке
+

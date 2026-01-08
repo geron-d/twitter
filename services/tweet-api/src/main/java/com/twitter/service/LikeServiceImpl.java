@@ -10,6 +10,8 @@ import com.twitter.repository.TweetRepository;
 import com.twitter.validation.LikeValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -71,5 +73,17 @@ public class LikeServiceImpl implements LikeService {
         tweet.decrementLikesCount();
         tweetRepository.saveAndFlush(tweet);
     }
-}
 
+    /**
+     * @see LikeService#getLikesByTweetId
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Page<LikeResponseDto> getLikesByTweetId(UUID tweetId, Pageable pageable) {
+        likeValidator.validateTweetExists(tweetId);
+
+        log.debug("Retrieving likes for tweet {} with pagination: page={}, size={}", tweetId, pageable.getPageNumber(), pageable.getPageSize());
+        Page<Like> likes = likeRepository.findByTweetIdOrderByCreatedAtDesc(tweetId, pageable);
+        return likes.map(likeMapper::toLikeResponseDto);
+    }
+}

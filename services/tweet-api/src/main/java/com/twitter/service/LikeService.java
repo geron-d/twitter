@@ -4,6 +4,8 @@ import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.UniquenessValidationException;
 import com.twitter.dto.request.LikeTweetRequestDto;
 import com.twitter.dto.response.LikeResponseDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
 
@@ -57,5 +59,25 @@ public interface LikeService {
      * @throws BusinessRuleValidationException if tweetId is null, tweet doesn't exist, user doesn't exist, or like doesn't exist
      */
     void removeLike(UUID tweetId, LikeTweetRequestDto requestDto);
-}
 
+    /**
+     * Retrieves a paginated list of likes for a specific tweet.
+     * <p>
+     * This method performs the following operations:
+     * 1. Validates that the tweet exists and is not deleted
+     * 2. Retrieves likes from the database with pagination support
+     * 3. Converts Like entities to LikeResponseDto
+     * 4. Returns a Page containing paginated likes with metadata
+     * <p>
+     * The method is read-only and transactional, ensuring data consistency. Likes are
+     * sorted by creation date in descending order (newest first). If the tweet doesn't
+     * exist or is deleted, a BusinessRuleValidationException is thrown. If there are no
+     * likes for the tweet, an empty page is returned (not an error).
+     *
+     * @param tweetId  the unique identifier of the tweet whose likes to retrieve
+     * @param pageable pagination parameters (page, size, sorting)
+     * @return Page containing paginated list of likes with metadata
+     * @throws BusinessRuleValidationException if tweetId is null, tweet doesn't exist, or tweet is deleted
+     */
+    Page<LikeResponseDto> getLikesByTweetId(UUID tweetId, Pageable pageable);
+}

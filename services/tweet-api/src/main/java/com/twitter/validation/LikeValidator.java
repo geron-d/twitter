@@ -47,5 +47,16 @@ public interface LikeValidator {
      * @throws BusinessRuleValidationException if tweetId is null, tweet doesn't exist, user doesn't exist, or like doesn't exist
      */
     void validateForUnlike(UUID tweetId, LikeTweetRequestDto requestDto);
-}
 
+    /**
+     * Validates that a tweet exists and is not deleted.
+     * <p>
+     * This method checks if the tweet with the given ID exists in the database
+     * and is not soft deleted. This validation is used for read operations like
+     * retrieving likes for a tweet.
+     *
+     * @param tweetId the unique identifier of the tweet to validate
+     * @throws BusinessRuleValidationException if tweetId is null, tweet doesn't exist, or tweet is deleted
+     */
+    void validateTweetExists(UUID tweetId);
+}
