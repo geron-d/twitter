@@ -60,12 +60,18 @@
   commit: "Проверка OpenAPI документации (изменений не требуется)"
 
 ### Финальная инфраструктура
-- [ ] (P2) #11: Обновление README.md — Обновить README с описанием нового эндпоинта.
+- [x] (P2) [2025-01-27] #11: Обновление README.md — Обновить README с описанием нового эндпоинта.
   acceptance: "README обновлен с учетом STANDART_README.md, эндпоинт добавлен в таблицу эндпоинтов, детальное описание, примеры использования на русском языке"
-- [ ] (P2) #12: Обновление Postman коллекции — Добавить запрос в Postman коллекцию.
+  note: "Обновлен README.md: добавлен эндпоинт GET /{tweetId}/likes в таблицу эндпоинтов, добавлено детальное описание эндпоинта (раздел 9) с параметрами, валидацией, бизнес-правилами, примерами ответов и ошибок, добавлен пример использования в раздел \"Примеры использования\" с curl командами и примерами ответов, обновлен список основных возможностей. Все описания на русском языке согласно STANDART_README.md."
+  commit: "services/tweet-api/README.md"
+- [x] (P2) [2025-01-27] #12: Обновление Postman коллекции — Добавить запрос в Postman коллекцию.
   acceptance: "Добавлен запрос get likes by tweet id с примерами ответов для всех эндпоинтов (200 OK, 404 Not Found, 400 Bad Request), обновлены переменные окружения"
-- [ ] (P1) #13: Проверка соответствия стандартам — Проверить соответствие всем стандартам проекта.
+  note: "Добавлен запрос 'get likes by tweet id' в Postman коллекцию после 'remove like'. Запрос включает: GET метод с параметрами пагинации (page, size, sort), описание эндпоинта, примеры ответов: likes retrieved (200 OK), empty likes list (200 OK), tweet not found error (409 Conflict), invalid uuid format error (400 Bad Request), invalid pagination parameters error (400 Bad Request). Обновлено описание коллекции в info секции. Запрос следует структуре 'get user tweets' для пагинированных GET эндпоинтов."
+  commit: "postman/tweet-api/twitter-tweet-api.postman_collection.json"
+- [x] (P1) [2025-01-27] #13: Проверка соответствия стандартам — Проверить соответствие всем стандартам проекта.
   acceptance: "Все стандарты проверены, код соответствует требованиям (CODE, TEST, JAVADOC, SWAGGER, POSTMAN, README)"
+  note: "Проверено соответствие всем стандартам проекта: STANDART_CODE.md (Java 24 features, MapStruct, Lombok, структура пакетов, @Transactional, @LoggableRequest, @PageableDefault, PagedModel), STANDART_TEST.md (структура тестов с @Nested, именование methodName_WhenCondition_ShouldExpectedResult, использование Mockito, AssertJ), STANDART_JAVADOC.md (JavaDoc для всех методов с @author geron, @version 1.0, @param, @return, @throws), STANDART_SWAGGER.md (OpenAPI документация с @Operation, @ApiResponses, @ExampleObject), STANDART_POSTMAN.md (структура коллекции, именование запросов, примеры ответов), STANDART_README.md (структура README, описание на русском языке). Все стандарты соблюдены."
+  commit: "Проверка соответствия стандартам (изменений не требуется)"
 
 ## Assumptions
 - Используется существующий LikeResponseDto - дополнительных DTO не требуется
@@ -102,4 +108,4 @@
 - Все JavaDoc на английском языке
 - Все README на русском языке
 - Все Swagger документация на английском языке
-
+

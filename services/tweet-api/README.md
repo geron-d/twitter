@@ -16,6 +16,7 @@
 - ✅ Удаление твитов (soft delete) с проверкой прав автора
 - ✅ Лайк твитов с проверкой бизнес-правил
 - ✅ Убрать лайк твита с проверкой бизнес-правил
+- ✅ Получить пользователей, лайкнувших твит с пагинацией
 - ✅ Ретвит твитов с опциональным комментарием
 - ✅ Убрать ретвит твита
 - ✅ Интеграция с users-api для проверки существования пользователей
@@ -107,6 +108,7 @@ http://localhost:8082/api/v1/tweets
 | `DELETE` | `/{tweetId}`          | Удалить твит (soft delete)    | `DeleteTweetRequestDto` | -                            |
 | `POST`   | `/{tweetId}/like`     | Лайкнуть твит                 | `LikeTweetRequestDto`   | `LikeResponseDto`            |
 | `DELETE` | `/{tweetId}/like`     | Убрать лайк твита             | `LikeTweetRequestDto`   | -                            |
+| `GET`    | `/{tweetId}/likes`    | Получить пользователей, лайкнувших твит | - | `PagedModel<LikeResponseDto>` |
 | `POST`   | `/{tweetId}/retweet`  | Ретвитнуть твит               | `RetweetRequestDto`     | `RetweetResponseDto`         |
 | `DELETE` | `/{tweetId}/retweet` | Убрать ретвит твита           | `RetweetRequestDto`     | -                            |
 
@@ -905,6 +907,133 @@ Content-Type: application/json
   "detail": "Business rule 'LIKE_NOT_FOUND' violated for context: Like not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
   "ruleName": "LIKE_NOT_FOUND",
   "context": "Like not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+#### 9. Получить пользователей, лайкнувших твит
+
+```http
+GET /api/v1/tweets/{tweetId}/likes
+```
+
+**Параметры пути:**
+
+- `tweetId` - обязательный, UUID существующего твита
+
+**Параметры запроса (query parameters):**
+
+- `page` - опциональный, номер страницы (по умолчанию: 0)
+- `size` - опциональный, размер страницы (по умолчанию: 20, максимум: 100)
+- `sort` - опциональный, параметры сортировки (по умолчанию: createdAt,DESC)
+
+**Валидация:**
+
+- `tweetId` - обязательный, должен быть валидным UUID форматом
+- `page` - должен быть >= 0
+- `size` - должен быть между 1 и 100
+
+**Бизнес-правила:**
+
+- Твит должен существовать в системе и не быть удаленным
+- Лайки сортируются по дате создания в порядке убывания (новые первыми)
+- Если у твита нет лайков, возвращается пустой список (не ошибка)
+- Поддерживается пагинация для больших списков лайков
+
+**Ответы:**
+
+- `200 OK` - список лайков успешно получен
+- `400 Bad Request` - ошибка валидации (некорректный UUID, неверные параметры пагинации)
+- `409 Conflict` - твит не найден или удален
+
+**Пример успешного ответа (200 OK) с лайками:**
+
+```json
+{
+  "content": [
+    {
+      "id": "987e6543-e21b-43d2-b654-321987654321",
+      "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+      "userId": "123e4567-e89b-12d3-a456-426614174000",
+      "createdAt": "2025-01-27T15:30:00Z"
+    },
+    {
+      "id": "876e5432-e10a-32c1-a543-210876543210",
+      "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+      "userId": "234e5678-f90c-23e4-b567-537725285112",
+      "createdAt": "2025-01-27T14:20:00Z"
+    }
+  ],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 45,
+    "totalPages": 3
+  }
+}
+```
+
+**Пример успешного ответа (200 OK) без лайков:**
+
+```json
+{
+  "content": [],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 0,
+    "totalPages": 0
+  }
+}
+```
+
+**Пример использования с пагинацией:**
+
+```bash
+# Получить первую страницу (20 лайков по умолчанию)
+curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/likes"
+
+# Получить вторую страницу с размером 10
+curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/likes?page=1&size=10"
+
+# Получить с кастомной сортировкой
+curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/likes?sort=createdAt,ASC"
+```
+
+**Пример ошибки валидации UUID (400 Bad Request):**
+
+```json
+{
+  "type": "https://example.com/errors/validation-error",
+  "title": "Validation Error",
+  "status": 400,
+  "detail": "Invalid UUID format for tweetId parameter",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки неверные параметры пагинации (400 Bad Request):**
+
+```json
+{
+  "type": "https://example.com/errors/validation-error",
+  "title": "Validation Error",
+  "status": 400,
+  "detail": "Invalid pagination parameters: page must be >= 0, size must be between 1 and 100",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки твит не найден (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
+  "ruleName": "TWEET_NOT_FOUND",
+  "context": "223e4567-e89b-12d3-a456-426614174001",
   "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
@@ -2115,6 +2244,86 @@ curl -X DELETE http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-42661
   "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
   "ruleName": "USER_NOT_EXISTS",
   "context": "123e4567-e89b-12d3-a456-426614174000",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+### Получить пользователей, лайкнувших твит
+
+```bash
+# Получить первую страницу (20 лайков по умолчанию)
+curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/likes"
+
+# Получить вторую страницу с размером 10
+curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/likes?page=1&size=10"
+
+# Получить с кастомной сортировкой
+curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/likes?sort=createdAt,ASC"
+```
+
+**Ответ (200 OK) с лайками:**
+
+```json
+{
+  "content": [
+    {
+      "id": "987e6543-e21b-43d2-b654-321987654321",
+      "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+      "userId": "123e4567-e89b-12d3-a456-426614174000",
+      "createdAt": "2025-01-27T15:30:00Z"
+    },
+    {
+      "id": "876e5432-e10a-32c1-a543-210876543210",
+      "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+      "userId": "234e5678-f90c-23e4-b567-537725285112",
+      "createdAt": "2025-01-27T14:20:00Z"
+    }
+  ],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 45,
+    "totalPages": 3
+  }
+}
+```
+
+**Ответ (200 OK) без лайков:**
+
+```json
+{
+  "content": [],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 0,
+    "totalPages": 0
+  }
+}
+```
+
+**Ответ при отсутствии твита (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
+  "ruleName": "TWEET_NOT_FOUND",
+  "context": "223e4567-e89b-12d3-a456-426614174001",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Ответ при неверном формате UUID (400 Bad Request):**
+
+```json
+{
+  "type": "https://example.com/errors/validation-error",
+  "title": "Validation Error",
+  "status": 400,
+  "detail": "Invalid UUID format for tweetId parameter",
   "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
