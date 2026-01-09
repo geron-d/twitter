@@ -7,6 +7,11 @@ import com.twitter.service.RetweetService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -51,5 +56,18 @@ public class RetweetController implements RetweetApi {
         @RequestBody @Valid RetweetRequestDto retweetRequest) {
         retweetService.removeRetweet(tweetId, retweetRequest);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    /**
+     * @see RetweetApi#getRetweetsByTweetId
+     */
+    @LoggableRequest
+    @GetMapping("/{tweetId}/retweets")
+    @Override
+    public PagedModel<RetweetResponseDto> getRetweetsByTweetId(
+        @PathVariable("tweetId") UUID tweetId,
+        @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<RetweetResponseDto> retweets = retweetService.getRetweetsByTweetId(tweetId, pageable);
+        return new PagedModel<>(retweets);
     }
 }

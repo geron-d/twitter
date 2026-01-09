@@ -5,6 +5,8 @@ import com.twitter.common.exception.validation.FormatValidationException;
 import com.twitter.common.exception.validation.UniquenessValidationException;
 import com.twitter.dto.request.RetweetRequestDto;
 import com.twitter.dto.response.RetweetResponseDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
 
@@ -63,4 +65,25 @@ public interface RetweetService {
      * @throws BusinessRuleValidationException if tweetId is null, tweet doesn't exist, user doesn't exist, or retweet doesn't exist
      */
     void removeRetweet(UUID tweetId, RetweetRequestDto requestDto);
+
+    /**
+     * Retrieves a paginated list of retweets for a specific tweet.
+     * <p>
+     * This method performs the following operations:
+     * 1. Validates that the tweet exists and is not deleted
+     * 2. Retrieves retweets from the database with pagination support
+     * 3. Converts Retweet entities to RetweetResponseDto
+     * 4. Returns a Page containing paginated retweets with metadata
+     * <p>
+     * The method is read-only and transactional, ensuring data consistency. Retweets are
+     * sorted by creation date in descending order (newest first). If the tweet doesn't
+     * exist or is deleted, a BusinessRuleValidationException is thrown. If there are no
+     * retweets for the tweet, an empty page is returned (not an error).
+     *
+     * @param tweetId  the unique identifier of the tweet whose retweets to retrieve
+     * @param pageable pagination parameters (page, size, sorting)
+     * @return Page containing paginated list of retweets with metadata
+     * @throws BusinessRuleValidationException if tweetId is null, tweet doesn't exist, or tweet is deleted
+     */
+    Page<RetweetResponseDto> getRetweetsByTweetId(UUID tweetId, Pageable pageable);
 }

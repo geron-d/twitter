@@ -50,4 +50,16 @@ public interface RetweetValidator {
      * @throws BusinessRuleValidationException if tweetId is null, tweet doesn't exist, user doesn't exist, or retweet doesn't exist
      */
     void validateForRemoveRetweet(UUID tweetId, RetweetRequestDto requestDto);
+
+    /**
+     * Validates that a tweet exists and is not deleted.
+     * <p>
+     * This method checks if the tweet with the given ID exists in the database
+     * and is not soft deleted. This validation is used for read operations like
+     * retrieving retweets for a tweet.
+     *
+     * @param tweetId the unique identifier of the tweet to validate
+     * @throws BusinessRuleValidationException if tweetId is null, tweet doesn't exist, or tweet is deleted
+     */
+    void validateTweetExists(UUID tweetId);
 }

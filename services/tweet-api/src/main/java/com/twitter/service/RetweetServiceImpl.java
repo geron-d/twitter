@@ -10,6 +10,8 @@ import com.twitter.repository.TweetRepository;
 import com.twitter.validation.RetweetValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -70,5 +72,18 @@ public class RetweetServiceImpl implements RetweetService {
             .orElseThrow(() -> new IllegalStateException("Tweet not found after validation"));
         tweet.decrementRetweetsCount();
         tweetRepository.saveAndFlush(tweet);
+    }
+
+    /**
+     * @see RetweetService#getRetweetsByTweetId
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Page<RetweetResponseDto> getRetweetsByTweetId(UUID tweetId, Pageable pageable) {
+        retweetValidator.validateTweetExists(tweetId);
+
+        log.debug("Retrieving retweets for tweet {} with pagination: page={}, size={}", tweetId, pageable.getPageNumber(), pageable.getPageSize());
+        Page<Retweet> retweets = retweetRepository.findByTweetIdOrderByCreatedAtDesc(tweetId, pageable);
+        return retweets.map(retweetMapper::toRetweetResponseDto);
     }
 }

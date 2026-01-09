@@ -187,4 +187,21 @@ public class RetweetValidatorImpl implements RetweetValidator {
             throw new BusinessRuleValidationException("RETWEET_NOT_FOUND", String.format("Retweet not found for tweet %s and user %s", tweetId, userId));
         }
     }
+
+    /**
+     * @see RetweetValidator#validateTweetExists
+     */
+    @Override
+    public void validateTweetExists(UUID tweetId) {
+        if (tweetId == null) {
+            log.warn("Tweet ID is null");
+            throw new BusinessRuleValidationException("TWEET_ID_NULL", "Tweet ID cannot be null");
+        }
+
+        tweetRepository.findByIdAndIsDeletedFalse(tweetId)
+            .orElseThrow(() -> {
+                log.warn("Tweet with ID {} not found or is deleted", tweetId);
+                return new BusinessRuleValidationException("TWEET_NOT_FOUND", tweetId);
+            });
+    }
 }

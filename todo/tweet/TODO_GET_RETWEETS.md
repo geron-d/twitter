@@ -16,22 +16,33 @@
 ## Tasks
 
 ### Анализ и проектирование
-- [ ] (P1) #1: Анализ требований — Анализ существующего кода GET /api/v1/tweets/{tweetId}/likes, определение структуры эндпоинта, проектирование API контракта.
+- [x] (P1) [2025-01-27] #1: Анализ требований — Анализ существующего кода GET /api/v1/tweets/{tweetId}/likes, определение структуры эндпоинта, проектирование API контракта.
   acceptance: "Понять вход/выход, определить затронутые стандарты, определить структуру эндпоинта"
+  note: "Анализ выполнен при создании плана. Изучена реализация эндпоинта getLikesByTweetId, определены все компоненты и структура данных."
 
 ### Реализация инфраструктуры и конфигов
-- [ ] (P1) #2: Обновление RetweetRepository — Добавить метод findByTweetIdOrderByCreatedAtDesc для получения ретвитов с пагинацией.
+- [x] (P1) [2025-01-27] #2: Обновление RetweetRepository — Добавить метод findByTweetIdOrderByCreatedAtDesc для получения ретвитов с пагинацией.
   acceptance: "Метод findByTweetIdOrderByCreatedAtDesc(UUID tweetId, Pageable pageable) добавлен в RetweetRepository (Derived Query Method, JavaDoc не требуется)"
-- [ ] (P1) #3: Обновление RetweetValidator — Добавить метод validateTweetExists для валидации существования твита.
+  note: "Добавлен метод findByTweetIdOrderByCreatedAtDesc в RetweetRepository. Добавлены импорты Page и Pageable. Метод следует паттерну из LikeRepository. Derived Query Method - JavaDoc не требуется согласно STANDART_JAVADOC.md"
+  commit: "services/tweet-api/src/main/java/com/twitter/repository/RetweetRepository.java"
+- [x] (P1) [2025-01-27] #3: Обновление RetweetValidator — Добавить метод validateTweetExists для валидации существования твита.
   acceptance: "Метод validateTweetExists(UUID tweetId) добавлен в RetweetValidator интерфейс и реализован в RetweetValidatorImpl"
+  note: "Добавлен метод validateTweetExists в RetweetValidator интерфейс с полным JavaDoc. Реализован в RetweetValidatorImpl с проверкой на null и существование твита (не удален). Метод следует паттерну из LikeValidatorImpl.validateTweetExists."
+  commit: "services/tweet-api/src/main/java/com/twitter/validation/RetweetValidator.java, services/tweet-api/src/main/java/com/twitter/validation/RetweetValidatorImpl.java"
 
 ### Эндпоинт: GET /api/v1/tweets/{tweetId}/retweets
-- [ ] (P1) #4: Service метод для эндпоинта — Добавить метод getRetweetsByTweetId в RetweetService интерфейс и реализацию.
+- [x] (P1) [2025-01-27] #4: Service метод для эндпоинта — Добавить метод getRetweetsByTweetId в RetweetService интерфейс и реализацию.
   acceptance: "Метод добавлен в RetweetService интерфейс с JavaDoc, реализован в RetweetServiceImpl с валидацией существования твита, использует @Transactional(readOnly = true)"
-- [ ] (P1) #5: OpenAPI интерфейс для эндпоинта — Добавить метод getRetweetsByTweetId в RetweetApi интерфейс с OpenAPI аннотациями.
+  note: "Добавлен метод getRetweetsByTweetId в RetweetService интерфейс с полным JavaDoc. Реализован в RetweetServiceImpl с валидацией существования твита через retweetValidator.validateTweetExists. Использует @Transactional(readOnly = true). Добавлены импорты Page и Pageable. Метод использует retweetRepository.findByTweetIdOrderByCreatedAtDesc и retweetMapper.toRetweetResponseDto для маппинга."
+  commit: "services/tweet-api/src/main/java/com/twitter/service/RetweetService.java, services/tweet-api/src/main/java/com/twitter/service/RetweetServiceImpl.java"
+- [x] (P1) [2025-01-27] #5: OpenAPI интерфейс для эндпоинта — Добавить метод getRetweetsByTweetId в RetweetApi интерфейс с OpenAPI аннотациями.
   acceptance: "Метод добавлен в RetweetApi интерфейс с OpenAPI аннотациями (@Operation, @ApiResponses, @Parameter)"
-- [ ] (P1) #6: Controller реализация для эндпоинта — Реализовать метод getRetweetsByTweetId в RetweetController.
+  note: "Добавлен метод getRetweetsByTweetId в RetweetApi интерфейс с полной OpenAPI документацией. Метод возвращает PagedModel<RetweetResponseDto>. Добавлены @Operation с summary и description, @ApiResponses с примерами для 200 OK (Paginated Retweets и Empty Retweets List), 400 (Invalid Pagination Error и Invalid UUID Format Error), 409 (Tweet Not Found Error). Добавлены @Parameter для tweetId и pageable. Добавлены импорты PagedModel и Pageable. Следует паттерну из LikeApi.getLikesByTweetId."
+  commit: "services/tweet-api/src/main/java/com/twitter/controller/RetweetApi.java"
+- [x] (P1) [2025-01-27] #6: Controller реализация для эндпоинта — Реализовать метод getRetweetsByTweetId в RetweetController.
   acceptance: "Метод реализован в RetweetController с @LoggableRequest и @PageableDefault"
+  note: "Добавлен метод getRetweetsByTweetId в RetweetController. Использует @LoggableRequest для логирования запросов. Использует @PageableDefault(size = 20, sort = \"createdAt\", direction = Sort.Direction.DESC) для пагинации по умолчанию. Путь: GET /api/v1/tweets/{tweetId}/retweets. Возвращает PagedModel<RetweetResponseDto>. Преобразует Page<RetweetResponseDto> в PagedModel через new PagedModel<>(retweets). Добавлены импорты Page, Pageable, Sort, PageableDefault, PagedModel. Следует паттерну из LikeController.getLikesByTweetId."
+  commit: "services/tweet-api/src/main/java/com/twitter/controller/RetweetController.java"
 - [ ] (P1) #7: JavaDoc для эндпоинта — Добавить JavaDoc для всех новых методов.
   acceptance: "JavaDoc добавлен для всех методов эндпоинта с @author geron, @version 1.0, @param, @return, @throws"
 - [ ] (P1) #8: Unit тесты для эндпоинта — Написать Unit тесты для Service и Validator методов.
