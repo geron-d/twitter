@@ -12,6 +12,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
 
 import java.util.UUID;
@@ -325,5 +327,152 @@ public interface LikeApi {
         UUID tweetId,
         @Parameter(description = "Unlike request containing userId", required = true)
         LikeTweetRequestDto likeTweetRequest);
-}
 
+    /**
+     * Retrieves a paginated list of users who liked a specific tweet.
+     * <p>
+     * This endpoint retrieves all likes for a specific tweet with pagination support.
+     * Likes are sorted by creation date in descending order (newest first). Supports
+     * pagination with page, size, and sort parameters. If the tweet has no likes,
+     * an empty page is returned (not an error).
+     *
+     * @param tweetId  the unique identifier of the tweet whose likes to retrieve
+     * @param pageable pagination parameters (page, size, sorting)
+     * @return PagedModel containing paginated list of likes with metadata and HATEOAS links
+     * @throws BusinessRuleValidationException if tweetId is null or tweet doesn't exist
+     */
+    @Operation(
+        summary = "Get users who liked a tweet",
+        description = "Retrieves a paginated list of users who liked a specific tweet. " +
+            "Likes are sorted by creation date in descending order (newest first). " +
+            "Supports pagination with page, size, and sort parameters. " +
+            "If the tweet has no likes, an empty page is returned (not an error). " +
+            "Default pagination: page=0, size=20, sort=createdAt,DESC."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Tweet likes retrieved successfully",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = PagedModel.class),
+                examples = {
+                    @ExampleObject(
+                        name = "Paginated Likes",
+                        summary = "Example paginated response with likes",
+                        value = """
+                            {
+                              "content": [
+                                {
+                                  "id": "987e6543-e21b-43d2-b654-321987654321",
+                                  "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+                                  "userId": "123e4567-e89b-12d3-a456-426614174000",
+                                  "createdAt": "2025-01-27T15:30:00Z"
+                                },
+                                {
+                                  "id": "876e5432-e10a-32c1-a543-210876543210",
+                                  "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+                                  "userId": "234e5678-f90c-23e4-b567-537725285112",
+                                  "createdAt": "2025-01-27T14:20:00Z"
+                                }
+                              ],
+                              "page": {
+                                "size": 20,
+                                "number": 0,
+                                "totalElements": 45,
+                                "totalPages": 3
+                              }
+                            }
+                            """
+                    ),
+                    @ExampleObject(
+                        name = "Empty Likes List",
+                        summary = "Example response when tweet has no likes",
+                        value = """
+                            {
+                              "content": [],
+                              "page": {
+                                "size": 20,
+                                "number": 0,
+                                "totalElements": 0,
+                                "totalPages": 0
+                              }
+                            }
+                            """
+                    )
+                }
+            )
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Validation error",
+            content = @Content(
+                mediaType = "application/problem+json",
+                examples = @ExampleObject(
+                    name = "Invalid Pagination Error",
+                    summary = "Invalid page or size parameters",
+                    value = """
+                        {
+                          "type": "https://example.com/errors/validation-error",
+                          "title": "Validation Error",
+                          "status": 400,
+                          "detail": "Invalid pagination parameters: page must be >= 0, size must be between 1 and 100",
+                          "timestamp": "2025-01-27T15:30:00Z"
+                        }
+                        """
+                )
+            )
+        ),
+        @ApiResponse(
+            responseCode = "409",
+            description = "Business rule violation",
+            content = @Content(
+                mediaType = "application/problem+json",
+                examples = @ExampleObject(
+                    name = "Tweet Not Found Error",
+                    summary = "Tweet does not exist or is deleted",
+                    value = """
+                        {
+                          "type": "https://example.com/errors/business-rule-validation",
+                          "title": "Business Rule Validation Error",
+                          "status": 409,
+                          "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
+                          "ruleName": "TWEET_NOT_FOUND",
+                          "context": "223e4567-e89b-12d3-a456-426614174001",
+                          "timestamp": "2025-01-27T15:30:00Z"
+                        }
+                        """
+                )
+            )
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Invalid UUID format",
+            content = @Content(
+                mediaType = "application/problem+json",
+                examples = @ExampleObject(
+                    name = "Invalid UUID Format Error",
+                    summary = "Invalid tweet ID format",
+                    value = """
+                        {
+                          "type": "https://example.com/errors/validation-error",
+                          "title": "Validation Error",
+                          "status": 400,
+                          "detail": "Invalid UUID format for tweetId parameter",
+                          "timestamp": "2025-01-27T15:30:00Z"
+                        }
+                        """
+                )
+            )
+        )
+    })
+    PagedModel<LikeResponseDto> getLikesByTweetId(
+        @Parameter(
+            description = "Unique identifier of the tweet",
+            required = true,
+            example = "223e4567-e89b-12d3-a456-426614174001"
+        )
+        UUID tweetId,
+        @Parameter(description = "Pagination parameters (page, size, sorting)", required = false)
+        Pageable pageable);
+}

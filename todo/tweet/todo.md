@@ -34,23 +34,29 @@
   acceptance: "Метод добавлен в LikeService интерфейс с JavaDoc, реализован в LikeServiceImpl с валидацией существования твита, использует @Transactional(readOnly = true)"
   note: "Добавлен метод getLikesByTweetId в LikeService интерфейс с полным JavaDoc. Реализован в LikeServiceImpl с валидацией существования твита через likeValidator.validateTweetExists. Валидация вынесена в LikeValidator (добавлен метод validateTweetExists). Использует @Transactional(readOnly = true). Добавлены импорты Page и Pageable. Метод использует likeRepository.findByTweetIdOrderByCreatedAtDesc и likeMapper.toLikeResponseDtoPage для маппинга."
   commit: "services/tweet-api/src/main/java/com/twitter/service/LikeService.java, services/tweet-api/src/main/java/com/twitter/service/LikeServiceImpl.java, services/tweet-api/src/main/java/com/twitter/validation/LikeValidator.java, services/tweet-api/src/main/java/com/twitter/validation/LikeValidatorImpl.java"
-- [ ] (P1) #5: Controller метод для эндпоинта — Добавить метод getLikesByTweetId в LikeApi интерфейс и LikeController.
-  acceptance: "Метод добавлен в LikeApi интерфейс с OpenAPI аннотациями (@Operation, @ApiResponses, @Parameter), реализован в LikeController с @LoggableRequest и @PageableDefault"
-- [ ] (P1) #6: JavaDoc для эндпоинта — Добавить JavaDoc для всех новых методов.
+- [x] (P1) [2025-01-27] #5: OpenAPI интерфейс для эндпоинта — Добавить метод getLikesByTweetId в LikeApi интерфейс с OpenAPI аннотациями.
+  acceptance: "Метод добавлен в LikeApi интерфейс с OpenAPI аннотациями (@Operation, @ApiResponses, @Parameter)"
+  note: "Добавлен метод getLikesByTweetId в LikeApi интерфейс с полной OpenAPI документацией. Метод возвращает PagedModel<LikeResponseDto>. Добавлены @Operation с summary и description, @ApiResponses с примерами для 200 OK (с пустым списком), 400 (валидация пагинации и UUID), 409 (твит не найден). Добавлены @Parameter для tweetId и pageable. Добавлены импорты PagedModel и Pageable. Следует паттерну из TweetApi.getUserTweets."
+  commit: "services/tweet-api/src/main/java/com/twitter/controller/LikeApi.java"
+- [x] (P1) [2025-01-27] #6: Controller реализация для эндпоинта — Реализовать метод getLikesByTweetId в LikeController.
+  acceptance: "Метод реализован в LikeController с @LoggableRequest и @PageableDefault"
+  note: "Добавлен метод getLikesByTweetId в LikeController. Использует @LoggableRequest для логирования запросов. Использует @PageableDefault(size = 20, sort = \"createdAt\", direction = Sort.Direction.DESC) для пагинации по умолчанию. Путь: GET /api/v1/tweets/{tweetId}/likes. Возвращает PagedModel<LikeResponseDto>. Преобразует Page<LikeResponseDto> в PagedModel через new PagedModel<>(likes). Добавлены импорты Page, Pageable, Sort, PageableDefault, PagedModel. Следует паттерну из TweetController.getUserTweets."
+  commit: "services/tweet-api/src/main/java/com/twitter/controller/LikeController.java"
+- [ ] (P1) #7: JavaDoc для эндпоинта — Добавить JavaDoc для всех новых методов.
   acceptance: "JavaDoc добавлен для всех методов эндпоинта с @author geron, @version 1.0, @param, @return, @throws"
-- [ ] (P1) #7: Unit тесты для эндпоинта — Написать Unit тесты для Service и Mapper методов.
+- [ ] (P1) #8: Unit тесты для эндпоинта — Написать Unit тесты для Service и Mapper методов.
   acceptance: "Unit тесты для LikeServiceImpl.getLikesByTweetId и LikeMapper.toLikeResponseDtoPage с учетом STANDART_TEST.md (успешный сценарий, твит не найден, пустой список, пагинация)"
-- [ ] (P2) #8: Integration тесты для эндпоинта — Написать Integration тесты для контроллера.
+- [ ] (P2) #9: Integration тесты для эндпоинта — Написать Integration тесты для контроллера.
   acceptance: "Integration тесты для LikeController.getLikesByTweetId с MockMvc, все статус-коды проверены (200 OK, 404 Not Found, 400 Bad Request, пагинация)"
-- [ ] (P1) #9: Swagger документация для эндпоинта — Убедиться, что OpenAPI документация полная.
+- [ ] (P1) #10: Swagger документация для эндпоинта — Убедиться, что OpenAPI документация полная.
   acceptance: "OpenAPI документация для эндпоинта полная с @ExampleObject для всех сценариев (200 OK, 404 Not Found, 400 Bad Request)"
 
 ### Финальная инфраструктура
-- [ ] (P2) #10: Обновление README.md — Обновить README с описанием нового эндпоинта.
+- [ ] (P2) #11: Обновление README.md — Обновить README с описанием нового эндпоинта.
   acceptance: "README обновлен с учетом STANDART_README.md, эндпоинт добавлен в таблицу эндпоинтов, детальное описание, примеры использования на русском языке"
-- [ ] (P2) #11: Обновление Postman коллекции — Добавить запрос в Postman коллекцию.
+- [ ] (P2) #12: Обновление Postman коллекции — Добавить запрос в Postman коллекцию.
   acceptance: "Добавлен запрос get likes by tweet id с примерами ответов для всех эндпоинтов (200 OK, 404 Not Found, 400 Bad Request), обновлены переменные окружения"
-- [ ] (P1) #12: Проверка соответствия стандартам — Проверить соответствие всем стандартам проекта.
+- [ ] (P1) #13: Проверка соответствия стандартам — Проверить соответствие всем стандартам проекта.
   acceptance: "Все стандарты проверены, код соответствует требованиям (CODE, TEST, JAVADOC, SWAGGER, POSTMAN, README)"
 
 ## Assumptions
