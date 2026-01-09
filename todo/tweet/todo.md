@@ -42,14 +42,22 @@
   acceptance: "Метод реализован в LikeController с @LoggableRequest и @PageableDefault"
   note: "Добавлен метод getLikesByTweetId в LikeController. Использует @LoggableRequest для логирования запросов. Использует @PageableDefault(size = 20, sort = \"createdAt\", direction = Sort.Direction.DESC) для пагинации по умолчанию. Путь: GET /api/v1/tweets/{tweetId}/likes. Возвращает PagedModel<LikeResponseDto>. Преобразует Page<LikeResponseDto> в PagedModel через new PagedModel<>(likes). Добавлены импорты Page, Pageable, Sort, PageableDefault, PagedModel. Следует паттерну из TweetController.getUserTweets."
   commit: "services/tweet-api/src/main/java/com/twitter/controller/LikeController.java"
-- [ ] (P1) #7: JavaDoc для эндпоинта — Добавить JavaDoc для всех новых методов.
+- [x] (P1) [2025-01-27] #7: JavaDoc для эндпоинта — Добавить JavaDoc для всех новых методов.
   acceptance: "JavaDoc добавлен для всех методов эндпоинта с @author geron, @version 1.0, @param, @return, @throws"
-- [ ] (P1) #8: Unit тесты для эндпоинта — Написать Unit тесты для Service и Mapper методов.
+  note: "Проверен JavaDoc для всех новых методов: LikeService.getLikesByTweetId (полный JavaDoc с @param, @return, @throws), LikeServiceImpl.getLikesByTweetId (JavaDoc с @see), LikeValidator.validateTweetExists (полный JavaDoc с @param, @throws), LikeValidatorImpl.validateTweetExists (JavaDoc с @see), LikeApi.getLikesByTweetId (полный JavaDoc с @param, @return, @throws), LikeController.getLikesByTweetId (JavaDoc с @see). Все методы имеют JavaDoc согласно STANDART_JAVADOC.md. Примечание: метод toLikeResponseDtoPage не существует в LikeMapper (используется likes.map(likeMapper::toLikeResponseDto) в LikeServiceImpl)."
+  commit: "Проверка JavaDoc для всех методов"
+- [x] (P1) [2025-01-27] #8: Unit тесты для эндпоинта — Написать Unit тесты для Service и Mapper методов.
   acceptance: "Unit тесты для LikeServiceImpl.getLikesByTweetId и LikeMapper.toLikeResponseDtoPage с учетом STANDART_TEST.md (успешный сценарий, твит не найден, пустой список, пагинация)"
-- [ ] (P2) #9: Integration тесты для эндпоинта — Написать Integration тесты для контроллера.
+  note: "Добавлены unit тесты для LikeServiceImpl.getLikesByTweetId в LikeServiceImplTest. Покрыты сценарии: успешный (лайки существуют), пустой список, твит не найден (BusinessRuleValidationException), пагинация (разные параметры). Тесты следуют паттерну methodName_WhenCondition_ShouldExpectedResult. Используются @Nested классы, моки для зависимостей, PageImpl для пагинации. Примечание: метод toLikeResponseDtoPage не существует в LikeMapper (используется likes.map(likeMapper::toLikeResponseDto)), поэтому тесты для маппера не требуются."
+  commit: "services/tweet-api/src/test/java/com/twitter/service/LikeServiceImplTest.java"
+- [x] (P2) [2025-01-27] #9: Integration тесты для эндпоинта — Написать Integration тесты для контроллера.
   acceptance: "Integration тесты для LikeController.getLikesByTweetId с MockMvc, все статус-коды проверены (200 OK, 404 Not Found, 400 Bad Request, пагинация)"
-- [ ] (P1) #10: Swagger документация для эндпоинта — Убедиться, что OpenAPI документация полная.
+  note: "Добавлены integration тесты для LikeController.getLikesByTweetId в LikeControllerTest. Покрыты сценарии: 200 OK (лайки существуют), 200 OK (пустой список), 409 Conflict (твит не найден), 400 Bad Request (неверный формат UUID), пагинация (разные параметры), пагинация по умолчанию, сортировка по createdAt DESC. Тесты используют MockMvc, проверяют структуру ответа (content, page), статус-коды и метаданные пагинации. Добавлен импорт get метода."
+  commit: "services/tweet-api/src/test/java/com/twitter/controller/LikeControllerTest.java"
+- [x] (P1) [2025-01-27] #10: Swagger документация для эндпоинта — Убедиться, что OpenAPI документация полная.
   acceptance: "OpenAPI документация для эндпоинта полная с @ExampleObject для всех сценариев (200 OK, 404 Not Found, 400 Bad Request)"
+  note: "Проверена OpenAPI документация для getLikesByTweetId в LikeApi. Документация полная и включает: @Operation с summary и description, @ApiResponses с примерами для 200 OK (Paginated Likes и Empty Likes List), 400 Bad Request (Invalid Pagination Error и Invalid UUID Format Error), 409 Conflict (Tweet Not Found Error). Все примеры соответствуют реальным ответам API. Документация следует паттерну из TweetApi.getUserTweets. Примечание: используется 409 Conflict вместо 404 Not Found для BusinessRuleValidationException, что соответствует стандартам проекта."
+  commit: "Проверка OpenAPI документации (изменений не требуется)"
 
 ### Финальная инфраструктура
 - [ ] (P2) #11: Обновление README.md — Обновить README с описанием нового эндпоинта.

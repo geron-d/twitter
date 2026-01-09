@@ -15,8 +15,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -357,5 +362,158 @@ class LikeServiceImplTest {
             verify(tweetRepository, never()).saveAndFlush(any());
         }
     }
-}
 
+    @Nested
+    class GetLikesByTweetIdTests {
+
+        private UUID testTweetId;
+        private UUID testUserId1;
+        private UUID testUserId2;
+        private Pageable pageable;
+        private Like like1;
+        private Like like2;
+        private LikeResponseDto responseDto1;
+        private LikeResponseDto responseDto2;
+
+        @BeforeEach
+        void setUp() {
+            testTweetId = UUID.fromString("223e4567-e89b-12d3-a456-426614174001");
+            testUserId1 = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+            testUserId2 = UUID.fromString("234e5678-f90c-23e4-b567-537725285112");
+
+            UUID likeId1 = UUID.fromString("987e6543-e21b-43d2-b654-321987654321");
+            UUID likeId2 = UUID.fromString("876e5432-e10a-32c1-a543-210876543210");
+
+            like1 = Like.builder()
+                .id(likeId1)
+                .tweetId(testTweetId)
+                .userId(testUserId1)
+                .createdAt(LocalDateTime.of(2025, 1, 27, 15, 30, 0))
+                .build();
+
+            like2 = Like.builder()
+                .id(likeId2)
+                .tweetId(testTweetId)
+                .userId(testUserId2)
+                .createdAt(LocalDateTime.of(2025, 1, 27, 14, 20, 0))
+                .build();
+
+            responseDto1 = LikeResponseDto.builder()
+                .id(likeId1)
+                .tweetId(testTweetId)
+                .userId(testUserId1)
+                .createdAt(LocalDateTime.of(2025, 1, 27, 15, 30, 0))
+                .build();
+
+            responseDto2 = LikeResponseDto.builder()
+                .id(likeId2)
+                .tweetId(testTweetId)
+                .userId(testUserId2)
+                .createdAt(LocalDateTime.of(2025, 1, 27, 14, 20, 0))
+                .build();
+
+            pageable = PageRequest.of(0, 20);
+        }
+
+        @Test
+        void getLikesByTweetId_WhenLikesExist_ShouldReturnPageWithLikes() {
+            List<Like> likes = List.of(like1, like2);
+            Page<Like> likePage = new PageImpl<>(likes, pageable, 2);
+
+            doNothing().when(likeValidator).validateTweetExists(testTweetId);
+            when(likeRepository.findByTweetIdOrderByCreatedAtDesc(eq(testTweetId), eq(pageable)))
+                .thenReturn(likePage);
+            when(likeMapper.toLikeResponseDto(like1)).thenReturn(responseDto1);
+            when(likeMapper.toLikeResponseDto(like2)).thenReturn(responseDto2);
+
+            Page<LikeResponseDto> result = likeService.getLikesByTweetId(testTweetId, pageable);
+
+            assertThat(result).isNotNull();
+            assertThat(result.getContent()).hasSize(2);
+            assertThat(result.getContent()).containsExactly(responseDto1, responseDto2);
+            assertThat(result.getTotalElements()).isEqualTo(2);
+            assertThat(result.getNumber()).isEqualTo(0);
+            assertThat(result.getSize()).isEqualTo(20);
+            assertThat(result.getTotalPages()).isEqualTo(1);
+        }
+
+        @Test
+        void getLikesByTweetId_WhenNoLikesExist_ShouldReturnEmptyPage() {
+            Page<Like> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+
+            doNothing().when(likeValidator).validateTweetExists(testTweetId);
+            when(likeRepository.findByTweetIdOrderByCreatedAtDesc(eq(testTweetId), eq(pageable)))
+                .thenReturn(emptyPage);
+
+            Page<LikeResponseDto> result = likeService.getLikesByTweetId(testTweetId, pageable);
+
+            assertThat(result).isNotNull();
+            assertThat(result.getContent()).isEmpty();
+            assertThat(result.getTotalElements()).isEqualTo(0);
+            assertThat(result.getNumber()).isEqualTo(0);
+            assertThat(result.getSize()).isEqualTo(20);
+            assertThat(result.getTotalPages()).isEqualTo(0);
+        }
+
+        @Test
+        void getLikesByTweetId_WhenLikesExist_ShouldCallValidatorRepositoryAndMapper() {
+            List<Like> likes = List.of(like1, like2);
+            Page<Like> likePage = new PageImpl<>(likes, pageable, 2);
+
+            doNothing().when(likeValidator).validateTweetExists(testTweetId);
+            when(likeRepository.findByTweetIdOrderByCreatedAtDesc(eq(testTweetId), eq(pageable)))
+                .thenReturn(likePage);
+            when(likeMapper.toLikeResponseDto(like1)).thenReturn(responseDto1);
+            when(likeMapper.toLikeResponseDto(like2)).thenReturn(responseDto2);
+
+            likeService.getLikesByTweetId(testTweetId, pageable);
+
+            verify(likeValidator, times(1)).validateTweetExists(eq(testTweetId));
+            verify(likeRepository, times(1))
+                .findByTweetIdOrderByCreatedAtDesc(eq(testTweetId), eq(pageable));
+            verify(likeMapper, times(1)).toLikeResponseDto(eq(like1));
+            verify(likeMapper, times(1)).toLikeResponseDto(eq(like2));
+            verifyNoMoreInteractions(likeValidator, likeRepository, likeMapper);
+        }
+
+        @Test
+        void getLikesByTweetId_WhenTweetNotFound_ShouldThrowBusinessRuleValidationException() {
+            doThrow(new com.twitter.common.exception.validation.BusinessRuleValidationException("TWEET_NOT_FOUND", testTweetId))
+                .when(likeValidator).validateTweetExists(testTweetId);
+
+            assertThatThrownBy(() -> likeService.getLikesByTweetId(testTweetId, pageable))
+                .isInstanceOf(com.twitter.common.exception.validation.BusinessRuleValidationException.class)
+                .satisfies(exception -> {
+                    com.twitter.common.exception.validation.BusinessRuleValidationException ex =
+                        (com.twitter.common.exception.validation.BusinessRuleValidationException) exception;
+                    assertThat(ex.getRuleName()).isEqualTo("TWEET_NOT_FOUND");
+                });
+
+            verify(likeValidator, times(1)).validateTweetExists(eq(testTweetId));
+            verify(likeRepository, never()).findByTweetIdOrderByCreatedAtDesc(any(), any());
+            verify(likeMapper, never()).toLikeResponseDto(any());
+        }
+
+        @Test
+        void getLikesByTweetId_WithPagination_ShouldReturnCorrectPage() {
+            Pageable secondPage = PageRequest.of(1, 10);
+            List<Like> likes = List.of(like1);
+            Page<Like> likePage = new PageImpl<>(likes, secondPage, 11);
+
+            doNothing().when(likeValidator).validateTweetExists(testTweetId);
+            when(likeRepository.findByTweetIdOrderByCreatedAtDesc(eq(testTweetId), eq(secondPage)))
+                .thenReturn(likePage);
+            when(likeMapper.toLikeResponseDto(like1)).thenReturn(responseDto1);
+
+            Page<LikeResponseDto> result = likeService.getLikesByTweetId(testTweetId, secondPage);
+
+            assertThat(result).isNotNull();
+            assertThat(result.getContent()).hasSize(1);
+            assertThat(result.getContent()).containsExactly(responseDto1);
+            assertThat(result.getTotalElements()).isEqualTo(11);
+            assertThat(result.getNumber()).isEqualTo(1);
+            assertThat(result.getSize()).isEqualTo(10);
+            assertThat(result.getTotalPages()).isEqualTo(2);
+        }
+    }
+}

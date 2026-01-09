@@ -25,6 +25,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -575,5 +576,170 @@ public class LikeControllerTest extends BaseIntegrationTest {
             assertThat(tweet.getLikesCount()).isEqualTo(1);
         }
     }
-}
 
+    @Nested
+    class GetLikesByTweetIdTests {
+
+        private UUID testUserId;
+        private UUID testTweetId;
+        private UUID likeUserId1;
+        private UUID likeUserId2;
+        private UUID likeUserId3;
+
+        @BeforeEach
+        void setUp() {
+            testUserId = UUID.randomUUID();
+            likeUserId1 = UUID.randomUUID();
+            likeUserId2 = UUID.randomUUID();
+            likeUserId3 = UUID.randomUUID();
+        }
+
+        @Test
+        void getLikesByTweetId_WhenLikesExist_ShouldReturn200Ok() throws Exception {
+            String content = "Test tweet for likes";
+            Tweet savedTweet = createAndSaveTweet(testUserId, content);
+            testTweetId = savedTweet.getId();
+
+            createAndSaveLike(testTweetId, likeUserId1);
+            createAndSaveLike(testTweetId, likeUserId2);
+            createAndSaveLike(testTweetId, likeUserId3);
+
+            mockMvc.perform(get("/api/v1/tweets/{tweetId}/likes", testTweetId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(3))
+                .andExpect(jsonPath("$.content[0].tweetId").value(testTweetId.toString()))
+                .andExpect(jsonPath("$.content[0].userId").exists())
+                .andExpect(jsonPath("$.content[0].id").exists())
+                .andExpect(jsonPath("$.content[0].createdAt").exists())
+                .andExpect(jsonPath("$.page.size").value(20))
+                .andExpect(jsonPath("$.page.number").value(0))
+                .andExpect(jsonPath("$.page.totalElements").value(3))
+                .andExpect(jsonPath("$.page.totalPages").value(1));
+        }
+
+        @Test
+        void getLikesByTweetId_WhenNoLikesExist_ShouldReturn200OkWithEmptyList() throws Exception {
+            String content = "Test tweet without likes";
+            Tweet savedTweet = createAndSaveTweet(testUserId, content);
+            testTweetId = savedTweet.getId();
+
+            mockMvc.perform(get("/api/v1/tweets/{tweetId}/likes", testTweetId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(0))
+                .andExpect(jsonPath("$.page.size").value(20))
+                .andExpect(jsonPath("$.page.number").value(0))
+                .andExpect(jsonPath("$.page.totalElements").value(0))
+                .andExpect(jsonPath("$.page.totalPages").value(0));
+        }
+
+        @Test
+        void getLikesByTweetId_WhenTweetDoesNotExist_ShouldReturn409Conflict() throws Exception {
+            testTweetId = UUID.randomUUID();
+
+            mockMvc.perform(get("/api/v1/tweets/{tweetId}/likes", testTweetId))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.type").exists())
+                .andExpect(jsonPath("$.ruleName").value("TWEET_NOT_FOUND"));
+        }
+
+        @Test
+        void getLikesByTweetId_WithInvalidUuid_ShouldReturn400BadRequest() throws Exception {
+            mockMvc.perform(get("/api/v1/tweets/{tweetId}/likes", "invalid-uuid"))
+                .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        void getLikesByTweetId_WithPagination_ShouldReturnCorrectPage() throws Exception {
+            String content = "Test tweet for pagination";
+            Tweet savedTweet = createAndSaveTweet(testUserId, content);
+            testTweetId = savedTweet.getId();
+
+            for (int i = 1; i <= 25; i++) {
+                createAndSaveLike(testTweetId, UUID.randomUUID());
+            }
+
+            mockMvc.perform(get("/api/v1/tweets/{tweetId}/likes", testTweetId)
+                    .param("page", "0")
+                    .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(10))
+                .andExpect(jsonPath("$.page.size").value(10))
+                .andExpect(jsonPath("$.page.number").value(0))
+                .andExpect(jsonPath("$.page.totalElements").value(25))
+                .andExpect(jsonPath("$.page.totalPages").value(3));
+
+            mockMvc.perform(get("/api/v1/tweets/{tweetId}/likes", testTweetId)
+                    .param("page", "1")
+                    .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(10))
+                .andExpect(jsonPath("$.page.size").value(10))
+                .andExpect(jsonPath("$.page.number").value(1))
+                .andExpect(jsonPath("$.page.totalElements").value(25))
+                .andExpect(jsonPath("$.page.totalPages").value(3));
+
+            mockMvc.perform(get("/api/v1/tweets/{tweetId}/likes", testTweetId)
+                    .param("page", "2")
+                    .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(5))
+                .andExpect(jsonPath("$.page.size").value(10))
+                .andExpect(jsonPath("$.page.number").value(2))
+                .andExpect(jsonPath("$.page.totalElements").value(25))
+                .andExpect(jsonPath("$.page.totalPages").value(3));
+        }
+
+        @Test
+        void getLikesByTweetId_WithDefaultPagination_ShouldUseDefaultValues() throws Exception {
+            String content = "Test tweet for default pagination";
+            Tweet savedTweet = createAndSaveTweet(testUserId, content);
+            testTweetId = savedTweet.getId();
+
+            for (int i = 1; i <= 5; i++) {
+                createAndSaveLike(testTweetId, UUID.randomUUID());
+            }
+
+            mockMvc.perform(get("/api/v1/tweets/{tweetId}/likes", testTweetId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(5))
+                .andExpect(jsonPath("$.page.size").value(20))
+                .andExpect(jsonPath("$.page.number").value(0))
+                .andExpect(jsonPath("$.page.totalElements").value(5))
+                .andExpect(jsonPath("$.page.totalPages").value(1));
+        }
+
+        @Test
+        void getLikesByTweetId_ShouldReturnLikesSortedByCreatedAtDesc() throws Exception {
+            String content = "Test tweet for sorting";
+            Tweet savedTweet = createAndSaveTweet(testUserId, content);
+            testTweetId = savedTweet.getId();
+
+            Like like1 = createAndSaveLike(testTweetId, likeUserId1);
+            Thread.sleep(10);
+            Like like2 = createAndSaveLike(testTweetId, likeUserId2);
+            Thread.sleep(10);
+            Like like3 = createAndSaveLike(testTweetId, likeUserId3);
+
+            mockMvc.perform(get("/api/v1/tweets/{tweetId}/likes", testTweetId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(3))
+                .andExpect(jsonPath("$.content[0].id").value(like3.getId().toString()))
+                .andExpect(jsonPath("$.content[1].id").value(like2.getId().toString()))
+                .andExpect(jsonPath("$.content[2].id").value(like1.getId().toString()));
+        }
+    }
+}
