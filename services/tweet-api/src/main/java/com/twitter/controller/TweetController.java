@@ -97,5 +97,18 @@ public class TweetController implements TweetApi {
         Page<TweetResponseDto> tweets = tweetService.getUserTweets(userId, pageable);
         return new PagedModel<>(tweets);
     }
+
+    /**
+     * @see TweetApi#getTimeline
+     */
+    @LoggableRequest
+    @GetMapping("/timeline/{userId}")
+    @Override
+    public PagedModel<TweetResponseDto> getTimeline(
+        @PathVariable("userId") UUID userId,
+        @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<TweetResponseDto> timeline = tweetService.getTimeline(userId, pageable);
+        return new PagedModel<>(timeline);
+    }
 }
 

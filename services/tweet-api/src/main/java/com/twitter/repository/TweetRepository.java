@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -25,6 +26,8 @@ public interface TweetRepository extends JpaRepository<Tweet, UUID> {
     Optional<Tweet> findByIdAndIsDeletedFalse(UUID id);
 
     Page<Tweet> findByUserIdAndIsDeletedFalseOrderByCreatedAtDesc(UUID userId, Pageable pageable);
+
+    Page<Tweet> findByUserIdInAndIsDeletedFalseOrderByCreatedAtDesc(List<UUID> userIds, Pageable pageable);
 
     /**
      * Performs soft delete on a tweet by setting isDeleted flag and deletedAt timestamp.

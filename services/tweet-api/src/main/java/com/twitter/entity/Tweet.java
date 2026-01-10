@@ -87,6 +87,29 @@ public class Tweet {
     private LocalDateTime deletedAt;
 
     /**
+     * Counter for the number of likes on this tweet.
+     * <p>
+     * This field stores the denormalized count of likes to optimize read operations.
+     * The counter is incremented when a like is created and should be decremented
+     * when a like is removed (if like removal functionality is implemented).
+     * Default value is 0 for new tweets.
+     */
+    @Column(name = "likes_count", nullable = false)
+    @Builder.Default
+    private Integer likesCount = 0;
+
+    /**
+     * Counter for the number of retweets on this tweet.
+     * <p>
+     * This field stores the denormalized count of retweets to optimize read operations.
+     * The counter is incremented when a retweet is created.
+     * Default value is 0 for new tweets.
+     */
+    @Column(name = "retweets_count", nullable = false)
+    @Builder.Default
+    private Integer retweetsCount = 0;
+
+    /**
      * Custom validation method to ensure content is not just whitespace.
      * This complements the database CHECK constraint.
      */
@@ -122,5 +145,67 @@ public class Tweet {
      */
     public boolean isActive() {
         return !Boolean.TRUE.equals(isDeleted);
+    }
+
+    /**
+     * Increments the likes count for this tweet.
+     * <p>
+     * This method atomically increments the likesCount field by 1.
+     * It should be called when a new like is created for this tweet.
+     * The method handles null values by initializing the counter to 1.
+     */
+    public void incrementLikesCount() {
+        if (this.likesCount == null) {
+            this.likesCount = 1;
+        } else {
+            this.likesCount++;
+        }
+    }
+
+    /**
+     * Decrements the likes count for this tweet.
+     * <p>
+     * This method atomically decrements the likesCount field by 1.
+     * It should be called when a like is removed from this tweet.
+     * The method handles null values and prevents negative counts by setting the counter to 0
+     * if it would become negative.
+     */
+    public void decrementLikesCount() {
+        if (this.likesCount == null || this.likesCount <= 0) {
+            this.likesCount = 0;
+        } else {
+            this.likesCount--;
+        }
+    }
+
+    /**
+     * Increments the retweets count for this tweet.
+     * <p>
+     * This method atomically increments the retweetsCount field by 1.
+     * It should be called when a new retweet is created for this tweet.
+     * The method handles null values by initializing the counter to 1.
+     */
+    public void incrementRetweetsCount() {
+        if (this.retweetsCount == null) {
+            this.retweetsCount = 1;
+        } else {
+            this.retweetsCount++;
+        }
+    }
+
+    /**
+     * Decrements the retweets count for this tweet.
+     * <p>
+     * This method atomically decrements the retweetsCount field by 1.
+     * It should be called when a retweet is removed from this tweet.
+     * The method handles null values and prevents negative counts by setting the counter to 0
+     * if it would become negative.
+     */
+    public void decrementRetweetsCount() {
+        if (this.retweetsCount == null || this.retweetsCount <= 0) {
+            this.retweetsCount = 0;
+        } else {
+            this.retweetsCount--;
+        }
     }
 }

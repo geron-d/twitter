@@ -84,4 +84,15 @@ public interface TweetValidator {
      * @throws BusinessRuleValidationException if tweetId is null, tweet doesn't exist, is already deleted, or access denied
      */
     void validateForDelete(UUID tweetId, DeleteTweetRequestDto requestDto);
+
+    /**
+     * Performs validation for timeline retrieval.
+     * <p>
+     * This method validates that the user exists in the system before retrieving their timeline.
+     * It ensures that the userId is not null and corresponds to an existing user.
+     *
+     * @param userId the unique identifier of the user whose timeline to retrieve
+     * @throws BusinessRuleValidationException if userId is null or user doesn't exist
+     */
+    void validateForTimeline(UUID userId);
 }

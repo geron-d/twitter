@@ -1,0 +1,9 @@
+Полностью почистить кэш курсора
+rd /s /q "%USERPROFILE%\AppData\Roaming\Cursor"
+rd /s /q "%USERPROFILE%\AppData\Local\Cursor"
+
+Удалить storage курсора
+del "C:\Users\Lenovo\AppData\Roaming\Cursor\User\workspaceStorage\3ecb2750803e3401e2043050ab6b7269\state.vscdb"
+del "C:\Users\Lenovo\AppData\Roaming\Cursor\User\workspaceStorage\3ecb2750803e3401e2043050ab6b7269\state.vscdb.backup"
+
+Можно почистить еще worktree гита

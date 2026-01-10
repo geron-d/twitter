@@ -1,0 +1,176 @@
+{
+    // ============================================
+    // ОТКЛЮЧЕНИЕ ВСЕХ ФОРМАТТЕРОВ И ЛИНТЕРОВ
+    // ============================================
+
+    // Отключить автоматическое форматирование при сохранении
+    "editor.formatOnSave": false,
+
+    // Отключить автоматическое форматирование при вставке
+    "editor.formatOnPaste": false,
+
+    // Отключить автоматическое форматирование при вводе
+    "editor.formatOnType": false,
+
+    // Отключить удаление пробелов в конце строк
+    "files.trimTrailingWhitespace": false,
+
+    // Отключить автоматическое добавление новой строки в конце файла
+    "files.insertFinalNewline": false,
+
+    // Отключить автосохранение (чтобы избежать автоматического форматирования)
+    "files.autoSave": "off",
+
+    // Отключить все форматтеры по умолчанию
+    "editor.defaultFormatter": null,
+
+    // Отключить все линтеры
+    "editor.codeActionsOnSave": {},
+
+    // Отключить проверку при сохранении
+    "editor.codeActionsOnSaveMode": "none",
+
+    // Отключить автоматическое применение исправлений
+    "editor.codeActionsOnSaveTimeout": 0,
+
+    // Отключить все расширения форматирования
+    "editor.formatOnSaveMode": "off",
+
+    // Отключить автоматическое форматирование для Java
+    "[java]": {
+        "editor.formatOnSave": false,
+        "editor.formatOnPaste": false,
+        "editor.formatOnType": false,
+        "editor.defaultFormatter": null,
+        "editor.codeActionsOnSave": {}
+    },
+
+    // Отключить автоматическое форматирование для YAML
+    "[yaml]": {
+        "editor.formatOnSave": false,
+        "editor.formatOnPaste": false,
+        "editor.formatOnType": false,
+        "editor.defaultFormatter": null,
+        "editor.codeActionsOnSave": {}
+    },
+
+    // Отключить автоматическое форматирование для Markdown
+    "[markdown]": {
+        "editor.formatOnSave": false,
+        "editor.formatOnPaste": false,
+        "editor.formatOnType": false,
+        "editor.defaultFormatter": null,
+        "editor.codeActionsOnSave": {}
+    },
+
+    // Отключить автоматическое форматирование для JSON
+    "[json]": {
+        "editor.formatOnSave": false,
+        "editor.formatOnPaste": false,
+        "editor.formatOnType": false,
+        "editor.defaultFormatter": null,
+        "editor.codeActionsOnSave": {}
+    },
+
+    // Отключить автоматическое форматирование для XML
+    "[xml]": {
+        "editor.formatOnSave": false,
+        "editor.formatOnPaste": false,
+        "editor.formatOnType": false,
+        "editor.defaultFormatter": null,
+        "editor.codeActionsOnSave": {}
+    },
+
+    // Отключить автоматическое форматирование для всех остальных файлов
+    "[*]": {
+        "editor.formatOnSave": false,
+        "editor.formatOnPaste": false,
+        "editor.formatOnType": false,
+        "editor.defaultFormatter": null,
+        "editor.codeActionsOnSave": {}
+    },
+
+    // Отключить расширения, которые могут форматировать код
+    "java.format.enabled": false,
+    "java.format.settings.url": "",
+    "java.format.settings.profile": "",
+    "redhat.telemetry.enabled": false,
+
+    // Отключить все расширения форматирования для других языков
+    "prettier.enable": false,
+    "eslint.enable": false,
+
+    // Отключить автоматическое применение изменений при открытии файлов
+    "editor.formatOnSaveTimeout": 0,
+
+    // Отключить все действия при открытии файла
+    "editor.formatOnOpen": false,
+
+    // Отключить автоматическое применение исправлений при открытии
+    "editor.codeActionsOnSaveTimeout": 0,
+
+    // Отключить все автоматические действия
+    "editor.autoClosingBrackets": "never",
+    "editor.autoClosingQuotes": "never",
+    "editor.autoIndent": "none",
+    "editor.autoSurround": "never",
+
+    // Отключить все расширения, которые могут изменять файлы
+    "files.watcherExclude": {
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "**/node_modules/**": true,
+        "**/build/**": true
+    },
+
+    // Отключить Language Server Protocol форматирование
+    "java.configuration.updateBuildConfiguration": "disabled",
+    "java.autobuild.enabled": false,
+    "java.clean.workspace": false,
+
+    // Отключить все автоматические действия Language Server
+    "editor.suggest.showWords": false,
+    "editor.quickSuggestions": {
+        "other": false,
+        "comments": false,
+        "strings": false
+    },
+
+    // Отключить автоматическое применение изменений из Language Server
+    "editor.inlineSuggest.enabled": false,
+
+    // Отключить все автоматические исправления
+    "editor.suggestSelection": "first",
+    "editor.acceptSuggestionOnCommitCharacter": false,
+    "editor.acceptSuggestionOnEnter": "off",
+
+    // Отключить автоматическое обновление файлов
+    "files.hotExit": "off",
+    "files.restoreUndoStack": false,
+    
+    // Отключить восстановление окон и файлов при запуске
+    "window.restoreWindows": "none",
+    "workbench.startupEditor": "none",
+    "window.reopenFolders": "none",
+
+    // Отключить все расширения форматирования для Cursor AI
+    "cursor.general.enableFormatting": false,
+    "cursor.chat.enableFormatting": false,
+
+    // Отключить автоматическое применение изменений от Cursor AI
+    "cursor.cpp.disabledLanguages": ["*"],
+    "cursor.chat.autoApply": false,
+
+    // Отключить все автоматические действия при открытии файлов
+    "editor.detectIndentation": false,
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+
+    // Отключить нормализацию файлов
+    "files.normalizeLineEndings": "off",
+
+    // Отключить все автоматические исправления при открытии
+    "editor.codeActionsOnSaveTimeout": 0,
+    "editor.codeActionsOnSave": {},
+    "java.compile.nullAnalysis.mode": "disabled"
+}

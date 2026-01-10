@@ -185,6 +185,6 @@
   - [STANDART_README.md](../../../../standards/STANDART_README.md)
   - [STANDART_POSTMAN.md](../../../../standards/STANDART_POSTMAN.md)
 - Ссылки на архитектуру:
-  - [TWEET_API_ARCHITECTURE.md](../../TWEET_API_ARCHITECTURE.md)
-  - [TWEET_API_COMMON_2.md](../../TWEET_API_COMMON_2.md)
-
+  - [TWEET_API_ARCHITECTURE.md](../TWEET_API_ARCHITECTURE.md)
+  - [TWEET_API_COMMON_2.md](../TWEET_API_COMMON_2.md)
+

@@ -7,6 +7,7 @@ import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.FormatValidationException;
 import com.twitter.dto.request.UpdateTweetRequestDto;
 import com.twitter.entity.Tweet;
+import com.twitter.gateway.FollowerGateway;
 import com.twitter.mapper.TweetMapper;
 import com.twitter.repository.TweetRepository;
 import com.twitter.validation.TweetValidator;
@@ -44,6 +45,9 @@ class TweetServiceImplTest {
 
     @Mock
     private TweetValidator tweetValidator;
+
+    @Mock
+    private FollowerGateway followerGateway;
 
     @InjectMocks
     private TweetServiceImpl tweetService;
@@ -571,6 +575,173 @@ class TweetServiceImplTest {
 
             verify(tweetRepository, times(1))
                 .findByUserIdAndIsDeletedFalseOrderByCreatedAtDesc(eq(testUserId), eq(pageable));
+            verifyNoInteractions(tweetMapper);
+        }
+    }
+
+    @Nested
+    class GetTimelineTests {
+
+        private UUID testUserId;
+        private UUID followingUserId1;
+        private UUID followingUserId2;
+        private Pageable pageable;
+        private Tweet tweet1;
+        private Tweet tweet2;
+        private TweetResponseDto responseDto1;
+        private TweetResponseDto responseDto2;
+
+        @BeforeEach
+        void setUp() {
+            testUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+            followingUserId1 = UUID.fromString("223e4567-e89b-12d3-a456-426614174001");
+            followingUserId2 = UUID.fromString("323e4567-e89b-12d3-a456-426614174002");
+
+            UUID tweetId1 = UUID.fromString("423e4567-e89b-12d3-a456-426614174003");
+            UUID tweetId2 = UUID.fromString("523e4567-e89b-12d3-a456-426614174004");
+
+            tweet1 = Tweet.builder()
+                .id(tweetId1)
+                .userId(followingUserId1)
+                .content("Tweet from followed user 1")
+                .createdAt(LocalDateTime.of(2024, 1, 15, 10, 30, 0))
+                .updatedAt(LocalDateTime.of(2024, 1, 15, 10, 30, 0))
+                .isDeleted(false)
+                .build();
+
+            tweet2 = Tweet.builder()
+                .id(tweetId2)
+                .userId(followingUserId2)
+                .content("Tweet from followed user 2")
+                .createdAt(LocalDateTime.of(2024, 1, 14, 9, 15, 0))
+                .updatedAt(LocalDateTime.of(2024, 1, 14, 9, 15, 0))
+                .isDeleted(false)
+                .build();
+
+            responseDto1 = TweetResponseDto.builder()
+                .id(tweetId1)
+                .userId(followingUserId1)
+                .content("Tweet from followed user 1")
+                .createdAt(LocalDateTime.of(2024, 1, 15, 10, 30, 0))
+                .updatedAt(LocalDateTime.of(2024, 1, 15, 10, 30, 0))
+                .isDeleted(false)
+                .deletedAt(null)
+                .build();
+
+            responseDto2 = TweetResponseDto.builder()
+                .id(tweetId2)
+                .userId(followingUserId2)
+                .content("Tweet from followed user 2")
+                .createdAt(LocalDateTime.of(2024, 1, 14, 9, 15, 0))
+                .updatedAt(LocalDateTime.of(2024, 1, 14, 9, 15, 0))
+                .isDeleted(false)
+                .deletedAt(null)
+                .build();
+
+            pageable = PageRequest.of(0, 20);
+        }
+
+        @Test
+        void getTimeline_WhenFollowingUsersHaveTweets_ShouldReturnPageWithTweets() {
+            List<UUID> followingUserIds = List.of(followingUserId1, followingUserId2);
+            List<Tweet> tweets = List.of(tweet1, tweet2);
+            Page<Tweet> tweetPage = new PageImpl<>(tweets, pageable, 2);
+
+            doNothing().when(tweetValidator).validateForTimeline(testUserId);
+            when(followerGateway.getFollowingUserIds(testUserId)).thenReturn(followingUserIds);
+            when(tweetRepository.findByUserIdInAndIsDeletedFalseOrderByCreatedAtDesc(eq(followingUserIds), eq(pageable)))
+                .thenReturn(tweetPage);
+            when(tweetMapper.toResponseDto(tweet1)).thenReturn(responseDto1);
+            when(tweetMapper.toResponseDto(tweet2)).thenReturn(responseDto2);
+
+            Page<TweetResponseDto> result = tweetService.getTimeline(testUserId, pageable);
+
+            assertThat(result).isNotNull();
+            assertThat(result.getContent()).hasSize(2);
+            assertThat(result.getContent()).containsExactly(responseDto1, responseDto2);
+            assertThat(result.getTotalElements()).isEqualTo(2);
+            assertThat(result.getNumber()).isEqualTo(0);
+            assertThat(result.getSize()).isEqualTo(20);
+            assertThat(result.getTotalPages()).isEqualTo(1);
+        }
+
+        @Test
+        void getTimeline_WhenNoFollowingUsers_ShouldReturnEmptyPage() {
+            List<UUID> emptyFollowingUserIds = List.of();
+
+            doNothing().when(tweetValidator).validateForTimeline(testUserId);
+            when(followerGateway.getFollowingUserIds(testUserId)).thenReturn(emptyFollowingUserIds);
+
+            Page<TweetResponseDto> result = tweetService.getTimeline(testUserId, pageable);
+
+            assertThat(result).isNotNull();
+            assertThat(result.getContent()).isEmpty();
+            assertThat(result.getTotalElements()).isEqualTo(0);
+            assertThat(result.getNumber()).isEqualTo(0);
+            assertThat(result.getSize()).isEqualTo(20);
+            assertThat(result.getTotalPages()).isEqualTo(0);
+        }
+
+        @Test
+        void getTimeline_WhenFollowingUsersHaveNoTweets_ShouldReturnEmptyPage() {
+            List<UUID> followingUserIds = List.of(followingUserId1, followingUserId2);
+            Page<Tweet> emptyTweetPage = new PageImpl<>(List.of(), pageable, 0);
+
+            doNothing().when(tweetValidator).validateForTimeline(testUserId);
+            when(followerGateway.getFollowingUserIds(testUserId)).thenReturn(followingUserIds);
+            when(tweetRepository.findByUserIdInAndIsDeletedFalseOrderByCreatedAtDesc(eq(followingUserIds), eq(pageable)))
+                .thenReturn(emptyTweetPage);
+
+            Page<TweetResponseDto> result = tweetService.getTimeline(testUserId, pageable);
+
+            assertThat(result).isNotNull();
+            assertThat(result.getContent()).isEmpty();
+            assertThat(result.getTotalElements()).isEqualTo(0);
+            assertThat(result.getNumber()).isEqualTo(0);
+            assertThat(result.getSize()).isEqualTo(20);
+            assertThat(result.getTotalPages()).isEqualTo(0);
+        }
+
+        @Test
+        void getTimeline_WhenFollowingUsersHaveTweets_ShouldCallEachDependencyExactlyOnce() {
+            List<UUID> followingUserIds = List.of(followingUserId1, followingUserId2);
+            List<Tweet> tweets = List.of(tweet1, tweet2);
+            Page<Tweet> tweetPage = new PageImpl<>(tweets, pageable, 2);
+
+            doNothing().when(tweetValidator).validateForTimeline(testUserId);
+            when(followerGateway.getFollowingUserIds(testUserId)).thenReturn(followingUserIds);
+            when(tweetRepository.findByUserIdInAndIsDeletedFalseOrderByCreatedAtDesc(eq(followingUserIds), eq(pageable)))
+                .thenReturn(tweetPage);
+            when(tweetMapper.toResponseDto(tweet1)).thenReturn(responseDto1);
+            when(tweetMapper.toResponseDto(tweet2)).thenReturn(responseDto2);
+
+            tweetService.getTimeline(testUserId, pageable);
+
+            verify(tweetValidator, times(1)).validateForTimeline(eq(testUserId));
+            verify(followerGateway, times(1)).getFollowingUserIds(eq(testUserId));
+            verify(tweetRepository, times(1))
+                .findByUserIdInAndIsDeletedFalseOrderByCreatedAtDesc(eq(followingUserIds), eq(pageable));
+            verify(tweetMapper, times(1)).toResponseDto(eq(tweet1));
+            verify(tweetMapper, times(1)).toResponseDto(eq(tweet2));
+        }
+
+        @Test
+        void getTimeline_WhenValidationFails_ShouldThrowBusinessRuleValidationException() {
+            BusinessRuleValidationException validationException = new BusinessRuleValidationException(
+                "USER_NOT_EXISTS",
+                testUserId
+            );
+            doThrow(validationException)
+                .when(tweetValidator).validateForTimeline(testUserId);
+
+            assertThatThrownBy(() -> tweetService.getTimeline(testUserId, pageable))
+                .isInstanceOf(BusinessRuleValidationException.class)
+                .isEqualTo(validationException);
+
+            verify(tweetValidator, times(1)).validateForTimeline(eq(testUserId));
+            verify(followerGateway, never()).getFollowingUserIds(any());
+            verify(tweetRepository, never())
+                .findByUserIdInAndIsDeletedFalseOrderByCreatedAtDesc(any(), any());
             verifyNoInteractions(tweetMapper);
         }
     }

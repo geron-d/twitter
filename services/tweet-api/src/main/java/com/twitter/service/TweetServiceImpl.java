@@ -5,6 +5,7 @@ import com.twitter.common.dto.request.DeleteTweetRequestDto;
 import com.twitter.common.dto.response.TweetResponseDto;
 import com.twitter.dto.request.UpdateTweetRequestDto;
 import com.twitter.entity.Tweet;
+import com.twitter.gateway.FollowerGateway;
 import com.twitter.mapper.TweetMapper;
 import com.twitter.repository.TweetRepository;
 import com.twitter.validation.TweetValidator;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -36,6 +38,7 @@ public class TweetServiceImpl implements TweetService {
     private final TweetRepository tweetRepository;
     private final TweetMapper tweetMapper;
     private final TweetValidator tweetValidator;
+    private final FollowerGateway followerGateway;
 
     /**
      * @see TweetService#createTweet
@@ -98,6 +101,26 @@ public class TweetServiceImpl implements TweetService {
     @Transactional(readOnly = true)
     public Page<TweetResponseDto> getUserTweets(UUID userId, Pageable pageable) {
         return tweetRepository.findByUserIdAndIsDeletedFalseOrderByCreatedAtDesc(userId, pageable)
+            .map(tweetMapper::toResponseDto);
+    }
+
+    /**
+     * @see TweetService#getTimeline
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Page<TweetResponseDto> getTimeline(UUID userId, Pageable pageable) {
+        tweetValidator.validateForTimeline(userId);
+
+        List<UUID> followingUserIds = followerGateway.getFollowingUserIds(userId);
+
+        if (followingUserIds.isEmpty()) {
+            log.debug("User {} has no following relationships, returning empty page", userId);
+            return Page.empty(pageable);
+        }
+
+        log.debug("Retrieving timeline for user {} with {} following users", userId, followingUserIds.size());
+        return tweetRepository.findByUserIdInAndIsDeletedFalseOrderByCreatedAtDesc(followingUserIds, pageable)
             .map(tweetMapper::toResponseDto);
     }
 }

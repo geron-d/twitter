@@ -11,18 +11,6 @@ CREATE TABLE IF NOT EXISTS follows (
     CONSTRAINT follows_check_no_self_follow CHECK (follower_id != following_id)
 );
 
--- Create indexes for performance optimization
--- Index for queries by follower (who is following)
-CREATE INDEX IF NOT EXISTS idx_follows_follower_id 
-ON follows(follower_id);
-
--- Index for queries by following (who are the followers)
-CREATE INDEX IF NOT EXISTS idx_follows_following_id 
-ON follows(following_id);
-
--- Index for sorting by creation date
-CREATE INDEX IF NOT EXISTS idx_follows_created_at 
-ON follows(created_at);
 
 
 

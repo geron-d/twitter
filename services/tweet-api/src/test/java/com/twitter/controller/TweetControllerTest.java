@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -632,6 +633,165 @@ public class TweetControllerTest extends BaseIntegrationTest {
                 .andExpect(jsonPath("$.page.number").value(0))
                 .andExpect(jsonPath("$.page.totalElements").value(5))
                 .andExpect(jsonPath("$.page.totalPages").value(1));
+        }
+    }
+
+    @Nested
+    class GetTimelineTests {
+
+        private UUID testUserId;
+        private UUID followingUserId1;
+        private UUID followingUserId2;
+
+        @BeforeEach
+        void setUp() {
+            testUserId = UUID.randomUUID();
+            followingUserId1 = UUID.randomUUID();
+            followingUserId2 = UUID.randomUUID();
+        }
+
+        @Test
+        void getTimeline_WhenFollowingUsersHaveTweets_ShouldReturn200Ok() throws Exception {
+            setupUserExistsStub(testUserId, true);
+            setupFollowingStub(testUserId, List.of(followingUserId1, followingUserId2), 0, 100);
+
+            Tweet tweet1 = createAndSaveTweet(followingUserId1, "Tweet from followed user 1");
+            Tweet tweet2 = createAndSaveTweet(followingUserId2, "Tweet from followed user 2");
+
+            mockMvc.perform(get("/api/v1/tweets/timeline/{userId}", testUserId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(2))
+                .andExpect(jsonPath("$.content[0].userId").exists())
+                .andExpect(jsonPath("$.content[0].content").exists())
+                .andExpect(jsonPath("$.page.size").value(20))
+                .andExpect(jsonPath("$.page.number").value(0))
+                .andExpect(jsonPath("$.page.totalElements").value(2))
+                .andExpect(jsonPath("$.page.totalPages").value(1));
+        }
+
+        @Test
+        void getTimeline_WhenNoFollowingUsers_ShouldReturn200OkWithEmptyList() throws Exception {
+            setupUserExistsStub(testUserId, true);
+            setupFollowingStubEmpty(testUserId);
+
+            mockMvc.perform(get("/api/v1/tweets/timeline/{userId}", testUserId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(0))
+                .andExpect(jsonPath("$.page.size").value(20))
+                .andExpect(jsonPath("$.page.number").value(0))
+                .andExpect(jsonPath("$.page.totalElements").value(0))
+                .andExpect(jsonPath("$.page.totalPages").value(0));
+        }
+
+        @Test
+        void getTimeline_WhenFollowingUsersHaveNoTweets_ShouldReturn200OkWithEmptyList() throws Exception {
+            setupUserExistsStub(testUserId, true);
+            setupFollowingStub(testUserId, List.of(followingUserId1, followingUserId2), 0, 100);
+
+            mockMvc.perform(get("/api/v1/tweets/timeline/{userId}", testUserId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(0))
+                .andExpect(jsonPath("$.page.size").value(20))
+                .andExpect(jsonPath("$.page.number").value(0))
+                .andExpect(jsonPath("$.page.totalElements").value(0))
+                .andExpect(jsonPath("$.page.totalPages").value(0));
+        }
+
+        @Test
+        void getTimeline_WithInvalidUserId_ShouldReturn400BadRequest() throws Exception {
+            String invalidUserId = "invalid-uuid";
+
+            mockMvc.perform(get("/api/v1/tweets/timeline/{userId}", invalidUserId))
+                .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        void getTimeline_WhenUserDoesNotExist_ShouldReturn409Conflict() throws Exception {
+            setupUserExistsStub(testUserId, false);
+
+            mockMvc.perform(get("/api/v1/tweets/timeline/{userId}", testUserId))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.type").exists())
+                .andExpect(jsonPath("$.ruleName").value("USER_NOT_EXISTS"));
+        }
+
+        @Test
+        void getTimeline_WhenFollowerApiReturns500_ShouldReturnEmptyPage() throws Exception {
+            setupUserExistsStub(testUserId, true);
+            setupFollowingStubWithError(testUserId, 500);
+
+            mockMvc.perform(get("/api/v1/tweets/timeline/{userId}", testUserId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(0))
+                .andExpect(jsonPath("$.page.totalElements").value(0))
+                .andExpect(jsonPath("$.page.totalPages").value(0));
+        }
+
+        @Test
+        void getTimeline_ShouldExcludeDeletedTweets() throws Exception {
+            setupUserExistsStub(testUserId, true);
+            setupFollowingStub(testUserId, List.of(followingUserId1), 0, 100);
+
+            Tweet activeTweet = createAndSaveTweet(followingUserId1, "Active tweet");
+            Tweet tweetToDelete = createAndSaveTweet(followingUserId1, "Tweet to be deleted");
+
+            DeleteTweetRequestDto deleteRequest = DeleteTweetRequestDto.builder()
+                .userId(followingUserId1)
+                .build();
+
+            mockMvc.perform(delete("/api/v1/tweets/{tweetId}", tweetToDelete.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(deleteRequest)))
+                .andExpect(status().isNoContent());
+
+            mockMvc.perform(get("/api/v1/tweets/timeline/{userId}", testUserId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.content[0].id").value(activeTweet.getId().toString()))
+                .andExpect(jsonPath("$.page.totalElements").value(1));
+        }
+
+        @Test
+        void getTimeline_ShouldSortByCreatedAtDesc() throws Exception {
+            setupUserExistsStub(testUserId, true);
+            setupFollowingStub(testUserId, List.of(followingUserId1), 0, 100);
+
+            Tweet tweet1 = createAndSaveTweet(followingUserId1, "First tweet");
+            Thread.sleep(10);
+            Tweet tweet2 = createAndSaveTweet(followingUserId1, "Second tweet");
+            Thread.sleep(10);
+            Tweet tweet3 = createAndSaveTweet(followingUserId1, "Third tweet");
+
+            String responseJson = mockMvc.perform(get("/api/v1/tweets/timeline/{userId}", testUserId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+            com.fasterxml.jackson.databind.JsonNode jsonNode = objectMapper.readTree(responseJson);
+            var content = jsonNode.get("content");
+            assertThat(content.isArray()).isTrue();
+            assertThat(content.size()).isEqualTo(3);
+
+            assertThat(content.get(0).get("id").asText()).isEqualTo(tweet3.getId().toString());
+            assertThat(content.get(0).get("content").asText()).isEqualTo("Third tweet");
+
+            assertThat(content.get(1).get("id").asText()).isEqualTo(tweet2.getId().toString());
+            assertThat(content.get(1).get("content").asText()).isEqualTo("Second tweet");
+
+            assertThat(content.get(2).get("id").asText()).isEqualTo(tweet1.getId().toString());
+            assertThat(content.get(2).get("content").asText()).isEqualTo("First tweet");
         }
     }
 }

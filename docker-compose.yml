@@ -90,12 +90,10 @@ services:
       SPRING_JPA_SHOW_SQL: false
       LOGGING_LEVEL_COM_TWITTER: DEBUG
       LOGGING_LEVEL_ORG_HIBERNATE_SQL: DEBUG
-      # Feign client для интеграции с users-api
       USERS_API_URL: http://users-api:8081
+      FOLLOWER_API_URL: http://follower-api:8084
     depends_on:
       postgres:
-        condition: service_healthy
-      users-api:
         condition: service_healthy
     networks:
       - twitter-network
@@ -130,10 +128,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      users-api:
-        condition: service_healthy
-      tweet-api:
-        condition: service_healthy
     networks:
       - twitter-network
     volumes:
@@ -166,8 +160,6 @@ services:
       LOGGING_LEVEL_ORG_HIBERNATE_SQL: DEBUG
     depends_on:
       postgres:
-        condition: service_healthy
-      users-api:
         condition: service_healthy
     networks:
       - twitter-network

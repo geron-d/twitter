@@ -11,9 +11,17 @@
 - ✅ Создание твитов с валидацией контента
 - ✅ Получение твита по уникальному идентификатору
 - ✅ Получение твитов пользователя с пагинацией
+- ✅ Получение ленты новостей (timeline) с пагинацией
 - ✅ Обновление твитов с проверкой прав автора
 - ✅ Удаление твитов (soft delete) с проверкой прав автора
+- ✅ Лайк твитов с проверкой бизнес-правил
+- ✅ Убрать лайк твита с проверкой бизнес-правил
+- ✅ Получить пользователей, лайкнувших твит с пагинацией
+- ✅ Ретвит твитов с опциональным комментарием
+- ✅ Убрать ретвит твита
+- ✅ Получить пользователей, ретвитнувших твит с пагинацией
 - ✅ Интеграция с users-api для проверки существования пользователей
+- ✅ Интеграция с follower-api для получения списка подписок
 - ✅ Валидация данных (длина контента 1-280 символов)
 - ✅ OpenAPI/Swagger документация
 - ✅ Обработка ошибок по стандарту RFC 7807 Problem Details
@@ -28,78 +36,57 @@
 com.twitter/
 ├── Application.java              # Главный класс приложения
 ├── controller/
-│   ├── TweetApi.java            # OpenAPI интерфейс
-│   └── TweetController.java     # REST контроллер
+│   ├── TweetApi.java            # OpenAPI интерфейс для твитов
+│   ├── TweetController.java     # REST контроллер для твитов
+│   ├── LikeApi.java             # OpenAPI интерфейс для лайков
+│   ├── LikeController.java      # REST контроллер для лайков
+│   ├── RetweetApi.java          # OpenAPI интерфейс для ретвитов
+│   └── RetweetController.java   # REST контроллер для ретвитов
 ├── dto/
 │   ├── request/
 │   │   ├── CreateTweetRequestDto.java  # DTO для создания твита
-│   │   └── UpdateTweetRequestDto.java   # DTO для обновления твита
+│   │   ├── UpdateTweetRequestDto.java   # DTO для обновления твита
+│   │   ├── LikeTweetRequestDto.java     # DTO для лайка твита
+│   │   └── RetweetRequestDto.java       # DTO для ретвита твита
 │   └── response/
-│       └── TweetResponseDto.java       # DTO для ответа
+│       ├── TweetResponseDto.java       # DTO для ответа твита
+│       ├── LikeResponseDto.java        # DTO для ответа лайка
+│       └── RetweetResponseDto.java      # DTO для ответа ретвита
 ├── entity/
-│   └── Tweet.java               # JPA сущность
+│   ├── Tweet.java               # JPA сущность твита
+│   ├── Like.java                # JPA сущность лайка
+│   └── Retweet.java             # JPA сущность ретвита
 ├── gateway/
-│   └── UserGateway.java        # Gateway для интеграции с users-api
+│   ├── UserGateway.java        # Gateway для интеграции с users-api
+│   └── FollowerGateway.java   # Gateway для интеграции с follower-api
 ├── client/
-│   └── UsersApiClient.java     # Feign клиент для users-api
+│   ├── UsersApiClient.java     # Feign клиент для users-api
+│   └── FollowerApiClient.java # Feign клиент для follower-api
 ├── mapper/
-│   └── TweetMapper.java        # MapStruct маппер
+│   ├── TweetMapper.java        # MapStruct маппер для твитов
+│   ├── LikeMapper.java         # MapStruct маппер для лайков
+│   └── RetweetMapper.java      # MapStruct маппер для ретвитов
 ├── repository/
-│   └── TweetRepository.java    # JPA репозиторий
+│   ├── TweetRepository.java    # JPA репозиторий для твитов
+│   ├── LikeRepository.java     # JPA репозиторий для лайков
+│   └── RetweetRepository.java  # JPA репозиторий для ретвитов
 ├── service/
-│   ├── TweetService.java       # Интерфейс сервиса
-│   └── TweetServiceImpl.java   # Реализация сервиса
+│   ├── TweetService.java       # Интерфейс сервиса для твитов
+│   ├── TweetServiceImpl.java   # Реализация сервиса для твитов
+│   ├── LikeService.java        # Интерфейс сервиса для лайков
+│   ├── LikeServiceImpl.java    # Реализация сервиса для лайков
+│   ├── RetweetService.java     # Интерфейс сервиса для ретвитов
+│   └── RetweetServiceImpl.java # Реализация сервиса для ретвитов
 ├── validation/
-│   ├── TweetValidator.java     # Интерфейс валидатора
-│   └── TweetValidatorImpl.java # Реализация валидатора
+│   ├── TweetValidator.java     # Интерфейс валидатора для твитов
+│   ├── TweetValidatorImpl.java # Реализация валидатора для твитов
+│   ├── LikeValidator.java      # Интерфейс валидатора для лайков
+│   ├── LikeValidatorImpl.java  # Реализация валидатора для лайков
+│   ├── RetweetValidator.java   # Интерфейс валидатора для ретвитов
+│   └── RetweetValidatorImpl.java # Реализация валидатора для ретвитов
 └── config/
     ├── FeignConfig.java        # Конфигурация Feign
     └── OpenApiConfig.java      # Конфигурация OpenAPI
-```
-
-### Диаграмма компонентов
-
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│ TweetController │────│  TweetService   │────│ TweetRepository │
-│                 │    │                 │    │                 │
-│ - REST Endpoint │    │ - Business Logic│    │ - Data Access   │
-│ - Error Handling│    │ - Orchestration │    │ - Queries       │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-                                │                       │
-         │──────────────────────│                       │
-         ▼                      ▼                       ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│ TweetValidator  │    │   TweetMapper   │    │   PostgreSQL    │
-│                 │    │                 │    │                 │
-│ - Data Validation│   │ - Entity Mapping│    │ - Database      │
-│ - Business Rules│    │ - DTO Conversion│    │ - Tables        │
-│ - User Check    │    │                 │    │                 │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │
-         │                       │
-         ▼                       ▼
-┌─────────────────┐    ┌─────────────────┐
-│   UserGateway   │    │      DTOs       │
-│                 │    │                 │
-│ - User Existence│    │ - Request/Response│
-│ - Feign Client  │    │ - Validation    │
-│                 │    │ - Constraints   │
-└─────────────────┘    └─────────────────┘
-         │
-         ▼
-┌─────────────────┐
-│ UsersApiClient  │
-│                 │
-│ - Feign Client  │
-│ - HTTP Calls    │
-└─────────────────┘
-         │
-         ▼
-┌─────────────────┐
-│   Users API     │
-│   (Port 8081)   │
-└─────────────────┘
 ```
 
 ## REST API
@@ -112,13 +99,20 @@ http://localhost:8082/api/v1/tweets
 
 ### Эндпоинты
 
-| Метод    | Путь              | Описание                      | Тело запроса            | Ответ                        |
-|----------|-------------------|-------------------------------|-------------------------|------------------------------|
-| `POST`   | `/`               | Создать новый твит            | `CreateTweetRequestDto` | `TweetResponseDto`           |
-| `GET`    | `/{tweetId}`      | Получить твит по ID            | -                       | `TweetResponseDto`           |
-| `GET`    | `/user/{userId}`  | Получить твиты пользователя   | -                       | `PagedModel<TweetResponseDto>`|
-| `PUT`    | `/{tweetId}`      | Обновить твит                 | `UpdateTweetRequestDto` | `TweetResponseDto`           |
-| `DELETE` | `/{tweetId}`      | Удалить твит (soft delete)    | `DeleteTweetRequestDto` | -                            |
+| Метод    | Путь                  | Описание                      | Тело запроса            | Ответ                        |
+|----------|-----------------------|-------------------------------|-------------------------|------------------------------|
+| `POST`   | `/`                   | Создать новый твит            | `CreateTweetRequestDto` | `TweetResponseDto`           |
+| `GET`    | `/{tweetId}`          | Получить твит по ID            | -                       | `TweetResponseDto`           |
+| `GET`    | `/user/{userId}`      | Получить твиты пользователя   | -                       | `PagedModel<TweetResponseDto>`|
+| `GET`    | `/timeline/{userId}`  | Получить ленту новостей        | -                       | `PagedModel<TweetResponseDto>`|
+| `PUT`    | `/{tweetId}`          | Обновить твит                 | `UpdateTweetRequestDto` | `TweetResponseDto`           |
+| `DELETE` | `/{tweetId}`          | Удалить твит (soft delete)    | `DeleteTweetRequestDto` | -                            |
+| `POST`   | `/{tweetId}/like`     | Лайкнуть твит                 | `LikeTweetRequestDto`   | `LikeResponseDto`            |
+| `DELETE` | `/{tweetId}/like`     | Убрать лайк твита             | `LikeTweetRequestDto`   | -                            |
+| `GET`    | `/{tweetId}/likes`    | Получить пользователей, лайкнувших твит | - | `PagedModel<LikeResponseDto>` |
+| `POST`   | `/{tweetId}/retweet`  | Ретвитнуть твит               | `RetweetRequestDto`     | `RetweetResponseDto`         |
+| `DELETE` | `/{tweetId}/retweet` | Убрать ретвит твита           | `RetweetRequestDto`     | -                            |
+| `GET`    | `/{tweetId}/retweets` | Получить пользователей, ретвитнувших твит | - | `PagedModel<RetweetResponseDto>` |
 
 ### Детальное описание эндпоинтов
 
@@ -404,7 +398,214 @@ GET /api/v1/tweets/user/{userId}?page=0&size=20&sort=createdAt,DESC
 }
 ```
 
-#### 5. Удалить твит
+#### 5. Получить ленту новостей (timeline)
+
+```http
+GET /api/v1/tweets/timeline/{userId}?page=0&size=20&sort=createdAt,DESC
+```
+
+**Параметры пути:**
+
+- `userId` - обязательный, UUID пользователя, чьи твиты нужно получить
+
+**Параметры запроса (query parameters):**
+
+- `page` - необязательный, номер страницы (по умолчанию 0)
+- `size` - необязательный, размер страницы (по умолчанию 20, максимум 100)
+- `sort` - необязательный, параметры сортировки (по умолчанию `createdAt,DESC`)
+
+**Валидация:**
+
+- `userId` - обязательный, должен быть валидным UUID форматом
+- `page` - должен быть >= 0
+- `size` - должен быть > 0 и <= 100
+- `sort` - должен быть валидным форматом сортировки Spring Data JPA
+
+**Бизнес-правила:**
+
+- Твиты сортируются по дате создания в порядке убывания (новые первыми)
+- Удаленные твиты (soft delete) исключаются из результатов
+- Поддерживается пагинация для работы с большими объемами данных
+
+**Ответы:**
+
+- `200 OK` - твиты успешно получены (может быть пустой список)
+- `400 Bad Request` - ошибка валидации (некорректный UUID, неверные параметры пагинации)
+
+**Пример успешного ответа (200 OK) с твитами:**
+
+```json
+{
+  "content": [
+    {
+      "id": "111e4567-e89b-12d3-a456-426614174000",
+      "userId": "123e4567-e89b-12d3-a456-426614174000",
+      "content": "This is my latest tweet!",
+      "createdAt": "2025-01-27T15:30:00Z",
+      "updatedAt": "2025-01-27T15:30:00Z",
+      "isDeleted": false,
+      "deletedAt": null
+    },
+    {
+      "id": "222e4567-e89b-12d3-a456-426614174000",
+      "userId": "123e4567-e89b-12d3-a456-426614174000",
+      "content": "Another tweet from yesterday",
+      "createdAt": "2025-01-26T10:15:00Z",
+      "updatedAt": "2025-01-26T10:15:00Z",
+      "isDeleted": false,
+      "deletedAt": null
+    }
+  ],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 150,
+    "totalPages": 8
+  }
+}
+```
+
+**Пример успешного ответа (200 OK) с пустым списком:**
+
+```json
+{
+  "content": [],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 0,
+    "totalPages": 0
+  }
+}
+```
+
+**Параметры пути:**
+
+- `userId` - обязательный, UUID пользователя, чью ленту новостей нужно получить
+
+**Параметры запроса (query parameters):**
+
+- `page` - необязательный, номер страницы (по умолчанию 0)
+- `size` - необязательный, размер страницы (по умолчанию 20, максимум 100)
+- `sort` - необязательный, параметры сортировки (по умолчанию `createdAt,DESC`)
+
+**Валидация:**
+
+- `userId` - обязательный, должен быть валидным UUID форматом и существовать в системе
+- `page` - должен быть >= 0
+- `size` - должен быть > 0 и <= 100
+- `sort` - должен быть валидным форматом сортировки Spring Data JPA
+
+**Бизнес-правила:**
+
+- Лента новостей содержит твиты от всех пользователей, на которых подписан указанный пользователь
+- Твиты сортируются по дате создания в порядке убывания (новые первыми)
+- Удаленные твиты (soft delete) исключаются из результатов
+- Если пользователь не имеет подписок, возвращается пустая страница (не ошибка)
+- Если подписанные пользователи не имеют твитов, возвращается пустая страница (не ошибка)
+- Поддерживается пагинация для работы с большими объемами данных
+- Интеграция с follower-api используется для получения списка подписок
+
+**Ответы:**
+
+- `200 OK` - лента новостей успешно получена (может быть пустой список)
+- `400 Bad Request` - ошибка валидации (некорректный UUID, неверные параметры пагинации, пользователь не существует)
+- `503 Service Unavailable` - follower-api недоступен (graceful degradation - возвращается пустая страница)
+
+**Пример успешного ответа (200 OK) с твитами:**
+
+```json
+{
+  "content": [
+    {
+      "id": "111e4567-e89b-12d3-a456-426614174000",
+      "userId": "222e4567-e89b-12d3-a456-426614174111",
+      "content": "This is a tweet from a followed user!",
+      "createdAt": "2025-01-27T15:30:00Z",
+      "updatedAt": "2025-01-27T15:30:00Z",
+      "isDeleted": false,
+      "deletedAt": null
+    },
+    {
+      "id": "333e4567-e89b-12d3-a456-426614174222",
+      "userId": "444e4567-e89b-12d3-a456-426614174333",
+      "content": "Another tweet from another followed user",
+      "createdAt": "2025-01-27T14:20:00Z",
+      "updatedAt": "2025-01-27T14:20:00Z",
+      "isDeleted": false,
+      "deletedAt": null
+    }
+  ],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 150,
+    "totalPages": 8,
+    "first": true,
+    "last": false
+  }
+}
+```
+
+**Пример успешного ответа (200 OK) с пустой лентой (нет подписок):**
+
+```json
+{
+  "content": [],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 0,
+    "totalPages": 0,
+    "first": true,
+    "last": true
+  }
+}
+```
+
+**Пример успешного ответа (200 OK) с пустой лентой (нет твитов):**
+
+```json
+{
+  "content": [],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 0,
+    "totalPages": 0,
+    "first": true,
+    "last": true
+  }
+}
+```
+
+**Пример ошибки пользователь не существует (400 Bad Request):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 400,
+  "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+  "ruleName": "USER_NOT_EXISTS",
+  "context": "123e4567-e89b-12d3-a456-426614174000",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки невалидный UUID (400 Bad Request):**
+
+```json
+{
+  "type": "https://example.com/errors/validation-error",
+  "title": "Validation Error",
+  "status": 400,
+  "detail": "Invalid UUID format for userId parameter",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+#### 6. Удалить твит
 
 ```http
 DELETE /api/v1/tweets/{tweetId}
@@ -496,6 +697,475 @@ Content-Type: application/json
   "ruleName": "TWEET_ACCESS_DENIED",
   "context": "Only the tweet author can delete their tweet",
   "timestamp": "2025-01-27T15:45:00Z"
+}
+```
+
+#### 7. Лайкнуть твит
+
+```http
+POST /api/v1/tweets/{tweetId}/like
+Content-Type: application/json
+```
+
+**Параметры пути:**
+
+- `tweetId` - обязательный, UUID существующего твита
+
+**Тело запроса:**
+
+```json
+{
+  "userId": "123e4567-e89b-12d3-a456-426614174000"
+}
+```
+
+**Валидация:**
+
+- `userId` - обязательное, UUID существующего пользователя
+- `tweetId` - обязательный, должен быть валидным UUID форматом
+
+**Бизнес-правила:**
+
+- Твит должен существовать в системе и не быть удаленным
+- Пользователь должен существовать в системе
+- Пользователь не может лайкнуть свой собственный твит (самолайк запрещен)
+- Пользователь может лайкнуть твит только один раз (уникальность)
+- Операция атомарна - создается запись лайка и обновляется счетчик `likesCount` в твите
+
+**Ответы:**
+
+- `201 Created` - твит успешно лайкнут
+- `400 Bad Request` - ошибка валидации (некорректный UUID, отсутствует userId)
+- `409 Conflict` - нарушение бизнес-правил (твит не найден, пользователь не существует, самолайк)
+- `409 Conflict` - дублирование лайка (пользователь уже лайкнул этот твит)
+
+**Пример успешного ответа (201 Created):**
+
+```json
+{
+  "id": "987e6543-e21b-43d2-b654-321987654321",
+  "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+  "userId": "123e4567-e89b-12d3-a456-426614174000",
+  "createdAt": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки валидации userId (400 Bad Request):**
+
+```json
+{
+  "type": "https://example.com/errors/validation-error",
+  "title": "Validation Error",
+  "status": 400,
+  "detail": "Validation failed: userId: User ID cannot be null",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки твит не найден (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
+  "ruleName": "TWEET_NOT_FOUND",
+  "context": "223e4567-e89b-12d3-a456-426614174001",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки пользователь не существует (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+  "ruleName": "USER_NOT_EXISTS",
+  "context": "123e4567-e89b-12d3-a456-426614174000",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки самолайк (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'SELF_LIKE_NOT_ALLOWED' violated for context: Users cannot like their own tweets",
+  "ruleName": "SELF_LIKE_NOT_ALLOWED",
+  "context": "Users cannot like their own tweets",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки дублирование лайка (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/uniqueness-validation",
+  "title": "Uniqueness Validation Error",
+  "status": 409,
+  "detail": "A like already exists for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+  "fieldName": "like",
+  "fieldValue": "tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+#### 8. Убрать лайк твита
+
+```http
+DELETE /api/v1/tweets/{tweetId}/like
+Content-Type: application/json
+```
+
+**Параметры пути:**
+
+- `tweetId` - обязательный, UUID существующего твита
+
+**Тело запроса:**
+
+```json
+{
+  "userId": "123e4567-e89b-12d3-a456-426614174000"
+}
+```
+
+**Валидация:**
+
+- `userId` - обязательное, UUID существующего пользователя
+- `tweetId` - обязательный, должен быть валидным UUID форматом
+
+**Бизнес-правила:**
+
+- Твит должен существовать в системе и не быть удаленным
+- Пользователь должен существовать в системе
+- Лайк должен существовать в системе (пользователь должен был ранее лайкнуть этот твит)
+- Операция атомарна - удаляется запись лайка и обновляется счетчик `likesCount` в твите (декремент на 1)
+
+**Ответы:**
+
+- `204 No Content` - лайк успешно удален (без тела ответа)
+- `400 Bad Request` - ошибка валидации (некорректный UUID, отсутствует userId)
+- `409 Conflict` - нарушение бизнес-правил (твит не найден, пользователь не существует, лайк не найден)
+
+**Пример успешного ответа (204 No Content):**
+
+Ответ не содержит тела, только HTTP статус 204.
+
+**Пример ошибки валидации userId (400 Bad Request):**
+
+```json
+{
+  "type": "https://example.com/errors/validation-error",
+  "title": "Validation Error",
+  "status": 400,
+  "detail": "Validation failed: userId: User ID cannot be null",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки твит не найден (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
+  "ruleName": "TWEET_NOT_FOUND",
+  "context": "223e4567-e89b-12d3-a456-426614174001",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки пользователь не существует (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+  "ruleName": "USER_NOT_EXISTS",
+  "context": "123e4567-e89b-12d3-a456-426614174000",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки лайк не найден (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'LIKE_NOT_FOUND' violated for context: Like not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+  "ruleName": "LIKE_NOT_FOUND",
+  "context": "Like not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+#### 9. Получить пользователей, лайкнувших твит
+
+```http
+GET /api/v1/tweets/{tweetId}/likes
+```
+
+**Параметры пути:**
+
+- `tweetId` - обязательный, UUID существующего твита
+
+**Параметры запроса (query parameters):**
+
+- `page` - опциональный, номер страницы (по умолчанию: 0)
+- `size` - опциональный, размер страницы (по умолчанию: 20, максимум: 100)
+- `sort` - опциональный, параметры сортировки (по умолчанию: createdAt,DESC)
+
+**Валидация:**
+
+- `tweetId` - обязательный, должен быть валидным UUID форматом
+- `page` - должен быть >= 0
+- `size` - должен быть между 1 и 100
+
+**Бизнес-правила:**
+
+- Твит должен существовать в системе и не быть удаленным
+- Лайки сортируются по дате создания в порядке убывания (новые первыми)
+- Если у твита нет лайков, возвращается пустой список (не ошибка)
+- Поддерживается пагинация для больших списков лайков
+
+**Ответы:**
+
+- `200 OK` - список лайков успешно получен
+- `400 Bad Request` - ошибка валидации (некорректный UUID, неверные параметры пагинации)
+- `409 Conflict` - твит не найден или удален
+
+**Пример успешного ответа (200 OK) с лайками:**
+
+```json
+{
+  "content": [
+    {
+      "id": "987e6543-e21b-43d2-b654-321987654321",
+      "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+      "userId": "123e4567-e89b-12d3-a456-426614174000",
+      "createdAt": "2025-01-27T15:30:00Z"
+    },
+    {
+      "id": "876e5432-e10a-32c1-a543-210876543210",
+      "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+      "userId": "234e5678-f90c-23e4-b567-537725285112",
+      "createdAt": "2025-01-27T14:20:00Z"
+    }
+  ],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 45,
+    "totalPages": 3
+  }
+}
+```
+
+**Пример успешного ответа (200 OK) без лайков:**
+
+```json
+{
+  "content": [],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 0,
+    "totalPages": 0
+  }
+}
+```
+
+**Пример использования с пагинацией:**
+
+```bash
+# Получить первую страницу (20 лайков по умолчанию)
+curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/likes"
+
+# Получить вторую страницу с размером 10
+curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/likes?page=1&size=10"
+
+# Получить с кастомной сортировкой
+curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/likes?sort=createdAt,ASC"
+```
+
+**Пример ошибки валидации UUID (400 Bad Request):**
+
+```json
+{
+  "type": "https://example.com/errors/validation-error",
+  "title": "Validation Error",
+  "status": 400,
+  "detail": "Invalid UUID format for tweetId parameter",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки неверные параметры пагинации (400 Bad Request):**
+
+```json
+{
+  "type": "https://example.com/errors/validation-error",
+  "title": "Validation Error",
+  "status": 400,
+  "detail": "Invalid pagination parameters: page must be >= 0, size must be between 1 and 100",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки твит не найден (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
+  "ruleName": "TWEET_NOT_FOUND",
+  "context": "223e4567-e89b-12d3-a456-426614174001",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+#### 10. Получить пользователей, ретвитнувших твит
+
+```http
+GET /api/v1/tweets/{tweetId}/retweets
+```
+
+**Параметры пути:**
+
+- `tweetId` - обязательный, UUID существующего твита
+
+**Параметры запроса (query parameters):**
+
+- `page` - опциональный, номер страницы (по умолчанию: 0)
+- `size` - опциональный, размер страницы (по умолчанию: 20, максимум: 100)
+- `sort` - опциональный, параметры сортировки (по умолчанию: createdAt,DESC)
+
+**Валидация:**
+
+- `tweetId` - обязательный, должен быть валидным UUID форматом
+- `page` - должен быть >= 0
+- `size` - должен быть между 1 и 100
+
+**Бизнес-правила:**
+
+- Твит должен существовать в системе и не быть удаленным
+- Ретвиты сортируются по дате создания в порядке убывания (новые первыми)
+- Если у твита нет ретвитов, возвращается пустой список (не ошибка)
+- Поддерживается пагинация для больших списков ретвитов
+
+**Ответы:**
+
+- `200 OK` - список ретвитов успешно получен
+- `400 Bad Request` - ошибка валидации (некорректный UUID, неверные параметры пагинации)
+- `409 Conflict` - твит не найден или удален
+
+**Пример успешного ответа (200 OK) с ретвитами:**
+
+```json
+{
+  "content": [
+    {
+      "id": "987e6543-e21b-43d2-b654-321987654321",
+      "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+      "userId": "123e4567-e89b-12d3-a456-426614174000",
+      "comment": "Great tweet!",
+      "createdAt": "2025-01-27T15:30:00Z"
+    },
+    {
+      "id": "876e5432-e10a-32c1-a543-210876543210",
+      "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+      "userId": "234e5678-f90c-23e4-b567-537725285112",
+      "comment": null,
+      "createdAt": "2025-01-27T14:20:00Z"
+    }
+  ],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 45,
+    "totalPages": 3
+  }
+}
+```
+
+**Пример успешного ответа (200 OK) без ретвитов:**
+
+```json
+{
+  "content": [],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 0,
+    "totalPages": 0
+  }
+}
+```
+
+**Пример использования с пагинацией:**
+
+```bash
+# Получить первую страницу (20 ретвитов по умолчанию)
+curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/retweets"
+
+# Получить вторую страницу с размером 10
+curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/retweets?page=1&size=10"
+
+# Получить с кастомной сортировкой
+curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/retweets?sort=createdAt,ASC"
+```
+
+**Пример ошибки валидации UUID (400 Bad Request):**
+
+```json
+{
+  "type": "https://example.com/errors/validation-error",
+  "title": "Validation Error",
+  "status": 400,
+  "detail": "Invalid UUID format for tweetId parameter",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки неверные параметры пагинации (400 Bad Request):**
+
+```json
+{
+  "type": "https://example.com/errors/validation-error",
+  "title": "Validation Error",
+  "status": 400,
+  "detail": "Invalid pagination parameters: page must be >= 0, size must be between 1 and 100",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки твит не найден (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
+  "ruleName": "TWEET_NOT_FOUND",
+  "context": "223e4567-e89b-12d3-a456-426614174001",
+  "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -592,7 +1262,24 @@ open http://localhost:8082/swagger-ui.html
         - Маппинг сущностей в DTO ответа
         - Возврат Page с метаданными пагинации
 
-5. **`deleteTweet(UUID tweetId, DeleteTweetRequestDto requestDto)`**
+5. **`getTimeline(UUID userId, Pageable pageable)`**
+    - Получает пагинированную ленту новостей (timeline) для пользователя
+    - Возвращает `Page<TweetResponseDto>`
+    - Логика:
+        - Валидация существования пользователя через UserGateway
+        - Получение списка подписок через FollowerGateway (интеграция с follower-api)
+        - Если список подписок пустой, возвращается пустая страница (не ошибка)
+        - Получение твитов из БД по списку userIds (IN запрос) с фильтрацией (isDeleted = false)
+        - Сортировка по createdAt DESC (новые первыми)
+        - Применение пагинации (page, size, sort)
+        - Маппинг сущностей в DTO ответа
+        - Возврат Page с метаданными пагинации
+    - Особенности:
+        - Интеграция с follower-api для получения списка подписок
+        - Graceful degradation: при недоступности follower-api возвращается пустая страница
+        - Поддержка пагинации для работы с большими объемами данных
+
+6. **`deleteTweet(UUID tweetId, DeleteTweetRequestDto requestDto)`**
     - Удаляет твит (soft delete)
     - Возвращает `void` (ответ 204 No Content)
     - Логика:
@@ -638,13 +1325,174 @@ open http://localhost:8082/swagger-ui.html
     - Дефолтные значения пагинации: page=0, size=20, sort=createdAt,DESC
     - Максимальный размер страницы: 100 элементов
 
+7. **Получение ленты новостей (timeline):**
+    - Лента содержит твиты от всех пользователей, на которых подписан указанный пользователь
+    - Интеграция с follower-api для получения списка подписок
+    - Поддержка пагинации для работы с большими объемами данных
+    - Сортировка по дате создания в порядке убывания (новые первыми)
+    - Автоматическое исключение удаленных твитов (isDeleted = false)
+    - Если пользователь не имеет подписок, возвращается пустая страница (не ошибка)
+    - Если подписанные пользователи не имеют твитов, возвращается пустая страница (не ошибка)
+    - Graceful degradation: при недоступности follower-api возвращается пустая страница
+    - Дефолтные значения пагинации: page=0, size=20, sort=createdAt,DESC
+    - Максимальный размер страницы: 100 элементов
+
+### LikeService
+
+Основной сервис для работы с лайками твитов, реализующий следующие операции:
+
+#### Методы сервиса:
+
+1. **`likeTweet(UUID tweetId, LikeTweetRequestDto requestDto)`**
+    - Создает лайк для твита
+    - Возвращает `LikeResponseDto`
+    - Логика:
+        - Валидация запроса (существование твита, пользователя, самолайк, дублирование)
+        - Маппинг DTO в сущность Like
+        - Сохранение лайка в БД
+        - Обновление счетчика `likesCount` в твите (инкремент на 1)
+        - Маппинг сущности в DTO ответа
+    - Особенности:
+        - Операция атомарна (выполняется в транзакции)
+        - Обновление счетчика выполняется синхронно при создании лайка
+        - Используется денормализация для оптимизации операций чтения
+
+2. **`removeLike(UUID tweetId, LikeTweetRequestDto requestDto)`**
+    - Удаляет лайк для твита
+    - Возвращает `void` (ответ 204 No Content)
+    - Логика:
+        - Валидация запроса (существование твита, пользователя, лайка)
+        - Поиск лайка в БД по tweetId и userId
+        - Удаление лайка из БД
+        - Обновление счетчика `likesCount` в твите (декремент на 1, с защитой от отрицательных значений)
+        - Сохранение изменений в БД
+    - Особенности:
+        - Операция атомарна (выполняется в транзакции)
+        - Обновление счетчика выполняется синхронно при удалении лайка
+        - Используется денормализация для оптимизации операций чтения
+        - Счетчик не может стать отрицательным (защита на уровне Entity)
+
+### Ключевые бизнес-правила для лайков:
+
+1. **Валидация твита:**
+    - Твит должен существовать в системе и не быть удаленным
+    - При отсутствии твита выбрасывается `BusinessRuleValidationException` с правилом `TWEET_NOT_FOUND`
+
+2. **Валидация пользователя:**
+    - Пользователь должен существовать в системе users-api
+    - Проверка выполняется через интеграцию с users-api
+    - При отсутствии пользователя выбрасывается `BusinessRuleValidationException` с правилом `USER_NOT_EXISTS`
+
+3. **Запрет самолайка:**
+    - Пользователь не может лайкнуть свой собственный твит
+    - При попытке самолайка выбрасывается `BusinessRuleValidationException` с правилом `SELF_LIKE_NOT_ALLOWED`
+
+4. **Уникальность лайка:**
+    - Пользователь может лайкнуть твит только один раз
+    - Уникальность обеспечивается на уровне БД (UNIQUE constraint на паре tweetId+userId)
+    - При попытке повторного лайка выбрасывается `UniquenessValidationException`
+
+5. **Обновление счетчика:**
+    - При создании лайка счетчик `likesCount` в твите инкрементируется на 1
+    - Операция выполняется атомарно в рамках транзакции
+    - Используется денормализация для оптимизации операций чтения
+
+6. **Временные метки:**
+    - `createdAt` устанавливается автоматически при создании лайка
+    - Управление выполняется Hibernate через `@CreationTimestamp`
+
+7. **Удаление лайка:**
+    - При удалении лайка счетчик `likesCount` в твите декрементируется на 1
+    - Операция выполняется атомарно в рамках транзакции
+    - Счетчик не может стать отрицательным (защита на уровне Entity через метод `decrementLikesCount()`)
+    - Используется денормализация для оптимизации операций чтения
+
+### RetweetService
+
+Основной сервис для работы с ретвитами твитов, реализующий следующие операции:
+
+#### Методы сервиса:
+
+1. **`retweetTweet(UUID tweetId, RetweetRequestDto requestDto)`**
+    - Создает ретвит для твита с опциональным комментарием
+    - Возвращает `RetweetResponseDto`
+    - Логика:
+        - Валидация запроса (существование твита, пользователя, запрет self-retweet, уникальность, валидация комментария)
+        - Маппинг DTO в сущность Retweet
+        - Сохранение ретвита в БД
+        - Обновление счетчика `retweetsCount` в твите (инкремент на 1)
+        - Маппинг сущности в DTO ответа
+    - Особенности:
+        - Операция атомарна (выполняется в транзакции)
+        - Обновление счетчика выполняется синхронно при создании ретвита
+        - Используется денормализация для оптимизации операций чтения
+        - Комментарий опционален: может быть `null`, но если указан, должен быть валидным (1-280 символов)
+
+2. **`removeRetweet(UUID tweetId, RetweetRequestDto requestDto)`**
+    - Удаляет ретвит для твита
+    - Возвращает `void` (ответ 204 No Content)
+    - Логика:
+        - Валидация запроса (существование твита, пользователя, ретвита)
+        - Поиск ретвита в БД по tweetId и userId
+        - Удаление ретвита из БД
+        - Обновление счетчика `retweetsCount` в твите (декремент на 1, с защитой от отрицательных значений)
+        - Сохранение изменений в БД
+    - Особенности:
+        - Операция атомарна (выполняется в транзакции)
+        - Обновление счетчика выполняется синхронно при удалении ретвита
+        - Используется денормализация для оптимизации операций чтения
+        - Счетчик не может стать отрицательным (защита на уровне Entity)
+
+### Ключевые бизнес-правила для ретвитов:
+
+1. **Валидация твита:**
+    - Твит должен существовать в системе и не быть удаленным
+    - При отсутствии твита выбрасывается `BusinessRuleValidationException` с правилом `TWEET_NOT_FOUND`
+
+2. **Валидация пользователя:**
+    - Пользователь должен существовать в системе users-api
+    - Проверка выполняется через интеграцию с users-api
+    - При отсутствии пользователя выбрасывается `BusinessRuleValidationException` с правилом `USER_NOT_EXISTS`
+
+3. **Запрет self-retweet:**
+    - Пользователь не может ретвитнуть свой собственный твит
+    - При попытке self-retweet выбрасывается `BusinessRuleValidationException` с правилом `SELF_RETWEET_NOT_ALLOWED`
+
+4. **Уникальность ретвита:**
+    - Пользователь может ретвитнуть твит только один раз
+    - Уникальность обеспечивается на уровне БД (UNIQUE constraint на паре tweetId+userId)
+    - При попытке повторного ретвита выбрасывается `UniquenessValidationException`
+
+5. **Валидация комментария:**
+    - Комментарий опционален: может быть `null`
+    - Если комментарий указан, он должен быть валидным:
+        - Не может быть пустой строкой (после trim)
+        - Не может превышать 280 символов
+    - При невалидном комментарии выбрасывается `FormatValidationException`
+
+6. **Обновление счетчика:**
+    - При создании ретвита счетчик `retweetsCount` в твите инкрементируется на 1
+    - Операция выполняется атомарно в рамках транзакции
+    - Используется денормализация для оптимизации операций чтения
+
+7. **Удаление ретвита:**
+    - При удалении ретвита счетчик `retweetsCount` в твите декрементируется на 1
+    - Операция выполняется атомарно в рамках транзакции
+    - Счетчик не может стать отрицательным (защита на уровне Entity через метод `decrementRetweetsCount()`)
+    - Используется денормализация для оптимизации операций чтения
+    - Ретвит должен существовать в системе перед удалением (проверка через `RetweetRepository.existsByTweetIdAndUserId()`)
+
+7. **Временные метки:**
+    - `createdAt` устанавливается автоматически при создании ретвита
+    - Управление выполняется Hibernate через `@CreationTimestamp`
+
 ## Слой валидации
 
 ### Архитектура валидации
 
-Сервис использует централизованный слой валидации через `TweetValidator`, который обеспечивает:
+Сервис использует централизованный слой валидации через `TweetValidator` и `LikeValidator`, которые обеспечивают:
 
-- **Единообразную валидацию** для всех операций с твитами
+- **Единообразную валидацию** для всех операций с твитами и лайками
 - **Разделение ответственности** между бизнес-логикой и валидацией
 - **Типизированные исключения** для различных видов ошибок
 - **Интеграцию с Jakarta Validation** для проверки формата данных
@@ -751,6 +1599,141 @@ open http://localhost:8082/swagger-ui.html
     - Сравнение `userId` из запроса с `userId` твита
     - При несовпадении выбрасывается `BusinessRuleValidationException` с правилом `TWEET_ACCESS_DENIED`
 
+### LikeValidator
+
+Интерфейс `LikeValidator` определяет методы валидации для операций с лайками. Он включает методы для валидации создания лайка, проверки существования твита и пользователя, предотвращения самолайка и дублирования.
+
+#### Лайк твита (LIKE)
+
+Выполняется многоэтапная валидация:
+
+1. **Проверка tweetId:**
+    - Проверка, что `tweetId` не равен `null`
+    - При отсутствии выбрасывается `BusinessRuleValidationException` с правилом `TWEET_ID_NULL`
+
+2. **Проверка существования твита:**
+    - Поиск твита в БД по UUID с фильтрацией (isDeleted = false)
+    - При отсутствии твита выбрасывается `BusinessRuleValidationException` с правилом `TWEET_NOT_FOUND`
+
+3. **Проверка requestDto:**
+    - Проверка, что `requestDto` не равен `null`
+    - При отсутствии выбрасывается `BusinessRuleValidationException` с правилом `LIKE_REQUEST_NULL`
+
+4. **Проверка userId:**
+    - Проверка, что `userId` не равен `null`
+    - При отсутствии выбрасывается `BusinessRuleValidationException` с правилом `USER_ID_NULL`
+
+5. **Проверка существования пользователя:**
+    - Вызов `UserGateway.existsUser()` для проверки существования
+    - При отсутствии пользователя выбрасывается `BusinessRuleValidationException` с правилом `USER_NOT_EXISTS`
+
+6. **Проверка самолайка:**
+    - Сравнение `userId` из запроса с `userId` твита
+    - При совпадении выбрасывается `BusinessRuleValidationException` с правилом `SELF_LIKE_NOT_ALLOWED`
+
+7. **Проверка уникальности:**
+    - Проверка существования лайка через `LikeRepository.existsByTweetIdAndUserId()`
+    - При существовании лайка выбрасывается `UniquenessValidationException` (409 Conflict)
+
+#### Убрать лайк твита (UNLIKE)
+
+Выполняется многоэтапная валидация:
+
+1. **Проверка tweetId:**
+    - Проверка, что `tweetId` не равен `null`
+    - При отсутствии выбрасывается `BusinessRuleValidationException` с правилом `TWEET_ID_NULL`
+
+2. **Проверка существования твита:**
+    - Поиск твита в БД по UUID с фильтрацией (isDeleted = false)
+    - При отсутствии твита выбрасывается `BusinessRuleValidationException` с правилом `TWEET_NOT_FOUND`
+
+3. **Проверка requestDto:**
+    - Проверка, что `requestDto` не равен `null`
+    - При отсутствии выбрасывается `BusinessRuleValidationException` с правилом `LIKE_REQUEST_NULL`
+
+4. **Проверка userId:**
+    - Проверка, что `userId` не равен `null`
+    - При отсутствии выбрасывается `BusinessRuleValidationException` с правилом `USER_ID_NULL`
+
+5. **Проверка существования пользователя:**
+    - Вызов `UserGateway.existsUser()` для проверки существования
+    - При отсутствии пользователя выбрасывается `BusinessRuleValidationException` с правилом `USER_NOT_EXISTS`
+
+6. **Проверка существования лайка:**
+    - Проверка существования лайка через `LikeRepository.findByTweetIdAndUserId()`
+    - При отсутствии лайка выбрасывается `BusinessRuleValidationException` с правилом `LIKE_NOT_FOUND` (409 Conflict)
+
+### RetweetValidator
+
+Интерфейс `RetweetValidator` определяет методы валидации для операций с ретвитами. Он включает методы для валидации создания ретвита, проверки существования твита и пользователя, предотвращения self-retweet, дублирования и валидации комментария.
+
+#### Ретвитнуть твит (RETWEET)
+
+Выполняется многоэтапная валидация:
+
+1. **Проверка tweetId:**
+    - Проверка, что `tweetId` не равен `null`
+    - При отсутствии выбрасывается `BusinessRuleValidationException` с правилом `TWEET_ID_NULL`
+
+2. **Проверка существования твита:**
+    - Поиск твита в БД по UUID с фильтрацией (isDeleted = false)
+    - При отсутствии твита выбрасывается `BusinessRuleValidationException` с правилом `TWEET_NOT_FOUND`
+
+3. **Проверка requestDto:**
+    - Проверка, что `requestDto` не равен `null`
+    - При отсутствии выбрасывается `BusinessRuleValidationException` с правилом `RETWEET_REQUEST_NULL`
+
+4. **Проверка userId:**
+    - Проверка, что `userId` не равен `null`
+    - При отсутствии выбрасывается `BusinessRuleValidationException` с правилом `USER_ID_NULL`
+
+5. **Проверка существования пользователя:**
+    - Вызов `UserGateway.existsUser()` для проверки существования
+    - При отсутствии пользователя выбрасывается `BusinessRuleValidationException` с правилом `USER_NOT_EXISTS`
+
+6. **Проверка self-retweet:**
+    - Сравнение `userId` из запроса с `userId` твита
+    - При совпадении выбрасывается `BusinessRuleValidationException` с правилом `SELF_RETWEET_NOT_ALLOWED`
+
+7. **Проверка уникальности:**
+    - Проверка существования ретвита через `RetweetRepository.existsByTweetIdAndUserId()`
+    - При существовании ретвита выбрасывается `UniquenessValidationException` (409 Conflict)
+
+8. **Валидация комментария:**
+    - Если комментарий не `null`, проверяется:
+        - Комментарий не может быть пустой строкой (после trim)
+        - Комментарий не может превышать 280 символов
+    - При невалидном комментарии выбрасывается `FormatValidationException`
+    - `null` комментарий разрешен и проходит валидацию
+
+#### Убрать ретвит твита (REMOVE_RETWEET)
+
+Выполняется многоэтапная валидация:
+
+1. **Проверка tweetId:**
+    - Проверка, что `tweetId` не равен `null`
+    - При отсутствии выбрасывается `BusinessRuleValidationException` с правилом `TWEET_ID_NULL`
+
+2. **Проверка существования твита:**
+    - Поиск твита в БД по UUID с фильтрацией (isDeleted = false)
+    - При отсутствии твита выбрасывается `BusinessRuleValidationException` с правилом `TWEET_NOT_FOUND`
+
+3. **Проверка requestDto:**
+    - Проверка, что `requestDto` не равен `null`
+    - При отсутствии выбрасывается `BusinessRuleValidationException` с правилом `RETWEET_REQUEST_NULL`
+
+4. **Проверка userId:**
+    - Проверка, что `userId` не равен `null`
+    - При отсутствии выбрасывается `BusinessRuleValidationException` с правилом `USER_ID_NULL`
+
+5. **Проверка существования пользователя:**
+    - Вызов `UserGateway.existsUser()` для проверки существования
+    - При отсутствии пользователя выбрасывается `BusinessRuleValidationException` с правилом `USER_NOT_EXISTS`
+
+6. **Проверка существования ретвита:**
+    - Проверка существования ретвита через `RetweetRepository.existsByTweetIdAndUserId()`
+    - При отсутствии ретвита выбрасывается `BusinessRuleValidationException` с правилом `RETWEET_NOT_FOUND` (409 Conflict)
+
 ## Работа с базой данных
 
 ### Таблица tweets
@@ -764,6 +1747,8 @@ open http://localhost:8082/swagger-ui.html
 | `updated_at` | TIMESTAMP    | NOT NULL              | Время последнего обновления           |
 | `is_deleted` | BOOLEAN      | NOT NULL, DEFAULT false | Флаг мягкого удаления                |
 | `deleted_at` | TIMESTAMP    | NULL                  | Время мягкого удаления                |
+| `likes_count`| INTEGER      | NOT NULL, DEFAULT 0   | Счетчик лайков (денормализация)       |
+| `retweets_count`| INTEGER   | NOT NULL, DEFAULT 0   | Счетчик ретвитов (денормализация)     |
 
 ### Ограничения базы данных
 
@@ -780,15 +1765,69 @@ open http://localhost:8082/swagger-ui.html
 3. **Автоматическое обновление updated_at:**
     - Триггер `update_tweets_updated_at` автоматически обновляет `updated_at` при изменении записи
 
+### Таблица tweet_likes
+
+| Поле         | Тип          | Ограничения           | Описание                              |
+|--------------|--------------|-----------------------|---------------------------------------|
+| `id`         | UUID         | PRIMARY KEY, NOT NULL | Уникальный идентификатор              |
+| `tweet_id`   | UUID         | NOT NULL              | ID твита (ссылка на tweets)           |
+| `user_id`    | UUID         | NOT NULL              | ID пользователя (ссылка на users-api) |
+| `created_at` | TIMESTAMP    | NOT NULL              | Время создания лайка                  |
+
+### Ограничения базы данных для лайков
+
+1. **UNIQUE constraint для уникальности лайка:**
+   ```sql
+   CONSTRAINT uk_tweet_likes_tweet_user UNIQUE (tweet_id, user_id)
+   ```
+   Обеспечивает, что пользователь может лайкнуть твит только один раз.
+
+2. **Индексы для оптимизации:**
+    - `uk_tweet_likes_tweet_user` - уникальный индекс на паре (tweet_id, user_id) для быстрой проверки существования лайка
+
 4. **Soft Delete (мягкое удаление):**
     - Поле `is_deleted` используется для пометки удаленных твитов (по умолчанию `false`)
     - Поле `deleted_at` хранит временную метку удаления (NULL для активных твитов)
     - Удаленные твиты не возвращаются в обычных запросах (используется `findByIdAndIsDeletedFalse()`)
     - Индекс `idx_tweets_is_deleted` для оптимизации запросов активных твитов
 
-## Интеграция с users-api
+### Таблица tweet_retweets
 
-### Архитектура интеграции
+| Поле         | Тип          | Ограничения           | Описание                              |
+|--------------|--------------|-----------------------|---------------------------------------|
+| `id`         | UUID         | PRIMARY KEY, NOT NULL | Уникальный идентификатор              |
+| `tweet_id`   | UUID         | NOT NULL              | ID твита (ссылка на tweets)           |
+| `user_id`    | UUID         | NOT NULL              | ID пользователя (ссылка на users-api) |
+| `comment`    | VARCHAR(280) | NULL                  | Опциональный комментарий ретвита      |
+| `created_at` | TIMESTAMP    | NOT NULL              | Время создания ретвита                 |
+
+### Ограничения базы данных для ретвитов
+
+1. **UNIQUE constraint для уникальности ретвита:**
+   ```sql
+   CONSTRAINT uk_tweet_retweets_tweet_user UNIQUE (tweet_id, user_id)
+   ```
+   Обеспечивает, что пользователь может ретвитнуть твит только один раз.
+
+2. **Foreign keys:**
+   - `tweet_retweets_tweet_fk` - ссылка на `tweets(id)`
+   - `tweet_retweets_user_fk` - ссылка на `users(id)` (внешняя ссылка на users-api)
+
+3. **Комментарий:**
+   - Поле `comment` опционально (может быть `NULL`)
+   - Если комментарий указан, он должен быть валидным (1-280 символов, не пустая строка)
+   - Максимальная длина комментария: 280 символов
+
+4**Обновление счетчика retweetsCount:**
+   - При создании ретвита счетчик `retweets_count` в таблице `tweets` инкрементируется на 1
+   - Операция выполняется атомарно в рамках транзакции
+   - Используется денормализация для оптимизации операций чтения
+
+## Интеграция с другими сервисами
+
+### Интеграция с users-api
+
+#### Архитектура интеграции
 
 Tweet API интегрируется с Users API через Feign Client для проверки существования пользователей перед созданием твитов.
 
@@ -847,6 +1886,91 @@ Gateway компонент для абстракции работы с users-api
     - Feign выбрасывает `FeignException`
     - `UserGateway` обрабатывает и возвращает `false`
     - Выбрасывается `BusinessRuleValidationException`
+
+### Интеграция с follower-api
+
+#### Архитектура интеграции
+
+Tweet API интегрируется с Follower API через Feign Client для получения списка подписок пользователя при построении ленты новостей (timeline).
+
+#### Компоненты интеграции
+
+##### 1. FollowerApiClient (Feign Client)
+
+Интерфейс Feign Client для вызова follower-api
+
+**Конфигурация:**
+
+- Базовый URL: `http://localhost:8084` (настраивается через `app.follower-api.base-url`)
+- Путь: `/api/v1/follows`
+- Эндпоинт: `GET /{userId}/following`
+
+**Метод:**
+
+- `PagedModel<FollowingResponseDto> getFollowing(UUID userId, Pageable pageable)` - получает пагинированный список подписок пользователя
+
+##### 2. FollowerGateway
+
+Gateway компонент для абстракции работы с follower-api
+
+**Особенности:**
+
+- Обрабатывает `null` userId (возвращает пустой список)
+- Обрабатывает исключения при вызове follower-api (graceful degradation)
+- Логирует операции для отладки
+- Получает все подписки через пагинацию (размер страницы 100)
+
+**Метод:**
+
+- `List<UUID> getFollowingUserIds(UUID userId)` - получает список идентификаторов пользователей, на которых подписан указанный пользователь
+
+#### Процесс получения ленты новостей
+
+1. **Валидация userId:**
+    - Проверка, что `userId` не равен `null`
+    - Проверка существования пользователя через `UserGateway.existsUser()`
+    - Если пользователь не существует, выбрасывается `BusinessRuleValidationException`
+
+2. **Получение списка подписок:**
+    - `TweetService` вызывает `FollowerGateway.getFollowingUserIds(userId)`
+    - `FollowerGateway` делает пагинированные запросы к follower-api до получения всех подписок
+    - Используется размер страницы 100 для минимизации количества запросов
+    - Если список подписок пустой, возвращается пустая страница (не ошибка)
+
+3. **Получение твитов:**
+    - Используется Repository метод `findByUserIdInAndIsDeletedFalseOrderByCreatedAtDesc` для получения твитов по списку userIds
+    - Применяется пагинация и сортировка по createdAt DESC
+    - Маппинг сущностей в DTO ответа
+    - Возврат Page с метаданными пагинации
+
+#### Обработка ошибок
+
+##### Сценарии ошибок:
+
+1. **Пользователь не имеет подписок:**
+    - HTTP 200 OK с пустым списком подписок
+    - Возвращается пустая страница твитов (не ошибка)
+
+2. **Ошибка сети:**
+    - Feign выбрасывает исключение
+    - `FollowerGateway` обрабатывает и возвращает пустой список (graceful degradation)
+    - Возвращается пустая страница твитов (не ошибка)
+
+3. **Таймаут:**
+    - Feign выбрасывает `FeignException`
+    - `FollowerGateway` обрабатывает и возвращает пустой список (graceful degradation)
+    - Возвращается пустая страница твитов (не ошибка)
+
+4. **Follower-api недоступен (503 Service Unavailable):**
+    - `FollowerGateway` обрабатывает и возвращает пустой список (graceful degradation)
+    - Возвращается пустая страница твитов (не ошибка)
+    - Логируется предупреждение для мониторинга
+
+**Логирование:**
+
+- Все вызовы к follower-api логируются на уровне DEBUG
+- Ошибки логируются с предупреждением
+- Успешные операции логируются на уровне INFO
 
 ## Примеры использования
 
@@ -963,6 +2087,100 @@ curl -X GET "http://localhost:8082/api/v1/tweets/user/123e4567-e89b-12d3-a456-42
 }
 ```
 
+### Получение ленты новостей (timeline)
+
+```bash
+# Получить первую страницу ленты новостей (20 твитов по умолчанию)
+curl -X GET "http://localhost:8082/api/v1/tweets/timeline/123e4567-e89b-12d3-a456-426614174000"
+
+# Получить вторую страницу с размером 10
+curl -X GET "http://localhost:8082/api/v1/tweets/timeline/123e4567-e89b-12d3-a456-426614174000?page=1&size=10"
+
+# Получить с кастомной сортировкой
+curl -X GET "http://localhost:8082/api/v1/tweets/timeline/123e4567-e89b-12d3-a456-426614174000?sort=createdAt,ASC"
+```
+
+**Ответ (200 OK) с твитами из ленты:**
+
+```json
+{
+  "content": [
+    {
+      "id": "111e4567-e89b-12d3-a456-426614174000",
+      "userId": "222e4567-e89b-12d3-a456-426614174111",
+      "content": "This is a tweet from a followed user!",
+      "createdAt": "2025-01-27T15:30:00Z",
+      "updatedAt": "2025-01-27T15:30:00Z",
+      "isDeleted": false,
+      "deletedAt": null
+    },
+    {
+      "id": "333e4567-e89b-12d3-a456-426614174222",
+      "userId": "444e4567-e89b-12d3-a456-426614174333",
+      "content": "Another tweet from another followed user",
+      "createdAt": "2025-01-27T14:20:00Z",
+      "updatedAt": "2025-01-27T14:20:00Z",
+      "isDeleted": false,
+      "deletedAt": null
+    }
+  ],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 150,
+    "totalPages": 8,
+    "first": true,
+    "last": false
+  }
+}
+```
+
+**Ответ (200 OK) с пустой лентой (нет подписок):**
+
+```json
+{
+  "content": [],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 0,
+    "totalPages": 0,
+    "first": true,
+    "last": true
+  }
+}
+```
+
+**Ответ (200 OK) с пустой лентой (нет твитов):**
+
+```json
+{
+  "content": [],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 0,
+    "totalPages": 0,
+    "first": true,
+    "last": true
+  }
+}
+```
+
+**Ответ при ошибке пользователь не существует (400 Bad Request):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 400,
+  "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+  "ruleName": "USER_NOT_EXISTS",
+  "context": "123e4567-e89b-12d3-a456-426614174000",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
 ### Обновление твита
 
 ```bash
@@ -1042,6 +2260,686 @@ curl -X DELETE http://localhost:8082/api/v1/tweets/123e4567-e89b-12d3-a456-42661
 }
 ```
 
+### Лайк твита
+
+```bash
+curl -X POST http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/like \
+  -H "Content-Type: application/json" \
+  -d '{
+    "userId": "123e4567-e89b-12d3-a456-426614174000"
+  }'
+```
+
+**Ответ (201 Created):**
+
+```json
+{
+  "id": "987e6543-e21b-43d2-b654-321987654321",
+  "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+  "userId": "123e4567-e89b-12d3-a456-426614174000",
+  "createdAt": "2025-01-27T15:30:00Z"
+}
+```
+
+**Ответ при дублировании лайка (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/uniqueness-validation",
+  "title": "Uniqueness Validation Error",
+  "status": 409,
+  "detail": "A like already exists for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+  "fieldName": "like",
+  "fieldValue": "tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Ответ при самолайке (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'SELF_LIKE_NOT_ALLOWED' violated for context: Users cannot like their own tweets",
+  "ruleName": "SELF_LIKE_NOT_ALLOWED",
+  "context": "Users cannot like their own tweets",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Ответ при отсутствии твита (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
+  "ruleName": "TWEET_NOT_FOUND",
+  "context": "223e4567-e89b-12d3-a456-426614174001",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+### Убрать лайк твита
+
+```bash
+curl -X DELETE http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/like \
+  -H "Content-Type: application/json" \
+  -d '{
+    "userId": "123e4567-e89b-12d3-a456-426614174000"
+  }'
+```
+
+**Ответ (204 No Content):**
+
+Ответ не содержит тела, только HTTP статус 204.
+
+**Ответ при отсутствии лайка (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'LIKE_NOT_FOUND' violated for context: Like not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+  "ruleName": "LIKE_NOT_FOUND",
+  "context": "Like not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Ответ при отсутствии твита (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
+  "ruleName": "TWEET_NOT_FOUND",
+  "context": "223e4567-e89b-12d3-a456-426614174001",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Ответ при отсутствии пользователя (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+  "ruleName": "USER_NOT_EXISTS",
+  "context": "123e4567-e89b-12d3-a456-426614174000",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+### Получить пользователей, лайкнувших твит
+
+```bash
+# Получить первую страницу (20 лайков по умолчанию)
+curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/likes"
+
+# Получить вторую страницу с размером 10
+curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/likes?page=1&size=10"
+
+# Получить с кастомной сортировкой
+curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/likes?sort=createdAt,ASC"
+```
+
+**Ответ (200 OK) с лайками:**
+
+```json
+{
+  "content": [
+    {
+      "id": "987e6543-e21b-43d2-b654-321987654321",
+      "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+      "userId": "123e4567-e89b-12d3-a456-426614174000",
+      "createdAt": "2025-01-27T15:30:00Z"
+    },
+    {
+      "id": "876e5432-e10a-32c1-a543-210876543210",
+      "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+      "userId": "234e5678-f90c-23e4-b567-537725285112",
+      "createdAt": "2025-01-27T14:20:00Z"
+    }
+  ],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 45,
+    "totalPages": 3
+  }
+}
+```
+
+**Ответ (200 OK) без лайков:**
+
+```json
+{
+  "content": [],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 0,
+    "totalPages": 0
+  }
+}
+```
+
+**Ответ при отсутствии твита (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
+  "ruleName": "TWEET_NOT_FOUND",
+  "context": "223e4567-e89b-12d3-a456-426614174001",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Ответ при неверном формате UUID (400 Bad Request):**
+
+```json
+{
+  "type": "https://example.com/errors/validation-error",
+  "title": "Validation Error",
+  "status": 400,
+  "detail": "Invalid UUID format for tweetId parameter",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+### Получить пользователей, ретвитнувших твит
+
+```bash
+# Получить первую страницу (20 ретвитов по умолчанию)
+curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/retweets"
+
+# Получить вторую страницу с размером 10
+curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/retweets?page=1&size=10"
+
+# Получить с кастомной сортировкой
+curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/retweets?sort=createdAt,ASC"
+```
+
+**Ответ (200 OK) с ретвитами:**
+
+```json
+{
+  "content": [
+    {
+      "id": "987e6543-e21b-43d2-b654-321987654321",
+      "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+      "userId": "123e4567-e89b-12d3-a456-426614174000",
+      "comment": "Great tweet!",
+      "createdAt": "2025-01-27T15:30:00Z"
+    },
+    {
+      "id": "876e5432-e10a-32c1-a543-210876543210",
+      "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+      "userId": "234e5678-f90c-23e4-b567-537725285112",
+      "comment": null,
+      "createdAt": "2025-01-27T14:20:00Z"
+    }
+  ],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 45,
+    "totalPages": 3
+  }
+}
+```
+
+**Ответ (200 OK) без ретвитов:**
+
+```json
+{
+  "content": [],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 0,
+    "totalPages": 0
+  }
+}
+```
+
+**Ответ при отсутствии твита (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
+  "ruleName": "TWEET_NOT_FOUND",
+  "context": "223e4567-e89b-12d3-a456-426614174001",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Ответ при неверном формате UUID (400 Bad Request):**
+
+```json
+{
+  "type": "https://example.com/errors/validation-error",
+  "title": "Validation Error",
+  "status": 400,
+  "detail": "Invalid UUID format for tweetId parameter",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+### Ретвитнуть твит
+
+```bash
+# Ретвитнуть твит с комментарием
+curl -X POST http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/retweet \
+  -H "Content-Type: application/json" \
+  -d '{
+    "userId": "123e4567-e89b-12d3-a456-426614174000",
+    "comment": "Great tweet!"
+  }'
+
+# Ретвитнуть твит без комментария
+curl -X POST http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/retweet \
+  -H "Content-Type: application/json" \
+  -d '{
+    "userId": "123e4567-e89b-12d3-a456-426614174000",
+    "comment": null
+  }'
+```
+
+**Ответ (201 Created) с комментарием:**
+
+```json
+{
+  "id": "987e6543-e21b-43d2-b654-321987654321",
+  "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+  "userId": "123e4567-e89b-12d3-a456-426614174000",
+  "comment": "Great tweet!",
+  "createdAt": "2025-01-27T15:30:00Z"
+}
+```
+
+**Ответ (201 Created) без комментария:**
+
+```json
+{
+  "id": "987e6543-e21b-43d2-b654-321987654321",
+  "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+  "userId": "123e4567-e89b-12d3-a456-426614174000",
+  "comment": null,
+  "createdAt": "2025-01-27T15:30:00Z"
+}
+```
+
+**Ответ при дублировании ретвита (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/uniqueness-validation",
+  "title": "Uniqueness Validation Error",
+  "status": 409,
+  "detail": "A retweet already exists for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+  "fieldName": "retweet",
+  "fieldValue": "tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Ответ при self-retweet (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'SELF_RETWEET_NOT_ALLOWED' violated for context: Users cannot retweet their own tweets",
+  "ruleName": "SELF_RETWEET_NOT_ALLOWED",
+  "context": "Users cannot retweet their own tweets",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Ответ при отсутствии твита (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
+  "ruleName": "TWEET_NOT_FOUND",
+  "context": "223e4567-e89b-12d3-a456-426614174001",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Ответ при отсутствии пользователя (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+  "ruleName": "USER_NOT_EXISTS",
+  "context": "123e4567-e89b-12d3-a456-426614174000",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+#### 9. Ретвитнуть твит
+
+```http
+POST /api/v1/tweets/{tweetId}/retweet
+Content-Type: application/json
+```
+
+**Параметры пути:**
+
+- `tweetId` - обязательный, UUID существующего твита
+
+**Тело запроса:**
+
+```json
+{
+  "userId": "123e4567-e89b-12d3-a456-426614174000",
+  "comment": "Great tweet!"
+}
+```
+
+**Валидация:**
+
+- `userId` - обязательное, UUID существующего пользователя
+- `comment` - необязательное, если указано, то 1-280 символов (не может быть пустой строкой), может быть `null`
+- `tweetId` - обязательный, должен быть валидным UUID форматом
+
+**Бизнес-правила:**
+
+- Твит должен существовать в системе и не быть удаленным
+- Пользователь должен существовать в системе
+- Пользователь не может ретвитнуть свой собственный твит (self-retweet запрещен)
+- Пользователь может ретвитнуть твит только один раз (уникальность)
+- Операция атомарна - создается запись ретвита и обновляется счетчик `retweetsCount` в твите
+- Комментарий опционален: может быть `null`, но если указан, должен быть валидным (1-280 символов, не пустая строка)
+
+**Ответы:**
+
+- `201 Created` - твит успешно ретвитнут
+- `400 Bad Request` - ошибка валидации (некорректный UUID, отсутствует userId, невалидный комментарий)
+- `409 Conflict` - нарушение бизнес-правил (твит не найден, пользователь не существует, self-retweet)
+- `409 Conflict` - дублирование ретвита (пользователь уже ретвитнул этот твит)
+
+**Пример успешного ответа (201 Created) с комментарием:**
+
+```json
+{
+  "id": "987e6543-e21b-43d2-b654-321987654321",
+  "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+  "userId": "123e4567-e89b-12d3-a456-426614174000",
+  "comment": "Great tweet!",
+  "createdAt": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример успешного ответа (201 Created) без комментария:**
+
+```json
+{
+  "id": "987e6543-e21b-43d2-b654-321987654321",
+  "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+  "userId": "123e4567-e89b-12d3-a456-426614174000",
+  "comment": null,
+  "createdAt": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки валидации userId (400 Bad Request):**
+
+```json
+{
+  "type": "https://example.com/errors/validation-error",
+  "title": "Validation Error",
+  "status": 400,
+  "detail": "Validation failed: userId: User ID cannot be null",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки валидации комментария (400 Bad Request):**
+
+```json
+{
+  "type": "https://example.com/errors/format-validation",
+  "title": "Format Validation Error",
+  "status": 400,
+  "detail": "Comment cannot be empty string. Use null if no comment is provided.",
+  "fieldName": "comment",
+  "constraintName": "NOT_EMPTY",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки твит не найден (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
+  "ruleName": "TWEET_NOT_FOUND",
+  "context": "223e4567-e89b-12d3-a456-426614174001",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки пользователь не существует (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+  "ruleName": "USER_NOT_EXISTS",
+  "context": "123e4567-e89b-12d3-a456-426614174000",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки self-retweet (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'SELF_RETWEET_NOT_ALLOWED' violated for context: Users cannot retweet their own tweets",
+  "ruleName": "SELF_RETWEET_NOT_ALLOWED",
+  "context": "Users cannot retweet their own tweets",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки дублирование ретвита (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/uniqueness-validation",
+  "title": "Uniqueness Validation Error",
+  "status": 409,
+  "detail": "A retweet already exists for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+  "fieldName": "retweet",
+  "fieldValue": "tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+#### 10. Убрать ретвит твита
+
+```http
+DELETE /api/v1/tweets/{tweetId}/retweet
+Content-Type: application/json
+```
+
+**Параметры пути:**
+
+- `tweetId` - обязательный, UUID существующего твита
+
+**Тело запроса:**
+
+```json
+{
+  "userId": "123e4567-e89b-12d3-a456-426614174000"
+}
+```
+
+**Валидация:**
+
+- `userId` - обязательное, UUID существующего пользователя
+- `tweetId` - обязательный, должен быть валидным UUID форматом
+
+**Бизнес-правила:**
+
+- Твит должен существовать в системе и не быть удаленным
+- Пользователь должен существовать в системе
+- Ретвит должен существовать в системе (пользователь должен был ранее ретвитнуть этот твит)
+- Операция атомарна - удаляется запись ретвита и обновляется счетчик `retweetsCount` в твите (декремент на 1)
+
+**Ответы:**
+
+- `204 No Content` - ретвит успешно удален (без тела ответа)
+- `400 Bad Request` - ошибка валидации (некорректный UUID, отсутствует userId)
+- `409 Conflict` - нарушение бизнес-правил (твит не найден, пользователь не существует, ретвит не найден)
+
+**Пример успешного ответа (204 No Content):**
+
+Ответ не содержит тела, только HTTP статус 204.
+
+**Пример ошибки валидации userId (400 Bad Request):**
+
+```json
+{
+  "type": "https://example.com/errors/validation-error",
+  "title": "Validation Error",
+  "status": 400,
+  "detail": "Validation failed: userId: User ID cannot be null",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки твит не найден (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
+  "ruleName": "TWEET_NOT_FOUND",
+  "context": "223e4567-e89b-12d3-a456-426614174001",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки пользователь не существует (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+  "ruleName": "USER_NOT_EXISTS",
+  "context": "123e4567-e89b-12d3-a456-426614174000",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки ретвит не найден (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'RETWEET_NOT_FOUND' violated for context: Retweet not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+  "ruleName": "RETWEET_NOT_FOUND",
+  "context": "Retweet not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+### Убрать ретвит твита
+
+```bash
+curl -X DELETE http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/retweet \
+  -H "Content-Type: application/json" \
+  -d '{
+    "userId": "123e4567-e89b-12d3-a456-426614174000"
+  }'
+```
+
+**Ответ (204 No Content):**
+
+Ответ не содержит тела, только HTTP статус 204.
+
+**Ответ при отсутствии ретвита (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'RETWEET_NOT_FOUND' violated for context: Retweet not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+  "ruleName": "RETWEET_NOT_FOUND",
+  "context": "Retweet not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Ответ при отсутствии твита (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
+  "ruleName": "TWEET_NOT_FOUND",
+  "context": "223e4567-e89b-12d3-a456-426614174001",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Ответ при отсутствии пользователя (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+  "ruleName": "USER_NOT_EXISTS",
+  "context": "123e4567-e89b-12d3-a456-426614174000",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
 ## Конфигурация
 
 ### Зависимости
@@ -1085,6 +2983,7 @@ docker run -p 8082:8082 tweet-api
 - **Java 24** - версия Java для сборки и запуска
 - **PostgreSQL** - база данных (порт 5432)
 - **Users API** - должен быть запущен на порту 8081 для проверки существования пользователей
+- **Follower API** - должен быть запущен на порту 8084 для получения списка подписок (опционально, при недоступности возвращается пустая лента)
 
 ## Безопасность
 
@@ -1131,4 +3030,3 @@ docker run -p 8082:8082 tweet-api
 - `TweetMapperTest` - тесты маппера
 - `UserGatewayTest` - тесты интеграции с users-api
 - `BaseIntegrationTest` - базовые интеграционные тесты
-

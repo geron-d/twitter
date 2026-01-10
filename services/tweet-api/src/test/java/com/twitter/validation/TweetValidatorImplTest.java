@@ -744,5 +744,49 @@ class TweetValidatorImplTest {
             verify(tweetRepository, times(1)).findById(tweetId);
         }
     }
+
+    @Nested
+    class ValidateForTimelineTests {
+
+        @Test
+        void validateForTimeline_WhenValidUserIdAndUserExists_ShouldCompleteWithoutExceptions() {
+            UUID validUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+            when(userGateway.existsUser(validUserId)).thenReturn(true);
+
+            assertThatCode(() -> tweetValidator.validateForTimeline(validUserId))
+                .doesNotThrowAnyException();
+
+            verify(userGateway, times(1)).existsUser(validUserId);
+        }
+
+        @Test
+        void validateForTimeline_WhenUserIdIsNull_ShouldThrowBusinessRuleValidationException() {
+            assertThatThrownBy(() -> tweetValidator.validateForTimeline(null))
+                .isInstanceOf(BusinessRuleValidationException.class)
+                .satisfies(exception -> {
+                    BusinessRuleValidationException ex = (BusinessRuleValidationException) exception;
+                    assertThat(ex.getRuleName()).isEqualTo("USER_ID_NULL");
+                    assertThat(ex.getContext()).isEqualTo("User ID cannot be null");
+                });
+
+            verify(userGateway, never()).existsUser(any());
+        }
+
+        @Test
+        void validateForTimeline_WhenUserDoesNotExist_ShouldThrowBusinessRuleValidationException() {
+            UUID nonExistentUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+            when(userGateway.existsUser(nonExistentUserId)).thenReturn(false);
+
+            assertThatThrownBy(() -> tweetValidator.validateForTimeline(nonExistentUserId))
+                .isInstanceOf(BusinessRuleValidationException.class)
+                .satisfies(exception -> {
+                    BusinessRuleValidationException ex = (BusinessRuleValidationException) exception;
+                    assertThat(ex.getRuleName()).isEqualTo("USER_NOT_EXISTS");
+                    assertThat(ex.getContext()).isEqualTo(nonExistentUserId);
+                });
+
+            verify(userGateway, times(1)).existsUser(nonExistentUserId);
+        }
+    }
 }
 

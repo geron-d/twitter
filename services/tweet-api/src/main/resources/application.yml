@@ -48,6 +48,8 @@ app:
     max-content-length: 280
   users-api:
     base-url: http://localhost:8081
+  follower-api:
+    base-url: http://localhost:8084
 
 # Feign configuration
 feign:
