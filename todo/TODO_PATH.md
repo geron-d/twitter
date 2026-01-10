@@ -1,19 +1,3 @@
-
-## 3. follow-service
-- подписка на пользователя
-- отписка
-
-```java
-public class Follow {
-    private UUID followerId;
-    private UUID followeeId;
-    private LocalDateTime createdAt;
-}
-```
-
-## 4. timeline-service
-генерация ленты пользователя из бд по подпискам
-
 ## 5. api-gateway
 
 

@@ -475,4 +475,82 @@ class RetweetValidatorImplTest {
             verify(retweetRepository, times(1)).existsByTweetIdAndUserId(testTweetId, testUserId);
         }
     }
+
+    @Nested
+    class ValidateTweetExistsTests {
+
+        private UUID testTweetId;
+        private Tweet existingTweet;
+
+        @BeforeEach
+        void setUp() {
+            testTweetId = UUID.fromString("223e4567-e89b-12d3-a456-426614174001");
+
+            existingTweet = Tweet.builder()
+                .id(testTweetId)
+                .userId(UUID.fromString("333e4567-e89b-12d3-a456-426614174002"))
+                .content("Test tweet content")
+                .retweetsCount(0)
+                .createdAt(LocalDateTime.of(2025, 1, 27, 10, 0, 0))
+                .updatedAt(LocalDateTime.of(2025, 1, 27, 10, 0, 0))
+                .isDeleted(false)
+                .build();
+        }
+
+        @Test
+        void validateTweetExists_WhenValidTweet_ShouldCompleteWithoutExceptions() {
+            when(tweetRepository.findByIdAndIsDeletedFalse(testTweetId)).thenReturn(Optional.of(existingTweet));
+
+            assertThatCode(() -> retweetValidator.validateTweetExists(testTweetId))
+                .doesNotThrowAnyException();
+
+            verify(tweetRepository, times(1)).findByIdAndIsDeletedFalse(testTweetId);
+            verifyNoMoreInteractions(tweetRepository, retweetRepository, userGateway);
+        }
+
+        @Test
+        void validateTweetExists_WhenTweetIdIsNull_ShouldThrowBusinessRuleValidationException() {
+            assertThatThrownBy(() -> retweetValidator.validateTweetExists(null))
+                .isInstanceOf(BusinessRuleValidationException.class)
+                .satisfies(exception -> {
+                    BusinessRuleValidationException ex = (BusinessRuleValidationException) exception;
+                    assertThat(ex.getRuleName()).isEqualTo("TWEET_ID_NULL");
+                });
+
+            verify(tweetRepository, never()).findByIdAndIsDeletedFalse(any());
+            verifyNoMoreInteractions(tweetRepository, retweetRepository, userGateway);
+        }
+
+        @Test
+        void validateTweetExists_WhenTweetNotFound_ShouldThrowBusinessRuleValidationException() {
+            when(tweetRepository.findByIdAndIsDeletedFalse(testTweetId)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> retweetValidator.validateTweetExists(testTweetId))
+                .isInstanceOf(BusinessRuleValidationException.class)
+                .satisfies(exception -> {
+                    BusinessRuleValidationException ex = (BusinessRuleValidationException) exception;
+                    assertThat(ex.getRuleName()).isEqualTo("TWEET_NOT_FOUND");
+                    assertThat(ex.getContext()).isEqualTo(testTweetId);
+                });
+
+            verify(tweetRepository, times(1)).findByIdAndIsDeletedFalse(testTweetId);
+            verifyNoMoreInteractions(tweetRepository, retweetRepository, userGateway);
+        }
+
+        @Test
+        void validateTweetExists_WhenTweetIsDeleted_ShouldThrowBusinessRuleValidationException() {
+            when(tweetRepository.findByIdAndIsDeletedFalse(testTweetId)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> retweetValidator.validateTweetExists(testTweetId))
+                .isInstanceOf(BusinessRuleValidationException.class)
+                .satisfies(exception -> {
+                    BusinessRuleValidationException ex = (BusinessRuleValidationException) exception;
+                    assertThat(ex.getRuleName()).isEqualTo("TWEET_NOT_FOUND");
+                    assertThat(ex.getContext()).isEqualTo(testTweetId);
+                });
+
+            verify(tweetRepository, times(1)).findByIdAndIsDeletedFalse(testTweetId);
+            verifyNoMoreInteractions(tweetRepository, retweetRepository, userGateway);
+        }
+    }
 }

@@ -533,8 +533,8 @@ List<UUID> getAllFollowingUserIds(UUID userId) {
 
 - [TODO.md](TODO.md)
 - [analysis-requirements.md](analysis-requirements.md) - предыдущий шаг
-- [TWEET_API_ARCHITECTURE.md](../../TWEET_API_ARCHITECTURE.md)
+- [TWEET_API_ARCHITECTURE.md](../TWEET_API_ARCHITECTURE.md)
 - [STANDART_SWAGGER.md](../../../../standards/STANDART_SWAGGER.md)
 - [TweetApi.java](../../../../services/tweet-api/src/main/java/com/twitter/controller/TweetApi.java)
 - [TweetController.java](../../../../services/tweet-api/src/main/java/com/twitter/controller/TweetController.java)
-- [Follower API README](../../../../services/follower-api/README.md)
+- [Follower API README](../../../../services/follower-api/README.md)

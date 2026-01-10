@@ -19,6 +19,7 @@
 - ✅ Получить пользователей, лайкнувших твит с пагинацией
 - ✅ Ретвит твитов с опциональным комментарием
 - ✅ Убрать ретвит твита
+- ✅ Получить пользователей, ретвитнувших твит с пагинацией
 - ✅ Интеграция с users-api для проверки существования пользователей
 - ✅ Интеграция с follower-api для получения списка подписок
 - ✅ Валидация данных (длина контента 1-280 символов)
@@ -111,6 +112,7 @@ http://localhost:8082/api/v1/tweets
 | `GET`    | `/{tweetId}/likes`    | Получить пользователей, лайкнувших твит | - | `PagedModel<LikeResponseDto>` |
 | `POST`   | `/{tweetId}/retweet`  | Ретвитнуть твит               | `RetweetRequestDto`     | `RetweetResponseDto`         |
 | `DELETE` | `/{tweetId}/retweet` | Убрать ретвит твита           | `RetweetRequestDto`     | -                            |
+| `GET`    | `/{tweetId}/retweets` | Получить пользователей, ретвитнувших твит | - | `PagedModel<RetweetResponseDto>` |
 
 ### Детальное описание эндпоинтов
 
@@ -998,6 +1000,135 @@ curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-4266141
 
 # Получить с кастомной сортировкой
 curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/likes?sort=createdAt,ASC"
+```
+
+**Пример ошибки валидации UUID (400 Bad Request):**
+
+```json
+{
+  "type": "https://example.com/errors/validation-error",
+  "title": "Validation Error",
+  "status": 400,
+  "detail": "Invalid UUID format for tweetId parameter",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки неверные параметры пагинации (400 Bad Request):**
+
+```json
+{
+  "type": "https://example.com/errors/validation-error",
+  "title": "Validation Error",
+  "status": 400,
+  "detail": "Invalid pagination parameters: page must be >= 0, size must be between 1 and 100",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Пример ошибки твит не найден (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
+  "ruleName": "TWEET_NOT_FOUND",
+  "context": "223e4567-e89b-12d3-a456-426614174001",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+#### 10. Получить пользователей, ретвитнувших твит
+
+```http
+GET /api/v1/tweets/{tweetId}/retweets
+```
+
+**Параметры пути:**
+
+- `tweetId` - обязательный, UUID существующего твита
+
+**Параметры запроса (query parameters):**
+
+- `page` - опциональный, номер страницы (по умолчанию: 0)
+- `size` - опциональный, размер страницы (по умолчанию: 20, максимум: 100)
+- `sort` - опциональный, параметры сортировки (по умолчанию: createdAt,DESC)
+
+**Валидация:**
+
+- `tweetId` - обязательный, должен быть валидным UUID форматом
+- `page` - должен быть >= 0
+- `size` - должен быть между 1 и 100
+
+**Бизнес-правила:**
+
+- Твит должен существовать в системе и не быть удаленным
+- Ретвиты сортируются по дате создания в порядке убывания (новые первыми)
+- Если у твита нет ретвитов, возвращается пустой список (не ошибка)
+- Поддерживается пагинация для больших списков ретвитов
+
+**Ответы:**
+
+- `200 OK` - список ретвитов успешно получен
+- `400 Bad Request` - ошибка валидации (некорректный UUID, неверные параметры пагинации)
+- `409 Conflict` - твит не найден или удален
+
+**Пример успешного ответа (200 OK) с ретвитами:**
+
+```json
+{
+  "content": [
+    {
+      "id": "987e6543-e21b-43d2-b654-321987654321",
+      "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+      "userId": "123e4567-e89b-12d3-a456-426614174000",
+      "comment": "Great tweet!",
+      "createdAt": "2025-01-27T15:30:00Z"
+    },
+    {
+      "id": "876e5432-e10a-32c1-a543-210876543210",
+      "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+      "userId": "234e5678-f90c-23e4-b567-537725285112",
+      "comment": null,
+      "createdAt": "2025-01-27T14:20:00Z"
+    }
+  ],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 45,
+    "totalPages": 3
+  }
+}
+```
+
+**Пример успешного ответа (200 OK) без ретвитов:**
+
+```json
+{
+  "content": [],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 0,
+    "totalPages": 0
+  }
+}
+```
+
+**Пример использования с пагинацией:**
+
+```bash
+# Получить первую страницу (20 ретвитов по умолчанию)
+curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/retweets"
+
+# Получить вторую страницу с размером 10
+curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/retweets?page=1&size=10"
+
+# Получить с кастомной сортировкой
+curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/retweets?sort=createdAt,ASC"
 ```
 
 **Пример ошибки валидации UUID (400 Bad Request):**
@@ -2289,6 +2420,88 @@ curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-4266141
 ```
 
 **Ответ (200 OK) без лайков:**
+
+```json
+{
+  "content": [],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 0,
+    "totalPages": 0
+  }
+}
+```
+
+**Ответ при отсутствии твита (409 Conflict):**
+
+```json
+{
+  "type": "https://example.com/errors/business-rule-validation",
+  "title": "Business Rule Validation Error",
+  "status": 409,
+  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
+  "ruleName": "TWEET_NOT_FOUND",
+  "context": "223e4567-e89b-12d3-a456-426614174001",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+**Ответ при неверном формате UUID (400 Bad Request):**
+
+```json
+{
+  "type": "https://example.com/errors/validation-error",
+  "title": "Validation Error",
+  "status": 400,
+  "detail": "Invalid UUID format for tweetId parameter",
+  "timestamp": "2025-01-27T15:30:00Z"
+}
+```
+
+### Получить пользователей, ретвитнувших твит
+
+```bash
+# Получить первую страницу (20 ретвитов по умолчанию)
+curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/retweets"
+
+# Получить вторую страницу с размером 10
+curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/retweets?page=1&size=10"
+
+# Получить с кастомной сортировкой
+curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-426614174001/retweets?sort=createdAt,ASC"
+```
+
+**Ответ (200 OK) с ретвитами:**
+
+```json
+{
+  "content": [
+    {
+      "id": "987e6543-e21b-43d2-b654-321987654321",
+      "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+      "userId": "123e4567-e89b-12d3-a456-426614174000",
+      "comment": "Great tweet!",
+      "createdAt": "2025-01-27T15:30:00Z"
+    },
+    {
+      "id": "876e5432-e10a-32c1-a543-210876543210",
+      "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+      "userId": "234e5678-f90c-23e4-b567-537725285112",
+      "comment": null,
+      "createdAt": "2025-01-27T14:20:00Z"
+    }
+  ],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 45,
+    "totalPages": 3
+  }
+}
+```
+
+**Ответ (200 OK) без ретвитов:**
 
 ```json
 {

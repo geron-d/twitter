@@ -15,8 +15,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -409,6 +414,163 @@ class RetweetServiceImplTest {
             verify(retweetRepository, times(1)).delete(eq(existingRetweet));
             verify(tweetRepository, times(1)).findByIdAndIsDeletedFalse(eq(testTweetId));
             verify(tweetRepository, never()).saveAndFlush(any());
+        }
+    }
+
+    @Nested
+    class GetRetweetsByTweetIdTests {
+
+        private UUID testTweetId;
+        private UUID testUserId1;
+        private UUID testUserId2;
+        private Retweet retweet1;
+        private Retweet retweet2;
+        private RetweetResponseDto responseDto1;
+        private RetweetResponseDto responseDto2;
+        private Pageable pageable;
+
+        @BeforeEach
+        void setUp() {
+            testTweetId = UUID.fromString("223e4567-e89b-12d3-a456-426614174001");
+            testUserId1 = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+            testUserId2 = UUID.fromString("234e5678-f90c-23e4-b567-537725285112");
+
+            UUID retweetId1 = UUID.fromString("987e6543-e21b-43d2-b654-321987654321");
+            retweet1 = Retweet.builder()
+                .id(retweetId1)
+                .tweetId(testTweetId)
+                .userId(testUserId1)
+                .comment("Great tweet!")
+                .createdAt(LocalDateTime.of(2025, 1, 27, 15, 30, 0))
+                .build();
+
+            UUID retweetId2 = UUID.fromString("876e5432-e10a-32c1-a543-210876543210");
+            retweet2 = Retweet.builder()
+                .id(retweetId2)
+                .tweetId(testTweetId)
+                .userId(testUserId2)
+                .comment(null)
+                .createdAt(LocalDateTime.of(2025, 1, 27, 14, 20, 0))
+                .build();
+
+            responseDto1 = RetweetResponseDto.builder()
+                .id(retweetId1)
+                .tweetId(testTweetId)
+                .userId(testUserId1)
+                .comment("Great tweet!")
+                .createdAt(LocalDateTime.of(2025, 1, 27, 15, 30, 0))
+                .build();
+
+            responseDto2 = RetweetResponseDto.builder()
+                .id(retweetId2)
+                .tweetId(testTweetId)
+                .userId(testUserId2)
+                .comment(null)
+                .createdAt(LocalDateTime.of(2025, 1, 27, 14, 20, 0))
+                .build();
+
+            pageable = PageRequest.of(0, 20);
+        }
+
+        @Test
+        void getRetweetsByTweetId_WhenRetweetsExist_ShouldReturnPageWithRetweets() {
+            List<Retweet> retweets = List.of(retweet1, retweet2);
+            Page<Retweet> retweetPage = new PageImpl<>(retweets, pageable, 2);
+
+            doNothing().when(retweetValidator).validateTweetExists(testTweetId);
+            when(retweetRepository.findByTweetIdOrderByCreatedAtDesc(eq(testTweetId), eq(pageable)))
+                .thenReturn(retweetPage);
+            when(retweetMapper.toRetweetResponseDto(retweet1)).thenReturn(responseDto1);
+            when(retweetMapper.toRetweetResponseDto(retweet2)).thenReturn(responseDto2);
+
+            Page<RetweetResponseDto> result = retweetService.getRetweetsByTweetId(testTweetId, pageable);
+
+            assertThat(result).isNotNull();
+            assertThat(result.getContent()).hasSize(2);
+            assertThat(result.getContent()).containsExactly(responseDto1, responseDto2);
+            assertThat(result.getTotalElements()).isEqualTo(2);
+            assertThat(result.getNumber()).isEqualTo(0);
+            assertThat(result.getSize()).isEqualTo(20);
+            assertThat(result.getTotalPages()).isEqualTo(1);
+        }
+
+        @Test
+        void getRetweetsByTweetId_WhenNoRetweetsExist_ShouldReturnEmptyPage() {
+            Page<Retweet> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+
+            doNothing().when(retweetValidator).validateTweetExists(testTweetId);
+            when(retweetRepository.findByTweetIdOrderByCreatedAtDesc(eq(testTweetId), eq(pageable)))
+                .thenReturn(emptyPage);
+
+            Page<RetweetResponseDto> result = retweetService.getRetweetsByTweetId(testTweetId, pageable);
+
+            assertThat(result).isNotNull();
+            assertThat(result.getContent()).isEmpty();
+            assertThat(result.getTotalElements()).isEqualTo(0);
+            assertThat(result.getNumber()).isEqualTo(0);
+            assertThat(result.getSize()).isEqualTo(20);
+            assertThat(result.getTotalPages()).isEqualTo(0);
+        }
+
+        @Test
+        void getRetweetsByTweetId_WhenRetweetsExist_ShouldCallValidatorRepositoryAndMapper() {
+            List<Retweet> retweets = List.of(retweet1, retweet2);
+            Page<Retweet> retweetPage = new PageImpl<>(retweets, pageable, 2);
+
+            doNothing().when(retweetValidator).validateTweetExists(testTweetId);
+            when(retweetRepository.findByTweetIdOrderByCreatedAtDesc(eq(testTweetId), eq(pageable)))
+                .thenReturn(retweetPage);
+            when(retweetMapper.toRetweetResponseDto(retweet1)).thenReturn(responseDto1);
+            when(retweetMapper.toRetweetResponseDto(retweet2)).thenReturn(responseDto2);
+
+            retweetService.getRetweetsByTweetId(testTweetId, pageable);
+
+            verify(retweetValidator, times(1)).validateTweetExists(eq(testTweetId));
+            verify(retweetRepository, times(1))
+                .findByTweetIdOrderByCreatedAtDesc(eq(testTweetId), eq(pageable));
+            verify(retweetMapper, times(1)).toRetweetResponseDto(eq(retweet1));
+            verify(retweetMapper, times(1)).toRetweetResponseDto(eq(retweet2));
+            verifyNoMoreInteractions(retweetValidator, retweetRepository, retweetMapper);
+        }
+
+        @Test
+        void getRetweetsByTweetId_WhenTweetNotFound_ShouldThrowBusinessRuleValidationException() {
+            doThrow(new com.twitter.common.exception.validation.BusinessRuleValidationException("TWEET_NOT_FOUND", testTweetId))
+                .when(retweetValidator).validateTweetExists(testTweetId);
+
+            assertThatThrownBy(() -> retweetService.getRetweetsByTweetId(testTweetId, pageable))
+                .isInstanceOf(com.twitter.common.exception.validation.BusinessRuleValidationException.class)
+                .satisfies(exception -> {
+                    com.twitter.common.exception.validation.BusinessRuleValidationException ex =
+                        (com.twitter.common.exception.validation.BusinessRuleValidationException) exception;
+                    assertThat(ex.getRuleName()).isEqualTo("TWEET_NOT_FOUND");
+                });
+
+            verify(retweetValidator, times(1)).validateTweetExists(eq(testTweetId));
+            verify(retweetRepository, never()).findByTweetIdOrderByCreatedAtDesc(any(), any());
+            verify(retweetMapper, never()).toRetweetResponseDto(any());
+        }
+
+        @Test
+        void getRetweetsByTweetId_WithPagination_ShouldReturnCorrectPage() {
+            Pageable secondPage = PageRequest.of(1, 10);
+            List<Retweet> retweets = List.of(retweet1);
+            Page<Retweet> retweetPage = new PageImpl<>(retweets, secondPage, 11);
+
+            doNothing().when(retweetValidator).validateTweetExists(testTweetId);
+            when(retweetRepository.findByTweetIdOrderByCreatedAtDesc(eq(testTweetId), eq(secondPage)))
+                .thenReturn(retweetPage);
+            when(retweetMapper.toRetweetResponseDto(retweet1)).thenReturn(responseDto1);
+
+            Page<RetweetResponseDto> result = retweetService.getRetweetsByTweetId(testTweetId, secondPage);
+
+            assertThat(result).isNotNull();
+            assertThat(result.getContent()).hasSize(1);
+            assertThat(result.getContent()).containsExactly(responseDto1);
+            assertThat(result.getTotalElements()).isEqualTo(11);
+            assertThat(result.getNumber()).isEqualTo(1);
+            assertThat(result.getSize()).isEqualTo(10);
+            assertThat(result.getTotalPages()).isEqualTo(2);
         }
     }
 }
