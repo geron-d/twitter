@@ -1,7 +1,7 @@
 package com.twitter.service;
 
-import com.twitter.dto.request.GenerateUsersAndTweetsRequestDto;
-import com.twitter.dto.response.GenerateUsersAndTweetsResponseDto;
+import com.twitter.dto.request.BaseScriptRequestDto;
+import com.twitter.dto.response.BaseScriptResponseDto;
 
 /**
  * Service interface for executing the administrative script to generate users and tweets.
@@ -27,8 +27,8 @@ public interface GenerateUsersAndTweetsService {
      * response with statistics, even if some operations failed.
      *
      * @param requestDto DTO containing script parameters (nUsers, nTweetsPerUser, lUsersForDeletion)
-     * @return GenerateUsersAndTweetsResponseDto containing lists of created/deleted IDs and execution statistics
+     * @return BaseScriptResponseDto containing lists of created/deleted IDs and execution statistics
      */
-    GenerateUsersAndTweetsResponseDto executeScript(GenerateUsersAndTweetsRequestDto requestDto);
+    BaseScriptResponseDto executeScript(BaseScriptRequestDto requestDto);
 }
-
+

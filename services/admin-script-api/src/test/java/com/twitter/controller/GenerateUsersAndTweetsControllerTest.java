@@ -2,8 +2,8 @@ package com.twitter.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
-import com.twitter.dto.request.GenerateUsersAndTweetsRequestDto;
-import com.twitter.dto.response.GenerateUsersAndTweetsResponseDto;
+import com.twitter.dto.request.BaseScriptRequestDto;
+import com.twitter.dto.response.BaseScriptResponseDto;
 import com.twitter.testconfig.BaseIntegrationTest;
 import com.twitter.testconfig.GenerateUsersAndTweetsTestStubBuilder;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,15 +53,15 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
 
 
     /**
-     * Creates a valid GenerateUsersAndTweetsRequestDto for testing.
+     * Creates a valid BaseScriptRequestDto for testing.
      *
      * @param nUsers            number of users to create
      * @param nTweetsPerUser    number of tweets per user
      * @param lUsersForDeletion number of users for deletion
-     * @return GenerateUsersAndTweetsRequestDto instance
+     * @return BaseScriptRequestDto instance
      */
-    private GenerateUsersAndTweetsRequestDto createValidRequest(Integer nUsers, Integer nTweetsPerUser, Integer lUsersForDeletion) {
-        return GenerateUsersAndTweetsRequestDto.builder()
+    private BaseScriptRequestDto createValidRequest(Integer nUsers, Integer nTweetsPerUser, Integer lUsersForDeletion) {
+        return BaseScriptRequestDto.builder()
             .nUsers(nUsers)
             .nTweetsPerUser(nTweetsPerUser)
             .lUsersForDeletion(lUsersForDeletion)
@@ -77,7 +77,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
             int nTweetsPerUser = 3;
             int lUsersForDeletion = 1;
 
-            GenerateUsersAndTweetsRequestDto request = createValidRequest(nUsers, nTweetsPerUser, lUsersForDeletion);
+            BaseScriptRequestDto request = createValidRequest(nUsers, nTweetsPerUser, lUsersForDeletion);
 
             stubBuilder.setupFullScenario(nUsers, nTweetsPerUser, lUsersForDeletion);
 
@@ -98,7 +98,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-            GenerateUsersAndTweetsResponseDto response = objectMapper.readValue(responseJson, GenerateUsersAndTweetsResponseDto.class);
+            BaseScriptResponseDto response = objectMapper.readValue(responseJson, BaseScriptResponseDto.class);
             assertThat(response.createdUsers()).hasSize(nUsers);
             assertThat(response.createdTweets()).hasSize(nUsers * nTweetsPerUser);
             assertThat(response.statistics().totalUsersCreated()).isEqualTo(nUsers);
@@ -110,7 +110,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
 
         @Test
         void generateUsersAndTweets_WithNullNUsers_ShouldReturn400BadRequest() throws Exception {
-            GenerateUsersAndTweetsRequestDto request = GenerateUsersAndTweetsRequestDto.builder()
+            BaseScriptRequestDto request = BaseScriptRequestDto.builder()
                 .nUsers(null)
                 .nTweetsPerUser(5)
                 .lUsersForDeletion(0)
@@ -124,7 +124,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
 
         @Test
         void generateUsersAndTweets_WithNUsersExceedingMax_ShouldReturn400BadRequest() throws Exception {
-            GenerateUsersAndTweetsRequestDto request = createValidRequest(1001, 5, 0);
+            BaseScriptRequestDto request = createValidRequest(1001, 5, 0);
 
             mockMvc.perform(post("/api/v1/admin-scripts/generate-users-and-tweets")
                     .contentType(MediaType.APPLICATION_JSON)
@@ -134,7 +134,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
 
         @Test
         void generateUsersAndTweets_WithNTweetsPerUserLessThanOne_ShouldReturn400BadRequest() throws Exception {
-            GenerateUsersAndTweetsRequestDto request = createValidRequest(5, 0, 0);
+            BaseScriptRequestDto request = createValidRequest(5, 0, 0);
 
             mockMvc.perform(post("/api/v1/admin-scripts/generate-users-and-tweets")
                     .contentType(MediaType.APPLICATION_JSON)
@@ -144,7 +144,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
 
         @Test
         void generateUsersAndTweets_WithNTweetsPerUserExceedingMax_ShouldReturn400BadRequest() throws Exception {
-            GenerateUsersAndTweetsRequestDto request = createValidRequest(5, 101, 0);
+            BaseScriptRequestDto request = createValidRequest(5, 101, 0);
 
             mockMvc.perform(post("/api/v1/admin-scripts/generate-users-and-tweets")
                     .contentType(MediaType.APPLICATION_JSON)
@@ -154,7 +154,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
 
         @Test
         void generateUsersAndTweets_WithLUsersForDeletionNegative_ShouldReturn400BadRequest() throws Exception {
-            GenerateUsersAndTweetsRequestDto request = createValidRequest(5, 5, -1);
+            BaseScriptRequestDto request = createValidRequest(5, 5, -1);
 
             mockMvc.perform(post("/api/v1/admin-scripts/generate-users-and-tweets")
                     .contentType(MediaType.APPLICATION_JSON)
@@ -168,7 +168,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
             int nTweetsPerUser = 3;
             int lUsersForDeletion = 5; // Exceeds nUsers
 
-            GenerateUsersAndTweetsRequestDto request = createValidRequest(nUsers, nTweetsPerUser, lUsersForDeletion);
+            BaseScriptRequestDto request = createValidRequest(nUsers, nTweetsPerUser, lUsersForDeletion);
 
             stubBuilder.setupFullScenario(nUsers, nTweetsPerUser, 0);
 
@@ -183,7 +183,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-            GenerateUsersAndTweetsResponseDto response = objectMapper.readValue(responseJson, GenerateUsersAndTweetsResponseDto.class);
+            BaseScriptResponseDto response = objectMapper.readValue(responseJson, BaseScriptResponseDto.class);
             assertThat(response.statistics().errors()).isNotEmpty();
             assertThat(response.statistics().errors().getFirst()).contains("DELETION_COUNT_EXCEEDS_USERS_WITH_TWEETS");
             assertThat(response.statistics().totalTweetsDeleted()).isEqualTo(0);
@@ -195,7 +195,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
             int nTweetsPerUser = 3;
             int lUsersForDeletion = 0;
 
-            GenerateUsersAndTweetsRequestDto request = createValidRequest(nUsers, nTweetsPerUser, lUsersForDeletion);
+            BaseScriptRequestDto request = createValidRequest(nUsers, nTweetsPerUser, lUsersForDeletion);
 
             stubBuilder.setupUserCreationError(500);
 
@@ -208,7 +208,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-            GenerateUsersAndTweetsResponseDto response = objectMapper.readValue(responseJson, GenerateUsersAndTweetsResponseDto.class);
+            BaseScriptResponseDto response = objectMapper.readValue(responseJson, BaseScriptResponseDto.class);
             assertThat(response.statistics().totalUsersCreated()).isEqualTo(0);
             assertThat(response.statistics().errors()).isNotEmpty();
         }
@@ -219,7 +219,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
             int nTweetsPerUser = 3;
             int lUsersForDeletion = 0;
 
-            GenerateUsersAndTweetsRequestDto request = createValidRequest(nUsers, nTweetsPerUser, lUsersForDeletion);
+            BaseScriptRequestDto request = createValidRequest(nUsers, nTweetsPerUser, lUsersForDeletion);
 
             stubBuilder.setupUsersStubs(nUsers);
             stubBuilder.setupTweetCreationError(500);
@@ -233,7 +233,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-            GenerateUsersAndTweetsResponseDto response = objectMapper.readValue(responseJson, GenerateUsersAndTweetsResponseDto.class);
+            BaseScriptResponseDto response = objectMapper.readValue(responseJson, BaseScriptResponseDto.class);
             assertThat(response.statistics().totalUsersCreated()).isEqualTo(1);
             assertThat(response.statistics().totalTweetsCreated()).isEqualTo(0);
             assertThat(response.statistics().errors()).isNotEmpty();
@@ -245,7 +245,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
             int nTweetsPerUser = 2;
             int lUsersForDeletion = 0;
 
-            GenerateUsersAndTweetsRequestDto request = createValidRequest(nUsers, nTweetsPerUser, lUsersForDeletion);
+            BaseScriptRequestDto request = createValidRequest(nUsers, nTweetsPerUser, lUsersForDeletion);
 
             stubBuilder.setupFullScenario(nUsers, nTweetsPerUser, lUsersForDeletion);
 
@@ -265,7 +265,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-            GenerateUsersAndTweetsResponseDto response = objectMapper.readValue(responseJson, GenerateUsersAndTweetsResponseDto.class);
+            BaseScriptResponseDto response = objectMapper.readValue(responseJson, BaseScriptResponseDto.class);
             assertThat(response.createdUsers()).hasSize(nUsers);
             // For 3 users: halfCount = (3-1)/2 = 1, so 2 follow relationships should be created
             // Note: Due to WireMock limitations with multiple stubs for the same URL and Collections.shuffle(),
@@ -282,7 +282,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
             int nTweetsPerUser = 2;
             int lUsersForDeletion = 0;
 
-            GenerateUsersAndTweetsRequestDto request = createValidRequest(nUsers, nTweetsPerUser, lUsersForDeletion);
+            BaseScriptRequestDto request = createValidRequest(nUsers, nTweetsPerUser, lUsersForDeletion);
 
             List<UUID> userIds = stubBuilder.setupUsersStubs(nUsers);
             Map<UUID, List<UUID>> userTweetsMap = stubBuilder.setupTweetsStubs(userIds, nTweetsPerUser);
@@ -299,7 +299,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-            GenerateUsersAndTweetsResponseDto response = objectMapper.readValue(responseJson, GenerateUsersAndTweetsResponseDto.class);
+            BaseScriptResponseDto response = objectMapper.readValue(responseJson, BaseScriptResponseDto.class);
             assertThat(response.statistics().totalUsersCreated()).isEqualTo(nUsers);
             assertThat(response.statistics().totalFollowsCreated()).isEqualTo(0);
             assertThat(response.statistics().errors()).isNotEmpty();
@@ -316,7 +316,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
             int nTweetsPerUser = 3;
             int lUsersForDeletion = 0;
 
-            GenerateUsersAndTweetsRequestDto request = createValidRequest(nUsers, nTweetsPerUser, lUsersForDeletion);
+            BaseScriptRequestDto request = createValidRequest(nUsers, nTweetsPerUser, lUsersForDeletion);
 
             stubBuilder.setupFullScenario(nUsers, nTweetsPerUser, lUsersForDeletion);
 
@@ -332,7 +332,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-            GenerateUsersAndTweetsResponseDto response = objectMapper.readValue(responseJson, GenerateUsersAndTweetsResponseDto.class);
+            BaseScriptResponseDto response = objectMapper.readValue(responseJson, BaseScriptResponseDto.class);
             assertThat(response.createdUsers()).hasSize(nUsers);
             assertThat(response.createdTweets()).hasSize(nUsers * nTweetsPerUser);
             assertThat(response.statistics().totalLikesCreated()).isGreaterThanOrEqualTo(0);
@@ -345,7 +345,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
             int nTweetsPerUser = 3;
             int lUsersForDeletion = 0;
 
-            GenerateUsersAndTweetsRequestDto request = createValidRequest(nUsers, nTweetsPerUser, lUsersForDeletion);
+            BaseScriptRequestDto request = createValidRequest(nUsers, nTweetsPerUser, lUsersForDeletion);
 
             List<UUID> userIds = stubBuilder.setupUsersStubs(nUsers);
             stubBuilder.setupFollowsStubs(userIds);
@@ -371,7 +371,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-            GenerateUsersAndTweetsResponseDto response = objectMapper.readValue(responseJson, GenerateUsersAndTweetsResponseDto.class);
+            BaseScriptResponseDto response = objectMapper.readValue(responseJson, BaseScriptResponseDto.class);
             assertThat(response.statistics().totalLikesCreated()).isEqualTo(0);
             assertThat(response.statistics().errors()).isNotEmpty();
             assertThat(response.statistics().errors()).anyMatch(error -> error.contains("Failed to create like"));
@@ -383,7 +383,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
             int nTweetsPerUser = 3;
             int lUsersForDeletion = 0;
 
-            GenerateUsersAndTweetsRequestDto request = createValidRequest(nUsers, nTweetsPerUser, lUsersForDeletion);
+            BaseScriptRequestDto request = createValidRequest(nUsers, nTweetsPerUser, lUsersForDeletion);
 
             List<UUID> userIds = stubBuilder.setupUsersStubs(nUsers);
             stubBuilder.setupFollowsStubs(userIds);
@@ -405,7 +405,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-            GenerateUsersAndTweetsResponseDto response = objectMapper.readValue(responseJson, GenerateUsersAndTweetsResponseDto.class);
+            BaseScriptResponseDto response = objectMapper.readValue(responseJson, BaseScriptResponseDto.class);
             // Due to random selection and WireMock stub matching, some retweets may succeed, some may fail
             // We verify that script completes successfully and handles errors gracefully
             assertThat(response.createdUsers()).hasSize(nUsers);
@@ -420,7 +420,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
             int nTweetsPerUser = 1;
             int lUsersForDeletion = 0;
 
-            GenerateUsersAndTweetsRequestDto request = createValidRequest(nUsers, nTweetsPerUser, lUsersForDeletion);
+            BaseScriptRequestDto request = createValidRequest(nUsers, nTweetsPerUser, lUsersForDeletion);
 
             stubBuilder.setupFullScenario(nUsers, nTweetsPerUser, lUsersForDeletion);
 
@@ -433,7 +433,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-            GenerateUsersAndTweetsResponseDto response = objectMapper.readValue(responseJson, GenerateUsersAndTweetsResponseDto.class);
+            BaseScriptResponseDto response = objectMapper.readValue(responseJson, BaseScriptResponseDto.class);
             assertThat(response.createdTweets()).hasSize(nUsers * nTweetsPerUser);
             // With only 2 tweets, steps 6-11 may be skipped or partially executed
             assertThat(response.statistics().totalLikesCreated()).isGreaterThanOrEqualTo(0);
@@ -446,7 +446,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
             int nTweetsPerUser = 6;
             int lUsersForDeletion = 0;
 
-            GenerateUsersAndTweetsRequestDto request = createValidRequest(nUsers, nTweetsPerUser, lUsersForDeletion);
+            BaseScriptRequestDto request = createValidRequest(nUsers, nTweetsPerUser, lUsersForDeletion);
 
             stubBuilder.setupFullScenario(nUsers, nTweetsPerUser, lUsersForDeletion);
 
@@ -459,7 +459,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-            GenerateUsersAndTweetsResponseDto response = objectMapper.readValue(responseJson, GenerateUsersAndTweetsResponseDto.class);
+            BaseScriptResponseDto response = objectMapper.readValue(responseJson, BaseScriptResponseDto.class);
             assertThat(response.createdTweets()).hasSize(nUsers * nTweetsPerUser);
             // With only 1 user, steps 6-11 should be skipped (no other users to like/retweet)
             assertThat(response.statistics().totalLikesCreated()).isEqualTo(0);

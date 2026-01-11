@@ -24,10 +24,12 @@
 ### Переименование основных компонентов
 
 #### DTO
-- [ ] (P1) #3: Переименование GenerateUsersAndTweetsRequestDto → BaseScriptRequestDto — Переименовать Request DTO и обновить JavaDoc, @Schema аннотации.
+- [x] (P1) [2025-01-27 15:30] #3: Переименование GenerateUsersAndTweetsRequestDto → BaseScriptRequestDto — Переименовать Request DTO и обновить JavaDoc, @Schema аннотации.
   acceptance: "Файл переименован, JavaDoc обновлен, @Schema аннотации обновлены, все ссылки на старое название заменены"
-- [ ] (P1) #4: Переименование GenerateUsersAndTweetsResponseDto → BaseScriptResponseDto — Переименовать Response DTO и обновить JavaDoc, @Schema аннотации.
+  note: "Создан новый файл BaseScriptRequestDto.java с обновленным JavaDoc и @Schema аннотациями. Обновлены все ссылки в 9 файлах (контроллеры, сервисы, валидаторы, тесты, README). Старый файл удален. Проверено: все ссылки заменены, ошибок компиляции нет."
+- [x] (P1) [2025-01-27 15:35] #4: Переименование GenerateUsersAndTweetsResponseDto → BaseScriptResponseDto — Переименовать Response DTO и обновить JavaDoc, @Schema аннотации.
   acceptance: "Файл переименован, JavaDoc обновлен, @Schema аннотации обновлены, все ссылки на старое название заменены"
+  note: "Создан новый файл BaseScriptResponseDto.java с обновленным JavaDoc и @Schema аннотациями. Обновлены все ссылки в 7 файлах (контроллеры, сервисы, тесты, README). Старый файл удален. Проверено: все ссылки заменены, ошибок компиляции нет."
 
 #### Валидаторы
 - [ ] (P1) #5: Переименование GenerateUsersAndTweetsValidator → BaseScriptValidator — Переименовать интерфейс валидатора и обновить JavaDoc, ссылки на DTO.

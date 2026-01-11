@@ -1,7 +1,7 @@
 package com.twitter.validation;
 
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
-import com.twitter.dto.request.GenerateUsersAndTweetsRequestDto;
+import com.twitter.dto.request.BaseScriptRequestDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -21,7 +21,7 @@ public class GenerateUsersAndTweetsValidatorImpl implements GenerateUsersAndTwee
      * @see GenerateUsersAndTweetsValidator#validateDeletionCount
      */
     @Override
-    public void validateDeletionCount(GenerateUsersAndTweetsRequestDto requestDto, int usersWithTweetsCount) {
+    public void validateDeletionCount(BaseScriptRequestDto requestDto, int usersWithTweetsCount) {
         if (requestDto == null) {
             log.error("Request DTO is null");
             throw new IllegalArgumentException("Request DTO cannot be null");
@@ -43,4 +43,4 @@ public class GenerateUsersAndTweetsValidatorImpl implements GenerateUsersAndTwee
         log.debug("Deletion count validation passed: {} <= {}", lUsersForDeletion, usersWithTweetsCount);
     }
 }
-
+

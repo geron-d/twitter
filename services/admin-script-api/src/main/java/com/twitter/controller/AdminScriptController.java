@@ -1,8 +1,8 @@
 package com.twitter.controller;
 
 import com.twitter.common.aspect.LoggableRequest;
-import com.twitter.dto.request.GenerateUsersAndTweetsRequestDto;
-import com.twitter.dto.response.GenerateUsersAndTweetsResponseDto;
+import com.twitter.dto.request.BaseScriptRequestDto;
+import com.twitter.dto.response.BaseScriptResponseDto;
 import com.twitter.service.GenerateUsersAndTweetsService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,10 +33,10 @@ public class AdminScriptController implements AdminScriptApi {
     @LoggableRequest
     @PostMapping("/generate-users-and-tweets")
     @Override
-    public ResponseEntity<GenerateUsersAndTweetsResponseDto> generateUsersAndTweets(
-        @RequestBody @Valid GenerateUsersAndTweetsRequestDto requestDto) {
-        GenerateUsersAndTweetsResponseDto response = generateUsersAndTweetsService.executeScript(requestDto);
+    public ResponseEntity<BaseScriptResponseDto> generateUsersAndTweets(
+        @RequestBody @Valid BaseScriptRequestDto requestDto) {
+        BaseScriptResponseDto response = generateUsersAndTweetsService.executeScript(requestDto);
         return ResponseEntity.ok(response);
     }
 }
-
+

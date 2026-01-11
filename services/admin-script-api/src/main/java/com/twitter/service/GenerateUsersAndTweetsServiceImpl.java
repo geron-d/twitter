@@ -8,8 +8,8 @@ import com.twitter.common.dto.request.RetweetRequestDto;
 import com.twitter.common.dto.request.UserRequestDto;
 import com.twitter.common.dto.response.TweetResponseDto;
 import com.twitter.common.dto.response.UserResponseDto;
-import com.twitter.dto.request.GenerateUsersAndTweetsRequestDto;
-import com.twitter.dto.response.GenerateUsersAndTweetsResponseDto;
+import com.twitter.dto.request.BaseScriptRequestDto;
+import com.twitter.dto.response.BaseScriptResponseDto;
 import com.twitter.dto.response.ScriptStatisticsDto;
 import com.twitter.gateway.FollowGateway;
 import com.twitter.gateway.TweetsGateway;
@@ -127,7 +127,7 @@ public class GenerateUsersAndTweetsServiceImpl implements GenerateUsersAndTweets
      * @see GenerateUsersAndTweetsService#executeScript
      */
     @Override
-    public GenerateUsersAndTweetsResponseDto executeScript(GenerateUsersAndTweetsRequestDto requestDto) {
+    public BaseScriptResponseDto executeScript(BaseScriptRequestDto requestDto) {
         long startTime = System.currentTimeMillis();
         log.info("Starting script execution: nUsers={}, nTweetsPerUser={}, lUsersForDeletion={}",
             requestDto.nUsers(), requestDto.nTweetsPerUser(), requestDto.lUsersForDeletion());
@@ -587,7 +587,7 @@ public class GenerateUsersAndTweetsServiceImpl implements GenerateUsersAndTweets
         ScriptStatisticsDto statistics = new ScriptStatisticsDto(createdUsers.size(), createdTweets.size(),
             totalFollowsCreated, deletedTweets.size(), usersWithTweetsCount, usersWithoutTweetsCount, totalLikesCreated, totalRetweetsCreated, executionTimeMs, errors);
 
-        GenerateUsersAndTweetsResponseDto response = GenerateUsersAndTweetsResponseDto.builder()
+        BaseScriptResponseDto response = BaseScriptResponseDto.builder()
             .createdUsers(createdUsers)
             .createdFollows(createdFollows)
             .createdTweets(createdTweets)

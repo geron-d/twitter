@@ -1,7 +1,7 @@
 package com.twitter.controller;
 
-import com.twitter.dto.request.GenerateUsersAndTweetsRequestDto;
-import com.twitter.dto.response.GenerateUsersAndTweetsResponseDto;
+import com.twitter.dto.request.BaseScriptRequestDto;
+import com.twitter.dto.response.BaseScriptResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -37,7 +37,7 @@ public interface AdminScriptApi {
      * <p>
      *
      * @param requestDto DTO containing script parameters (nUsers, nTweetsPerUser, lUsersForDeletion)
-     * @return ResponseEntity containing GenerateUsersAndTweetsResponseDto with lists of IDs and execution statistics
+     * @return ResponseEntity containing BaseScriptResponseDto with lists of IDs and execution statistics
      */
     @Operation(
         summary = "Generate users, follow relationships and tweets",
@@ -53,7 +53,7 @@ public interface AdminScriptApi {
             description = "Script executed successfully",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = GenerateUsersAndTweetsResponseDto.class),
+                schema = @Schema(implementation = BaseScriptResponseDto.class),
                 examples = {
                     @ExampleObject(
                         name = "Successful Execution",
@@ -160,11 +160,11 @@ public interface AdminScriptApi {
             )
         )
     })
-    ResponseEntity<GenerateUsersAndTweetsResponseDto> generateUsersAndTweets(
+    ResponseEntity<BaseScriptResponseDto> generateUsersAndTweets(
         @Parameter(
             description = "Script parameters: nUsers (1-1000), nTweetsPerUser (1-100), lUsersForDeletion (0+)",
             required = true
         )
-        GenerateUsersAndTweetsRequestDto requestDto);
+        BaseScriptRequestDto requestDto);
 }
-
+

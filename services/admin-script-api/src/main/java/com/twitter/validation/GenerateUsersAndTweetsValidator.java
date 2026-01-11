@@ -1,7 +1,7 @@
 package com.twitter.validation;
 
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
-import com.twitter.dto.request.GenerateUsersAndTweetsRequestDto;
+import com.twitter.dto.request.BaseScriptRequestDto;
 
 /**
  * Interface for validating parameters of the generate users and tweets script.
@@ -19,6 +19,6 @@ public interface GenerateUsersAndTweetsValidator {
      * @param usersWithTweetsCount actual number of users who have tweets (after creation)
      * @throws BusinessRuleValidationException if lUsersForDeletion > usersWithTweetsCount
      */
-    void validateDeletionCount(GenerateUsersAndTweetsRequestDto requestDto, int usersWithTweetsCount);
+    void validateDeletionCount(BaseScriptRequestDto requestDto, int usersWithTweetsCount);
 }
-
+

@@ -35,9 +35,9 @@ com.twitter/
 │   └── AdminScriptController.java     # REST контроллер
 ├── dto/
 │   ├── request/
-│   │   └── GenerateUsersAndTweetsRequestDto.java  # DTO для запроса скрипта
+│   │   └── BaseScriptRequestDto.java  # DTO для запроса скрипта
 │   ├── response/
-│   │   ├── GenerateUsersAndTweetsResponseDto.java  # DTO для ответа скрипта
+│   │   ├── BaseScriptResponseDto.java  # DTO для ответа скрипта
 │   │   └── ScriptStatisticsDto.java               # DTO для статистики
 │   └── external/
 │       ├── UserRequestDto.java         # DTO для создания пользователя (users-api)
@@ -82,7 +82,7 @@ http://localhost:8083/api/v1/admin-scripts
 
 | Метод | Путь | Описание | Параметры | Тело запроса | Ответ |
 |-------|------|----------|-----------|--------------|-------|
-| `POST` | `/generate-users-and-tweets` | Выполнить административный скрипт | - | `GenerateUsersAndTweetsRequestDto` | `GenerateUsersAndTweetsResponseDto` |
+| `POST` | `/generate-users-and-tweets` | Выполнить административный скрипт | - | `BaseScriptRequestDto` | `BaseScriptResponseDto` |
 
 ### Детальное описание эндпоинтов
 
@@ -218,9 +218,9 @@ Content-Type: application/json
 
 #### Методы сервиса:
 
-1. **`executeScript(GenerateUsersAndTweetsRequestDto requestDto)`**
+1. **`executeScript(BaseScriptRequestDto requestDto)`**
    - Выполняет полный цикл административного скрипта
-   - Возвращает `GenerateUsersAndTweetsResponseDto` со списками ID и статистикой
+   - Возвращает `BaseScriptResponseDto` со списками ID и статистикой
    - Логика выполнения:
      - **Шаг 1:** Создание nUsers пользователей с рандомными данными через `RandomDataGenerator` и `UsersGateway`
      - **Шаг 1.5:** Создание follow-отношений между пользователями:
@@ -294,7 +294,7 @@ Content-Type: application/json
 
 #### Методы валидатора:
 
-1. **`validateDeletionCount(GenerateUsersAndTweetsRequestDto requestDto, int usersWithTweetsCount)`**
+1. **`validateDeletionCount(BaseScriptRequestDto requestDto, int usersWithTweetsCount)`**
    - Проверяет, что `lUsersForDeletion` не превышает количество пользователей с твитами
    - Выбрасывает `BusinessRuleValidationException` при нарушении правила
    - Обрабатывает случай `lUsersForDeletion = 0` (валидация проходит)

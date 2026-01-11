@@ -7,9 +7,9 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
 /**
- * Data Transfer Object for administrative script request to generate users and tweets.
+ * Data Transfer Object for base administrative script request.
  * <p>
- * This record represents the data structure used for executing the administrative
+ * This record represents the data structure used for executing the base administrative
  * script that creates multiple users with random data, adds tweets for each user,
  * and deletes one tweet from a specified number of random users.
  *
@@ -20,8 +20,8 @@ import lombok.Builder;
  * @version 1.0
  */
 @Schema(
-    name = "GenerateUsersAndTweetsRequest",
-    description = "Data structure for administrative script request to generate users and tweets",
+    name = "BaseScriptRequest",
+    description = "Data structure for base administrative script request",
     example = """
         {
           "nUsers": 10,
@@ -31,7 +31,7 @@ import lombok.Builder;
         """
 )
 @Builder
-public record GenerateUsersAndTweetsRequestDto(
+public record BaseScriptRequestDto(
 
     /**
      * Number of users to create.
@@ -88,4 +88,3 @@ public record GenerateUsersAndTweetsRequestDto(
     Integer lUsersForDeletion
 ) {
 }
-

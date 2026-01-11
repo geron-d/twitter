@@ -14,8 +14,8 @@ import com.twitter.common.dto.response.UserResponseDto;
 import com.twitter.common.enums.UserRole;
 import com.twitter.common.enums.UserStatus;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
-import com.twitter.dto.request.GenerateUsersAndTweetsRequestDto;
-import com.twitter.dto.response.GenerateUsersAndTweetsResponseDto;
+import com.twitter.dto.request.BaseScriptRequestDto;
+import com.twitter.dto.response.BaseScriptResponseDto;
 import com.twitter.gateway.FollowGateway;
 import com.twitter.gateway.TweetsGateway;
 import com.twitter.gateway.UsersGateway;
@@ -67,7 +67,7 @@ class GenerateUsersAndTweetsServiceImplTest {
     @Nested
     class ExecuteScriptTests {
 
-        private GenerateUsersAndTweetsRequestDto requestDto;
+        private BaseScriptRequestDto requestDto;
         private UUID userId1;
         private UUID userId2;
         private UUID tweetId1;
@@ -84,7 +84,7 @@ class GenerateUsersAndTweetsServiceImplTest {
             tweetId3 = UUID.fromString("523e4567-e89b-12d3-a456-426614174004");
             tweetId4 = UUID.fromString("623e4567-e89b-12d3-a456-426614174005");
 
-            requestDto = GenerateUsersAndTweetsRequestDto.builder()
+            requestDto = BaseScriptRequestDto.builder()
                 .nUsers(2)
                 .nTweetsPerUser(2)
                 .lUsersForDeletion(1)
@@ -130,7 +130,7 @@ class GenerateUsersAndTweetsServiceImplTest {
             doNothing().when(validator).validateDeletionCount(any(), eq(2));
             doNothing().when(tweetsGateway).deleteTweet(any(UUID.class), any(DeleteTweetRequestDto.class));
 
-            GenerateUsersAndTweetsResponseDto result = service.executeScript(requestDto);
+            BaseScriptResponseDto result = service.executeScript(requestDto);
 
             assertThat(result).isNotNull();
             assertThat(result.createdUsers()).hasSize(2);
@@ -167,7 +167,7 @@ class GenerateUsersAndTweetsServiceImplTest {
                 .thenThrow(new RuntimeException("User creation failed"))
                 .thenReturn(userResponse2);
 
-            GenerateUsersAndTweetsResponseDto result = service.executeScript(requestDto);
+            BaseScriptResponseDto result = service.executeScript(requestDto);
 
             assertThat(result).isNotNull();
             assertThat(result.createdUsers()).hasSize(1);
@@ -206,13 +206,13 @@ class GenerateUsersAndTweetsServiceImplTest {
 
             doNothing().when(validator).validateDeletionCount(any(), eq(1));
 
-            GenerateUsersAndTweetsRequestDto requestWithoutDeletion = GenerateUsersAndTweetsRequestDto.builder()
+            BaseScriptRequestDto requestWithoutDeletion = BaseScriptRequestDto.builder()
                 .nUsers(1)
                 .nTweetsPerUser(2)
                 .lUsersForDeletion(0)
                 .build();
 
-            GenerateUsersAndTweetsResponseDto result = service.executeScript(requestWithoutDeletion);
+            BaseScriptResponseDto result = service.executeScript(requestWithoutDeletion);
 
             assertThat(result).isNotNull();
             assertThat(result.createdUsers()).hasSize(1);
@@ -249,13 +249,13 @@ class GenerateUsersAndTweetsServiceImplTest {
 
             doNothing().when(validator).validateDeletionCount(any(), eq(1));
 
-            GenerateUsersAndTweetsRequestDto requestWithoutDeletion = GenerateUsersAndTweetsRequestDto.builder()
+            BaseScriptRequestDto requestWithoutDeletion = BaseScriptRequestDto.builder()
                 .nUsers(1)
                 .nTweetsPerUser(1)
                 .lUsersForDeletion(0)
                 .build();
 
-            GenerateUsersAndTweetsResponseDto result = service.executeScript(requestWithoutDeletion);
+            BaseScriptResponseDto result = service.executeScript(requestWithoutDeletion);
 
             assertThat(result).isNotNull();
             assertThat(result.deletedTweets()).isEmpty();
@@ -292,13 +292,13 @@ class GenerateUsersAndTweetsServiceImplTest {
             doThrow(new BusinessRuleValidationException("DELETION_COUNT_EXCEEDS_USERS_WITH_TWEETS", "test"))
                 .when(validator).validateDeletionCount(any(), eq(1));
 
-            GenerateUsersAndTweetsRequestDto requestWithInvalidDeletion = GenerateUsersAndTweetsRequestDto.builder()
+            BaseScriptRequestDto requestWithInvalidDeletion = BaseScriptRequestDto.builder()
                 .nUsers(1)
                 .nTweetsPerUser(1)
                 .lUsersForDeletion(2)
                 .build();
 
-            GenerateUsersAndTweetsResponseDto result = service.executeScript(requestWithInvalidDeletion);
+            BaseScriptResponseDto result = service.executeScript(requestWithInvalidDeletion);
 
             assertThat(result).isNotNull();
             assertThat(result.deletedTweets()).isEmpty();
@@ -336,13 +336,13 @@ class GenerateUsersAndTweetsServiceImplTest {
 
             doNothing().when(validator).validateDeletionCount(any(), eq(0));
 
-            GenerateUsersAndTweetsRequestDto requestWithoutDeletion = GenerateUsersAndTweetsRequestDto.builder()
+            BaseScriptRequestDto requestWithoutDeletion = BaseScriptRequestDto.builder()
                 .nUsers(2)
                 .nTweetsPerUser(1)
                 .lUsersForDeletion(0)
                 .build();
 
-            GenerateUsersAndTweetsResponseDto result = service.executeScript(requestWithoutDeletion);
+            BaseScriptResponseDto result = service.executeScript(requestWithoutDeletion);
 
             assertThat(result).isNotNull();
             assertThat(result.createdUsers()).hasSize(2);
@@ -355,7 +355,7 @@ class GenerateUsersAndTweetsServiceImplTest {
 
         @Test
         void executeScript_WhenDeletionFails_ShouldContinueAndAddError() {
-            GenerateUsersAndTweetsRequestDto testRequestDto = GenerateUsersAndTweetsRequestDto.builder()
+            BaseScriptRequestDto testRequestDto = BaseScriptRequestDto.builder()
                 .nUsers(1)
                 .nTweetsPerUser(1)
                 .lUsersForDeletion(1)
@@ -389,7 +389,7 @@ class GenerateUsersAndTweetsServiceImplTest {
             doThrow(new RuntimeException("Deletion failed"))
                 .when(tweetsGateway).deleteTweet(any(UUID.class), any(DeleteTweetRequestDto.class));
 
-            GenerateUsersAndTweetsResponseDto result = service.executeScript(testRequestDto);
+            BaseScriptResponseDto result = service.executeScript(testRequestDto);
 
             assertThat(result).isNotNull();
             assertThat(result.deletedTweets()).isEmpty();
@@ -426,7 +426,7 @@ class GenerateUsersAndTweetsServiceImplTest {
 
         @Test
         void executeScript_WithTwoUsers_ShouldSkipFollowRelationships() {
-            GenerateUsersAndTweetsRequestDto requestDto = GenerateUsersAndTweetsRequestDto.builder()
+            BaseScriptRequestDto requestDto = BaseScriptRequestDto.builder()
                 .nUsers(2)
                 .nTweetsPerUser(1)
                 .lUsersForDeletion(0)
@@ -464,7 +464,7 @@ class GenerateUsersAndTweetsServiceImplTest {
 
             doNothing().when(validator).validateDeletionCount(any(), eq(2));
 
-            GenerateUsersAndTweetsResponseDto result = service.executeScript(requestDto);
+            BaseScriptResponseDto result = service.executeScript(requestDto);
 
             assertThat(result).isNotNull();
             assertThat(result.createdUsers()).hasSize(2);
@@ -476,7 +476,7 @@ class GenerateUsersAndTweetsServiceImplTest {
 
         @Test
         void executeScript_WithThreeUsers_ShouldCreateFollowRelationships() {
-            GenerateUsersAndTweetsRequestDto requestDto = GenerateUsersAndTweetsRequestDto.builder()
+            BaseScriptRequestDto requestDto = BaseScriptRequestDto.builder()
                 .nUsers(3)
                 .nTweetsPerUser(1)
                 .lUsersForDeletion(0)
@@ -543,7 +543,7 @@ class GenerateUsersAndTweetsServiceImplTest {
 
             doNothing().when(validator).validateDeletionCount(any(), eq(3));
 
-            GenerateUsersAndTweetsResponseDto result = service.executeScript(requestDto);
+            BaseScriptResponseDto result = service.executeScript(requestDto);
 
             assertThat(result).isNotNull();
             assertThat(result.createdUsers()).hasSize(3);
@@ -555,7 +555,7 @@ class GenerateUsersAndTweetsServiceImplTest {
 
         @Test
         void executeScript_WhenFollowCreationFails_ShouldContinueAndAddError() {
-            GenerateUsersAndTweetsRequestDto requestDto = GenerateUsersAndTweetsRequestDto.builder()
+            BaseScriptRequestDto requestDto = BaseScriptRequestDto.builder()
                 .nUsers(3)
                 .nTweetsPerUser(1)
                 .lUsersForDeletion(0)
@@ -623,7 +623,7 @@ class GenerateUsersAndTweetsServiceImplTest {
 
             doNothing().when(validator).validateDeletionCount(any(), eq(3));
 
-            GenerateUsersAndTweetsResponseDto result = service.executeScript(requestDto);
+            BaseScriptResponseDto result = service.executeScript(requestDto);
 
             assertThat(result).isNotNull();
             assertThat(result.createdUsers()).hasSize(3);
@@ -637,7 +637,7 @@ class GenerateUsersAndTweetsServiceImplTest {
 
         @Test
         void executeScript_WithFollowRelationships_ShouldIncludeInStatistics() {
-            GenerateUsersAndTweetsRequestDto requestDto = GenerateUsersAndTweetsRequestDto.builder()
+            BaseScriptRequestDto requestDto = BaseScriptRequestDto.builder()
                 .nUsers(3)
                 .nTweetsPerUser(2)
                 .lUsersForDeletion(0)
@@ -717,7 +717,7 @@ class GenerateUsersAndTweetsServiceImplTest {
 
             doNothing().when(validator).validateDeletionCount(any(), eq(3));
 
-            GenerateUsersAndTweetsResponseDto result = service.executeScript(requestDto);
+            BaseScriptResponseDto result = service.executeScript(requestDto);
 
             assertThat(result).isNotNull();
             assertThat(result.createdUsers()).hasSize(3);
@@ -761,7 +761,7 @@ class GenerateUsersAndTweetsServiceImplTest {
 
         @Test
         void executeScript_WithEnoughTweetsAndUsers_ShouldCreateLikesAndRetweets() {
-            GenerateUsersAndTweetsRequestDto requestDto = GenerateUsersAndTweetsRequestDto.builder()
+            BaseScriptRequestDto requestDto = BaseScriptRequestDto.builder()
                 .nUsers(3)
                 .nTweetsPerUser(3)
                 .lUsersForDeletion(0)
@@ -840,7 +840,7 @@ class GenerateUsersAndTweetsServiceImplTest {
             when(tweetsGateway.retweetTweet(any(UUID.class), any(RetweetRequestDto.class)))
                 .thenReturn(retweetResponse);
 
-            GenerateUsersAndTweetsResponseDto result = service.executeScript(requestDto);
+            BaseScriptResponseDto result = service.executeScript(requestDto);
 
             assertThat(result).isNotNull();
             assertThat(result.createdUsers()).hasSize(3);
@@ -855,7 +855,7 @@ class GenerateUsersAndTweetsServiceImplTest {
 
         @Test
         void executeScript_WhenLikeFails_ShouldContinueAndAddError() {
-            GenerateUsersAndTweetsRequestDto requestDto = GenerateUsersAndTweetsRequestDto.builder()
+            BaseScriptRequestDto requestDto = BaseScriptRequestDto.builder()
                 .nUsers(2)
                 .nTweetsPerUser(3)
                 .lUsersForDeletion(0)
@@ -905,7 +905,7 @@ class GenerateUsersAndTweetsServiceImplTest {
             when(tweetsGateway.likeTweet(any(UUID.class), any(LikeTweetRequestDto.class)))
                 .thenThrow(new RuntimeException("Self-like error"));
 
-            GenerateUsersAndTweetsResponseDto result = service.executeScript(requestDto);
+            BaseScriptResponseDto result = service.executeScript(requestDto);
 
             assertThat(result).isNotNull();
             assertThat(result.statistics().errors()).isNotEmpty();
@@ -917,7 +917,7 @@ class GenerateUsersAndTweetsServiceImplTest {
 
         @Test
         void executeScript_WhenRetweetFails_ShouldContinueAndAddError() {
-            GenerateUsersAndTweetsRequestDto requestDto = GenerateUsersAndTweetsRequestDto.builder()
+            BaseScriptRequestDto requestDto = BaseScriptRequestDto.builder()
                 .nUsers(2)
                 .nTweetsPerUser(3)
                 .lUsersForDeletion(0)
@@ -976,7 +976,7 @@ class GenerateUsersAndTweetsServiceImplTest {
             when(tweetsGateway.retweetTweet(any(UUID.class), any(RetweetRequestDto.class)))
                 .thenThrow(new RuntimeException("Self-retweet error"));
 
-            GenerateUsersAndTweetsResponseDto result = service.executeScript(requestDto);
+            BaseScriptResponseDto result = service.executeScript(requestDto);
 
             assertThat(result).isNotNull();
             assertThat(result.statistics().errors()).isNotEmpty();
@@ -988,7 +988,7 @@ class GenerateUsersAndTweetsServiceImplTest {
 
         @Test
         void executeScript_WithInsufficientTweets_ShouldSkipLikesAndRetweets() {
-            GenerateUsersAndTweetsRequestDto requestDto = GenerateUsersAndTweetsRequestDto.builder()
+            BaseScriptRequestDto requestDto = BaseScriptRequestDto.builder()
                 .nUsers(2)
                 .nTweetsPerUser(1)
                 .lUsersForDeletion(0)
@@ -1027,7 +1027,7 @@ class GenerateUsersAndTweetsServiceImplTest {
 
             doNothing().when(validator).validateDeletionCount(any(), eq(2));
 
-            GenerateUsersAndTweetsResponseDto result = service.executeScript(requestDto);
+            BaseScriptResponseDto result = service.executeScript(requestDto);
 
             assertThat(result).isNotNull();
             assertThat(result.createdTweets()).hasSize(2);
@@ -1037,7 +1037,7 @@ class GenerateUsersAndTweetsServiceImplTest {
 
         @Test
         void executeScript_WithInsufficientUsers_ShouldSkipLikesAndRetweets() {
-            GenerateUsersAndTweetsRequestDto requestDto = GenerateUsersAndTweetsRequestDto.builder()
+            BaseScriptRequestDto requestDto = BaseScriptRequestDto.builder()
                 .nUsers(1)
                 .nTweetsPerUser(6)
                 .lUsersForDeletion(0)
@@ -1080,7 +1080,7 @@ class GenerateUsersAndTweetsServiceImplTest {
 
             doNothing().when(validator).validateDeletionCount(any(), eq(1));
 
-            GenerateUsersAndTweetsResponseDto result = service.executeScript(requestDto);
+            BaseScriptResponseDto result = service.executeScript(requestDto);
 
             assertThat(result).isNotNull();
             assertThat(result.createdTweets()).hasSize(6);
