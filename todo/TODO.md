@@ -2,7 +2,7 @@
 
 ## Meta
 - project: twitter-microservices
-- updated: 2025-01-27 20:00
+- updated: 2025-01-27 20:30
 - changelog: todo/CHANGELOG.md
 - standards:
   - STANDART_CODE.md
@@ -52,8 +52,9 @@
 - [x] (P1) [2025-01-27] #10: Unit тесты для GenerateUsersAndTweetsServiceImpl — Написать unit тесты для логики выбора твитов и пользователей, обработки ошибок в GenerateUsersAndTweetsServiceImpl.
   acceptance: "Unit тесты для логики выбора твитов и пользователей, обработки ошибок (self-like, self-retweet, дубликаты) в GenerateUsersAndTweetsServiceImpl написаны, покрывают основные сценарии и edge cases"
   note: "Добавлен новый @Nested класс LikesAndRetweetsTests в GenerateUsersAndTweetsServiceImplTest. Покрыты сценарии: успешное создание лайков и ретвитов, обработка ошибок при создании лайков (self-like, дубликаты), обработка ошибок при создании ретвитов (self-retweet, дубликаты), edge cases (недостаточно твитов, недостаточно пользователей). Все тесты проходят успешно."
-- [ ] (P2) #11: Integration тесты — Написать integration тесты для полного цикла скрипта с лайками и ретвитами, включая edge cases.
+- [x] (P2) [2025-01-27] #11: Integration тесты — Написать integration тесты для полного цикла скрипта с лайками и ретвитами, включая edge cases.
   acceptance: "Integration тесты для полного цикла скрипта с лайками и ретвитами написаны, покрывают успешные сценарии и edge cases (мало пользователей, мало твитов)"
+  note: "Добавлены integration тесты в GenerateUsersAndTweetsControllerTest: успешное создание лайков и ретвитов, обработка ошибок при создании лайков (409 Conflict), обработка ошибок при создании ретвитов (409 Conflict), edge cases (недостаточно твитов, недостаточно пользователей). Обновлены WireMockStubHelper и GenerateUsersAndTweetsTestStubBuilder для поддержки лайков и ретвитов. Все тесты проходят успешно."
 
 ## Assumptions
 - DTO для лайков и ретвитов (LikeTweetRequestDto, RetweetRequestDto) будут перемещены в common-lib (com.twitter.common.dto.request) для соответствия текущей архитектуре проекта, где другие DTO уже находятся в common-lib. Это потребует обновления импортов в tweet-api.

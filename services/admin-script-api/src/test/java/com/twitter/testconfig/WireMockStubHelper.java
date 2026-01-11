@@ -5,8 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.twitter.common.dto.request.CreateTweetRequestDto;
 import com.twitter.common.dto.request.FollowRequestDto;
+import com.twitter.common.dto.request.LikeTweetRequestDto;
+import com.twitter.common.dto.request.RetweetRequestDto;
 import com.twitter.common.dto.request.UserRequestDto;
 import com.twitter.common.dto.response.FollowResponseDto;
+import com.twitter.common.dto.response.LikeResponseDto;
+import com.twitter.common.dto.response.RetweetResponseDto;
 import com.twitter.common.dto.response.TweetResponseDto;
 import com.twitter.common.dto.response.UserResponseDto;
 import org.springframework.data.domain.PageImpl;
@@ -283,5 +287,149 @@ public final class WireMockStubHelper {
                     .withBody("{\"error\":\"Internal Server Error\"}"))
         );
     }
-}
 
+    /**
+     * Sets up WireMock stub for liking a tweet via tweet-api.
+     * <p>
+     * This method configures a stub for POST /api/v1/tweets/{tweetId}/like endpoint that matches
+     * the request by userId and returns the provided like response with HTTP status 201 Created.
+     *
+     * @param wireMockServer     the WireMock server instance
+     * @param objectMapper       the ObjectMapper for JSON serialization
+     * @param tweetId            the tweet ID to like
+     * @param likeTweetRequest   the like request DTO (used for matching userId in request body)
+     * @param likeResponse       the like response DTO to return
+     * @throws RuntimeException if JSON serialization fails
+     */
+    public static void setupLikeTweetStub(
+        WireMockServer wireMockServer,
+        ObjectMapper objectMapper,
+        UUID tweetId,
+        LikeTweetRequestDto likeTweetRequest,
+        LikeResponseDto likeResponse) {
+        if (wireMockServer == null) {
+            return;
+        }
+
+        try {
+            String responseBody = objectMapper.writeValueAsString(likeResponse);
+
+            wireMockServer.stubFor(
+                post(urlPathEqualTo("/api/v1/tweets/" + tweetId + "/like"))
+                    .withRequestBody(matchingJsonPath("$.userId", equalTo(likeTweetRequest.userId().toString())))
+                    .willReturn(aResponse()
+                        .withStatus(201)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(responseBody))
+            );
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to setup like tweet stub", e);
+        }
+    }
+
+    /**
+     * Sets up WireMock stub for liking a tweet with error response via tweet-api.
+     * <p>
+     * This method configures a stub for POST /api/v1/tweets/{tweetId}/like endpoint that returns
+     * an error response with the specified HTTP status code.
+     *
+     * @param wireMockServer the WireMock server instance
+     * @param tweetId        the tweet ID to like
+     * @param statusCode     the HTTP status code to return
+     */
+    public static void setupLikeTweetStubWithError(
+        WireMockServer wireMockServer,
+        UUID tweetId,
+        int statusCode) {
+        if (wireMockServer == null) {
+            return;
+        }
+
+        wireMockServer.stubFor(
+            post(urlPathMatching("/api/v1/tweets/.*/like"))
+                .willReturn(aResponse()
+                    .withStatus(statusCode)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody("{\"error\":\"Internal Server Error\"}"))
+        );
+    }
+
+    /**
+     * Sets up WireMock stub for retweeting a tweet via tweet-api.
+     * <p>
+     * This method configures a stub for POST /api/v1/tweets/{tweetId}/retweet endpoint that matches
+     * the request by userId and returns the provided retweet response with HTTP status 201 Created.
+     *
+     * @param wireMockServer     the WireMock server instance
+     * @param objectMapper       the ObjectMapper for JSON serialization
+     * @param tweetId            the tweet ID to retweet
+     * @param retweetRequest     the retweet request DTO (used for matching userId in request body)
+     * @param retweetResponse    the retweet response DTO to return
+     * @throws RuntimeException if JSON serialization fails
+     */
+    public static void setupRetweetTweetStub(
+        WireMockServer wireMockServer,
+        ObjectMapper objectMapper,
+        UUID tweetId,
+        RetweetRequestDto retweetRequest,
+        RetweetResponseDto retweetResponse) {
+        if (wireMockServer == null) {
+            return;
+        }
+
+        try {
+            String responseBody = objectMapper.writeValueAsString(retweetResponse);
+
+            wireMockServer.stubFor(
+                post(urlPathEqualTo("/api/v1/tweets/" + tweetId + "/retweet"))
+                    .withRequestBody(matchingJsonPath("$.userId", equalTo(retweetRequest.userId().toString())))
+                    .willReturn(aResponse()
+                        .withStatus(201)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(responseBody))
+            );
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to setup retweet tweet stub", e);
+        }
+    }
+
+    /**
+     * Sets up WireMock stub for retweeting a tweet with error response via tweet-api.
+     * <p>
+     * This method configures a stub for POST /api/v1/tweets/{tweetId}/retweet endpoint that returns
+     * an error response with the specified HTTP status code.
+     * <p>
+     * If tweetId is null, creates a stub that matches all retweet requests.
+     *
+     * @param wireMockServer the WireMock server instance
+     * @param tweetId        the tweet ID to retweet (null for all tweets)
+     * @param statusCode     the HTTP status code to return
+     */
+    public static void setupRetweetTweetStubWithError(
+        WireMockServer wireMockServer,
+        UUID tweetId,
+        int statusCode) {
+        if (wireMockServer == null) {
+            return;
+        }
+
+        if (tweetId != null) {
+            wireMockServer.stubFor(
+                post(urlPathEqualTo("/api/v1/tweets/" + tweetId + "/retweet"))
+                    .willReturn(aResponse()
+                        .withStatus(statusCode)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{\"error\":\"Internal Server Error\"}"))
+            );
+        } else {
+            wireMockServer.stubFor(
+                post(urlPathMatching("/api/v1/tweets/.*/retweet"))
+                    .willReturn(aResponse()
+                        .withStatus(statusCode)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{\"error\":\"Internal Server Error\"}"))
+            );
+        }
+    }
+}
+

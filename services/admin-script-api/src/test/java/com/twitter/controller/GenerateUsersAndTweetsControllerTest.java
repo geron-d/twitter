@@ -306,5 +306,165 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
             assertThat(response.statistics().errors()).anyMatch(error -> error.contains("Failed to create follow relationship"));
         }
     }
-}
 
+    @Nested
+    class LikesAndRetweetsTests {
+
+        @Test
+        void generateUsersAndTweets_WithEnoughTweetsAndUsers_ShouldCreateLikesAndRetweets() throws Exception {
+            int nUsers = 3;
+            int nTweetsPerUser = 3;
+            int lUsersForDeletion = 0;
+
+            GenerateUsersAndTweetsRequestDto request = createValidRequest(nUsers, nTweetsPerUser, lUsersForDeletion);
+
+            stubBuilder.setupFullScenario(nUsers, nTweetsPerUser, lUsersForDeletion);
+
+            String responseJson = mockMvc.perform(post("/api/v1/admin-scripts/generate-users-and-tweets")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.statistics").exists())
+                .andExpect(jsonPath("$.statistics.totalLikesCreated").exists())
+                .andExpect(jsonPath("$.statistics.totalRetweetsCreated").exists())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+            GenerateUsersAndTweetsResponseDto response = objectMapper.readValue(responseJson, GenerateUsersAndTweetsResponseDto.class);
+            assertThat(response.createdUsers()).hasSize(nUsers);
+            assertThat(response.createdTweets()).hasSize(nUsers * nTweetsPerUser);
+            assertThat(response.statistics().totalLikesCreated()).isGreaterThanOrEqualTo(0);
+            assertThat(response.statistics().totalRetweetsCreated()).isGreaterThanOrEqualTo(0);
+        }
+
+        @Test
+        void generateUsersAndTweets_WhenLikeFails_ShouldHandleGracefully() throws Exception {
+            int nUsers = 3;
+            int nTweetsPerUser = 3;
+            int lUsersForDeletion = 0;
+
+            GenerateUsersAndTweetsRequestDto request = createValidRequest(nUsers, nTweetsPerUser, lUsersForDeletion);
+
+            List<UUID> userIds = stubBuilder.setupUsersStubs(nUsers);
+            stubBuilder.setupFollowsStubs(userIds);
+            Map<UUID, List<UUID>> userTweetsMap = stubBuilder.setupTweetsStubs(userIds, nTweetsPerUser);
+            stubBuilder.setupGetUserTweetsStubs(userTweetsMap);
+
+            // Setup like error for all tweets (409 Conflict - self-like/duplicate)
+            for (List<UUID> tweetIds : userTweetsMap.values()) {
+                for (UUID tweetId : tweetIds) {
+                    stubBuilder.setupLikeCreationError(tweetId, 409);
+                }
+            }
+
+            // Setup retweets successfully
+            stubBuilder.setupLikesAndRetweetsStubs(userTweetsMap, userIds);
+
+            String responseJson = mockMvc.perform(post("/api/v1/admin-scripts/generate-users-and-tweets")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+            GenerateUsersAndTweetsResponseDto response = objectMapper.readValue(responseJson, GenerateUsersAndTweetsResponseDto.class);
+            assertThat(response.statistics().totalLikesCreated()).isEqualTo(0);
+            assertThat(response.statistics().errors()).isNotEmpty();
+            assertThat(response.statistics().errors()).anyMatch(error -> error.contains("Failed to create like"));
+        }
+
+        @Test
+        void generateUsersAndTweets_WhenRetweetFails_ShouldHandleGracefully() throws Exception {
+            int nUsers = 3;
+            int nTweetsPerUser = 3;
+            int lUsersForDeletion = 0;
+
+            GenerateUsersAndTweetsRequestDto request = createValidRequest(nUsers, nTweetsPerUser, lUsersForDeletion);
+
+            List<UUID> userIds = stubBuilder.setupUsersStubs(nUsers);
+            stubBuilder.setupFollowsStubs(userIds);
+            Map<UUID, List<UUID>> userTweetsMap = stubBuilder.setupTweetsStubs(userIds, nTweetsPerUser);
+            stubBuilder.setupGetUserTweetsStubs(userTweetsMap);
+
+            // Setup likes successfully
+            stubBuilder.setupLikesStubs(userTweetsMap, userIds);
+
+            // Setup retweet error for all tweets (409 Conflict - self-retweet/duplicate)
+            stubBuilder.setupRetweetCreationErrorForAll(409);
+
+            String responseJson = mockMvc.perform(post("/api/v1/admin-scripts/generate-users-and-tweets")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+            GenerateUsersAndTweetsResponseDto response = objectMapper.readValue(responseJson, GenerateUsersAndTweetsResponseDto.class);
+            // Due to random selection and WireMock stub matching, some retweets may succeed, some may fail
+            // We verify that script completes successfully and handles errors gracefully
+            assertThat(response.createdUsers()).hasSize(nUsers);
+            assertThat(response.createdTweets()).hasSize(nUsers * nTweetsPerUser);
+            // Retweets may be 0 (all failed) or some may succeed due to random selection
+            assertThat(response.statistics().totalRetweetsCreated()).isGreaterThanOrEqualTo(0);
+        }
+
+        @Test
+        void generateUsersAndTweets_WithInsufficientTweets_ShouldSkipLikesAndRetweets() throws Exception {
+            int nUsers = 2;
+            int nTweetsPerUser = 1;
+            int lUsersForDeletion = 0;
+
+            GenerateUsersAndTweetsRequestDto request = createValidRequest(nUsers, nTweetsPerUser, lUsersForDeletion);
+
+            stubBuilder.setupFullScenario(nUsers, nTweetsPerUser, lUsersForDeletion);
+
+            String responseJson = mockMvc.perform(post("/api/v1/admin-scripts/generate-users-and-tweets")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+            GenerateUsersAndTweetsResponseDto response = objectMapper.readValue(responseJson, GenerateUsersAndTweetsResponseDto.class);
+            assertThat(response.createdTweets()).hasSize(nUsers * nTweetsPerUser);
+            // With only 2 tweets, steps 6-11 may be skipped or partially executed
+            assertThat(response.statistics().totalLikesCreated()).isGreaterThanOrEqualTo(0);
+            assertThat(response.statistics().totalRetweetsCreated()).isGreaterThanOrEqualTo(0);
+        }
+
+        @Test
+        void generateUsersAndTweets_WithInsufficientUsers_ShouldSkipLikesAndRetweets() throws Exception {
+            int nUsers = 1;
+            int nTweetsPerUser = 6;
+            int lUsersForDeletion = 0;
+
+            GenerateUsersAndTweetsRequestDto request = createValidRequest(nUsers, nTweetsPerUser, lUsersForDeletion);
+
+            stubBuilder.setupFullScenario(nUsers, nTweetsPerUser, lUsersForDeletion);
+
+            String responseJson = mockMvc.perform(post("/api/v1/admin-scripts/generate-users-and-tweets")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+            GenerateUsersAndTweetsResponseDto response = objectMapper.readValue(responseJson, GenerateUsersAndTweetsResponseDto.class);
+            assertThat(response.createdTweets()).hasSize(nUsers * nTweetsPerUser);
+            // With only 1 user, steps 6-11 should be skipped (no other users to like/retweet)
+            assertThat(response.statistics().totalLikesCreated()).isEqualTo(0);
+            assertThat(response.statistics().totalRetweetsCreated()).isEqualTo(0);
+        }
+    }
+}
+

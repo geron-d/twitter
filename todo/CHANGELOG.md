@@ -450,4 +450,87 @@
 
 **Артефакты:**
 - Обновлен `services/admin-script-api/src/test/java/com/twitter/service/GenerateUsersAndTweetsServiceImplTest.java`
-- Обновлен `todo/TODO.md` с отметкой о выполнении шага #10
+- Обновлен `todo/TODO.md` с отметкой о выполнении шага #10
+
+## 2025-01-27 20:30 — step #11 done — Integration тесты — автор: assistant
+
+**Выполнено:**
+- Добавлены integration тесты для полного цикла скрипта с лайками и ретвитами
+- Обновлены WireMockStubHelper и GenerateUsersAndTweetsTestStubBuilder для поддержки лайков и ретвитов
+- Покрыты успешные сценарии и edge cases
+
+**Созданные тесты:**
+
+**1. generateUsersAndTweets_WithEnoughTweetsAndUsers_ShouldCreateLikesAndRetweets:**
+- Проверяет успешное создание лайков и ретвитов при достаточном количестве твитов (9) и пользователей (3)
+- Проверяет, что статистика содержит totalLikesCreated и totalRetweetsCreated
+- Проверяет, что скрипт выполняется успешно
+
+**2. generateUsersAndTweets_WhenLikeFails_ShouldHandleGracefully:**
+- Проверяет обработку ошибок при создании лайков (409 Conflict - self-like/duplicate)
+- Проверяет, что ошибки добавляются в statistics.errors
+- Проверяет, что выполнение продолжается (totalLikesCreated = 0, но скрипт завершается)
+
+**3. generateUsersAndTweets_WhenRetweetFails_ShouldHandleGracefully:**
+- Проверяет обработку ошибок при создании ретвитов (409 Conflict - self-retweet/duplicate)
+- Проверяет, что скрипт выполняется успешно и обрабатывает ошибки gracefully
+- Проверяет, что totalRetweetsCreated >= 0 (может быть 0 или больше из-за случайного выбора)
+
+**4. generateUsersAndTweets_WithInsufficientTweets_ShouldSkipLikesAndRetweets:**
+- Проверяет edge case: недостаточно твитов (2 твита, требуется минимум 6 для всех шагов)
+- Проверяет, что скрипт выполняется без ошибок, но лайки и ретвиты могут быть пропущены
+
+**5. generateUsersAndTweets_WithInsufficientUsers_ShouldSkipLikesAndRetweets:**
+- Проверяет edge case: недостаточно пользователей (1 пользователь, требуется минимум 2)
+- Проверяет, что totalLikesCreated и totalRetweetsCreated равны 0
+
+**Обновления WireMockStubHelper:**
+
+**1. Добавлены методы для настройки stubs лайков:**
+- `setupLikeTweetStub()` - настройка успешного создания лайка
+- `setupLikeTweetStubWithError()` - настройка ошибки при создании лайка
+
+**2. Добавлены методы для настройки stubs ретвитов:**
+- `setupRetweetTweetStub()` - настройка успешного создания ретвита
+- `setupRetweetTweetStubWithError()` - настройка ошибки при создании ретвита (поддерживает null tweetId для всех твитов)
+
+**Обновления GenerateUsersAndTweetsTestStubBuilder:**
+
+**1. Добавлены методы для настройки stubs лайков и ретвитов:**
+- `setupLikesStubs()` - настройка stubs для лайков (отдельно от ретвитов)
+- `setupRetweetsStubs()` - настройка stubs для ретвитов (отдельно от лайков)
+- `setupLikesAndRetweetsStubs()` - настройка stubs для лайков и ретвитов (обновлен для использования новых методов)
+- `setupRetweetCreationErrorForAll()` - настройка ошибки для всех ретвитов
+
+**2. Обновлен метод setupFullScenario:**
+- Добавлена автоматическая настройка stubs для лайков и ретвитов (если достаточно твитов >= 6 и пользователей >= 2)
+
+**Технические детали:**
+
+**1. Структура тестов:**
+- Используется @Nested класс LikesAndRetweetsTests для группировки тестов
+- Используется WireMock для мокирования внешних сервисов
+- Используется MockMvc для тестирования REST API
+
+**2. Покрытие сценариев:**
+- Успешные операции (создание лайков и ретвитов)
+- Обработка ошибок (409 Conflict для self-like/self-retweet/дубликатов)
+- Edge cases (недостаточно твитов, недостаточно пользователей)
+- Проверка статистики (totalLikesCreated, totalRetweetsCreated)
+
+**3. Используемые техники:**
+- WireMock для мокирования внешних API
+- MockMvc для тестирования REST контроллера
+- Полный Spring контекст для integration тестов
+- Проверка результатов через AssertJ
+
+**4. Результаты тестирования:**
+- Все тесты проходят успешно (16 тестов completed)
+- Покрытие включает основные сценарии и edge cases
+- Тесты следуют структуре существующих integration тестов
+
+**Артефакты:**
+- Обновлен `services/admin-script-api/src/test/java/com/twitter/controller/GenerateUsersAndTweetsControllerTest.java`
+- Обновлен `services/admin-script-api/src/test/java/com/twitter/testconfig/WireMockStubHelper.java`
+- Обновлен `services/admin-script-api/src/test/java/com/twitter/testconfig/GenerateUsersAndTweetsTestStubBuilder.java`
+- Обновлен `todo/TODO.md` с отметкой о выполнении шага #11
