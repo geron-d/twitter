@@ -1,1 +1,3 @@
-переместить LikeTweetRequestDto и RetweetRequestDto в common-lib (com.twitter.common.dto.request) для соответствия текущей архитектуре, где другие DTO (CreateTweetRequestDto, DeleteTweetRequestDto) уже находятся в common-lib. Обновления импортов в tweet-api
+Изменить в AdminScriptController название эндпоинта generateUsersAndTweets на baseScript.
+Также нужно изменить название GenerateUsersAndTweetsService на BaseScriptService и метод в нем.
+Нужно также проверить весь сервис и обновить в остальных местах данные
