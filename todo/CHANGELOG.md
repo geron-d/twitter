@@ -246,4 +246,208 @@
 
 **Артефакты:**
 - Обновлен `services/admin-script-api/src/main/java/com/twitter/service/GenerateUsersAndTweetsServiceImpl.java`
-- Обновлен `todo/TODO.md` с отметкой о выполнении шага #6
+- Обновлен `todo/TODO.md` с отметкой о выполнении шага #6
+
+## 2025-01-27 18:30 — step #7 done — Обновление JavaDoc для GenerateUsersAndTweetsServiceImpl — автор: assistant
+
+**Выполнено:**
+- Расширен JavaDoc с подробным описанием шагов 6-11
+- Добавлены детали о логике выбора твитов и пользователей
+- Добавлено описание обработки ошибок и edge cases
+
+**Обновления JavaDoc:**
+
+**1. Подробное описание шагов 6-11:**
+- Каждый шаг (6-11) теперь содержит детальное описание с подпунктами:
+  - Логика выбора твита (Collections.shuffle(), отслеживание использованных твитов)
+  - Получение автора твита из кэша
+  - Логика выбора пользователей (исключение автора твита)
+  - Создание лайков/ретвитов
+  - Обработка ошибок (graceful handling)
+
+**2. Добавлен раздел со стратегиями для шагов 6-11:**
+- **Tweet selection:** Описание логики выбора разных твитов для каждой операции
+- **User selection:** Описание логики выбора пользователей, исключая автора твита
+- **Error handling:** Описание graceful обработки ошибок (логирование, добавление в errors, продолжение выполнения)
+- **Edge cases:** Описание обработки случаев с недостаточным количеством твитов или пользователей
+- **Performance:** Описание кэширования TweetResponseDto для оптимизации
+
+**Детали описания:**
+- Указано использование `Collections.shuffle()` для случайного выбора
+- Указано отслеживание использованных твитов для избежания дубликатов
+- Указано исключение автора твита из списка доступных пользователей
+- Указано, что ошибки логируются с WARN уровнем и добавляются в errors
+- Указаны требования: минимум 6 твитов и 2 пользователя для выполнения всех шагов
+
+**Артефакты:**
+- Обновлен `services/admin-script-api/src/main/java/com/twitter/service/GenerateUsersAndTweetsServiceImpl.java`
+- Обновлен `todo/TODO.md` с отметкой о выполнении шага #7
+
+## 2025-01-27 19:00 — step #8 done — Обновление README.md — автор: assistant
+
+**Выполнено:**
+- Обновлен README.md с описанием новых шагов 6-11
+- Добавлено описание новых методов TweetsGateway и TweetsApiClient
+- Обновлены примеры использования с новыми полями статистики
+
+**Обновления README.md:**
+
+**1. Раздел "Основные возможности":**
+- Добавлено: "Создание лайков для случайных твитов (половина, треть, 1 пользователь)"
+- Добавлено: "Создание ретвитов для случайных твитов (половина, треть, 1 пользователь)"
+- Обновлено: "Подробная статистика выполнения скрипта (включая количество созданных лайков и ретвитов)"
+
+**2. Раздел "Структура пакетов":**
+- Добавлены новые DTO: `LikeTweetRequestDto`, `RetweetRequestDto`, `LikeResponseDto`, `RetweetResponseDto`
+
+**3. Раздел "Бизнес-логика":**
+- Обновлено описание шага 2: добавлено упоминание кэширования TweetResponseDto
+- Добавлено описание шагов 6-11:
+  - Шаг 6: Создание лайков (половина пользователей)
+  - Шаг 7: Создание лайков (треть пользователей)
+  - Шаг 8: Создание лайков (1 пользователь)
+  - Шаг 9: Создание ретвитов (половина пользователей)
+  - Шаг 10: Создание ретвитов (треть пользователей)
+  - Шаг 11: Создание ретвитов (1 пользователь)
+  - Шаг 12: Сбор статистики (обновлен с новыми полями)
+
+**4. Раздел "Ключевые бизнес-правила":**
+- Добавлено правило #6: "Создание лайков и ретвитов (шаги 6-11)" с описанием:
+  - Логики выбора твитов (6 разных твитов для 6 операций)
+  - Логики выбора пользователей (исключение автора твита)
+  - Обработки ошибок (graceful handling)
+  - Требований (минимум 6 твитов и 2 пользователя)
+  - Кэширования TweetResponseDto
+
+**5. Раздел "Интеграция":**
+- Обновлен раздел "TweetsApiClient": добавлены методы `likeTweet()` и `retweetTweet()`
+- Обновлен раздел "TweetsGateway": добавлено описание новых методов и обработки ошибок
+- Добавлено описание процесса создания лайков (шаги 6-8)
+- Добавлено описание процесса создания ретвитов (шаги 9-11)
+
+**6. Раздел "Примеры использования":**
+- Обновлены все примеры ответов с новыми полями:
+  - `totalLikesCreated` - количество созданных лайков
+  - `totalRetweetsCreated` - количество созданных ретвитов
+  - `totalFollowsCreated` - добавлено в примеры (было пропущено ранее)
+
+**Артефакты:**
+- Обновлен `services/admin-script-api/README.md`
+- Обновлен `todo/TODO.md` с отметкой о выполнении шага #8
+
+## 2025-01-27 19:30 — step #9 done — Unit тесты для TweetsGateway — автор: assistant
+
+**Выполнено:**
+- Создан TweetsGatewayTest с тестами для методов likeTweet и retweetTweet
+- Покрыты успешные сценарии и обработка ошибок
+- Используется мокирование Feign клиента
+
+**Созданные тесты:**
+
+**1. @Nested class LikeTweetTests:**
+- `likeTweet_WithValidRequest_ShouldReturnLikeResponseDto` - успешное создание лайка
+- `likeTweet_WithValidRequest_ShouldLogSuccess` - проверка логирования успешной операции
+- `likeTweet_WhenTweetIdIsNull_ShouldThrowIllegalArgumentException` - валидация null tweetId
+- `likeTweet_WhenRequestIsNull_ShouldThrowIllegalArgumentException` - валидация null request
+- `likeTweet_WhenFeignClientThrowsRuntimeException_ShouldThrowRuntimeException` - обработка RuntimeException
+- `likeTweet_WhenFeignClientThrowsIllegalArgumentException_ShouldThrowRuntimeException` - обработка IllegalArgumentException
+- `likeTweet_WhenFeignClientThrowsGenericException_ShouldWrapInRuntimeException` - обработка generic exceptions
+
+**2. @Nested class RetweetTweetTests:**
+- `retweetTweet_WithValidRequest_ShouldReturnRetweetResponseDto` - успешное создание ретвита (без comment)
+- `retweetTweet_WithValidRequestAndComment_ShouldReturnRetweetResponseDto` - успешное создание ретвита (с comment)
+- `retweetTweet_WithValidRequest_ShouldLogSuccess` - проверка логирования успешной операции
+- `retweetTweet_WhenTweetIdIsNull_ShouldThrowIllegalArgumentException` - валидация null tweetId
+- `retweetTweet_WhenRequestIsNull_ShouldThrowIllegalArgumentException` - валидация null request
+- `retweetTweet_WhenFeignClientThrowsRuntimeException_ShouldThrowRuntimeException` - обработка RuntimeException
+- `retweetTweet_WhenFeignClientThrowsIllegalArgumentException_ShouldThrowRuntimeException` - обработка IllegalArgumentException
+- `retweetTweet_WhenFeignClientThrowsGenericException_ShouldWrapInRuntimeException` - обработка generic exceptions
+
+**Технические детали:**
+
+**1. Структура теста:**
+- Используется `@ExtendWith(MockitoExtension.class)` для интеграции с Mockito
+- `@Mock` для мокирования TweetsApiClient
+- `@InjectMocks` для внедрения моков в TweetsGateway
+- `@Nested` классы для группировки тестов по методам
+
+**2. Покрытие сценариев:**
+- Успешные операции (с проверкой возвращаемых значений)
+- Валидация входных параметров (null checks)
+- Обработка различных типов исключений (RuntimeException, IllegalArgumentException, generic exceptions)
+- Проверка вызовов Feign клиента (verify)
+
+**3. Используемые библиотеки:**
+- JUnit 5 (Jupiter)
+- Mockito для мокирования
+- AssertJ для assertions
+
+**4. Результаты тестирования:**
+- Все тесты проходят успешно
+- Покрытие включает все основные сценарии и edge cases
+- Тесты следуют структуре существующих тестов (FollowGatewayTest)
+
+**Артефакты:**
+- Создан `services/admin-script-api/src/test/java/com/twitter/gateway/TweetsGatewayTest.java`
+- Обновлен `todo/TODO.md` с отметкой о выполнении шага #9
+
+## 2025-01-27 20:00 — step #10 done — Unit тесты для GenerateUsersAndTweetsServiceImpl — автор: assistant
+
+**Выполнено:**
+- Добавлен новый @Nested класс LikesAndRetweetsTests в GenerateUsersAndTweetsServiceImplTest
+- Покрыты сценарии для шагов 6-11 (лайки и ретвиты)
+- Покрыты edge cases и обработка ошибок
+
+**Созданные тесты:**
+
+**1. executeScript_WithEnoughTweetsAndUsers_ShouldCreateLikesAndRetweets:**
+- Проверяет успешное создание лайков и ретвитов при достаточном количестве твитов (9) и пользователей (3)
+- Проверяет, что статистика содержит totalLikesCreated и totalRetweetsCreated
+- Проверяет вызовы методов likeTweet и retweetTweet
+
+**2. executeScript_WhenLikeFails_ShouldContinueAndAddError:**
+- Проверяет обработку ошибок при создании лайков (self-like, дубликаты)
+- Проверяет, что ошибки добавляются в statistics.errors
+- Проверяет, что выполнение продолжается (totalLikesCreated = 0, но скрипт завершается)
+
+**3. executeScript_WhenRetweetFails_ShouldContinueAndAddError:**
+- Проверяет обработку ошибок при создании ретвитов (self-retweet, дубликаты)
+- Проверяет, что ошибки добавляются в statistics.errors
+- Проверяет, что выполнение продолжается (totalRetweetsCreated = 0, но скрипт завершается)
+
+**4. executeScript_WithInsufficientTweets_ShouldSkipLikesAndRetweets:**
+- Проверяет edge case: недостаточно твитов (2 твита, требуется минимум 6 для всех шагов)
+- Проверяет, что скрипт выполняется без ошибок, но лайки и ретвиты могут быть пропущены
+
+**5. executeScript_WithInsufficientUsers_ShouldSkipLikesAndRetweets:**
+- Проверяет edge case: недостаточно пользователей (1 пользователь, требуется минимум 2)
+- Проверяет, что методы likeTweet и retweetTweet не вызываются
+- Проверяет, что totalLikesCreated и totalRetweetsCreated равны 0
+
+**Технические детали:**
+
+**1. Структура тестов:**
+- Используется @Nested класс LikesAndRetweetsTests для группировки тестов
+- Используется @BeforeEach для инициализации UUID для пользователей и твитов
+- Используется мокирование всех зависимостей (UsersGateway, TweetsGateway, FollowGateway, RandomDataGenerator, Validator)
+
+**2. Покрытие сценариев:**
+- Успешные операции (создание лайков и ретвитов)
+- Обработка ошибок (self-like, self-retweet, дубликаты)
+- Edge cases (недостаточно твитов, недостаточно пользователей)
+- Проверка статистики (totalLikesCreated, totalRetweetsCreated)
+
+**3. Используемые техники:**
+- Мокирование через Mockito
+- Проверка вызовов через verify()
+- Проверка результатов через AssertJ
+- Использование thenAnswer() для сложных сценариев
+
+**4. Результаты тестирования:**
+- Все тесты проходят успешно
+- Покрытие включает основные сценарии и edge cases
+- Тесты следуют структуре существующих тестов в классе
+
+**Артефакты:**
+- Обновлен `services/admin-script-api/src/test/java/com/twitter/service/GenerateUsersAndTweetsServiceImplTest.java`
+- Обновлен `todo/TODO.md` с отметкой о выполнении шага #10

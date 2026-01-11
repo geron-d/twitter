@@ -49,12 +49,60 @@ import java.util.UUID;
  *   <li>Step 3: Calculate users with tweets - Determines which users have tweets</li>
  *   <li>Step 4: Validate deletion count - Validates business rules for tweet deletion</li>
  *   <li>Step 5: Delete tweets - Deletes one tweet from random users (if validation passes)</li>
- *   <li>Step 6: Create likes (half of users) - Selects a random tweet and creates likes from half of available users (excluding tweet author)</li>
- *   <li>Step 7: Create likes (third of users) - Selects a different random tweet and creates likes from third of available users (excluding tweet author)</li>
- *   <li>Step 8: Create likes (1 user) - Selects a different random tweet and creates one like from an available user (excluding tweet author)</li>
- *   <li>Step 9: Create retweets (half of users) - Selects a different random tweet and creates retweets from half of available users (excluding tweet author)</li>
- *   <li>Step 10: Create retweets (third of users) - Selects a different random tweet and creates retweets from third of available users (excluding tweet author)</li>
- *   <li>Step 11: Create retweets (1 user) - Selects a different random tweet and creates one retweet from an available user (excluding tweet author)</li>
+ *   <li>Step 6: Create likes (half of users) - Creates likes for a random tweet:
+ *     <ul>
+ *       <li>Selects a random tweet from created tweets (using Collections.shuffle())</li>
+ *       <li>Gets the tweet author from cached TweetResponseDto</li>
+ *       <li>Selects half of available users, excluding the tweet author</li>
+ *       <li>Creates likes for each selected user</li>
+ *       <li>Handles errors gracefully (self-like, duplicates): logs and adds to errors, continues execution</li>
+ *     </ul>
+ *   </li>
+ *   <li>Step 7: Create likes (third of users) - Creates likes for a different random tweet:
+ *     <ul>
+ *       <li>Selects a different random tweet (not used in step 6)</li>
+ *       <li>Gets the tweet author from cached TweetResponseDto</li>
+ *       <li>Selects third of available users, excluding the tweet author</li>
+ *       <li>Creates likes for each selected user</li>
+ *       <li>Handles errors gracefully: logs and adds to errors, continues execution</li>
+ *     </ul>
+ *   </li>
+ *   <li>Step 8: Create likes (1 user) - Creates one like for a different random tweet:
+ *     <ul>
+ *       <li>Selects a different random tweet (not used in steps 6-7)</li>
+ *       <li>Gets the tweet author from cached TweetResponseDto</li>
+ *       <li>Selects 1 available user, excluding the tweet author</li>
+ *       <li>Creates one like for the selected user</li>
+ *       <li>Handles errors gracefully: logs and adds to errors, continues execution</li>
+ *     </ul>
+ *   </li>
+ *   <li>Step 9: Create retweets (half of users) - Creates retweets for a different random tweet:
+ *     <ul>
+ *       <li>Selects a different random tweet (not used in steps 6-8)</li>
+ *       <li>Gets the tweet author from cached TweetResponseDto</li>
+ *       <li>Selects half of available users, excluding the tweet author</li>
+ *       <li>Creates retweets for each selected user (with comment = null)</li>
+ *       <li>Handles errors gracefully (self-retweet, duplicates): logs and adds to errors, continues execution</li>
+ *     </ul>
+ *   </li>
+ *   <li>Step 10: Create retweets (third of users) - Creates retweets for a different random tweet:
+ *     <ul>
+ *       <li>Selects a different random tweet (not used in steps 6-9)</li>
+ *       <li>Gets the tweet author from cached TweetResponseDto</li>
+ *       <li>Selects third of available users, excluding the tweet author</li>
+ *       <li>Creates retweets for each selected user (with comment = null)</li>
+ *       <li>Handles errors gracefully: logs and adds to errors, continues execution</li>
+ *     </ul>
+ *   </li>
+ *   <li>Step 11: Create retweets (1 user) - Creates one retweet for a different random tweet:
+ *     <ul>
+ *       <li>Selects a different random tweet (not used in steps 6-10)</li>
+ *       <li>Gets the tweet author from cached TweetResponseDto</li>
+ *       <li>Selects 1 available user, excluding the tweet author</li>
+ *       <li>Creates one retweet for the selected user (with comment = null)</li>
+ *       <li>Handles errors gracefully: logs and adds to errors, continues execution</li>
+ *     </ul>
+ *   </li>
  *   <li>Step 12: Build response - Collects statistics and builds the response DTO</li>
  * </ol>
  * <p>
