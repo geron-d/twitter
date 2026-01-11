@@ -2,7 +2,7 @@
 
 ## Meta
 - project: twitter-microservices
-- updated: 2025-01-27 16:30
+- updated: 2025-01-27 18:00
 - changelog: todo/CHANGELOG.md
 - standards:
   - STANDART_CODE.md
@@ -25,14 +25,17 @@
 - [x] (P1) [2025-01-27] #3: Добавление методов в TweetsApiClient — Добавить методы likeTweet и retweetTweet в TweetsApiClient с JavaDoc.
   acceptance: "Методы likeTweet и retweetTweet добавлены в TweetsApiClient с полной JavaDoc документацией, соответствуют эндпоинтам tweet-api"
   note: "Добавлены методы likeTweet() и retweetTweet() в TweetsApiClient с полной JavaDoc документацией. Использованы полные имена пакетов для DTO (com.twitter.dto.request.* и com.twitter.dto.response.*), так как DTO еще не перемещены в common-lib. После перемещения DTO (из шага #1) необходимо обновить импорты. Методы соответствуют эндпоинтам tweet-api: POST /api/v1/tweets/{tweetId}/like и POST /api/v1/tweets/{tweetId}/retweet."
-- [ ] (P1) #4: Расширение TweetsGateway — Добавить методы likeTweet и retweetTweet в TweetsGateway с обработкой ошибок и JavaDoc.
+- [x] (P1) [2025-01-27] #4: Расширение TweetsGateway — Добавить методы likeTweet и retweetTweet в TweetsGateway с обработкой ошибок и JavaDoc.
   acceptance: "Методы likeTweet и retweetTweet добавлены в TweetsGateway с обработкой ошибок, логированием и полной JavaDoc документацией"
+  note: "Добавлены методы likeTweet() и retweetTweet() в TweetsGateway с валидацией входных параметров (null-проверки), логированием успеха/ошибок, обработкой исключений (пробрасывание как RuntimeException). Добавлена полная JavaDoc документация с описанием функциональности, параметров, возвращаемых значений и примечанием о необходимости graceful обработки HTTP 409 ошибок в сервисном слое. Методы следуют существующему паттерну в TweetsGateway."
 
 ### Реализация бизнес-логики
-- [ ] (P1) #5: Обновление ScriptStatisticsDto — Добавить поля totalLikesCreated и totalRetweetsCreated, обновить JavaDoc и @Schema аннотации.
+- [x] (P1) [2025-01-27] #5: Обновление ScriptStatisticsDto — Добавить поля totalLikesCreated и totalRetweetsCreated, обновить JavaDoc и @Schema аннотации.
   acceptance: "ScriptStatisticsDto обновлен с новыми полями totalLikesCreated и totalRetweetsCreated, обновлены JavaDoc и @Schema аннотации"
-- [ ] (P1) #6: Реализация логики лайков и ретвитов в GenerateUsersAndTweetsServiceImpl — Реализовать шаги 6-11: логика выбора твитов и пользователей, создание лайков и ретвитов, обработка ошибок, обновление статистики.
+  note: "Добавлены поля totalLikesCreated и totalRetweetsCreated в ScriptStatisticsDto. Обновлен JavaDoc в описании record с новыми параметрами. Обновлена @Schema аннотация с примерами новых полей. Добавлены @Schema аннотации для новых полей с описаниями и примерами. Обновлен конструктор в GenerateUsersAndTweetsServiceImpl (временно используется 0 для новых полей, будут реализованы в шаге #6)."
+- [x] (P1) [2025-01-27] #6: Реализация логики лайков и ретвитов в GenerateUsersAndTweetsServiceImpl — Реализовать шаги 6-11: логика выбора твитов и пользователей, создание лайков и ретвитов, обработка ошибок, обновление статистики.
   acceptance: "Реализованы шаги 6-11 в GenerateUsersAndTweetsServiceImpl: выбор разных твитов для каждой операции, выбор пользователей (исключая автора твита), создание лайков (половина, треть, 1 пользователь), создание ретвитов (половина, треть, 1 пользователь), обработка ошибок (self-like, self-retweet, дубликаты), обновление статистики"
+  note: "Реализованы шаги 6-11: добавлено кэширование TweetResponseDto при создании твитов (шаг 2), реализована логика выбора разных твитов для каждой операции (6 разных твитов), выбор пользователей исключая автора твита, создание лайков (шаги 6-8: половина, треть, 1 пользователь), создание ретвитов (шаги 9-11: половина, треть, 1 пользователь), graceful обработка ошибок (логирование и добавление в errors, выполнение продолжается), обновление статистики (totalLikesCreated и totalRetweetsCreated). Обновлен JavaDoc с описанием новых шагов 6-11."
 - [ ] (P1) #7: Обновление JavaDoc для GenerateUsersAndTweetsServiceImpl — Обновить JavaDoc с описанием новых шагов 6-11.
   acceptance: "JavaDoc для GenerateUsersAndTweetsServiceImpl обновлен с подробным описанием шагов 6-11 (создание лайков и ретвитов)"
 

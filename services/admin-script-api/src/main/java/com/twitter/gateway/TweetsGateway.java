@@ -3,6 +3,10 @@ package com.twitter.gateway;
 import com.twitter.client.TweetsApiClient;
 import com.twitter.common.dto.request.CreateTweetRequestDto;
 import com.twitter.common.dto.request.DeleteTweetRequestDto;
+import com.twitter.common.dto.request.LikeTweetRequestDto;
+import com.twitter.common.dto.request.RetweetRequestDto;
+import com.twitter.common.dto.response.LikeResponseDto;
+import com.twitter.common.dto.response.RetweetResponseDto;
 import com.twitter.common.dto.response.TweetResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -102,5 +106,65 @@ public class TweetsGateway {
             throw new RuntimeException("Failed to retrieve user tweets: " + ex.getMessage(), ex);
         }
     }
-}
 
+    /**
+     * Likes a tweet in the tweet-api service.
+     *
+     * @param tweetId          the unique identifier of the tweet to like
+     * @param likeTweetRequest DTO containing userId for the like operation
+     * @return LikeResponseDto containing the created like information including ID, tweetId, userId, and createdAt
+     * @throws IllegalArgumentException if tweetId or likeTweetRequest is null
+     * @throws RuntimeException if the like operation fails (e.g., service unavailable, network error)
+     */
+    public LikeResponseDto likeTweet(UUID tweetId, LikeTweetRequestDto likeTweetRequest) {
+        if (tweetId == null) {
+            log.error("Attempted to like tweet with null tweet ID");
+            throw new IllegalArgumentException("Tweet ID cannot be null");
+        }
+        if (likeTweetRequest == null) {
+            log.error("Attempted to like tweet with null like request");
+            throw new IllegalArgumentException("Like tweet request cannot be null");
+        }
+
+        try {
+            LikeResponseDto response = tweetsApiClient.likeTweet(tweetId, likeTweetRequest);
+            log.info("Successfully created like for tweet {} by user {}", tweetId, likeTweetRequest.userId());
+            return response;
+        } catch (Exception ex) {
+            log.error("Failed to create like for tweet {} by user {}. Error: {}",
+                tweetId, likeTweetRequest.userId(), ex.getMessage(), ex);
+            throw new RuntimeException("Failed to create like: " + ex.getMessage(), ex);
+        }
+    }
+
+    /**
+     * Retweets a tweet in the tweet-api service.
+     *
+     * @param tweetId         the unique identifier of the tweet to retweet
+     * @param retweetRequest  DTO containing userId and optional comment for the retweet operation
+     * @return RetweetResponseDto containing the created retweet information including ID, tweetId, userId, comment, and createdAt
+     * @throws IllegalArgumentException if tweetId or retweetRequest is null
+     * @throws RuntimeException if the retweet operation fails (e.g., service unavailable, network error)
+     */
+    public RetweetResponseDto retweetTweet(UUID tweetId, RetweetRequestDto retweetRequest) {
+        if (tweetId == null) {
+            log.error("Attempted to retweet tweet with null tweet ID");
+            throw new IllegalArgumentException("Tweet ID cannot be null");
+        }
+        if (retweetRequest == null) {
+            log.error("Attempted to retweet tweet with null retweet request");
+            throw new IllegalArgumentException("Retweet request cannot be null");
+        }
+
+        try {
+            RetweetResponseDto response = tweetsApiClient.retweetTweet(tweetId, retweetRequest);
+            log.info("Successfully created retweet for tweet {} by user {}", tweetId, retweetRequest.userId());
+            return response;
+        } catch (Exception ex) {
+            log.error("Failed to create retweet for tweet {} by user {}. Error: {}",
+                tweetId, retweetRequest.userId(), ex.getMessage(), ex);
+            throw new RuntimeException("Failed to create retweet: " + ex.getMessage(), ex);
+        }
+    }
+}
+

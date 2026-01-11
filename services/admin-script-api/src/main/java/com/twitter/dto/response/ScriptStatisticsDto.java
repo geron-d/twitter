@@ -11,14 +11,16 @@ import java.util.List;
  * script, including counts of created and deleted entities, execution time, and any
  * errors that occurred during execution.
  *
- * @param totalUsersCreated   total number of successfully created users
- * @param totalTweetsCreated  total number of successfully created tweets
- * @param totalFollowsCreated total number of successfully created follow relationships
- * @param totalTweetsDeleted  total number of successfully deleted tweets
- * @param usersWithTweets     number of users who have tweets
- * @param usersWithoutTweets  number of users who do not have tweets
- * @param executionTimeMs     script execution time in milliseconds
- * @param errors              list of error messages if any errors occurred during execution
+ * @param totalUsersCreated     total number of successfully created users
+ * @param totalTweetsCreated    total number of successfully created tweets
+ * @param totalFollowsCreated   total number of successfully created follow relationships
+ * @param totalTweetsDeleted    total number of successfully deleted tweets
+ * @param usersWithTweets       number of users who have tweets
+ * @param usersWithoutTweets    number of users who do not have tweets
+ * @param totalLikesCreated     total number of successfully created likes
+ * @param totalRetweetsCreated  total number of successfully created retweets
+ * @param executionTimeMs       script execution time in milliseconds
+ * @param errors                list of error messages if any errors occurred during execution
  * @author geron
  * @version 1.0
  */
@@ -33,6 +35,8 @@ import java.util.List;
           "totalTweetsDeleted": 3,
           "usersWithTweets": 10,
           "usersWithoutTweets": 0,
+          "totalLikesCreated": 15,
+          "totalRetweetsCreated": 12,
           "executionTimeMs": 1234,
           "errors": []
         }
@@ -101,6 +105,26 @@ public record ScriptStatisticsDto(
     Integer usersWithoutTweets,
 
     /**
+     * Total number of successfully created likes.
+     */
+    @Schema(
+        description = "Total number of successfully created likes",
+        example = "15",
+        requiredMode = Schema.RequiredMode.REQUIRED
+    )
+    Integer totalLikesCreated,
+
+    /**
+     * Total number of successfully created retweets.
+     */
+    @Schema(
+        description = "Total number of successfully created retweets",
+        example = "12",
+        requiredMode = Schema.RequiredMode.REQUIRED
+    )
+    Integer totalRetweetsCreated,
+
+    /**
      * Script execution time in milliseconds.
      */
     @Schema(
@@ -125,4 +149,4 @@ public record ScriptStatisticsDto(
     List<String> errors
 ) {
 }
-
+

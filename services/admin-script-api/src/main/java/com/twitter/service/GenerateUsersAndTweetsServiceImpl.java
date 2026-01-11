@@ -3,6 +3,8 @@ package com.twitter.service;
 import com.twitter.common.dto.request.CreateTweetRequestDto;
 import com.twitter.common.dto.request.DeleteTweetRequestDto;
 import com.twitter.common.dto.request.FollowRequestDto;
+import com.twitter.common.dto.request.LikeTweetRequestDto;
+import com.twitter.common.dto.request.RetweetRequestDto;
 import com.twitter.common.dto.request.UserRequestDto;
 import com.twitter.common.dto.response.TweetResponseDto;
 import com.twitter.common.dto.response.UserResponseDto;
@@ -23,7 +25,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -41,11 +45,17 @@ import java.util.UUID;
  *       <li>Requires at least 2 users to create follow relationships</li>
  *     </ul>
  *   </li>
- *   <li>Step 2: Create tweets - Creates tweets for each successfully created user</li>
+ *   <li>Step 2: Create tweets - Creates tweets for each successfully created user (caches TweetResponseDto for later use)</li>
  *   <li>Step 3: Calculate users with tweets - Determines which users have tweets</li>
  *   <li>Step 4: Validate deletion count - Validates business rules for tweet deletion</li>
  *   <li>Step 5: Delete tweets - Deletes one tweet from random users (if validation passes)</li>
- *   <li>Step 6: Build response - Collects statistics and builds the response DTO</li>
+ *   <li>Step 6: Create likes (half of users) - Selects a random tweet and creates likes from half of available users (excluding tweet author)</li>
+ *   <li>Step 7: Create likes (third of users) - Selects a different random tweet and creates likes from third of available users (excluding tweet author)</li>
+ *   <li>Step 8: Create likes (1 user) - Selects a different random tweet and creates one like from an available user (excluding tweet author)</li>
+ *   <li>Step 9: Create retweets (half of users) - Selects a different random tweet and creates retweets from half of available users (excluding tweet author)</li>
+ *   <li>Step 10: Create retweets (third of users) - Selects a different random tweet and creates retweets from third of available users (excluding tweet author)</li>
+ *   <li>Step 11: Create retweets (1 user) - Selects a different random tweet and creates one retweet from an available user (excluding tweet author)</li>
+ *   <li>Step 12: Build response - Collects statistics and builds the response DTO</li>
  * </ol>
  * <p>
  * The service handles partial failures gracefully: errors are logged and added to the
@@ -79,6 +89,7 @@ public class GenerateUsersAndTweetsServiceImpl implements GenerateUsersAndTweets
         List<UUID> createdTweets = new ArrayList<>();
         List<UUID> deletedTweets = new ArrayList<>();
         List<String> errors = new ArrayList<>();
+        Map<UUID, TweetResponseDto> tweetsCache = new HashMap<>();
 
         // Step 1: Create users
         log.info("Step 1: Creating {} users", requestDto.nUsers());
@@ -182,6 +193,7 @@ public class GenerateUsersAndTweetsServiceImpl implements GenerateUsersAndTweets
 
                     TweetResponseDto tweetResponse = tweetsGateway.createTweet(tweetRequest);
                     createdTweets.add(tweetResponse.id());
+                    tweetsCache.put(tweetResponse.id(), tweetResponse);
                     log.debug("Created tweet {}/{} for user {}", i + 1, requestDto.nTweetsPerUser(), userId);
                 } catch (Exception ex) {
                     String errorMsg = String.format("Failed to create tweet %d/%d for user %s: %s",
@@ -270,12 +282,262 @@ public class GenerateUsersAndTweetsServiceImpl implements GenerateUsersAndTweets
             log.info("Step 5 skipped: No deletions requested or no users with tweets");
         }
 
-        // Step 6: Calculate execution time and build response
+        // Step 6: Create likes (half of users)
+        log.info("Step 6: Creating likes for half of users");
+        int totalLikesCreated = 0;
+        int totalRetweetsCreated = 0;
+        List<UUID> usedTweets = new ArrayList<>();
+        
+        if (createdTweets.size() >= 1 && createdUsers.size() >= 2) {
+            List<UUID> availableTweets = new ArrayList<>(createdTweets);
+            Collections.shuffle(availableTweets);
+            UUID selectedTweetId = availableTweets.getFirst();
+            usedTweets.add(selectedTweetId);
+            
+            TweetResponseDto selectedTweet = tweetsCache.get(selectedTweetId);
+            if (selectedTweet != null) {
+                UUID tweetAuthorId = selectedTweet.userId();
+                List<UUID> availableUsers = new ArrayList<>(createdUsers);
+                availableUsers.remove(tweetAuthorId);
+                
+                if (!availableUsers.isEmpty()) {
+                    Collections.shuffle(availableUsers);
+                    int halfCount = availableUsers.size() / 2;
+                    List<UUID> usersToLike = availableUsers.subList(0, Math.min(halfCount, availableUsers.size()));
+                    
+                    for (UUID userId : usersToLike) {
+                        try {
+                            LikeTweetRequestDto likeRequest = LikeTweetRequestDto.builder()
+                                .userId(userId)
+                                .build();
+                            tweetsGateway.likeTweet(selectedTweetId, likeRequest);
+                            totalLikesCreated++;
+                            log.debug("Successfully created like for tweet {} by user {}", selectedTweetId, userId);
+                        } catch (Exception ex) {
+                            String errorMsg = String.format("Failed to create like for tweet %s by user %s: %s",
+                                selectedTweetId, userId, ex.getMessage());
+                            log.warn(errorMsg);
+                            errors.add(errorMsg);
+                        }
+                    }
+                }
+            }
+        }
+        log.info("Step 6 completed: {} likes created successfully", totalLikesCreated);
+
+        // Step 7: Create likes (third of users)
+        log.info("Step 7: Creating likes for third of users");
+        if (createdTweets.size() >= 2 && createdUsers.size() >= 2) {
+            List<UUID> availableTweets = new ArrayList<>(createdTweets);
+            availableTweets.removeAll(usedTweets);
+            if (!availableTweets.isEmpty()) {
+                Collections.shuffle(availableTweets);
+                UUID selectedTweetId = availableTweets.get(0);
+                usedTweets.add(selectedTweetId);
+                
+                TweetResponseDto selectedTweet = tweetsCache.get(selectedTweetId);
+                if (selectedTweet != null) {
+                    UUID tweetAuthorId = selectedTweet.userId();
+                    List<UUID> availableUsers = new ArrayList<>(createdUsers);
+                    availableUsers.remove(tweetAuthorId);
+                    
+                    if (!availableUsers.isEmpty()) {
+                        Collections.shuffle(availableUsers);
+                        int thirdCount = availableUsers.size() / 3;
+                        List<UUID> usersToLike = availableUsers.subList(0, Math.min(thirdCount, availableUsers.size()));
+                        
+                        for (UUID userId : usersToLike) {
+                            try {
+                                LikeTweetRequestDto likeRequest = LikeTweetRequestDto.builder()
+                                    .userId(userId)
+                                    .build();
+                                tweetsGateway.likeTweet(selectedTweetId, likeRequest);
+                                totalLikesCreated++;
+                                log.debug("Successfully created like for tweet {} by user {}", selectedTweetId, userId);
+                            } catch (Exception ex) {
+                                String errorMsg = String.format("Failed to create like for tweet %s by user %s: %s",
+                                    selectedTweetId, userId, ex.getMessage());
+                                log.warn(errorMsg);
+                                errors.add(errorMsg);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        log.info("Step 7 completed: {} total likes created", totalLikesCreated);
+
+        // Step 8: Create likes (1 user)
+        log.info("Step 8: Creating like for 1 user");
+        if (createdTweets.size() >= 3 && createdUsers.size() >= 2) {
+            List<UUID> availableTweets = new ArrayList<>(createdTweets);
+            availableTweets.removeAll(usedTweets);
+            if (!availableTweets.isEmpty()) {
+                Collections.shuffle(availableTweets);
+                UUID selectedTweetId = availableTweets.get(0);
+                usedTweets.add(selectedTweetId);
+                
+                TweetResponseDto selectedTweet = tweetsCache.get(selectedTweetId);
+                if (selectedTweet != null) {
+                    UUID tweetAuthorId = selectedTweet.userId();
+                    List<UUID> availableUsers = new ArrayList<>(createdUsers);
+                    availableUsers.remove(tweetAuthorId);
+                    
+                    if (!availableUsers.isEmpty()) {
+                        Collections.shuffle(availableUsers);
+                        UUID userId = availableUsers.get(0);
+                        
+                        try {
+                            LikeTweetRequestDto likeRequest = LikeTweetRequestDto.builder()
+                                .userId(userId)
+                                .build();
+                            tweetsGateway.likeTweet(selectedTweetId, likeRequest);
+                            totalLikesCreated++;
+                            log.debug("Successfully created like for tweet {} by user {}", selectedTweetId, userId);
+                        } catch (Exception ex) {
+                            String errorMsg = String.format("Failed to create like for tweet %s by user %s: %s",
+                                selectedTweetId, userId, ex.getMessage());
+                            log.warn(errorMsg);
+                            errors.add(errorMsg);
+                        }
+                    }
+                }
+            }
+        }
+        log.info("Step 8 completed: {} total likes created", totalLikesCreated);
+
+        // Step 9: Create retweets (half of users)
+        log.info("Step 9: Creating retweets for half of users");
+        if (createdTweets.size() >= 4 && createdUsers.size() >= 2) {
+            List<UUID> availableTweets = new ArrayList<>(createdTweets);
+            availableTweets.removeAll(usedTweets);
+            if (!availableTweets.isEmpty()) {
+                Collections.shuffle(availableTweets);
+                UUID selectedTweetId = availableTweets.get(0);
+                usedTweets.add(selectedTweetId);
+                
+                TweetResponseDto selectedTweet = tweetsCache.get(selectedTweetId);
+                if (selectedTweet != null) {
+                    UUID tweetAuthorId = selectedTweet.userId();
+                    List<UUID> availableUsers = new ArrayList<>(createdUsers);
+                    availableUsers.remove(tweetAuthorId);
+                    
+                    if (!availableUsers.isEmpty()) {
+                        Collections.shuffle(availableUsers);
+                        int halfCount = availableUsers.size() / 2;
+                        List<UUID> usersToRetweet = availableUsers.subList(0, Math.min(halfCount, availableUsers.size()));
+                        
+                        for (UUID userId : usersToRetweet) {
+                            try {
+                                RetweetRequestDto retweetRequest = RetweetRequestDto.builder()
+                                    .userId(userId)
+                                    .comment(null)
+                                    .build();
+                                tweetsGateway.retweetTweet(selectedTweetId, retweetRequest);
+                                totalRetweetsCreated++;
+                                log.debug("Successfully created retweet for tweet {} by user {}", selectedTweetId, userId);
+                            } catch (Exception ex) {
+                                String errorMsg = String.format("Failed to create retweet for tweet %s by user %s: %s",
+                                    selectedTweetId, userId, ex.getMessage());
+                                log.warn(errorMsg);
+                                errors.add(errorMsg);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        log.info("Step 9 completed: {} retweets created successfully", totalRetweetsCreated);
+
+        // Step 10: Create retweets (third of users)
+        log.info("Step 10: Creating retweets for third of users");
+        if (createdTweets.size() >= 5 && createdUsers.size() >= 2) {
+            List<UUID> availableTweets = new ArrayList<>(createdTweets);
+            availableTweets.removeAll(usedTweets);
+            if (!availableTweets.isEmpty()) {
+                Collections.shuffle(availableTweets);
+                UUID selectedTweetId = availableTweets.get(0);
+                usedTweets.add(selectedTweetId);
+                
+                TweetResponseDto selectedTweet = tweetsCache.get(selectedTweetId);
+                if (selectedTweet != null) {
+                    UUID tweetAuthorId = selectedTweet.userId();
+                    List<UUID> availableUsers = new ArrayList<>(createdUsers);
+                    availableUsers.remove(tweetAuthorId);
+                    
+                    if (!availableUsers.isEmpty()) {
+                        Collections.shuffle(availableUsers);
+                        int thirdCount = availableUsers.size() / 3;
+                        List<UUID> usersToRetweet = availableUsers.subList(0, Math.min(thirdCount, availableUsers.size()));
+                        
+                        for (UUID userId : usersToRetweet) {
+                            try {
+                                RetweetRequestDto retweetRequest = RetweetRequestDto.builder()
+                                    .userId(userId)
+                                    .comment(null)
+                                    .build();
+                                tweetsGateway.retweetTweet(selectedTweetId, retweetRequest);
+                                totalRetweetsCreated++;
+                                log.debug("Successfully created retweet for tweet {} by user {}", selectedTweetId, userId);
+                            } catch (Exception ex) {
+                                String errorMsg = String.format("Failed to create retweet for tweet %s by user %s: %s",
+                                    selectedTweetId, userId, ex.getMessage());
+                                log.warn(errorMsg);
+                                errors.add(errorMsg);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        log.info("Step 10 completed: {} total retweets created", totalRetweetsCreated);
+
+        // Step 11: Create retweets (1 user)
+        log.info("Step 11: Creating retweet for 1 user");
+        if (createdTweets.size() >= 6 && createdUsers.size() >= 2) {
+            List<UUID> availableTweets = new ArrayList<>(createdTweets);
+            availableTweets.removeAll(usedTweets);
+            if (!availableTweets.isEmpty()) {
+                Collections.shuffle(availableTweets);
+                UUID selectedTweetId = availableTweets.get(0);
+                usedTweets.add(selectedTweetId);
+                
+                TweetResponseDto selectedTweet = tweetsCache.get(selectedTweetId);
+                if (selectedTweet != null) {
+                    UUID tweetAuthorId = selectedTweet.userId();
+                    List<UUID> availableUsers = new ArrayList<>(createdUsers);
+                    availableUsers.remove(tweetAuthorId);
+                    
+                    if (!availableUsers.isEmpty()) {
+                        Collections.shuffle(availableUsers);
+                        UUID userId = availableUsers.get(0);
+                        
+                        try {
+                            RetweetRequestDto retweetRequest = RetweetRequestDto.builder()
+                                .userId(userId)
+                                .comment(null)
+                                .build();
+                            tweetsGateway.retweetTweet(selectedTweetId, retweetRequest);
+                            totalRetweetsCreated++;
+                            log.debug("Successfully created retweet for tweet {} by user {}", selectedTweetId, userId);
+                        } catch (Exception ex) {
+                            String errorMsg = String.format("Failed to create retweet for tweet %s by user %s: %s",
+                                selectedTweetId, userId, ex.getMessage());
+                            log.warn(errorMsg);
+                            errors.add(errorMsg);
+                        }
+                    }
+                }
+            }
+        }
+        log.info("Step 11 completed: {} total retweets created", totalRetweetsCreated);
+
+        // Step 12: Calculate execution time and build response
         long endTime = System.currentTimeMillis();
         long executionTimeMs = endTime - startTime;
 
         ScriptStatisticsDto statistics = new ScriptStatisticsDto(createdUsers.size(), createdTweets.size(),
-            totalFollowsCreated, deletedTweets.size(), usersWithTweetsCount, usersWithoutTweetsCount, executionTimeMs, errors);
+            totalFollowsCreated, deletedTweets.size(), usersWithTweetsCount, usersWithoutTweetsCount, totalLikesCreated, totalRetweetsCreated, executionTimeMs, errors);
 
         GenerateUsersAndTweetsResponseDto response = GenerateUsersAndTweetsResponseDto.builder()
             .createdUsers(createdUsers)
@@ -285,10 +547,10 @@ public class GenerateUsersAndTweetsServiceImpl implements GenerateUsersAndTweets
             .statistics(statistics)
             .build();
 
-        log.info("Script execution completed in {} ms. Created: {} users, {} follow relationships, {} tweets. Deleted: {} tweets. Errors: {}",
-            executionTimeMs, createdUsers.size(), totalFollowsCreated, createdTweets.size(), deletedTweets.size(), errors.size());
+        log.info("Script execution completed in {} ms. Created: {} users, {} follow relationships, {} tweets, {} likes, {} retweets. Deleted: {} tweets. Errors: {}",
+            executionTimeMs, createdUsers.size(), totalFollowsCreated, createdTweets.size(), totalLikesCreated, totalRetweetsCreated, deletedTweets.size(), errors.size());
 
         return response;
     }
 }
-
+
