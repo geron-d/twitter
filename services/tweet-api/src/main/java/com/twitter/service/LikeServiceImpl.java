@@ -1,7 +1,7 @@
 package com.twitter.service;
 
-import com.twitter.dto.request.LikeTweetRequestDto;
-import com.twitter.dto.response.LikeResponseDto;
+import com.twitter.common.dto.request.LikeTweetRequestDto;
+import com.twitter.common.dto.response.LikeResponseDto;
 import com.twitter.entity.Like;
 import com.twitter.entity.Tweet;
 import com.twitter.mapper.LikeMapper;

@@ -2,7 +2,7 @@
 
 ## Meta
 - project: twitter-microservices
-- updated: 2025-01-27
+- updated: 2025-01-27 16:30
 - changelog: todo/CHANGELOG.md
 - standards:
   - STANDART_CODE.md
@@ -14,14 +14,17 @@
 ## Tasks
 
 ### Анализ и проектирование
-- [ ] (P1) #1: Анализ зависимостей DTO — Проверить доступность LikeTweetRequestDto и RetweetRequestDto из tweet-api в admin-script-api. Определить стратегию: использовать напрямую, создать копии или переместить в common-lib.
+- [x] (P1) [2025-01-27] #1: Анализ зависимостей DTO — Проверить доступность LikeTweetRequestDto и RetweetRequestDto из tweet-api в admin-script-api. Определить стратегию: использовать напрямую, создать копии или переместить в common-lib.
   acceptance: "Определена стратегия работы с DTO для лайков и ретвитов, проверена доступность через зависимости"
-- [ ] (P1) #2: Проектирование API интеграции — Определить структуру Feign клиентов для лайков и ретвитов, методы Gateway, логику выбора твитов и пользователей.
+  note: "Проанализирована архитектура проекта. DTO находятся в tweet-api (com.twitter.dto.request), но admin-script-api не имеет зависимости от tweet-api. Определена стратегия: переместить LikeTweetRequestDto и RetweetRequestDto в common-lib (com.twitter.common.dto.request) для соответствия текущей архитектуре, где другие DTO (CreateTweetRequestDto, DeleteTweetRequestDto) уже находятся в common-lib. Это потребует обновления импортов в tweet-api."
+- [x] (P1) [2025-01-27] #2: Проектирование API интеграции — Определить структуру Feign клиентов для лайков и ретвитов, методы Gateway, логику выбора твитов и пользователей.
   acceptance: "Спроектирована структура интеграции с tweet-api для лайков и ретвитов, определена логика выбора твитов и пользователей"
+  note: "Спроектирована полная структура интеграции: методы likeTweet и retweetTweet для TweetsApiClient и TweetsGateway, логика выбора 6 разных твитов и пользователей (исключая автора), обработка ошибок (409 для self-like/self-retweet/дубликатов не прерывает выполнение), кэширование TweetResponseDto для получения автора твита. Создан документ design-api-integration.md с детальным проектированием."
 
 ### Реализация инфраструктуры
-- [ ] (P1) #3: Добавление методов в TweetsApiClient — Добавить методы likeTweet и retweetTweet в TweetsApiClient с JavaDoc.
+- [x] (P1) [2025-01-27] #3: Добавление методов в TweetsApiClient — Добавить методы likeTweet и retweetTweet в TweetsApiClient с JavaDoc.
   acceptance: "Методы likeTweet и retweetTweet добавлены в TweetsApiClient с полной JavaDoc документацией, соответствуют эндпоинтам tweet-api"
+  note: "Добавлены методы likeTweet() и retweetTweet() в TweetsApiClient с полной JavaDoc документацией. Использованы полные имена пакетов для DTO (com.twitter.dto.request.* и com.twitter.dto.response.*), так как DTO еще не перемещены в common-lib. После перемещения DTO (из шага #1) необходимо обновить импорты. Методы соответствуют эндпоинтам tweet-api: POST /api/v1/tweets/{tweetId}/like и POST /api/v1/tweets/{tweetId}/retweet."
 - [ ] (P1) #4: Расширение TweetsGateway — Добавить методы likeTweet и retweetTweet в TweetsGateway с обработкой ошибок и JavaDoc.
   acceptance: "Методы likeTweet и retweetTweet добавлены в TweetsGateway с обработкой ошибок, логированием и полной JavaDoc документацией"
 
@@ -46,7 +49,7 @@
   acceptance: "Integration тесты для полного цикла скрипта с лайками и ретвитами написаны, покрывают успешные сценарии и edge cases (мало пользователей, мало твитов)"
 
 ## Assumptions
-- DTO для лайков и ретвитов (LikeTweetRequestDto, RetweetRequestDto) будут доступны через зависимости или будут созданы копии в admin-script-api
+- DTO для лайков и ретвитов (LikeTweetRequestDto, RetweetRequestDto) будут перемещены в common-lib (com.twitter.common.dto.request) для соответствия текущей архитектуре проекта, где другие DTO уже находятся в common-lib. Это потребует обновления импортов в tweet-api.
 - Эндпоинты лайков и ретвитов в tweet-api работают корректно и возвращают соответствующие статус-коды (201 для успеха, 409 для self-like/self-retweet/дубликатов)
 - Ошибки self-like и self-retweet обрабатываются gracefully (логируются и добавляются в errors, но не прерывают выполнение скрипта)
 - Для каждой операции выбираются разные твиты из созданных (6 разных твитов для 6 операций)

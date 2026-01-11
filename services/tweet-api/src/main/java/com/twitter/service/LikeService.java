@@ -2,8 +2,8 @@ package com.twitter.service;
 
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.UniquenessValidationException;
-import com.twitter.dto.request.LikeTweetRequestDto;
-import com.twitter.dto.response.LikeResponseDto;
+import com.twitter.common.dto.request.LikeTweetRequestDto;
+import com.twitter.common.dto.response.LikeResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
