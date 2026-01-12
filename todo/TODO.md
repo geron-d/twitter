@@ -32,22 +32,28 @@
   note: "Создан новый файл BaseScriptResponseDto.java с обновленным JavaDoc и @Schema аннотациями. Обновлены все ссылки в 7 файлах (контроллеры, сервисы, тесты, README). Старый файл удален. Проверено: все ссылки заменены, ошибок компиляции нет."
 
 #### Валидаторы
-- [ ] (P1) #5: Переименование GenerateUsersAndTweetsValidator → BaseScriptValidator — Переименовать интерфейс валидатора и обновить JavaDoc, ссылки на DTO.
+- [x] (P1) [2025-01-27 16:00] #5: Переименование GenerateUsersAndTweetsValidator → BaseScriptValidator — Переименовать интерфейс валидатора и обновить JavaDoc, ссылки на DTO.
   acceptance: "Файл переименован, JavaDoc обновлен, ссылки на BaseScriptRequestDto обновлены"
-- [ ] (P1) #6: Переименование GenerateUsersAndTweetsValidatorImpl → BaseScriptValidatorImpl — Переименовать реализацию валидатора и обновить JavaDoc, импорты.
+  note: "Создан новый файл BaseScriptValidator.java с обновленным JavaDoc. Обновлены все ссылки в 4 файлах (реализация валидатора, сервис, тесты сервиса). Старый файл удален. Проверено: все ссылки заменены, ошибок компиляции нет."
+- [x] (P1) [2025-01-27 16:05] #6: Переименование GenerateUsersAndTweetsValidatorImpl → BaseScriptValidatorImpl — Переименовать реализацию валидатора и обновить JavaDoc, импорты.
   acceptance: "Файл переименован, JavaDoc обновлен, импорты обновлены, ссылки на BaseScriptValidator и BaseScriptRequestDto обновлены"
+  note: "Создан новый файл BaseScriptValidatorImpl.java с обновленным JavaDoc. Обновлены все ссылки в 1 файле (тесты валидатора). Старый файл удален. Проверено: все ссылки заменены, ошибок компиляции нет."
 
 #### Сервисы
-- [ ] (P1) #7: Переименование GenerateUsersAndTweetsService → BaseScriptService — Переименовать интерфейс сервиса и обновить JavaDoc, ссылки на DTO.
+- [x] (P1) [2025-01-27 16:10] #7: Переименование GenerateUsersAndTweetsService → BaseScriptService — Переименовать интерфейс сервиса и обновить JavaDoc, ссылки на DTO.
   acceptance: "Файл переименован, JavaDoc обновлен, ссылки на BaseScriptRequestDto и BaseScriptResponseDto обновлены"
-- [ ] (P1) #8: Переименование GenerateUsersAndTweetsServiceImpl → BaseScriptServiceImpl — Переименовать реализацию сервиса и обновить JavaDoc, импорты, ссылки на валидатор.
+  note: "Создан новый файл BaseScriptService.java с обновленным JavaDoc. Обновлены все ссылки в 3 файлах (реализация сервиса, контроллер). Старый файл удален. Проверено: все ссылки заменены, ошибок компиляции нет."
+- [x] (P1) [2025-01-27 16:15] #8: Переименование GenerateUsersAndTweetsServiceImpl → BaseScriptServiceImpl — Переименовать реализацию сервиса и обновить JavaDoc, импорты, ссылки на валидатор.
   acceptance: "Файл переименован, JavaDoc обновлен, импорты обновлены, ссылки на BaseScriptService, BaseScriptValidator, BaseScriptRequestDto, BaseScriptResponseDto обновлены"
+  note: "Файл переименован в BaseScriptServiceImpl.java с обновленным JavaDoc. Обновлены все ссылки в 1 файле (тесты сервиса). Проверено: все ссылки заменены, ошибок компиляции нет."
 
 #### Контроллер и API интерфейс
-- [ ] (P1) #9: Обновление AdminScriptApi — Переименовать метод generateUsersAndTweets → baseScript, обновить OpenAPI аннотации, примеры, JavaDoc.
+- [x] (P1) [2025-01-27 16:20] #9: Обновление AdminScriptApi — Переименовать метод generateUsersAndTweets → baseScript, обновить OpenAPI аннотации, примеры, JavaDoc.
   acceptance: "Метод переименован, OpenAPI аннотации (@Operation, @ApiResponses) обновлены, примеры в @ExampleObject обновлены, JavaDoc обновлен, ссылки на BaseScriptRequestDto и BaseScriptResponseDto обновлены"
-- [ ] (P1) #10: Обновление AdminScriptController — Переименовать метод и эндпоинт /generate-users-and-tweets → /base-script, обновить поле сервиса, JavaDoc.
+  note: "Метод переименован в baseScript в интерфейсе AdminScriptApi и контроллере AdminScriptController. Обновлены JavaDoc и @Operation аннотации. Примеры в @ExampleObject остались актуальными. Проверено: все ссылки обновлены, ошибок компиляции нет."
+- [x] (P1) [2025-01-27 16:25] #10: Обновление AdminScriptController — Переименовать метод и эндпоинт /generate-users-and-tweets → /base-script, обновить поле сервиса, JavaDoc.
   acceptance: "Метод переименован в baseScript, @PostMapping обновлен на /base-script, поле сервиса обновлено на BaseScriptService, JavaDoc обновлен, ссылки на BaseScriptRequestDto и BaseScriptResponseDto обновлены"
+  note: "Эндпоинт обновлен с /generate-users-and-tweets на /base-script. Поле сервиса переименовано с generateUsersAndTweetsService на baseScriptService. Метод уже был переименован в baseScript на предыдущем шаге. Проверено: все ссылки обновлены, ошибок компиляции нет."
 
 ### Переименование тестовых классов
 

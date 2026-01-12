@@ -4,12 +4,12 @@ import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.dto.request.BaseScriptRequestDto;
 
 /**
- * Interface for validating parameters of the generate users and tweets script.
+ * Interface for validating parameters of the base script.
  *
  * @author geron
  * @version 1.0
  */
-public interface GenerateUsersAndTweetsValidator {
+public interface BaseScriptValidator {
 
     /**
      * Validates that the number of users for deletion does not exceed
@@ -21,4 +21,3 @@ public interface GenerateUsersAndTweetsValidator {
      */
     void validateDeletionCount(BaseScriptRequestDto requestDto, int usersWithTweetsCount);
 }
-

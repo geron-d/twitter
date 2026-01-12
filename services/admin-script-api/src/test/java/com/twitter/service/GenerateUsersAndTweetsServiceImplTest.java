@@ -20,7 +20,7 @@ import com.twitter.gateway.FollowGateway;
 import com.twitter.gateway.TweetsGateway;
 import com.twitter.gateway.UsersGateway;
 import com.twitter.util.RandomDataGenerator;
-import com.twitter.validation.GenerateUsersAndTweetsValidator;
+import com.twitter.validation.BaseScriptValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -59,10 +59,10 @@ class GenerateUsersAndTweetsServiceImplTest {
     private RandomDataGenerator randomDataGenerator;
 
     @Mock
-    private GenerateUsersAndTweetsValidator validator;
+    private BaseScriptValidator validator;
 
     @InjectMocks
-    private GenerateUsersAndTweetsServiceImpl service;
+    private BaseScriptServiceImpl service;
 
     @Nested
     class ExecuteScriptTests {

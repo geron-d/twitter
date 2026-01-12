@@ -4,12 +4,12 @@ import com.twitter.dto.request.BaseScriptRequestDto;
 import com.twitter.dto.response.BaseScriptResponseDto;
 
 /**
- * Service interface for executing the administrative script to generate users and tweets.
+ * Service interface for executing the base administrative script.
  *
  * @author geron
  * @version 1.0
  */
-public interface GenerateUsersAndTweetsService {
+public interface BaseScriptService {
 
     /**
      * Executes the administrative script to generate users and tweets.
@@ -31,4 +31,3 @@ public interface GenerateUsersAndTweetsService {
      */
     BaseScriptResponseDto executeScript(BaseScriptRequestDto requestDto);
 }
-

@@ -24,7 +24,7 @@ import org.springframework.http.ResponseEntity;
 public interface AdminScriptApi {
 
     /**
-     * Executes the administrative script to generate users, follow relationships and tweets.
+     * Executes the base administrative script.
      * <p>
      * This endpoint executes an administrative script that performs the following operations:
      * <ul>
@@ -40,8 +40,8 @@ public interface AdminScriptApi {
      * @return ResponseEntity containing BaseScriptResponseDto with lists of IDs and execution statistics
      */
     @Operation(
-        summary = "Generate users, follow relationships and tweets",
-        description = "Executes an administrative script that creates multiple users with random data, " +
+        summary = "Execute base script",
+        description = "Executes the base administrative script that creates multiple users with random data, " +
             "creates follow relationships between users (central user follows half of others, half of others follow central user), " +
             "adds tweets for each user, and deletes one tweet from a specified number of random users. " +
             "Parameters: nUsers (1-1000), nTweetsPerUser (1-100), " +
@@ -160,7 +160,7 @@ public interface AdminScriptApi {
             )
         )
     })
-    ResponseEntity<BaseScriptResponseDto> generateUsersAndTweets(
+    ResponseEntity<BaseScriptResponseDto> baseScript(
         @Parameter(
             description = "Script parameters: nUsers (1-1000), nTweetsPerUser (1-100), lUsersForDeletion (0+)",
             required = true

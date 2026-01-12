@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * Implementation of the validator for generate users and tweets script.
+ * Implementation of the validator for base script.
  *
  * @author geron
  * @version 1.0
@@ -15,10 +15,10 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class GenerateUsersAndTweetsValidatorImpl implements GenerateUsersAndTweetsValidator {
+public class BaseScriptValidatorImpl implements BaseScriptValidator {
 
     /**
-     * @see GenerateUsersAndTweetsValidator#validateDeletionCount
+     * @see BaseScriptValidator#validateDeletionCount
      */
     @Override
     public void validateDeletionCount(BaseScriptRequestDto requestDto, int usersWithTweetsCount) {
@@ -43,4 +43,3 @@ public class GenerateUsersAndTweetsValidatorImpl implements GenerateUsersAndTwee
         log.debug("Deletion count validation passed: {} <= {}", lUsersForDeletion, usersWithTweetsCount);
     }
 }
-

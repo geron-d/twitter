@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.*;
 class GenerateUsersAndTweetsValidatorImplTest {
 
     @InjectMocks
-    private GenerateUsersAndTweetsValidatorImpl validator;
+    private BaseScriptValidatorImpl validator;
 
     @Nested
     class ValidateDeletionCountTests {

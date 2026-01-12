@@ -15,7 +15,7 @@ import com.twitter.gateway.FollowGateway;
 import com.twitter.gateway.TweetsGateway;
 import com.twitter.gateway.UsersGateway;
 import com.twitter.util.RandomDataGenerator;
-import com.twitter.validation.GenerateUsersAndTweetsValidator;
+import com.twitter.validation.BaseScriptValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Implementation of the service for executing the administrative script to generate users and tweets.
+ * Implementation of the service for executing the base administrative script.
  * <p>
  * This service executes a comprehensive administrative script that performs the following steps:
  * <ol>
@@ -115,16 +115,16 @@ import java.util.UUID;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class GenerateUsersAndTweetsServiceImpl implements GenerateUsersAndTweetsService {
+public class BaseScriptServiceImpl implements BaseScriptService {
 
     private final UsersGateway usersGateway;
     private final TweetsGateway tweetsGateway;
     private final FollowGateway followGateway;
     private final RandomDataGenerator randomDataGenerator;
-    private final GenerateUsersAndTweetsValidator validator;
+    private final BaseScriptValidator validator;
 
     /**
-     * @see GenerateUsersAndTweetsService#executeScript
+     * @see BaseScriptService#executeScript
      */
     @Override
     public BaseScriptResponseDto executeScript(BaseScriptRequestDto requestDto) {
@@ -601,4 +601,4 @@ public class GenerateUsersAndTweetsServiceImpl implements GenerateUsersAndTweets
         return response;
     }
 }
-
+
