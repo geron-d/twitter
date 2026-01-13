@@ -5,7 +5,7 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.twitter.dto.request.BaseScriptRequestDto;
 import com.twitter.dto.response.BaseScriptResponseDto;
 import com.twitter.testconfig.BaseIntegrationTest;
-import com.twitter.testconfig.GenerateUsersAndTweetsTestStubBuilder;
+import com.twitter.testconfig.BaseScriptTestStubBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -32,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureWebMvc
 @ActiveProfiles("test")
 @Transactional
-public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
+public class BaseScriptControllerTest extends BaseIntegrationTest {
 
     @Autowired
     private WebApplicationContext webApplicationContext;
@@ -42,13 +42,13 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
 
     private MockMvc mockMvc;
     private WireMockServer wireMockServer;
-    private GenerateUsersAndTweetsTestStubBuilder stubBuilder;
+    private BaseScriptTestStubBuilder stubBuilder;
 
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
         wireMockServer = getWireMockServer();
-        stubBuilder = new GenerateUsersAndTweetsTestStubBuilder(wireMockServer, objectMapper);
+        stubBuilder = new BaseScriptTestStubBuilder(wireMockServer, objectMapper);
     }
 
 
@@ -69,10 +69,10 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
     }
 
     @Nested
-    class GenerateUsersAndTweetsTests {
+    class BaseScriptTests {
 
         @Test
-        void generateUsersAndTweets_WithValidData_ShouldReturn200Ok() throws Exception {
+        void baseScript_WithValidData_ShouldReturn200Ok() throws Exception {
             int nUsers = 2;
             int nTweetsPerUser = 3;
             int lUsersForDeletion = 1;
@@ -81,7 +81,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
 
             stubBuilder.setupFullScenario(nUsers, nTweetsPerUser, lUsersForDeletion);
 
-            String responseJson = mockMvc.perform(post("/api/v1/admin-scripts/generate-users-and-tweets")
+            String responseJson = mockMvc.perform(post("/api/v1/admin-scripts/base-script")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -109,61 +109,61 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
         }
 
         @Test
-        void generateUsersAndTweets_WithNullNUsers_ShouldReturn400BadRequest() throws Exception {
+        void baseScript_WithNullNUsers_ShouldReturn400BadRequest() throws Exception {
             BaseScriptRequestDto request = BaseScriptRequestDto.builder()
                 .nUsers(null)
                 .nTweetsPerUser(5)
                 .lUsersForDeletion(0)
                 .build();
 
-            mockMvc.perform(post("/api/v1/admin-scripts/generate-users-and-tweets")
+            mockMvc.perform(post("/api/v1/admin-scripts/base-script")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
         }
 
         @Test
-        void generateUsersAndTweets_WithNUsersExceedingMax_ShouldReturn400BadRequest() throws Exception {
+        void baseScript_WithNUsersExceedingMax_ShouldReturn400BadRequest() throws Exception {
             BaseScriptRequestDto request = createValidRequest(1001, 5, 0);
 
-            mockMvc.perform(post("/api/v1/admin-scripts/generate-users-and-tweets")
+            mockMvc.perform(post("/api/v1/admin-scripts/base-script")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
         }
 
         @Test
-        void generateUsersAndTweets_WithNTweetsPerUserLessThanOne_ShouldReturn400BadRequest() throws Exception {
+        void baseScript_WithNTweetsPerUserLessThanOne_ShouldReturn400BadRequest() throws Exception {
             BaseScriptRequestDto request = createValidRequest(5, 0, 0);
 
-            mockMvc.perform(post("/api/v1/admin-scripts/generate-users-and-tweets")
+            mockMvc.perform(post("/api/v1/admin-scripts/base-script")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
         }
 
         @Test
-        void generateUsersAndTweets_WithNTweetsPerUserExceedingMax_ShouldReturn400BadRequest() throws Exception {
+        void baseScript_WithNTweetsPerUserExceedingMax_ShouldReturn400BadRequest() throws Exception {
             BaseScriptRequestDto request = createValidRequest(5, 101, 0);
 
-            mockMvc.perform(post("/api/v1/admin-scripts/generate-users-and-tweets")
+            mockMvc.perform(post("/api/v1/admin-scripts/base-script")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
         }
 
         @Test
-        void generateUsersAndTweets_WithLUsersForDeletionNegative_ShouldReturn400BadRequest() throws Exception {
+        void baseScript_WithLUsersForDeletionNegative_ShouldReturn400BadRequest() throws Exception {
             BaseScriptRequestDto request = createValidRequest(5, 5, -1);
 
-            mockMvc.perform(post("/api/v1/admin-scripts/generate-users-and-tweets")
+            mockMvc.perform(post("/api/v1/admin-scripts/base-script")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
         }
 
         @Test
-        void generateUsersAndTweets_WithLUsersForDeletionExceedingUsersWithTweets_ShouldReturn400BadRequest() throws Exception {
+        void baseScript_WithLUsersForDeletionExceedingUsersWithTweets_ShouldReturn400BadRequest() throws Exception {
             int nUsers = 2;
             int nTweetsPerUser = 3;
             int lUsersForDeletion = 5; // Exceeds nUsers
@@ -172,7 +172,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
 
             stubBuilder.setupFullScenario(nUsers, nTweetsPerUser, 0);
 
-            String responseJson = mockMvc.perform(post("/api/v1/admin-scripts/generate-users-and-tweets")
+            String responseJson = mockMvc.perform(post("/api/v1/admin-scripts/base-script")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -190,7 +190,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
         }
 
         @Test
-        void generateUsersAndTweets_WhenUsersApiReturns500_ShouldHandleGracefully() throws Exception {
+        void baseScript_WhenUsersApiReturns500_ShouldHandleGracefully() throws Exception {
             int nUsers = 2;
             int nTweetsPerUser = 3;
             int lUsersForDeletion = 0;
@@ -199,7 +199,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
 
             stubBuilder.setupUserCreationError(500);
 
-            String responseJson = mockMvc.perform(post("/api/v1/admin-scripts/generate-users-and-tweets")
+            String responseJson = mockMvc.perform(post("/api/v1/admin-scripts/base-script")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk()) // Service handles errors gracefully
@@ -214,7 +214,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
         }
 
         @Test
-        void generateUsersAndTweets_WhenTweetsApiReturns500_ShouldHandleGracefully() throws Exception {
+        void baseScript_WhenTweetsApiReturns500_ShouldHandleGracefully() throws Exception {
             int nUsers = 1;
             int nTweetsPerUser = 3;
             int lUsersForDeletion = 0;
@@ -224,7 +224,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
             stubBuilder.setupUsersStubs(nUsers);
             stubBuilder.setupTweetCreationError(500);
 
-            String responseJson = mockMvc.perform(post("/api/v1/admin-scripts/generate-users-and-tweets")
+            String responseJson = mockMvc.perform(post("/api/v1/admin-scripts/base-script")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk()) // Service handles errors gracefully
@@ -240,7 +240,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
         }
 
         @Test
-        void generateUsersAndTweets_WithThreeUsers_ShouldCreateFollowRelationships() throws Exception {
+        void baseScript_WithThreeUsers_ShouldCreateFollowRelationships() throws Exception {
             int nUsers = 3;
             int nTweetsPerUser = 2;
             int lUsersForDeletion = 0;
@@ -249,7 +249,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
 
             stubBuilder.setupFullScenario(nUsers, nTweetsPerUser, lUsersForDeletion);
 
-            String responseJson = mockMvc.perform(post("/api/v1/admin-scripts/generate-users-and-tweets")
+            String responseJson = mockMvc.perform(post("/api/v1/admin-scripts/base-script")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -277,7 +277,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
         }
 
         @Test
-        void generateUsersAndTweets_WhenFollowerApiReturns500_ShouldHandleGracefully() throws Exception {
+        void baseScript_WhenFollowerApiReturns500_ShouldHandleGracefully() throws Exception {
             int nUsers = 3;
             int nTweetsPerUser = 2;
             int lUsersForDeletion = 0;
@@ -290,7 +290,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
 
             stubBuilder.setupFollowCreationError(500);
 
-            String responseJson = mockMvc.perform(post("/api/v1/admin-scripts/generate-users-and-tweets")
+            String responseJson = mockMvc.perform(post("/api/v1/admin-scripts/base-script")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -311,7 +311,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
     class LikesAndRetweetsTests {
 
         @Test
-        void generateUsersAndTweets_WithEnoughTweetsAndUsers_ShouldCreateLikesAndRetweets() throws Exception {
+        void baseScript_WithEnoughTweetsAndUsers_ShouldCreateLikesAndRetweets() throws Exception {
             int nUsers = 3;
             int nTweetsPerUser = 3;
             int lUsersForDeletion = 0;
@@ -320,7 +320,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
 
             stubBuilder.setupFullScenario(nUsers, nTweetsPerUser, lUsersForDeletion);
 
-            String responseJson = mockMvc.perform(post("/api/v1/admin-scripts/generate-users-and-tweets")
+            String responseJson = mockMvc.perform(post("/api/v1/admin-scripts/base-script")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -340,7 +340,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
         }
 
         @Test
-        void generateUsersAndTweets_WhenLikeFails_ShouldHandleGracefully() throws Exception {
+        void baseScript_WhenLikeFails_ShouldHandleGracefully() throws Exception {
             int nUsers = 3;
             int nTweetsPerUser = 3;
             int lUsersForDeletion = 0;
@@ -362,7 +362,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
             // Setup retweets successfully
             stubBuilder.setupLikesAndRetweetsStubs(userTweetsMap, userIds);
 
-            String responseJson = mockMvc.perform(post("/api/v1/admin-scripts/generate-users-and-tweets")
+            String responseJson = mockMvc.perform(post("/api/v1/admin-scripts/base-script")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -378,7 +378,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
         }
 
         @Test
-        void generateUsersAndTweets_WhenRetweetFails_ShouldHandleGracefully() throws Exception {
+        void baseScript_WhenRetweetFails_ShouldHandleGracefully() throws Exception {
             int nUsers = 3;
             int nTweetsPerUser = 3;
             int lUsersForDeletion = 0;
@@ -396,7 +396,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
             // Setup retweet error for all tweets (409 Conflict - self-retweet/duplicate)
             stubBuilder.setupRetweetCreationErrorForAll(409);
 
-            String responseJson = mockMvc.perform(post("/api/v1/admin-scripts/generate-users-and-tweets")
+            String responseJson = mockMvc.perform(post("/api/v1/admin-scripts/base-script")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -415,7 +415,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
         }
 
         @Test
-        void generateUsersAndTweets_WithInsufficientTweets_ShouldSkipLikesAndRetweets() throws Exception {
+        void baseScript_WithInsufficientTweets_ShouldSkipLikesAndRetweets() throws Exception {
             int nUsers = 2;
             int nTweetsPerUser = 1;
             int lUsersForDeletion = 0;
@@ -424,7 +424,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
 
             stubBuilder.setupFullScenario(nUsers, nTweetsPerUser, lUsersForDeletion);
 
-            String responseJson = mockMvc.perform(post("/api/v1/admin-scripts/generate-users-and-tweets")
+            String responseJson = mockMvc.perform(post("/api/v1/admin-scripts/base-script")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -441,7 +441,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
         }
 
         @Test
-        void generateUsersAndTweets_WithInsufficientUsers_ShouldSkipLikesAndRetweets() throws Exception {
+        void baseScript_WithInsufficientUsers_ShouldSkipLikesAndRetweets() throws Exception {
             int nUsers = 1;
             int nTweetsPerUser = 6;
             int lUsersForDeletion = 0;
@@ -450,7 +450,7 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
 
             stubBuilder.setupFullScenario(nUsers, nTweetsPerUser, lUsersForDeletion);
 
-            String responseJson = mockMvc.perform(post("/api/v1/admin-scripts/generate-users-and-tweets")
+            String responseJson = mockMvc.perform(post("/api/v1/admin-scripts/base-script")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -467,4 +467,3 @@ public class GenerateUsersAndTweetsControllerTest extends BaseIntegrationTest {
         }
     }
 }
-

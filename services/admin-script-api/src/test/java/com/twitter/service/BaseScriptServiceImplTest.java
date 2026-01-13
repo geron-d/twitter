@@ -44,7 +44,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class GenerateUsersAndTweetsServiceImplTest {
+class BaseScriptServiceImplTest {
 
     @Mock
     private UsersGateway usersGateway;
@@ -1091,4 +1091,4 @@ class GenerateUsersAndTweetsServiceImplTest {
             verify(tweetsGateway, never()).retweetTweet(any(UUID.class), any(RetweetRequestDto.class));
         }
     }
-}
+}

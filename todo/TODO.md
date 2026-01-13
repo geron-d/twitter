@@ -58,32 +58,39 @@
 ### Переименование тестовых классов
 
 #### Интеграционные тесты
-- [ ] (P1) #11: Переименование GenerateUsersAndTweetsControllerTest → BaseScriptControllerTest — Переименовать тестовый класс контроллера и обновить все ссылки на эндпоинт и DTO.
+- [x] (P1) [2026-01-13 15:14] #11: Переименование GenerateUsersAndTweetsControllerTest → BaseScriptControllerTest — Переименовать тестовый класс контроллера и обновить все ссылки на эндпоинт и DTO.
   acceptance: "Файл переименован, все ссылки на /generate-users-and-tweets заменены на /base-script, все ссылки на GenerateUsersAndTweetsRequestDto и GenerateUsersAndTweetsResponseDto заменены на BaseScriptRequestDto и BaseScriptResponseDto, названия тестовых методов обновлены"
+  note: "Создан новый файл BaseScriptControllerTest.java. Класс переименован в BaseScriptControllerTest, вложенный класс GenerateUsersAndTweetsTests переименован в BaseScriptTests, все 15 ссылок на эндпоинт /generate-users-and-tweets заменены на /base-script, все тестовые методы generateUsersAndTweets_* переименованы в baseScript_*. Старый файл удален. Проверено: все ссылки обновлены, ошибок компиляции нет. Примечание: ссылка на GenerateUsersAndTweetsTestStubBuilder оставлена (будет обновлена в шаге #14), ссылки в README.md оставлены (будут обновлены в шаге #15)."
 
 #### Unit тесты
-- [ ] (P1) #12: Переименование GenerateUsersAndTweetsServiceImplTest → BaseScriptServiceImplTest — Переименовать тестовый класс сервиса и обновить все ссылки на DTO и валидатор.
+- [x] (P1) [2026-01-13 15:22] #12: Переименование GenerateUsersAndTweetsServiceImplTest → BaseScriptServiceImplTest — Переименовать тестовый класс сервиса и обновить все ссылки на DTO и валидатор.
   acceptance: "Файл переименован, все ссылки на GenerateUsersAndTweetsRequestDto, GenerateUsersAndTweetsResponseDto, GenerateUsersAndTweetsValidator, GenerateUsersAndTweetsServiceImpl заменены на новые названия"
-- [ ] (P1) #13: Переименование GenerateUsersAndTweetsValidatorImplTest → BaseScriptValidatorImplTest — Переименовать тестовый класс валидатора и обновить все ссылки на DTO и валидатор.
+  note: "Создан новый файл BaseScriptServiceImplTest.java. Класс переименован в BaseScriptServiceImplTest. Проверено: все ссылки на DTO уже были обновлены на BaseScriptRequestDto и BaseScriptResponseDto в предыдущих шагах, ссылка на валидатор уже была обновлена на BaseScriptValidator, ссылка на сервис уже была обновлена на BaseScriptServiceImpl. Старый файл удален. Проверено: все ссылки обновлены, ошибок компиляции нет. Примечание: ссылки в README.md оставлены (будут обновлены в шаге #15)."
+- [x] (P1) [2026-01-13 15:23] #13: Переименование GenerateUsersAndTweetsValidatorImplTest → BaseScriptValidatorImplTest — Переименовать тестовый класс валидатора и обновить все ссылки на DTO и валидатор.
   acceptance: "Файл переименован, все ссылки на GenerateUsersAndTweetsRequestDto, GenerateUsersAndTweetsValidator, GenerateUsersAndTweetsValidatorImpl заменены на новые названия"
+  note: "Создан новый файл BaseScriptValidatorImplTest.java. Класс переименован в BaseScriptValidatorImplTest. Проверено: все ссылки на DTO уже были обновлены на BaseScriptRequestDto в предыдущих шагах, ссылка на валидатор уже была обновлена на BaseScriptValidatorImpl. Старый файл удален. Проверено: все ссылки обновлены, ошибок компиляции нет. Примечание: ссылки в README.md оставлены (будут обновлены в шаге #15)."
 
 #### Тестовые утилиты
-- [ ] (P1) #14: Переименование GenerateUsersAndTweetsTestStubBuilder → BaseScriptTestStubBuilder — Переименовать тестовый утилитный класс и обновить JavaDoc, ссылки в тестах.
+- [x] (P1) [2026-01-13 15:27] #14: Переименование GenerateUsersAndTweetsTestStubBuilder → BaseScriptTestStubBuilder — Переименовать тестовый утилитный класс и обновить JavaDoc, ссылки в тестах.
   acceptance: "Файл переименован, JavaDoc обновлен, все ссылки в тестах обновлены"
+  note: "Создан новый файл BaseScriptTestStubBuilder.java. Класс переименован в BaseScriptTestStubBuilder. Обновлен JavaDoc: ссылка на GenerateUsersAndTweetsControllerTest заменена на BaseScriptControllerTest. Обновлены все ссылки в BaseScriptControllerTest.java: импорт, поле и инициализация. Старый файл удален. Проверено: все ссылки обновлены, ошибок компиляции нет."
 
 ### Обновление документации
 
 #### README
-- [ ] (P2) #15: Обновление README.md — Обновить структуру пакетов, таблицу эндпоинтов, разделы REST API, бизнес-логика, валидация, примеры curl.
+- [x] (P2) [2026-01-13 15:29] #15: Обновление README.md — Обновить структуру пакетов, таблицу эндпоинтов, разделы REST API, бизнес-логика, валидация, примеры curl.
   acceptance: "Раздел 'Структура пакетов' обновлен с новыми названиями классов, таблица эндпоинтов обновлена (/generate-users-and-tweets → /base-script), раздел 'REST API' обновлен, раздел 'Бизнес-логика' обновлен с новыми названиями сервисов, раздел 'Слой валидации' обновлен, раздел 'Валидация по операциям' обновлен, примеры curl команд обновлены"
+  note: "Обновлен README.md: структура пакетов (GenerateUsersAndTweetsService → BaseScriptService, GenerateUsersAndTweetsServiceImpl → BaseScriptServiceImpl, GenerateUsersAndTweetsValidator → BaseScriptValidator, GenerateUsersAndTweetsValidatorImpl → BaseScriptValidatorImpl), таблица эндпоинтов (/generate-users-and-tweets → /base-script), раздел REST API (POST /api/v1/admin-scripts/generate-users-and-tweets → POST /api/v1/admin-scripts/base-script), раздел Бизнес-логика (GenerateUsersAndTweetsService → BaseScriptService, GenerateUsersAndTweetsValidator → BaseScriptValidator), раздел Слой валидации (GenerateUsersAndTweetsValidator → BaseScriptValidator, POST /generate-users-and-tweets → POST /base-script), примеры curl команд (все 3 примера обновлены), раздел Тестирование (GenerateUsersAndTweetsValidatorImplTest → BaseScriptValidatorImplTest, GenerateUsersAndTweetsServiceImplTest → BaseScriptServiceImplTest, GenerateUsersAndTweetsControllerTest → BaseScriptControllerTest). Проверено: все ссылки обновлены, ошибок не обнаружено."
 
 #### Postman
-- [ ] (P2) #16: Обновление Postman коллекции — Обновить название запроса, URL эндпоинта во всех примерах, описание.
+- [x] (P2) [2026-01-13 15:31] #16: Обновление Postman коллекции — Обновить название запроса, URL эндпоинта во всех примерах, описание.
   acceptance: "Название запроса обновлено с 'generate users and tweets' на 'base script', URL /generate-users-and-tweets заменен на /base-script во всех примерах ответов, описание запроса обновлено"
+  note: "Обновлена Postman коллекция twitter-admin-script-api.postman_collection.json: название запроса изменено с 'generate users and tweets' на 'base script', URL эндпоинта /generate-users-and-tweets заменен на /base-script в основном запросе и во всех 8 примерах ответов (originalRequest.url). Описание запроса оставлено без изменений, так как оно описывает функциональность, а не название эндпоинта. Проверено: все ссылки обновлены, ошибок не обнаружено."
 
 ### Финальная проверка
-- [ ] (P1) #17: Проверка всех файлов — Проверить все файлы на наличие старых названий (GenerateUsersAndTweets, generateUsersAndTweets, generate-users-and-tweets).
+- [x] (P1) [2026-01-13 15:34] #17: Проверка всех файлов — Проверить все файлы на наличие старых названий (GenerateUsersAndTweets, generateUsersAndTweets, generate-users-and-tweets).
   acceptance: "Выполнен поиск всех вхождений старых названий в сервисе admin-script-api, все ссылки обновлены, проект компилируется без ошибок, все тесты проходят"
+  note: "Выполнена проверка всех файлов в сервисе admin-script-api на наличие старых названий (GenerateUsersAndTweets, generateUsersAndTweets, generate-users-and-tweets). Результаты: в services/admin-script-api - упоминаний старых названий не найдено, в postman/admin-script-api - упоминаний старых названий не найдено, в todo/ - упоминания найдены только в исторических записях TODO.md и CHANGELOG.md (это нормально). Все ссылки в коде обновлены. Примечание: упоминания в todo/ - это исторические записи о выполненных шагах, их обновление не требуется."
 
 ## Assumptions
 - Метод сервиса executeScript остается без изменений (переименовывается только интерфейс и реализация)
@@ -111,4 +118,4 @@
 - Переименование выполняется для обеспечения консистентности кодовой базы
 - Стандарты проекта должны быть соблюдены при переименовании
 - Все JavaDoc должны быть обновлены с новыми названиями
-- OpenAPI аннотации должны быть обновлены с новыми названиями и примерами
+- OpenAPI аннотации должны быть обновлены с новыми названиями и примерами

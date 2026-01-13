@@ -12,7 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-class GenerateUsersAndTweetsValidatorImplTest {
+class BaseScriptValidatorImplTest {
 
     @InjectMocks
     private BaseScriptValidatorImpl validator;
@@ -78,4 +78,4 @@ class GenerateUsersAndTweetsValidatorImplTest {
                 });
         }
     }
-}
+}

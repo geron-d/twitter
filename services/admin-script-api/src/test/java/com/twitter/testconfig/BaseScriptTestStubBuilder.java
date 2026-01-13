@@ -19,10 +19,10 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 /**
- * Builder class for setting up WireMock stubs in GenerateUsersAndTweetsControllerTest.
+ * Builder class for setting up WireMock stubs in BaseScriptControllerTest.
  * <p>
  * This class provides methods to create test data (DTOs) and configure WireMock stubs
- * for testing the generate-users-and-tweets endpoint. It encapsulates the repetitive
+ * for testing the base-script endpoint. It encapsulates the repetitive
  * logic of creating users and tweets test data and setting up corresponding stubs.
  * <p>
  * The builder uses instance-based approach for better flexibility and testability.
@@ -30,7 +30,7 @@ import java.util.*;
  * @author geron
  * @version 1.0
  */
-public final class GenerateUsersAndTweetsTestStubBuilder {
+public final class BaseScriptTestStubBuilder {
 
     private final WireMockServer wireMockServer;
     private final ObjectMapper objectMapper;
@@ -41,7 +41,7 @@ public final class GenerateUsersAndTweetsTestStubBuilder {
      * @param wireMockServer the WireMock server instance for setting up stubs
      * @param objectMapper   the ObjectMapper for JSON serialization
      */
-    public GenerateUsersAndTweetsTestStubBuilder(WireMockServer wireMockServer, ObjectMapper objectMapper) {
+    public BaseScriptTestStubBuilder(WireMockServer wireMockServer, ObjectMapper objectMapper) {
         this.wireMockServer = wireMockServer;
         this.objectMapper = objectMapper;
     }
@@ -587,4 +587,3 @@ public final class GenerateUsersAndTweetsTestStubBuilder {
         }
     }
 }
-
