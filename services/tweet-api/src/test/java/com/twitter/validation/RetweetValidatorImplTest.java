@@ -3,7 +3,7 @@ package com.twitter.validation;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.FormatValidationException;
 import com.twitter.common.exception.validation.UniquenessValidationException;
-import com.twitter.dto.request.RetweetRequestDto;
+import com.twitter.common.dto.request.RetweetRequestDto;
 import com.twitter.entity.Tweet;
 import com.twitter.gateway.UserGateway;
 import com.twitter.repository.RetweetRepository;

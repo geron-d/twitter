@@ -2,7 +2,7 @@ package com.twitter.validation;
 
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.UniquenessValidationException;
-import com.twitter.dto.request.LikeTweetRequestDto;
+import com.twitter.common.dto.request.LikeTweetRequestDto;
 import com.twitter.entity.Tweet;
 import com.twitter.gateway.UserGateway;
 import com.twitter.repository.LikeRepository;
