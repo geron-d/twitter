@@ -1,3 +1,2 @@
-Изменить в AdminScriptController название эндпоинта generateUsersAndTweets на baseScript.
-Также нужно изменить название GenerateUsersAndTweetsService на BaseScriptService и метод в нем.
-Нужно также проверить весь сервис и обновить в остальных местах данные
+Проанализировать services.
+Проверить все дто, которые используются в нескольких сервисах, найти все которые не находятся в common-lib и вынести их в common-lib
