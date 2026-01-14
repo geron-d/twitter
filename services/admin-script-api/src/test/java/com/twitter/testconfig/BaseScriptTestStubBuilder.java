@@ -4,8 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.twitter.common.dto.request.CreateTweetRequestDto;
 import com.twitter.common.dto.request.FollowRequestDto;
+import com.twitter.common.dto.request.LikeTweetRequestDto;
+import com.twitter.common.dto.request.RetweetRequestDto;
 import com.twitter.common.dto.request.UserRequestDto;
 import com.twitter.common.dto.response.FollowResponseDto;
+import com.twitter.common.dto.response.LikeResponseDto;
+import com.twitter.common.dto.response.RetweetResponseDto;
 import com.twitter.common.dto.response.TweetResponseDto;
 import com.twitter.common.dto.response.UserResponseDto;
 import com.twitter.common.enums.UserRole;
@@ -15,10 +19,10 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 /**
- * Builder class for setting up WireMock stubs in GenerateUsersAndTweetsControllerTest.
+ * Builder class for setting up WireMock stubs in BaseScriptControllerTest.
  * <p>
  * This class provides methods to create test data (DTOs) and configure WireMock stubs
- * for testing the generate-users-and-tweets endpoint. It encapsulates the repetitive
+ * for testing the base-script endpoint. It encapsulates the repetitive
  * logic of creating users and tweets test data and setting up corresponding stubs.
  * <p>
  * The builder uses instance-based approach for better flexibility and testability.
@@ -26,7 +30,7 @@ import java.util.*;
  * @author geron
  * @version 1.0
  */
-public final class GenerateUsersAndTweetsTestStubBuilder {
+public final class BaseScriptTestStubBuilder {
 
     private final WireMockServer wireMockServer;
     private final ObjectMapper objectMapper;
@@ -37,7 +41,7 @@ public final class GenerateUsersAndTweetsTestStubBuilder {
      * @param wireMockServer the WireMock server instance for setting up stubs
      * @param objectMapper   the ObjectMapper for JSON serialization
      */
-    public GenerateUsersAndTweetsTestStubBuilder(WireMockServer wireMockServer, ObjectMapper objectMapper) {
+    public BaseScriptTestStubBuilder(WireMockServer wireMockServer, ObjectMapper objectMapper) {
         this.wireMockServer = wireMockServer;
         this.objectMapper = objectMapper;
     }
@@ -322,6 +326,197 @@ public final class GenerateUsersAndTweetsTestStubBuilder {
     }
 
     /**
+     * Sets up WireMock stubs for creating likes.
+     * <p>
+     * This method creates test data for likes and configures WireMock stubs
+     * for the POST /api/v1/tweets/{tweetId}/like endpoint.
+     * <p>
+     * Since the actual service uses Collections.shuffle() which makes the order unpredictable,
+     * this method creates stubs for all possible combinations that could be created.
+     * <p>
+     * For each tweet, it creates stubs for all users (except the tweet author) to like it.
+     *
+     * @param userTweetsMap map of user ID to list of tweet IDs for that user
+     * @param userIds       list of all user IDs
+     */
+    public void setupLikesStubs(Map<UUID, List<UUID>> userTweetsMap, List<UUID> userIds) {
+        Map<UUID, UUID> tweetAuthorMap = new HashMap<>();
+        for (Map.Entry<UUID, List<UUID>> entry : userTweetsMap.entrySet()) {
+            UUID authorId = entry.getKey();
+            for (UUID tweetId : entry.getValue()) {
+                tweetAuthorMap.put(tweetId, authorId);
+            }
+        }
+        
+        for (Map.Entry<UUID, UUID> entry : tweetAuthorMap.entrySet()) {
+            UUID tweetId = entry.getKey();
+            UUID authorId = entry.getValue();
+
+            for (UUID userId : userIds) {
+                if (userId.equals(authorId)) {
+                    continue;
+                }
+                
+                LikeTweetRequestDto likeRequest = LikeTweetRequestDto.builder()
+                    .userId(userId)
+                    .build();
+                LikeResponseDto likeResponse = LikeResponseDto.builder()
+                    .id(UUID.randomUUID())
+                    .tweetId(tweetId)
+                    .userId(userId)
+                    .createdAt(LocalDateTime.now())
+                    .build();
+                WireMockStubHelper.setupLikeTweetStub(wireMockServer, objectMapper, tweetId, likeRequest, likeResponse);
+            }
+        }
+    }
+
+    /**
+     * Sets up WireMock stubs for creating retweets.
+     * <p>
+     * This method creates test data for retweets and configures WireMock stubs
+     * for the POST /api/v1/tweets/{tweetId}/retweet endpoint.
+     * <p>
+     * Since the actual service uses Collections.shuffle() which makes the order unpredictable,
+     * this method creates stubs for all possible combinations that could be created.
+     * <p>
+     * For each tweet, it creates stubs for all users (except the tweet author) to retweet it.
+     *
+     * @param userTweetsMap map of user ID to list of tweet IDs for that user
+     * @param userIds       list of all user IDs
+     */
+    public void setupRetweetsStubs(Map<UUID, List<UUID>> userTweetsMap, List<UUID> userIds) {
+        Map<UUID, UUID> tweetAuthorMap = new HashMap<>();
+        for (Map.Entry<UUID, List<UUID>> entry : userTweetsMap.entrySet()) {
+            UUID authorId = entry.getKey();
+            for (UUID tweetId : entry.getValue()) {
+                tweetAuthorMap.put(tweetId, authorId);
+            }
+        }
+        
+        for (Map.Entry<UUID, UUID> entry : tweetAuthorMap.entrySet()) {
+            UUID tweetId = entry.getKey();
+            UUID authorId = entry.getValue();
+
+            for (UUID userId : userIds) {
+                if (userId.equals(authorId)) {
+                    continue;
+                }
+                
+                RetweetRequestDto retweetRequest = RetweetRequestDto.builder()
+                    .userId(userId)
+                    .comment(null)
+                    .build();
+                RetweetResponseDto retweetResponse = RetweetResponseDto.builder()
+                    .id(UUID.randomUUID())
+                    .tweetId(tweetId)
+                    .userId(userId)
+                    .comment(null)
+                    .createdAt(LocalDateTime.now())
+                    .build();
+                WireMockStubHelper.setupRetweetTweetStub(wireMockServer, objectMapper, tweetId, retweetRequest, retweetResponse);
+            }
+        }
+    }
+
+    /**
+     * Sets up WireMock stubs for creating likes and retweets.
+     * <p>
+     * This method creates test data for likes and retweets and configures WireMock stubs
+     * for the POST /api/v1/tweets/{tweetId}/like and POST /api/v1/tweets/{tweetId}/retweet endpoints.
+     * <p>
+     * Since the actual service uses Collections.shuffle() which makes the order unpredictable,
+     * this method creates stubs for all possible combinations that could be created.
+     * <p>
+     * For each tweet, it creates stubs for all users (except the tweet author) to like/retweet it.
+     *
+     * @param userTweetsMap map of user ID to list of tweet IDs for that user
+     * @param userIds       list of all user IDs
+     */
+    public void setupLikesAndRetweetsStubs(Map<UUID, List<UUID>> userTweetsMap, List<UUID> userIds) {
+        Map<UUID, UUID> tweetAuthorMap = new HashMap<>();
+        for (Map.Entry<UUID, List<UUID>> entry : userTweetsMap.entrySet()) {
+            UUID authorId = entry.getKey();
+            for (UUID tweetId : entry.getValue()) {
+                tweetAuthorMap.put(tweetId, authorId);
+            }
+        }
+        
+        for (Map.Entry<UUID, UUID> entry : tweetAuthorMap.entrySet()) {
+            UUID tweetId = entry.getKey();
+            UUID authorId = entry.getValue();
+
+            for (UUID userId : userIds) {
+                if (userId.equals(authorId)) {
+                    continue;
+                }
+                
+                LikeTweetRequestDto likeRequest = LikeTweetRequestDto.builder()
+                    .userId(userId)
+                    .build();
+                LikeResponseDto likeResponse = LikeResponseDto.builder()
+                    .id(UUID.randomUUID())
+                    .tweetId(tweetId)
+                    .userId(userId)
+                    .createdAt(LocalDateTime.now())
+                    .build();
+                WireMockStubHelper.setupLikeTweetStub(wireMockServer, objectMapper, tweetId, likeRequest, likeResponse);
+                
+                RetweetRequestDto retweetRequest = RetweetRequestDto.builder()
+                    .userId(userId)
+                    .comment(null)
+                    .build();
+                RetweetResponseDto retweetResponse = RetweetResponseDto.builder()
+                    .id(UUID.randomUUID())
+                    .tweetId(tweetId)
+                    .userId(userId)
+                    .comment(null)
+                    .createdAt(LocalDateTime.now())
+                    .build();
+                WireMockStubHelper.setupRetweetTweetStub(wireMockServer, objectMapper, tweetId, retweetRequest, retweetResponse);
+            }
+        }
+    }
+
+    /**
+     * Sets up WireMock stub for like creation error.
+     * <p>
+     * This method configures a WireMock stub for the POST /api/v1/tweets/{tweetId}/like endpoint
+     * that returns an error response with the specified HTTP status code.
+     *
+     * @param tweetId    the tweet ID to like
+     * @param statusCode the HTTP status code to return
+     */
+    public void setupLikeCreationError(UUID tweetId, int statusCode) {
+        WireMockStubHelper.setupLikeTweetStubWithError(wireMockServer, tweetId, statusCode);
+    }
+
+    /**
+     * Sets up WireMock stub for retweet creation error.
+     * <p>
+     * This method configures a WireMock stub for the POST /api/v1/tweets/{tweetId}/retweet endpoint
+     * that returns an error response with the specified HTTP status code.
+     *
+     * @param tweetId    the tweet ID to retweet
+     * @param statusCode the HTTP status code to return
+     */
+    public void setupRetweetCreationError(UUID tweetId, int statusCode) {
+        WireMockStubHelper.setupRetweetTweetStubWithError(wireMockServer, tweetId, statusCode);
+    }
+
+    /**
+     * Sets up WireMock stub for retweet creation error for all tweets.
+     * <p>
+     * This method configures a WireMock stub for the POST /api/v1/tweets/{tweetId}/retweet endpoint
+     * that returns an error response with the specified HTTP status code for all retweet requests.
+     *
+     * @param statusCode the HTTP status code to return
+     */
+    public void setupRetweetCreationErrorForAll(int statusCode) {
+        WireMockStubHelper.setupRetweetTweetStubWithError(wireMockServer, null, statusCode);
+    }
+
+    /**
      * Sets up all WireMock stubs for a full scenario of generating users and tweets.
      * <p>
      * This method sets up stubs for:
@@ -331,6 +526,7 @@ public final class GenerateUsersAndTweetsTestStubBuilder {
      *   <li>Creating N tweets per user</li>
      *   <li>Getting tweets for each user</li>
      *   <li>Deleting the first N tweets (if nTweetsToDelete > 0)</li>
+     *   <li>Creating likes and retweets (if enough tweets and users exist)</li>
      * </ul>
      *
      * @param nUsers          number of users to create
@@ -353,6 +549,11 @@ public final class GenerateUsersAndTweetsTestStubBuilder {
         // Setup delete stubs for the first N tweets
         for (int i = 0; i < nTweetsToDelete && i < allTweetIds.size(); i++) {
             setupDeleteTweetStub(allTweetIds.get(i));
+        }
+
+        // Setup likes and retweets stubs (if enough tweets and users exist)
+        if (allTweetIds.size() >= 6 && userIds.size() >= 2) {
+            setupLikesAndRetweetsStubs(userTweetsMap, userIds);
         }
 
         return new TestStubData(userIds, followIds, allTweetIds);
@@ -386,4 +587,3 @@ public final class GenerateUsersAndTweetsTestStubBuilder {
         }
     }
 }
-

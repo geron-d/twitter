@@ -1,9 +1,9 @@
 package com.twitter.controller;
 
 import com.twitter.common.aspect.LoggableRequest;
-import com.twitter.dto.request.GenerateUsersAndTweetsRequestDto;
-import com.twitter.dto.response.GenerateUsersAndTweetsResponseDto;
-import com.twitter.service.GenerateUsersAndTweetsService;
+import com.twitter.dto.request.BaseScriptRequestDto;
+import com.twitter.dto.response.BaseScriptResponseDto;
+import com.twitter.service.BaseScriptService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,18 +25,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AdminScriptController implements AdminScriptApi {
 
-    private final GenerateUsersAndTweetsService generateUsersAndTweetsService;
+    private final BaseScriptService baseScriptService;
 
     /**
-     * @see AdminScriptApi#generateUsersAndTweets
+     * @see AdminScriptApi#baseScript
      */
     @LoggableRequest
-    @PostMapping("/generate-users-and-tweets")
+    @PostMapping("/base-script")
     @Override
-    public ResponseEntity<GenerateUsersAndTweetsResponseDto> generateUsersAndTweets(
-        @RequestBody @Valid GenerateUsersAndTweetsRequestDto requestDto) {
-        GenerateUsersAndTweetsResponseDto response = generateUsersAndTweetsService.executeScript(requestDto);
+    public ResponseEntity<BaseScriptResponseDto> baseScript(
+        @RequestBody @Valid BaseScriptRequestDto requestDto) {
+        BaseScriptResponseDto response = baseScriptService.executeScript(requestDto);
         return ResponseEntity.ok(response);
     }
 }
-
+

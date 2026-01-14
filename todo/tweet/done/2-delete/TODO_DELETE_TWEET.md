@@ -149,8 +149,8 @@
 - Только автор твита может удалить свой твит
 - Статистика (лайки, ретвиты) сохраняется при удалении
 - Ссылки на стандарты:
-  - [Архитектура сервиса](../TWEET_API_ARCHITECTURE.md)
-  - [План разработки](../TWEET_API_COMMON_2.md)
+  - [Архитектура сервиса](../0-base/TWEET_API_ARCHITECTURE.md)
+  - [План разработки](../0-base/TWEET_API_COMMON_2.md)
   - [Стандарты кода](../../../../standards/STANDART_CODE.md)
   - [Стандарты проекта](../../../../standards/STANDART_PROJECT.md)
   - [Стандарты тестирования](../../../../standards/STANDART_TEST.md)

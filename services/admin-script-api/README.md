@@ -10,7 +10,9 @@
 - ✅ Создание follow-отношений между пользователями (центральный пользователь фолловит половину остальных, половина остальных фолловят центрального)
 - ✅ Создание твитов для каждого пользователя с рандомным контентом
 - ✅ Удаление твитов у случайных пользователей для тестирования
-- ✅ Подробная статистика выполнения скрипта
+- ✅ Создание лайков для случайных твитов (половина, треть, 1 пользователь)
+- ✅ Создание ретвитов для случайных твитов (половина, треть, 1 пользователь)
+- ✅ Подробная статистика выполнения скрипта (включая количество созданных лайков и ретвитов)
 - ✅ Обработка частичных ошибок с graceful degradation
 - ✅ Интеграция с users-api через Feign Client
 - ✅ Интеграция с follower-api через Feign Client
@@ -33,16 +35,20 @@ com.twitter/
 │   └── AdminScriptController.java     # REST контроллер
 ├── dto/
 │   ├── request/
-│   │   └── GenerateUsersAndTweetsRequestDto.java  # DTO для запроса скрипта
+│   │   └── BaseScriptRequestDto.java  # DTO для запроса скрипта
 │   ├── response/
-│   │   ├── GenerateUsersAndTweetsResponseDto.java  # DTO для ответа скрипта
+│   │   ├── BaseScriptResponseDto.java  # DTO для ответа скрипта
 │   │   └── ScriptStatisticsDto.java               # DTO для статистики
 │   └── external/
 │       ├── UserRequestDto.java         # DTO для создания пользователя (users-api)
 │       ├── UserResponseDto.java        # DTO ответа users-api
 │       ├── CreateTweetRequestDto.java  # DTO для создания твита (tweet-api)
 │       ├── DeleteTweetRequestDto.java  # DTO для удаления твита (tweet-api)
-│       └── TweetResponseDto.java       # DTO ответа tweet-api
+│       ├── LikeTweetRequestDto.java    # DTO для создания лайка (tweet-api)
+│       ├── RetweetRequestDto.java     # DTO для создания ретвита (tweet-api)
+│       ├── TweetResponseDto.java       # DTO ответа tweet-api
+│       ├── LikeResponseDto.java       # DTO ответа лайка (tweet-api)
+│       └── RetweetResponseDto.java    # DTO ответа ретвита (tweet-api)
 ├── client/
 │   ├── UsersApiClient.java            # Feign клиент для users-api
 │   ├── FollowApiClient.java           # Feign клиент для follower-api
@@ -52,13 +58,13 @@ com.twitter/
 │   ├── FollowGateway.java            # Gateway для follower-api с обработкой ошибок
 │   └── TweetsGateway.java            # Gateway для tweet-api с обработкой ошибок
 ├── service/
-│   ├── GenerateUsersAndTweetsService.java      # Интерфейс сервиса
-│   └── GenerateUsersAndTweetsServiceImpl.java  # Реализация сервиса
+│   ├── BaseScriptService.java      # Интерфейс сервиса
+│   └── BaseScriptServiceImpl.java  # Реализация сервиса
 ├── util/
 │   └── RandomDataGenerator.java      # Генератор рандомных данных (Datafaker)
 ├── validation/
-│   ├── GenerateUsersAndTweetsValidator.java      # Интерфейс валидатора
-│   └── GenerateUsersAndTweetsValidatorImpl.java  # Реализация валидатора
+│   ├── BaseScriptValidator.java      # Интерфейс валидатора
+│   └── BaseScriptValidatorImpl.java  # Реализация валидатора
 └── config/
     ├── FeignConfig.java               # Конфигурация Feign
     └── OpenApiConfig.java             # Конфигурация OpenAPI
@@ -76,14 +82,14 @@ http://localhost:8083/api/v1/admin-scripts
 
 | Метод | Путь | Описание | Параметры | Тело запроса | Ответ |
 |-------|------|----------|-----------|--------------|-------|
-| `POST` | `/generate-users-and-tweets` | Выполнить административный скрипт | - | `GenerateUsersAndTweetsRequestDto` | `GenerateUsersAndTweetsResponseDto` |
+| `POST` | `/base-script` | Выполнить административный скрипт | - | `BaseScriptRequestDto` | `BaseScriptResponseDto` |
 
 ### Детальное описание эндпоинтов
 
 #### 1. Выполнение административного скрипта
 
 ```http
-POST /api/v1/admin-scripts/generate-users-and-tweets
+POST /api/v1/admin-scripts/base-script
 Content-Type: application/json
 ```
 
@@ -127,9 +133,12 @@ Content-Type: application/json
   "statistics": {
     "totalUsersCreated": 3,
     "totalTweetsCreated": 15,
+    "totalFollowsCreated": 2,
     "totalTweetsDeleted": 1,
     "usersWithTweets": 3,
     "usersWithoutTweets": 0,
+    "totalLikesCreated": 5,
+    "totalRetweetsCreated": 4,
     "executionTimeMs": 1234,
     "errors": []
   }
@@ -151,9 +160,12 @@ Content-Type: application/json
   "statistics": {
     "totalUsersCreated": 2,
     "totalTweetsCreated": 10,
+    "totalFollowsCreated": 1,
     "totalTweetsDeleted": 0,
     "usersWithTweets": 2,
     "usersWithoutTweets": 0,
+    "totalLikesCreated": 2,
+    "totalRetweetsCreated": 1,
     "executionTimeMs": 856,
     "errors": [
       "Validation failed: Business rule 'DELETION_COUNT_EXCEEDS_USERS_WITH_TWEETS' violated for context: Cannot delete tweets from 5 users: only 2 users have tweets"
@@ -200,15 +212,15 @@ Content-Type: application/json
 
 ## Бизнес-логика
 
-### GenerateUsersAndTweetsService
+### BaseScriptService
 
 Основной сервис для выполнения административного скрипта, реализующий следующие операции:
 
 #### Методы сервиса:
 
-1. **`executeScript(GenerateUsersAndTweetsRequestDto requestDto)`**
+1. **`executeScript(BaseScriptRequestDto requestDto)`**
    - Выполняет полный цикл административного скрипта
-   - Возвращает `GenerateUsersAndTweetsResponseDto` со списками ID и статистикой
+   - Возвращает `BaseScriptResponseDto` со списками ID и статистикой
    - Логика выполнения:
      - **Шаг 1:** Создание nUsers пользователей с рандомными данными через `RandomDataGenerator` и `UsersGateway`
      - **Шаг 1.5:** Создание follow-отношений между пользователями:
@@ -217,11 +229,17 @@ Content-Type: application/json
        - Центральный пользователь фолловит половину остальных пользователей
        - Половина остальных пользователей фолловят центрального пользователя
        - Создание follow-отношений через `FollowGateway` с обработкой ошибок
-     - **Шаг 2:** Создание nTweetsPerUser твитов для каждого успешно созданного пользователя через `RandomDataGenerator` и `TweetsGateway`
+     - **Шаг 2:** Создание nTweetsPerUser твитов для каждого успешно созданного пользователя через `RandomDataGenerator` и `TweetsGateway` (кэширование TweetResponseDto для последующего использования)
      - **Шаг 3:** Подсчёт пользователей с твитами и без твитов через `TweetsGateway.getUserTweets()`
-     - **Шаг 4:** Валидация параметра lUsersForDeletion через `GenerateUsersAndTweetsValidator` (проверка, что lUsersForDeletion <= usersWithTweetsCount)
+     - **Шаг 4:** Валидация параметра lUsersForDeletion через `BaseScriptValidator` (проверка, что lUsersForDeletion <= usersWithTweetsCount)
      - **Шаг 5:** Выбор l случайных пользователей с твитами и удаление по 1 твиту у каждого через `TweetsGateway.deleteTweet()`
-     - **Шаг 6:** Сбор статистики (totalUsersCreated, totalFollowsCreated, totalTweetsCreated, totalTweetsDeleted, usersWithTweets, usersWithoutTweets, executionTimeMs, errors)
+     - **Шаг 6:** Создание лайков для случайного твита (половина пользователей, исключая автора твита) через `TweetsGateway.likeTweet()`
+     - **Шаг 7:** Создание лайков для другого случайного твита (треть пользователей, исключая автора твита) через `TweetsGateway.likeTweet()`
+     - **Шаг 8:** Создание одного лайка для другого случайного твита (1 пользователь, исключая автора твита) через `TweetsGateway.likeTweet()`
+     - **Шаг 9:** Создание ретвитов для другого случайного твита (половина пользователей, исключая автора твита) через `TweetsGateway.retweetTweet()`
+     - **Шаг 10:** Создание ретвитов для другого случайного твита (треть пользователей, исключая автора твита) через `TweetsGateway.retweetTweet()`
+     - **Шаг 11:** Создание одного ретвита для другого случайного твита (1 пользователь, исключая автора твита) через `TweetsGateway.retweetTweet()`
+     - **Шаг 12:** Сбор статистики (totalUsersCreated, totalFollowsCreated, totalTweetsCreated, totalTweetsDeleted, usersWithTweets, usersWithoutTweets, totalLikesCreated, totalRetweetsCreated, executionTimeMs, errors)
 
 ### Ключевые бизнес-правила:
 
@@ -250,6 +268,16 @@ Content-Type: application/json
    - Собираются все ошибки, возникшие во время выполнения
    - Подсчитывается количество созданных follow-отношений (totalFollowsCreated)
    - Подсчитывается количество пользователей с твитами и без твитов
+   - Подсчитывается количество созданных лайков (totalLikesCreated)
+   - Подсчитывается количество созданных ретвитов (totalRetweetsCreated)
+
+6. **Создание лайков и ретвитов (шаги 6-11):**
+   - Для каждой операции выбирается случайный твит из созданных (6 разных твитов для 6 операций)
+   - Пользователи выбираются случайно, исключая автора твита (для избежания self-like/self-retweet ошибок)
+   - Используется `Collections.shuffle()` для случайного выбора твитов и пользователей
+   - Ошибки (self-like, self-retweet, дубликаты) обрабатываются gracefully: логируются и добавляются в errors, выполнение продолжается
+   - Требуется минимум 6 твитов и 2 пользователя для выполнения всех шагов
+   - TweetResponseDto кэшируются при создании твитов для оптимизации (получение автора твита без дополнительных запросов)
 
 ## Слой валидации
 
@@ -258,15 +286,15 @@ Content-Type: application/json
 Валидация в сервисе выполняется на двух уровнях:
 
 1. **Bean Validation** (Jakarta Validation) - валидация на уровне DTO
-2. **Business Rule Validation** - валидация бизнес-правил через `GenerateUsersAndTweetsValidator`
+2. **Business Rule Validation** - валидация бизнес-правил через `BaseScriptValidator`
 
-### GenerateUsersAndTweetsValidator
+### BaseScriptValidator
 
 Валидатор для проверки бизнес-правил выполнения скрипта.
 
 #### Методы валидатора:
 
-1. **`validateDeletionCount(GenerateUsersAndTweetsRequestDto requestDto, int usersWithTweetsCount)`**
+1. **`validateDeletionCount(BaseScriptRequestDto requestDto, int usersWithTweetsCount)`**
    - Проверяет, что `lUsersForDeletion` не превышает количество пользователей с твитами
    - Выбрасывает `BusinessRuleValidationException` при нарушении правила
    - Обрабатывает случай `lUsersForDeletion = 0` (валидация проходит)
@@ -314,7 +342,7 @@ Content-Type: application/json
 
 ### Валидация по операциям
 
-#### Выполнение скрипта (POST /generate-users-and-tweets)
+#### Выполнение скрипта (POST /base-script)
 
 **Bean Validation:**
 - `nUsers` - обязательное поле, @NotNull, @Min(1), @Max(1000)
@@ -375,6 +403,8 @@ Feign клиент для интеграции с tweet-api.
 - `createTweet(CreateTweetRequestDto createTweetRequest) -> TweetResponseDto` - создание твита
 - `deleteTweet(UUID tweetId, DeleteTweetRequestDto deleteTweetRequest) -> void` - удаление твита
 - `getUserTweets(UUID userId, Pageable pageable) -> Page<TweetResponseDto>` - получение твитов пользователя
+- `likeTweet(UUID tweetId, LikeTweetRequestDto likeTweetRequest) -> LikeResponseDto` - создание лайка
+- `retweetTweet(UUID tweetId, RetweetRequestDto retweetRequest) -> RetweetResponseDto` - создание ретвита
 
 **Использование:**
 - Вызывается через `TweetsGateway` для обработки ошибок и логирования
@@ -406,6 +436,18 @@ Gateway для обёртки вызовов `TweetsApiClient` с обработ
 - Обработка исключений через try-catch с логированием
 - Пробрасывание исключений дальше для обработки в Service слое
 
+**Методы:**
+- `createTweet(CreateTweetRequestDto createTweetRequest) -> TweetResponseDto` - создание твита
+- `deleteTweet(UUID tweetId, DeleteTweetRequestDto deleteTweetRequest) -> void` - удаление твита
+- `getUserTweets(UUID userId, Pageable pageable) -> Page<TweetResponseDto>` - получение твитов пользователя
+- `likeTweet(UUID tweetId, LikeTweetRequestDto likeTweetRequest) -> LikeResponseDto` - создание лайка
+- `retweetTweet(UUID tweetId, RetweetRequestDto retweetRequest) -> RetweetResponseDto` - создание ретвита
+
+**Обработка ошибок:**
+- Все исключения логируются с детальной информацией
+- Исключения пробрасываются как RuntimeException для обработки в Service слое
+- HTTP 409 ошибки (self-like, self-retweet, дубликаты) должны обрабатываться gracefully в Service слое
+
 ### Процесс выполнения скрипта
 
 1. **Создание пользователей:**
@@ -436,6 +478,20 @@ Gateway для обёртки вызовов `TweetsApiClient` с обработ
    - Выбирается случайный твит и удаляется через `TweetsGateway.deleteTweet()`
    - Ошибки обрабатываются gracefully
 
+6. **Создание лайков (шаги 6-8):**
+   - Выбирается случайный твит из созданных (разные твиты для каждой операции)
+   - Получается автор твита из кэша TweetResponseDto
+   - Выбираются пользователи случайно, исключая автора твита
+   - Создаются лайки через `TweetsGateway.likeTweet()` для выбранных пользователей
+   - Ошибки (self-like, дубликаты) обрабатываются gracefully
+
+7. **Создание ретвитов (шаги 9-11):**
+   - Выбирается случайный твит из созданных (разные твиты для каждой операции, не использованные в шагах 6-8)
+   - Получается автор твита из кэша TweetResponseDto
+   - Выбираются пользователи случайно, исключая автора твита
+   - Создаются ретвиты через `TweetsGateway.retweetTweet()` для выбранных пользователей (comment = null)
+   - Ошибки (self-retweet, дубликаты) обрабатываются gracefully
+
 ### Обработка ошибок
 
 - **Частичные ошибки:** Ошибки при создании/удалении отдельных сущностей обрабатываются gracefully, логируются и добавляются в `statistics.errors`
@@ -447,7 +503,7 @@ Gateway для обёртки вызовов `TweetsApiClient` с обработ
 ### Выполнение скрипта с успешным результатом
 
 ```bash
-curl -X POST http://localhost:8083/api/v1/admin-scripts/generate-users-and-tweets \
+curl -X POST http://localhost:8083/api/v1/admin-scripts/base-script \
   -H "Content-Type: application/json" \
   -d '{
     "nUsers": 5,
@@ -487,6 +543,8 @@ curl -X POST http://localhost:8083/api/v1/admin-scripts/generate-users-and-tweet
     "totalTweetsDeleted": 2,
     "usersWithTweets": 5,
     "usersWithoutTweets": 0,
+    "totalLikesCreated": 8,
+    "totalRetweetsCreated": 6,
     "executionTimeMs": 2345,
     "errors": []
   }
@@ -496,7 +554,7 @@ curl -X POST http://localhost:8083/api/v1/admin-scripts/generate-users-and-tweet
 ### Выполнение скрипта с ошибкой валидации
 
 ```bash
-curl -X POST http://localhost:8083/api/v1/admin-scripts/generate-users-and-tweets \
+curl -X POST http://localhost:8083/api/v1/admin-scripts/base-script \
   -H "Content-Type: application/json" \
   -d '{
     "nUsers": 0,
@@ -520,7 +578,7 @@ curl -X POST http://localhost:8083/api/v1/admin-scripts/generate-users-and-tweet
 ### Выполнение скрипта с частичными ошибками
 
 ```bash
-curl -X POST http://localhost:8083/api/v1/admin-scripts/generate-users-and-tweets \
+curl -X POST http://localhost:8083/api/v1/admin-scripts/base-script \
   -H "Content-Type: application/json" \
   -d '{
     "nUsers": 2,
@@ -652,7 +710,7 @@ docker run -p 8083:8083 admin-script-api
 ### Валидация
 
 - Все входящие данные валидируются через Jakarta Validation
-- Кастомная валидация для бизнес-правил через `GenerateUsersAndTweetsValidator`
+- Кастомная валидация для бизнес-правил через `BaseScriptValidator`
 - Валидация параметров скрипта (nUsers, nTweetsPerUser, lUsersForDeletion)
 
 ### Логирование
@@ -673,10 +731,10 @@ docker run -p 8083:8083 admin-script-api
 
 - **Unit тесты** для всех компонентов:
   - `RandomDataGeneratorTest` - тесты генератора данных
-  - `GenerateUsersAndTweetsValidatorImplTest` - тесты валидатора
-  - `GenerateUsersAndTweetsServiceImplTest` - тесты сервиса
+  - `BaseScriptValidatorImplTest` - тесты валидатора
+  - `BaseScriptServiceImplTest` - тесты сервиса
 - **Integration тесты** с MockMvc и WireMock:
-  - `GenerateUsersAndTweetsControllerTest` - тесты контроллера с полным Spring контекстом
+  - `BaseScriptControllerTest` - тесты контроллера с полным Spring контекстом
 
 Запуск тестов:
 
@@ -687,9 +745,9 @@ docker run -p 8083:8083 admin-script-api
 ### Покрытие тестами
 
 - `RandomDataGeneratorTest` - тесты всех методов генерации данных, проверка уникальности и ограничений
-- `GenerateUsersAndTweetsValidatorImplTest` - тесты валидации параметров удаления
-- `GenerateUsersAndTweetsServiceImplTest` - тесты полного цикла выполнения скрипта
-- `GenerateUsersAndTweetsControllerTest` - тесты REST эндпоинта с мокированием внешних сервисов
+- `BaseScriptValidatorImplTest` - тесты валидации параметров удаления
+- `BaseScriptServiceImplTest` - тесты полного цикла выполнения скрипта
+- `BaseScriptControllerTest` - тесты REST эндпоинта с мокированием внешних сервисов
 
 ### Использование Datafaker
 

@@ -1276,3 +1276,41 @@
 - Проверены все файлы сервиса admin-script-api
 - Все стандарты соответствуют требованиям проекта
 
+## 2026-01-13
+
+### Step #11 (TODO.md): Переименование GenerateUsersAndTweetsControllerTest → BaseScriptControllerTest
+**Время:** 2026-01-13 15:14  
+**Автор:** assistant
+
+**Выполнено:**
+- Создан новый файл `BaseScriptControllerTest.java` в пакете `com.twitter.controller`
+- Переименован класс `GenerateUsersAndTweetsControllerTest` → `BaseScriptControllerTest`
+- Переименован вложенный класс `GenerateUsersAndTweetsTests` → `BaseScriptTests`
+- Обновлены все 15 ссылок на эндпоинт `/api/v1/admin-scripts/generate-users-and-tweets` → `/api/v1/admin-scripts/base-script`
+- Переименованы все тестовые методы `generateUsersAndTweets_*` → `baseScript_*`:
+  - `generateUsersAndTweets_WithValidData_ShouldReturn200Ok` → `baseScript_WithValidData_ShouldReturn200Ok`
+  - `generateUsersAndTweets_WithNullNUsers_ShouldReturn400BadRequest` → `baseScript_WithNullNUsers_ShouldReturn400BadRequest`
+  - `generateUsersAndTweets_WithNUsersExceedingMax_ShouldReturn400BadRequest` → `baseScript_WithNUsersExceedingMax_ShouldReturn400BadRequest`
+  - `generateUsersAndTweets_WithNTweetsPerUserLessThanOne_ShouldReturn400BadRequest` → `baseScript_WithNTweetsPerUserLessThanOne_ShouldReturn400BadRequest`
+  - `generateUsersAndTweets_WithNTweetsPerUserExceedingMax_ShouldReturn400BadRequest` → `baseScript_WithNTweetsPerUserExceedingMax_ShouldReturn400BadRequest`
+  - `generateUsersAndTweets_WithLUsersForDeletionNegative_ShouldReturn400BadRequest` → `baseScript_WithLUsersForDeletionNegative_ShouldReturn400BadRequest`
+  - `generateUsersAndTweets_WithLUsersForDeletionExceedingUsersWithTweets_ShouldReturn400BadRequest` → `baseScript_WithLUsersForDeletionExceedingUsersWithTweets_ShouldReturn400BadRequest`
+  - `generateUsersAndTweets_WhenUsersApiReturns500_ShouldHandleGracefully` → `baseScript_WhenUsersApiReturns500_ShouldHandleGracefully`
+  - `generateUsersAndTweets_WhenTweetsApiReturns500_ShouldHandleGracefully` → `baseScript_WhenTweetsApiReturns500_ShouldHandleGracefully`
+  - `generateUsersAndTweets_WithThreeUsers_ShouldCreateFollowRelationships` → `baseScript_WithThreeUsers_ShouldCreateFollowRelationships`
+  - `generateUsersAndTweets_WhenFollowerApiReturns500_ShouldHandleGracefully` → `baseScript_WhenFollowerApiReturns500_ShouldHandleGracefully`
+  - `generateUsersAndTweets_WithEnoughTweetsAndUsers_ShouldCreateLikesAndRetweets` → `baseScript_WithEnoughTweetsAndUsers_ShouldCreateLikesAndRetweets`
+  - `generateUsersAndTweets_WhenLikeFails_ShouldHandleGracefully` → `baseScript_WhenLikeFails_ShouldHandleGracefully`
+  - `generateUsersAndTweets_WhenRetweetFails_ShouldHandleGracefully` → `baseScript_WhenRetweetFails_ShouldHandleGracefully`
+  - `generateUsersAndTweets_WithInsufficientTweets_ShouldSkipLikesAndRetweets` → `baseScript_WithInsufficientTweets_ShouldSkipLikesAndRetweets`
+  - `generateUsersAndTweets_WithInsufficientUsers_ShouldSkipLikesAndRetweets` → `baseScript_WithInsufficientUsers_ShouldSkipLikesAndRetweets`
+- Удален старый файл `GenerateUsersAndTweetsControllerTest.java`
+- Проверено: все ссылки на DTO уже были обновлены на `BaseScriptRequestDto` и `BaseScriptResponseDto` в предыдущих шагах
+- Примечание: ссылка на `GenerateUsersAndTweetsTestStubBuilder` оставлена (будет обновлена в шаге #14)
+- Примечание: ссылки в `README.md` оставлены (будут обновлены в шаге #15)
+- Проверка линтера: ошибок не обнаружено
+- Проверка компиляции: проект компилируется без ошибок
+
+**Артефакты:**
+- `services/admin-script-api/src/test/java/com/twitter/controller/BaseScriptControllerTest.java` - создан
+- `services/admin-script-api/src/test/java/com/twitter/controller/GenerateUsersAndTweetsControllerTest.java` - удален

@@ -2,6 +2,10 @@ package com.twitter.client;
 
 import com.twitter.common.dto.request.CreateTweetRequestDto;
 import com.twitter.common.dto.request.DeleteTweetRequestDto;
+import com.twitter.common.dto.request.LikeTweetRequestDto;
+import com.twitter.common.dto.request.RetweetRequestDto;
+import com.twitter.common.dto.response.LikeResponseDto;
+import com.twitter.common.dto.response.RetweetResponseDto;
 import com.twitter.common.dto.response.TweetResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.SpringQueryMap;
@@ -59,5 +63,31 @@ public interface TweetsApiClient {
         @PathVariable("userId") UUID userId,
         @SpringQueryMap Pageable pageable
     );
-}
 
+    /**
+     * Likes a tweet in the tweet-api service.
+     *
+     * @param tweetId          the unique identifier of the tweet to like
+     * @param likeTweetRequest DTO containing userId for the like operation
+     * @return LikeResponseDto containing the created like information including ID, tweetId, userId, and createdAt
+     */
+    @PostMapping("/{tweetId}/like")
+    LikeResponseDto likeTweet(
+        @PathVariable("tweetId") UUID tweetId,
+        @RequestBody LikeTweetRequestDto likeTweetRequest
+    );
+
+    /**
+     * Retweets a tweet in the tweet-api service.
+     *
+     * @param tweetId         the unique identifier of the tweet to retweet
+     * @param retweetRequest  DTO containing userId and optional comment for the retweet operation
+     * @return RetweetResponseDto containing the created retweet information including ID, tweetId, userId, comment, and createdAt
+     */
+    @PostMapping("/{tweetId}/retweet")
+    RetweetResponseDto retweetTweet(
+        @PathVariable("tweetId") UUID tweetId,
+        @RequestBody RetweetRequestDto retweetRequest
+    );
+}
+

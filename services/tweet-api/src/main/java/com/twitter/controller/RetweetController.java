@@ -1,8 +1,8 @@
 package com.twitter.controller;
 
 import com.twitter.common.aspect.LoggableRequest;
-import com.twitter.dto.request.RetweetRequestDto;
-import com.twitter.dto.response.RetweetResponseDto;
+import com.twitter.common.dto.request.RetweetRequestDto;
+import com.twitter.common.dto.response.RetweetResponseDto;
 import com.twitter.service.RetweetService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

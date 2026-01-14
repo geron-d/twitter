@@ -12,7 +12,7 @@
 			"description": "API for executing administrative scripts in the Twitter system",
 			"item": [
 				{
-					"name": "generate users and tweets",
+					"name": "base script",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -37,7 +37,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/admin-scripts/generate-users-and-tweets",
+							"raw": "{{baseUrl}}/api/v1/admin-scripts/base-script",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -45,7 +45,7 @@
 								"api",
 								"v1",
 								"admin-scripts",
-								"generate-users-and-tweets"
+								"base-script"
 							]
 						},
 						"description": "Executes an administrative script that creates multiple users with random data, creates follow relationships between users (central user follows half of others, half of others follow central user), adds tweets for each user, and deletes one tweet from a specified number of random users. Parameters: nUsers (1-1000), nTweetsPerUser (1-100), lUsersForDeletion (0+, must not exceed number of users with tweets). The script uses Datafaker library for generating realistic test data. All errors during execution are collected and returned in statistics.errors field."
@@ -77,7 +77,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{baseUrl}}/api/v1/admin-scripts/generate-users-and-tweets",
+									"raw": "{{baseUrl}}/api/v1/admin-scripts/base-script",
 									"host": [
 										"{{baseUrl}}"
 									],
@@ -85,7 +85,7 @@
 										"api",
 										"v1",
 										"admin-scripts",
-										"generate-users-and-tweets"
+										"base-script"
 									]
 								}
 							},
@@ -127,7 +127,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{baseUrl}}/api/v1/admin-scripts/generate-users-and-tweets",
+									"raw": "{{baseUrl}}/api/v1/admin-scripts/base-script",
 									"host": [
 										"{{baseUrl}}"
 									],
@@ -135,7 +135,7 @@
 										"api",
 										"v1",
 										"admin-scripts",
-										"generate-users-and-tweets"
+										"base-script"
 									]
 								}
 							},
@@ -177,7 +177,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{baseUrl}}/api/v1/admin-scripts/generate-users-and-tweets",
+									"raw": "{{baseUrl}}/api/v1/admin-scripts/base-script",
 									"host": [
 										"{{baseUrl}}"
 									],
@@ -185,7 +185,7 @@
 										"api",
 										"v1",
 										"admin-scripts",
-										"generate-users-and-tweets"
+										"base-script"
 									]
 								}
 							},
@@ -227,7 +227,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{baseUrl}}/api/v1/admin-scripts/generate-users-and-tweets",
+									"raw": "{{baseUrl}}/api/v1/admin-scripts/base-script",
 									"host": [
 										"{{baseUrl}}"
 									],
@@ -235,7 +235,7 @@
 										"api",
 										"v1",
 										"admin-scripts",
-										"generate-users-and-tweets"
+										"base-script"
 									]
 								}
 							},
@@ -277,7 +277,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{baseUrl}}/api/v1/admin-scripts/generate-users-and-tweets",
+									"raw": "{{baseUrl}}/api/v1/admin-scripts/base-script",
 									"host": [
 										"{{baseUrl}}"
 									],
@@ -285,7 +285,7 @@
 										"api",
 										"v1",
 										"admin-scripts",
-										"generate-users-and-tweets"
+										"base-script"
 									]
 								}
 							},
@@ -327,7 +327,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{baseUrl}}/api/v1/admin-scripts/generate-users-and-tweets",
+									"raw": "{{baseUrl}}/api/v1/admin-scripts/base-script",
 									"host": [
 										"{{baseUrl}}"
 									],
@@ -335,7 +335,7 @@
 										"api",
 										"v1",
 										"admin-scripts",
-										"generate-users-and-tweets"
+										"base-script"
 									]
 								}
 							},
@@ -377,7 +377,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{baseUrl}}/api/v1/admin-scripts/generate-users-and-tweets",
+									"raw": "{{baseUrl}}/api/v1/admin-scripts/base-script",
 									"host": [
 										"{{baseUrl}}"
 									],
@@ -385,7 +385,7 @@
 										"api",
 										"v1",
 										"admin-scripts",
-										"generate-users-and-tweets"
+										"base-script"
 									]
 								}
 							},
@@ -427,7 +427,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{baseUrl}}/api/v1/admin-scripts/generate-users-and-tweets",
+									"raw": "{{baseUrl}}/api/v1/admin-scripts/base-script",
 									"host": [
 										"{{baseUrl}}"
 									],
@@ -435,7 +435,7 @@
 										"api",
 										"v1",
 										"admin-scripts",
-										"generate-users-and-tweets"
+										"base-script"
 									]
 								}
 							},

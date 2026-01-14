@@ -3,8 +3,8 @@ package com.twitter.service;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.FormatValidationException;
 import com.twitter.common.exception.validation.UniquenessValidationException;
-import com.twitter.dto.request.RetweetRequestDto;
-import com.twitter.dto.response.RetweetResponseDto;
+import com.twitter.common.dto.request.RetweetRequestDto;
+import com.twitter.common.dto.response.RetweetResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

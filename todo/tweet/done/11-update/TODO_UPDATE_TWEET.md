@@ -128,7 +128,7 @@
   - [STANDART_SWAGGER.md](../../../../standards/STANDART_SWAGGER.md)
   - [STANDART_README.md](../../../../standards/STANDART_README.md)
   - [STANDART_POSTMAN.md](../../../../standards/STANDART_POSTMAN.md)
-- Архитектурный документ: [TWEET_API_ARCHITECTURE.md](../TWEET_API_ARCHITECTURE.md)
-- Общий план сервиса: [TWEET_API_COMMON_2.md](../TWEET_API_COMMON_2.md)
+- Архитектурный документ: [TWEET_API_ARCHITECTURE.md](../0-base/TWEET_API_ARCHITECTURE.md)
+- Общий план сервиса: [TWEET_API_COMMON_2.md](../0-base/TWEET_API_COMMON_2.md)
 
-
+

@@ -1,7 +1,7 @@
 package com.twitter.validation;
 
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
-import com.twitter.dto.request.GenerateUsersAndTweetsRequestDto;
+import com.twitter.dto.request.BaseScriptRequestDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -12,19 +12,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-class GenerateUsersAndTweetsValidatorImplTest {
+class BaseScriptValidatorImplTest {
 
     @InjectMocks
-    private GenerateUsersAndTweetsValidatorImpl validator;
+    private BaseScriptValidatorImpl validator;
 
     @Nested
     class ValidateDeletionCountTests {
 
-        private GenerateUsersAndTweetsRequestDto requestDto;
+        private BaseScriptRequestDto requestDto;
 
         @BeforeEach
         void setUp() {
-            requestDto = GenerateUsersAndTweetsRequestDto.builder()
+            requestDto = BaseScriptRequestDto.builder()
                 .nUsers(10)
                 .nTweetsPerUser(5)
                 .lUsersForDeletion(3)
@@ -63,7 +63,7 @@ class GenerateUsersAndTweetsValidatorImplTest {
 
         @Test
         void validateDeletionCount_WhenLUsersForDeletionIsLarge_ShouldThrowBusinessRuleValidationException() {
-            GenerateUsersAndTweetsRequestDto requestWithLargeDeletion = GenerateUsersAndTweetsRequestDto.builder()
+            BaseScriptRequestDto requestWithLargeDeletion = BaseScriptRequestDto.builder()
                 .nUsers(100)
                 .nTweetsPerUser(10)
                 .lUsersForDeletion(50)

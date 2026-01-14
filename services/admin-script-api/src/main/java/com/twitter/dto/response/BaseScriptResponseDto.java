@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Data Transfer Object for administrative script response with execution results.
+ * Data Transfer Object for base administrative script response with execution results.
  * <p>
- * This record represents the data structure returned after executing the administrative
+ * This record represents the data structure returned after executing the base administrative
  * script. It contains lists of created and deleted entity IDs, as well as detailed
  * statistics about the script execution.
  *
@@ -22,8 +22,8 @@ import java.util.UUID;
  * @version 1.0
  */
 @Schema(
-    name = "GenerateUsersAndTweetsResponse",
-    description = "Response data structure for administrative script execution results",
+    name = "BaseScriptResponse",
+    description = "Response data structure for base administrative script execution results",
     example = """
         {
           "createdUsers": [
@@ -54,7 +54,7 @@ import java.util.UUID;
         """
 )
 @Builder
-public record GenerateUsersAndTweetsResponseDto(
+public record BaseScriptResponseDto(
 
     /**
      * List of IDs of successfully created users.
@@ -122,4 +122,3 @@ public record GenerateUsersAndTweetsResponseDto(
     ScriptStatisticsDto statistics
 ) {
 }
-

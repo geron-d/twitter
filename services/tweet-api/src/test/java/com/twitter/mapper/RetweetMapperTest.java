@@ -1,7 +1,7 @@
 package com.twitter.mapper;
 
-import com.twitter.dto.request.RetweetRequestDto;
-import com.twitter.dto.response.RetweetResponseDto;
+import com.twitter.common.dto.request.RetweetRequestDto;
+import com.twitter.common.dto.response.RetweetResponseDto;
 import com.twitter.entity.Retweet;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

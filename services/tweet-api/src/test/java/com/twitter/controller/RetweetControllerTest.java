@@ -1,8 +1,8 @@
 package com.twitter.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.twitter.dto.request.RetweetRequestDto;
-import com.twitter.dto.response.RetweetResponseDto;
+import com.twitter.common.dto.request.RetweetRequestDto;
+import com.twitter.common.dto.response.RetweetResponseDto;
 import com.twitter.entity.Retweet;
 import com.twitter.entity.Tweet;
 import com.twitter.repository.RetweetRepository;
@@ -855,4 +855,4 @@ public class RetweetControllerTest extends BaseIntegrationTest {
         }
     }
 }
-
+

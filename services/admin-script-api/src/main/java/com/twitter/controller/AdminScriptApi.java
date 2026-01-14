@@ -1,7 +1,7 @@
 package com.twitter.controller;
 
-import com.twitter.dto.request.GenerateUsersAndTweetsRequestDto;
-import com.twitter.dto.response.GenerateUsersAndTweetsResponseDto;
+import com.twitter.dto.request.BaseScriptRequestDto;
+import com.twitter.dto.response.BaseScriptResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -24,7 +24,7 @@ import org.springframework.http.ResponseEntity;
 public interface AdminScriptApi {
 
     /**
-     * Executes the administrative script to generate users, follow relationships and tweets.
+     * Executes the base administrative script.
      * <p>
      * This endpoint executes an administrative script that performs the following operations:
      * <ul>
@@ -37,11 +37,11 @@ public interface AdminScriptApi {
      * <p>
      *
      * @param requestDto DTO containing script parameters (nUsers, nTweetsPerUser, lUsersForDeletion)
-     * @return ResponseEntity containing GenerateUsersAndTweetsResponseDto with lists of IDs and execution statistics
+     * @return ResponseEntity containing BaseScriptResponseDto with lists of IDs and execution statistics
      */
     @Operation(
-        summary = "Generate users, follow relationships and tweets",
-        description = "Executes an administrative script that creates multiple users with random data, " +
+        summary = "Execute base script",
+        description = "Executes the base administrative script that creates multiple users with random data, " +
             "creates follow relationships between users (central user follows half of others, half of others follow central user), " +
             "adds tweets for each user, and deletes one tweet from a specified number of random users. " +
             "Parameters: nUsers (1-1000), nTweetsPerUser (1-100), " +
@@ -53,7 +53,7 @@ public interface AdminScriptApi {
             description = "Script executed successfully",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = GenerateUsersAndTweetsResponseDto.class),
+                schema = @Schema(implementation = BaseScriptResponseDto.class),
                 examples = {
                     @ExampleObject(
                         name = "Successful Execution",
@@ -160,11 +160,11 @@ public interface AdminScriptApi {
             )
         )
     })
-    ResponseEntity<GenerateUsersAndTweetsResponseDto> generateUsersAndTweets(
+    ResponseEntity<BaseScriptResponseDto> baseScript(
         @Parameter(
             description = "Script parameters: nUsers (1-1000), nTweetsPerUser (1-100), lUsersForDeletion (0+)",
             required = true
         )
-        GenerateUsersAndTweetsRequestDto requestDto);
+        BaseScriptRequestDto requestDto);
 }
-
+
