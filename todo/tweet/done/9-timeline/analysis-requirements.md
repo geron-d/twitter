@@ -348,7 +348,7 @@ app:
 ## 9. Ссылки
 
 - [TODO.md](TODO.md)
-- [TWEET_API_ARCHITECTURE.md](../TWEET_API_ARCHITECTURE.md)
+- [TWEET_API_ARCHITECTURE.md](../0-base/TWEET_API_ARCHITECTURE.md)
 - [STANDART_CODE.md](../../../../standards/STANDART_CODE.md)
 - [STANDART_PROJECT.md](../../../../standards/STANDART_PROJECT.md)
-- [Follower API README](../../../../services/follower-api/README.md)
+- [Follower API README](../../../../services/follower-api/README.md)
