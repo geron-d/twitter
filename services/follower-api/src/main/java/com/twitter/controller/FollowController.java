@@ -8,7 +8,7 @@ import com.twitter.common.dto.response.FollowResponseDto;
 import com.twitter.dto.response.FollowStatsResponseDto;
 import com.twitter.dto.response.FollowStatusResponseDto;
 import com.twitter.dto.response.FollowerResponseDto;
-import com.twitter.dto.response.FollowingResponseDto;
+import com.twitter.common.dto.response.FollowingResponseDto;
 import com.twitter.service.FollowService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -112,4 +112,3 @@ public class FollowController implements FollowApi {
         return ResponseEntity.ok(stats);
     }
 }
-

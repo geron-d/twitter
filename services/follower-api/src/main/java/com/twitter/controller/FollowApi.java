@@ -7,7 +7,7 @@ import com.twitter.dto.filter.FollowingFilter;
 import com.twitter.dto.response.FollowStatsResponseDto;
 import com.twitter.dto.response.FollowStatusResponseDto;
 import com.twitter.dto.response.FollowerResponseDto;
-import com.twitter.dto.response.FollowingResponseDto;
+import com.twitter.common.dto.response.FollowingResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -558,4 +558,3 @@ public interface FollowApi {
         )
         UUID userId);
 }
-

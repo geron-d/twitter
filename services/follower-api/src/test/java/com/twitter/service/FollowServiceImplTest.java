@@ -9,7 +9,7 @@ import com.twitter.common.dto.response.FollowResponseDto;
 import com.twitter.dto.response.FollowStatsResponseDto;
 import com.twitter.dto.response.FollowStatusResponseDto;
 import com.twitter.dto.response.FollowerResponseDto;
-import com.twitter.dto.response.FollowingResponseDto;
+import com.twitter.common.dto.response.FollowingResponseDto;
 import com.twitter.entity.Follow;
 import com.twitter.gateway.UserGateway;
 import com.twitter.mapper.FollowMapper;
@@ -865,4 +865,3 @@ class FollowServiceImplTest {
         }
     }
 }
-

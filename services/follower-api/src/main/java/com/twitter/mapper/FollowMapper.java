@@ -5,7 +5,7 @@ import com.twitter.common.dto.response.FollowResponseDto;
 import com.twitter.dto.response.FollowStatsResponseDto;
 import com.twitter.dto.response.FollowStatusResponseDto;
 import com.twitter.dto.response.FollowerResponseDto;
-import com.twitter.dto.response.FollowingResponseDto;
+import com.twitter.common.dto.response.FollowingResponseDto;
 import com.twitter.entity.Follow;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -106,4 +106,3 @@ public interface FollowMapper {
     @Mapping(target = "followingCount", source = "followingCount")
     FollowStatsResponseDto toFollowStatsResponseDto(long followersCount, long followingCount);
 }
-

@@ -9,7 +9,7 @@ import com.twitter.common.dto.response.FollowResponseDto;
 import com.twitter.dto.response.FollowStatsResponseDto;
 import com.twitter.dto.response.FollowStatusResponseDto;
 import com.twitter.dto.response.FollowerResponseDto;
-import com.twitter.dto.response.FollowingResponseDto;
+import com.twitter.common.dto.response.FollowingResponseDto;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
 import org.springframework.web.server.ResponseStatusException;
@@ -110,4 +110,3 @@ public interface FollowService {
      */
     FollowStatsResponseDto getFollowStats(UUID userId);
 }
-
