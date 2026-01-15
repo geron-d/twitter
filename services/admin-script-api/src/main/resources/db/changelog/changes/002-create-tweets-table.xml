@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <changeSet id="002-create-tweets-table" author="geron">
+        <createTable tableName="tweets">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content" type="varchar(280)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+                <defaultValueComputed>CURRENT_TIMESTAMP</defaultValueComputed>
+            </column>
+            <column name="updated_at" type="timestamp">
+                <constraints nullable="false"/>
+                <defaultValueComputed>CURRENT_TIMESTAMP</defaultValueComputed>
+            </column>
+            <column name="is_deleted" type="boolean">
+                <constraints nullable="false"/>
+                <defaultValueBoolean>false</defaultValueBoolean>
+            </column>
+            <column name="deleted_at" type="timestamp"/>
+            <column name="likes_count" type="integer">
+                <constraints nullable="false"/>
+                <defaultValueNumeric>0</defaultValueNumeric>
+            </column>
+            <column name="retweets_count" type="integer">
+                <constraints nullable="false"/>
+                <defaultValueNumeric>0</defaultValueNumeric>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+            baseTableName="tweets"
+            baseColumnNames="user_id"
+            constraintName="fk_tweets_user_id"
+            referencedTableName="users"
+            referencedColumnNames="id"/>
+
+        <sql>
+            ALTER TABLE tweets ADD CONSTRAINT chk_content_length CHECK (LENGTH(TRIM(content)) > 0);
+        </sql>
+        <sql>
+            ALTER TABLE tweets ADD CONSTRAINT chk_content_max_length CHECK (LENGTH(content) <= 280);
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

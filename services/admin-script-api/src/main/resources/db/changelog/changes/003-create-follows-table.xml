@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <changeSet id="003-create-follows-table" author="geron">
+        <createTable tableName="follows">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="follower_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="following_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+                <defaultValueComputed>CURRENT_TIMESTAMP</defaultValueComputed>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+            baseTableName="follows"
+            baseColumnNames="follower_id"
+            constraintName="follows_follower_fk"
+            referencedTableName="users"
+            referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint
+            baseTableName="follows"
+            baseColumnNames="following_id"
+            constraintName="follows_following_fk"
+            referencedTableName="users"
+            referencedColumnNames="id"/>
+
+        <addUniqueConstraint
+            tableName="follows"
+            columnNames="follower_id, following_id"
+            constraintName="follows_unique_follower_following"/>
+
+        <sql>
+            ALTER TABLE follows ADD CONSTRAINT follows_check_no_self_follow CHECK (follower_id != following_id);
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

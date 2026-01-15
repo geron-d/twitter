@@ -1,3 +1,9 @@
+spring:
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    enabled: true
+    drop-first: false
+
 # Admin Script API specific configuration
 app:
   users-api:
@@ -5,4 +11,4 @@ app:
   tweet-api:
     base-url: http://tweet-api:8082
   follower-api:
-    base-url: http://follower-api:8084
+    base-url: http://follower-api:8084
