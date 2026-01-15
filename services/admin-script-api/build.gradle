@@ -32,6 +32,8 @@ dependencies {
     implementation 'org.mapstruct:mapstruct'
     annotationProcessor 'org.mapstruct:mapstruct-processor'
     annotationProcessor 'org.projectlombok:lombok-mapstruct-binding'
+    
+    implementation 'org.liquibase:liquibase-core'
 
     runtimeOnly 'org.postgresql:postgresql'
 
@@ -55,4 +57,3 @@ compileJava {
 springBoot {
     mainClass = 'com.twitter.Application'
 }
-

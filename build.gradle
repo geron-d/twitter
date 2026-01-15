@@ -61,6 +61,8 @@ subprojects {
             // Database dependencies
             dependency 'org.postgresql:postgresql:42.7.7'
 
+            dependency 'org.liquibase:liquibase-core:5.0.1'
+
             dependency 'org.wiremock:wiremock-standalone:3.13.1'
             
             // Datafaker for generating fake data
