@@ -42,11 +42,11 @@
             referencedColumnNames="id"/>
 
         <sql>
-            ALTER TABLE tweets ADD CONSTRAINT chk_content_length CHECK (LENGTH(TRIM(content)) > 0);
+            ALTER TABLE tweets ADD CONSTRAINT chk_content_length CHECK (LENGTH(TRIM(content)) &gt; 0);
         </sql>
         <sql>
-            ALTER TABLE tweets ADD CONSTRAINT chk_content_max_length CHECK (LENGTH(content) <= 280);
+            ALTER TABLE tweets ADD CONSTRAINT chk_content_max_length CHECK (LENGTH(content) &lt;= 280);
         </sql>
     </changeSet>
 
-</databaseChangeLog>
+</databaseChangeLog>
