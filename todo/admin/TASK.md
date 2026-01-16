@@ -1,2 +1,3 @@
-Подключить liquidbase к admin-tool.
-Перенести скрипты из sql в liquidbase в admin-tool
+План по переходу на liquidbase
+C:\learn\projects\twitter\todo\admin\TODO.md
+admin-script-api при запуске выкидывает ошибки

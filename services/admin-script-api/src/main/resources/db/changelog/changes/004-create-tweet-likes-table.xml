@@ -16,9 +16,8 @@
             <column name="user_id" type="uuid">
                 <constraints nullable="false"/>
             </column>
-            <column name="created_at" type="timestamp">
+            <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
                 <constraints nullable="false"/>
-                <defaultValueComputed>CURRENT_TIMESTAMP</defaultValueComputed>
             </column>
         </createTable>
 
