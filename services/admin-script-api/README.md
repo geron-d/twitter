@@ -624,6 +624,7 @@ curl -X POST http://localhost:8083/api/v1/admin-scripts/base-script \
 - **Spring Web** - REST API
 - **Spring Cloud OpenFeign** - интеграция с другими сервисами
 - **SpringDoc OpenAPI** - документация API и Swagger UI
+- **Liquibase** - управление миграциями базы данных
 - **Datafaker 2.1.0** - генерация рандомных данных
 - **Lombok** - генерация кода
 - **Jakarta Validation** - валидация данных
@@ -666,6 +667,88 @@ feign:
   httpclient:
     enabled: true
 ```
+
+### Управление миграциями базы данных (Liquibase)
+
+Сервис использует **Liquibase** для управления миграциями базы данных.
+
+#### Конфигурация Liquibase
+
+В `application.yml` и `application-docker.yml` настроена конфигурация Liquibase:
+
+**Параметры:**
+- `change-log` - путь к master changelog файлу
+- `enabled: true` - включить выполнение миграций при старте приложения
+- `drop-first: false` - не удалять существующие таблицы перед применением миграций
+- `ddl-auto: none` - отключить автоматическое создание схемы через Hibernate (используется только Liquibase)
+
+#### Структура миграций
+
+Миграции организованы в следующей структуре:
+
+```
+src/main/resources/
+└── db/
+    └── changelog/
+        ├── db.changelog-master.xml          # Master changelog (включает все изменения)
+        └── changes/
+            ├── 001-create-users-table.xml
+            ├── 002-create-tweets-table.xml
+            ├── 003-create-follows-table.xml
+            ├── 004-create-tweet-likes-table.xml
+            └── 005-create-tweet-retweets-table.xml
+```
+
+#### Добавление новых миграций
+
+Для добавления новой миграции выполните следующие шаги:
+
+1. **Создайте новый changelog файл** в `src/main/resources/db/changelog/changes/`:
+   - Используйте префикс с номером (например, `006-<описание>.xml`)
+   - Номер должен быть больше последнего существующего
+
+2. **Формат changelog файла:**
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <changeSet id="006-<описание>" author="<ваше-имя>">
+        <!-- Ваши изменения здесь -->
+    </changeSet>
+
+</databaseChangeLog>
+```
+
+3. **Добавьте включение в master changelog** (`db.changelog-master.xml`):
+```xml
+<include file="db/changelog/changes/006-<описание>.xml"/>
+```
+   - Включение должно быть добавлено в правильном порядке (после всех зависимых миграций)
+
+4. **Проверьте зависимости:**
+   - Убедитесь, что все таблицы, на которые ссылаются foreign keys, уже созданы в предыдущих миграциях
+   - Соблюдайте порядок выполнения миграций
+
+#### Примеры операций в миграциях
+
+#### Выполнение миграций
+
+Миграции выполняются **автоматически** при старте приложения:
+- При первом запуске создаются все таблицы
+- При последующих запусках применяются только новые миграции
+- Liquibase отслеживает выполненные миграции в таблице `databasechangelog`
+
+#### Важные замечания
+
+- **Не изменяйте существующие миграции** после их применения в продакшене - создавайте новые миграции для изменений
+- **Тестируйте миграции** на тестовой БД перед применением в продакшене
+- **Соблюдайте порядок миграций** - неправильный порядок может привести к ошибкам foreign key
+- **Используйте осмысленные имена** для changeSet id (например, `006-add-user-profile-table`)
+- **Указывайте автора** в атрибуте `author` для отслеживания изменений
 
 ## Запуск и развертывание
 
@@ -760,4 +843,3 @@ docker run -p 8083:8083 admin-script-api
 - **Генерация контента твита:** `lorem().sentence()` или `lorem().paragraph()` (1-280 символов)
 
 Все данные генерируются с соблюдением ограничений DTO и обеспечивают уникальность через timestamp/UUID где необходимо.
-
