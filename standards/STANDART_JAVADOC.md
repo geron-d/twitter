@@ -47,8 +47,9 @@ All public classes, interfaces, and methods must include:
 ### Formatting Guidelines
 
 - Use `<p>` tags to separate paragraphs
-- Use `<pre>{@code ... }</pre>` for multi-line code examples
-- Use `{@code code}` for inline code references
+- **Do not insert source code snippets in JavaDoc.** Do not use `<pre>{@code ... }</pre>` for Java or other code examples. Put usage examples in README, tests, or external documentation; in JavaDoc use `@see` and `{@link}`.
+- Use `{@code ...}` for inline references to identifiers, literals (`true`, `false`), annotation names, field names, etc.
+- Use `<pre>...</pre>` **without** `{@code}` only for short **data format** examples (JSON, log lines, RFC 7807, etc.), not for source code.
 - Use `<ul>` and `<li>` for unordered lists
 - Use `<ol>` and `<li>` for ordered lists
 - Use `{@link ClassName}` or `{@link ClassName#method}` for cross-references
@@ -255,7 +256,10 @@ private void setPassword(User user, String password) {
 }
 ```
 
-**Method with Code Example:**
+**Method with output/format example (allowed):**
+
+`<pre>` without `{@code}` may be used for short **output or data format** examples (log lines, JSON), not for source code:
+
 ```java
 /**
  * Logs detailed information about the HTTP request.
@@ -623,18 +627,9 @@ public @interface ExampleAnnotation {
  * which intercepts method calls and logs request details including headers,
  * body content, and response information.
  *
- * <p>Example usage:</p>
- * <pre>{@code
- * @LoggableRequest
- * public ResponseEntity<User> createUser(@RequestBody User user) {
- *     return userService.createUser(user);
- * }
- *
- * @LoggableRequest(printRequestBody = false, hideFields = {"password", "ssn"})
- * public ResponseEntity<User> updateUser(@RequestBody User user) {
- *     return userService.updateUser(user);
- * }
- * }</pre>
+ * <p>Annotate controller methods with {@code @LoggableRequest}. Use
+ * {@code printRequestBody} and {@code hideFields} to control logging. See
+ * project README or integration tests for usage examples.</p>
  *
  * @author geron
  * @version 1.0
@@ -678,13 +673,8 @@ public @interface LoggableRequest {
      *   <li>{@code "secret"} - API secrets</li>
      * </ul>
      *
-     * <p>Example:</p>
-     * <pre>{@code
-     * @LoggableRequest(hideFields = {"password", "ssn", "creditCard"})
-     * public ResponseEntity<User> createUser(@RequestBody User user) {
-     *     // password, ssn, and creditCard fields will be hidden in logs
-     * }
-     * }</pre>
+     * <p>Specify field names as in {@code hideFields = {"password", "ssn"}}.
+     * For full usage examples, see README or tests.</p>
      *
      * @return array of field names to hide in the logged output
      */
@@ -822,26 +812,15 @@ Use `<p>` tags to separate paragraphs:
 
 ### Code Examples
 
-Use `<pre>{@code ... }</pre>` for multi-line code examples:
+Do not use `<pre>{@code ... }</pre>` for source code examples. Prefer `@see`, README, or external documentation for usage.
 
-```java
-/**
- * Method description.
- * <p>
- * Example usage:
- * <pre>{@code
- * ExampleClass example = new ExampleClass();
- * ReturnType result = example.methodName(paramValue);
- * }</pre>
- */
-```
-
-Use `{@code code}` for inline code references:
+Use `{@code ...}` for inline references to identifiers, literals, annotation names:
 
 ```java
 /**
  * When set to {@code true}, the feature is enabled.
  * Use {@code false} to disable the feature.
+ * Annotate with {@code @LoggableRequest} for request logging.
  */
 ```
 
@@ -927,10 +906,8 @@ Use `{@link ClassName#method}` for method references:
 
 ### 5. Examples
 
-- Include code examples for complex methods
-- Ensure examples are syntactically correct
-- Use realistic examples from the project context
-- Update examples when API changes
+- Do not include source code snippets (code examples) in JavaDoc. For complex usage, use `@see`, README, integration tests, or separate documentation.
+- Use inline `{@code}` for identifiers and literals where helpful.
 
 ### 6. Implementation Methods
 
@@ -944,6 +921,10 @@ Use `{@link ClassName#method}` for method references:
 - **DO** document custom query methods with `@Query`
 - **DO** document complex business logic methods
 - Use clear, descriptive method names
+
+### 8. Don'ts
+
+- Do not put source code snippets in JavaDoc. Do not use `<pre>{@code ... }</pre>` for Java or other code. Use `@see`, README, or tests for usage examples.
 
 ---
 
@@ -966,7 +947,7 @@ Before submitting code, ensure:
 - [ ] Parameter descriptions are accurate
 - [ ] Return value descriptions are correct
 - [ ] Exception descriptions are accurate
-- [ ] Examples work as described
+- [ ] Any `<pre>` data or format examples (JSON, log output, etc.) are accurate
 - [ ] Cross-references point to existing classes/methods
 
 ### Clarity
@@ -984,6 +965,7 @@ Before submitting code, ensure:
 - [ ] Includes `@author geron` and `@version 1.0` where required
 - [ ] Uses `<p>` tags for paragraph separation
 - [ ] Uses proper code formatting tags
+- [ ] No source code snippets in JavaDoc (no `<pre>{@code ... }</pre>` with code); only inline `{@code}` and `<pre>` for data/format examples where appropriate
 
 ### Repository-Specific
 - [ ] Repository interface is documented
@@ -1163,4 +1145,4 @@ Most modern IDEs (IntelliJ IDEA, Eclipse) can:
 - [Oracle JavaDoc Guide](https://www.oracle.com/technical-resources/articles/java/javadoc-tool.html)
 - [JavaDoc Tags Reference](https://docs.oracle.com/javase/8/docs/technotes/tools/windows/javadoc.html#CHDJGIED)
 - [Spring Boot Documentation](https://spring.io/projects/spring-boot)
-- [Project Code Standards](./STANDART_CODE.md)
+- [Project Code Standards](./STANDART_CODE.md)

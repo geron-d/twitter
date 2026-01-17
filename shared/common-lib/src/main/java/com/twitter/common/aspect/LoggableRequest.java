@@ -15,19 +15,6 @@ import java.lang.annotation.Target;
  * which intercepts method calls and logs request details including headers,
  * body content, and response information.
  *
- * <p>Example usage:</p>
- * <pre>{@code
- * @LoggableRequest
- * public ResponseEntity<User> createUser(@RequestBody User user) {
- *     return userService.createUser(user);
- * }
- *
- * @LoggableRequest(printRequestBody = false, hideFields = {"password", "ssn"})
- * public ResponseEntity<User> updateUser(@RequestBody User user) {
- *     return userService.updateUser(user);
- * }
- * }</pre>
- *
  * @author geron
  * @version 1.0
  */
