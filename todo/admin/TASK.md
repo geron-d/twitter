@@ -1,3 +1,1 @@
-План по переходу на liquidbase
-C:\learn\projects\twitter\todo\admin\TODO.md
-admin-script-api при запуске выкидывает ошибки
+В admin-script-api был добавлен liquidbase и теперь миграции делаются только через эту технологию. Необходимо проанализировать скрипты и на их основе реализовать стандарты по созданию sql скриптов и миграций и сохранить их в файл STANDART_LIQUIDBASE в папку standards
