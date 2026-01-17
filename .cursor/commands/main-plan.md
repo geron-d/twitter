@@ -22,6 +22,7 @@
    - README (STANDART_README.md)
    - Postman (STANDART_POSTMAN.md)
    - Docker (STANDART_DOCKER.md)
+   - Liquibase (STANDART_LIQUIDBASE.md) — при добавлении или изменении Entity, хранящихся в БД
 
 ## Составление плана
 
@@ -40,6 +41,7 @@
 - Проектирование структуры данных (DTO, Entity)
 - Определение зависимостей между компонентами
 - Определение общих компонентов (Entity, Repository, общие DTO) и специфичных для эндпоинтов
+- Определение необходимости Liquibase-миграции (при добавлении или изменении Entity, хранящихся в БД)
 
 ### 2. Реализация инфраструктуры и конфигов
 **Этот этап выполняется один раз для всех эндпоинтов.**
@@ -71,9 +73,16 @@
   - Правильная конфигурация docker-compose.yml (networks, volumes, depends_on с health conditions)
   - Использование конкретных версий образов (избегать latest)
 
+- **STANDART_LIQUIDBASE.md** (если добавляются или изменяются Entity, хранящиеся в БД):
+  - Миграции создаются в services/admin-script-api: `src/main/resources/db/changelog/changes/`
+  - Именование: `XXX-description.xml` (очередной номер 001, 002, …), changeSet `id="XXX-description"`, `author="geron"`
+  - Добавить `<include file="db/changelog/changes/XXX-....xml"/>` в `db.changelog-master.xml`
+  - Следовать стандарту: createTable / addColumn / modifyDataType, UUID для PK/FK, ограничения (FK, unique, check), при необходимости аудит-поля (created_at, updated_at, is_deleted, deleted_at)
+
 **Компоненты для реализации на этом этапе:**
 - Entity (если нужна новая или обновление существующей)
 - Repository (если нужен новый или обновление существующего)
+- **Liquibase-миграция** (если добавлена новая Entity или изменена существующая Entity, хранящаяся в БД): создать файл в `services/admin-script-api/src/main/resources/db/changelog/changes/` с очередным номером (`XXX-description.xml`), добавить `include` в `db.changelog-master.xml`; следовать STANDART_LIQUIDBASE.md (changeSet, типы, ограничения, аудит-поля при необходимости)
 - Общие DTO (Filter, общие Response DTO, если используются несколькими эндпоинтами)
 - Mapper интерфейс (MapStruct) - создание/обновление интерфейса, без методов для конкретных эндпоинтов
 - Validator интерфейс - создание/обновление интерфейса, без методов для конкретных эндпоинтов
@@ -206,6 +215,7 @@
 - Проверить соответствие STANDART_README.md
 - Проверить соответствие STANDART_POSTMAN.md (если добавлены эндпоинты)
 - Проверить соответствие STANDART_DOCKER.md (если создается новый сервис или изменяется Docker конфигурация)
+- Проверить соответствие STANDART_LIQUIDBASE.md (если добавлялись или изменялись Entity, хранящиеся в БД)
 
 #### 4.4. Проверка Docker конфигурации
 **Обязательно, если создается новый сервис или изменяется Docker конфигурация.**
@@ -260,6 +270,7 @@
   - STANDART_README.md
   - STANDART_POSTMAN.md (если добавляются эндпоинты)
   - STANDART_DOCKER.md (если создается новый сервис или изменяется Docker конфигурация)
+  - STANDART_LIQUIDBASE.md (если добавляются или изменяются Entity, хранящиеся в БД)
 
 ## Tasks
 
@@ -274,6 +285,8 @@
   acceptance: "Entity создана/обновлена с учетом STANDART_CODE.md"
 - [ ] (P1) #4: Реализация Repository — Краткое описание.
   acceptance: "Repository создан/обновлен с Derived Query Methods (без JavaDoc)"
+- [ ] (P1) #4a: Реализация Liquibase-миграции (если добавлена/изменена Entity, хранящаяся в БД) — Краткое описание.
+  acceptance: "Миграция в services/admin-script-api: новый файл в db/changelog/changes/ с очередным номером (XXX-description.xml), include в db.changelog-master.xml, соответствие STANDART_LIQUIDBASE.md"
 - [ ] (P1) #5: Реализация общих DTO — Краткое описание.
   acceptance: "Общие DTO (Filter, общие Response) созданы как Records с валидацией, размещены в правильных пакетах"
 - [ ] (P1) #6: Реализация Mapper интерфейса — Краткое описание.
@@ -416,7 +429,8 @@
   - Integration тесты
   - Swagger документация
   - Postman коллекции
+- **Если добавляются новые Entity или редактируются существующие Entity, хранящиеся в БД** — в план включается Liquibase-миграция в `services/admin-script-api/` по STANDART_LIQUIDBASE.md: новый файл в `db/changelog/changes/`, `include` в `db.changelog-master.xml`.
 - **Все README на русском языке**
 - **Все JavaDoc на английском языке**
 - **Все Swagger документация на английском языке**
-
+

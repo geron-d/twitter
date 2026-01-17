@@ -1,4 +1,2 @@
-- сделать стандарты на sql
-- добавть в main-plan что при добавлении новых сущностей или редактировании старых необходимо доработать sql
 - почистить javadoc и open-api и поправить стандарты
 - нужны ли defaultValueComputed="CURRENT_TIMESTAMP" если уже есть     @CreationTimestamp
