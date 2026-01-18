@@ -12,13 +12,11 @@ import lombok.Getter;
  * JSON parsing errors.
  *
  * <p>The exception provides the following functionality:</p>
- * <ul>
- *   <li>Identifies the specific field that failed format validation</li>
- *   <li>Specifies the constraint that was violated</li>
- *   <li>Supports custom error messages for specific scenarios</li>
- *   <li>Provides factory methods for common validation errors</li>
- *   <li>Enables cause chaining for debugging complex validation failures</li>
- * </ul>
+ * - Identifies the specific field that failed format validation
+ * - Specifies the constraint that was violated
+ * - Supports custom error messages for specific scenarios
+ * - Provides factory methods for common validation errors
+ * - Enables cause chaining for debugging complex validation failures
  *
  * @author geron
  * @version 1.0
@@ -160,4 +158,4 @@ public class FormatValidationException extends ValidationException {
     public static FormatValidationException beanValidationError(String fieldName, String constraintName, String message) {
         return new FormatValidationException(fieldName, constraintName, message);
     }
-}
+}

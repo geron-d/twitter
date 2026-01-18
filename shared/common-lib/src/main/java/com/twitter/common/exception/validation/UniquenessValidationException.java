@@ -12,12 +12,10 @@ import lombok.Getter;
  * and what value was duplicated, enabling precise error handling and user feedback.
  *
  * <p>The exception provides the following functionality:</p>
- * <ul>
- *   <li>Identifies the specific field that caused the uniqueness violation</li>
- *   <li>Provides the duplicate value that triggered the conflict</li>
- *   <li>Supports custom error messages for specific scenarios</li>
- *   <li>Enables cause chaining for debugging complex validation failures</li>
- * </ul>
+ * - Identifies the specific field that caused the uniqueness violation
+ * - Provides the duplicate value that triggered the conflict
+ * - Supports custom error messages for specific scenarios
+ * - Enables cause chaining for debugging complex validation failures
  *
  * @author geron
  * @version 1.0
@@ -129,4 +127,4 @@ public class UniquenessValidationException extends ValidationException {
     public ValidationType getValidationType() {
         return ValidationType.UNIQUENESS;
     }
-}
+}

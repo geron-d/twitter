@@ -520,14 +520,12 @@ public final class BaseScriptTestStubBuilder {
      * Sets up all WireMock stubs for a full scenario of generating users and tweets.
      * <p>
      * This method sets up stubs for:
-     * <ul>
-     *   <li>Creating N users</li>
-     *   <li>Creating follow relationships between users</li>
-     *   <li>Creating N tweets per user</li>
-     *   <li>Getting tweets for each user</li>
-     *   <li>Deleting the first N tweets (if nTweetsToDelete > 0)</li>
-     *   <li>Creating likes and retweets (if enough tweets and users exist)</li>
-     * </ul>
+     * - Creating N users
+     * - Creating follow relationships between users
+     * - Creating N tweets per user
+     * - Getting tweets for each user
+     * - Deleting the first N tweets (if nTweetsToDelete > 0)
+     * - Creating likes and retweets (if enough tweets and users exist)
      *
      * @param nUsers          number of users to create
      * @param nTweetsPerUser  number of tweets per user

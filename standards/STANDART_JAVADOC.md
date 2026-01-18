@@ -35,7 +35,7 @@ This document defines the JavaDoc documentation standards for the Twitter micros
 - Start with a brief description of the element (first sentence)
 - Follow with detailed information using `<p>` tags
 - Use standard JavaDoc tags consistently
-- Use lists (`<ul>`, `<ol>`) for multiple items or steps
+- Use dashes (`-`) for unordered lists and numbering (`1.`, `2.`, `3.`) for ordered lists
 
 ### Required Tags
 
@@ -50,8 +50,8 @@ All public classes, interfaces, and methods must include:
 - **Do not insert source code snippets in JavaDoc.** Do not use `<pre>{@code ... }</pre>` for Java or other code examples. Put usage examples in README, tests, or external documentation; in JavaDoc use `@see` and `{@link}`.
 - Use `{@code ...}` for inline references to identifiers, literals (`true`, `false`), annotation names, field names, etc.
 - Use `<pre>...</pre>` **without** `{@code}` only for short **data format** examples (JSON, log lines, RFC 7807, etc.), not for source code.
-- Use `<ul>` and `<li>` for unordered lists
-- Use `<ol>` and `<li>` for ordered lists
+- Use dashes (`-`) for unordered lists (each item on a new line starting with `-`)
+- Use numbering (`1.`, `2.`, `3.`, etc.) for ordered lists (each item on a new line with number and dot)
 - Use `{@link ClassName}` or `{@link ClassName#method}` for cross-references
 
 ---
@@ -646,11 +646,9 @@ public @interface LoggableRequest {
      * method and URI will be logged without the body content.
      *
      * <p>Use {@code false} for:</p>
-     * <ul>
-     *   <li>Large request bodies that would clutter logs</li>
-     *   <li>Sensitive endpoints where body content should not be logged</li>
-     *   <li>Performance-critical endpoints where logging overhead should be minimized</li>
-     * </ul>
+     * - Large request bodies that would clutter logs
+     * - Sensitive endpoints where body content should not be logged
+     * - Performance-critical endpoints where logging overhead should be minimized
      *
      * @return {@code true} if request body should be logged, {@code false} otherwise
      */
@@ -665,13 +663,11 @@ public @interface LoggableRequest {
      * and should match exactly with the JSON property names.
      *
      * <p>Common fields to hide:</p>
-     * <ul>
-     *   <li>{@code "password"} - User passwords</li>
-     *   <li>{@code "ssn"} - Social Security Numbers</li>
-     *   <li>{@code "creditCard"} - Credit card information</li>
-     *   <li>{@code "token"} - Authentication tokens</li>
-     *   <li>{@code "secret"} - API secrets</li>
-     * </ul>
+     * - {@code "password"} - User passwords
+     * - {@code "ssn"} - Social Security Numbers
+     * - {@code "creditCard"} - Credit card information
+     * - {@code "token"} - Authentication tokens
+     * - {@code "secret"} - API secrets
      *
      * <p>Specify field names as in {@code hideFields = {"password", "ssn"}}.
      * For full usage examples, see README or tests.</p>
@@ -826,29 +822,25 @@ Use `{@code ...}` for inline references to identifiers, literals, annotation nam
 
 ### Lists
 
-Use `<ul>` and `<li>` for unordered lists:
+Use dashes (`-`) for unordered lists:
 
 ```java
 /**
  * <p>The handler processes the following exception types:</p>
- * <ul>
- *   <li>ResponseStatusException - HTTP status exceptions</li>
- *   <li>RuntimeException - General runtime errors</li>
- *   <li>ConstraintViolationException - Bean validation errors</li>
- * </ul>
+ * - ResponseStatusException - HTTP status exceptions
+ * - RuntimeException - General runtime errors
+ * - ConstraintViolationException - Bean validation errors
  */
 ```
 
-Use `<ol>` and `<li>` for ordered lists:
+Use numbering (`1.`, `2.`, `3.`, etc.) for ordered lists:
 
 ```java
 /**
  * <p>This method performs the following operations:</p>
- * <ol>
- *   <li>Validates the request data</li>
- *   <li>Checks if the user exists</li>
- *   <li>Saves the entity to the database</li>
- * </ol>
+ * 1. Validates the request data
+ * 2. Checks if the user exists
+ * 3. Saves the entity to the database
  */
 ```
 

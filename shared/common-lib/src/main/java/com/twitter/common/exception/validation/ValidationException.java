@@ -12,12 +12,10 @@ import lombok.Getter;
  * of different types of validation failures.
  *
  * <p>The validation architecture follows these principles:</p>
- * <ul>
- *   <li><strong>Type Safety</strong> - Each validation exception has a specific type</li>
- *   <li><strong>Consistency</strong> - All validation errors follow the same structure</li>
- *   <li><strong>Extensibility</strong> - New validation types can be easily added</li>
- *   <li><strong>Centralized Handling</strong> - GlobalExceptionHandler processes all types</li>
- * </ul>
+ * - <strong>Type Safety</strong> - Each validation exception has a specific type
+ * - <strong>Consistency</strong> - All validation errors follow the same structure
+ * - <strong>Extensibility</strong> - New validation types can be easily added
+ * - <strong>Centralized Handling</strong> - GlobalExceptionHandler processes all types
  *
  * @author geron
  * @version 1.0
@@ -76,4 +74,4 @@ public abstract class ValidationException extends RuntimeException {
      * @return the ValidationType that categorizes this validation error
      */
     public abstract ValidationType getValidationType();
-}
+}

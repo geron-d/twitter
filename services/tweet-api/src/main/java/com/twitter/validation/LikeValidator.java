@@ -18,12 +18,10 @@ public interface LikeValidator {
      * Performs complete validation for tweet like operation.
      * <p>
      * This method validates like data including:
-     * <ul>
-     *   <li>Existence of the tweet (tweetId must not be null and tweet must exist and not be deleted)</li>
-     *   <li>Existence of the user (userId must not be null and user must exist)</li>
-     *   <li>Self-like check (user cannot like their own tweet)</li>
-     *   <li>Duplicate like check (user cannot like the same tweet twice)</li>
-     * </ul>
+     * - Existence of the tweet (tweetId must not be null and tweet must exist and not be deleted)
+     * - Existence of the user (userId must not be null and user must exist)
+     * - Self-like check (user cannot like their own tweet)
+     * - Duplicate like check (user cannot like the same tweet twice)
      *
      * @param tweetId    the unique identifier of the tweet to like
      * @param requestDto DTO containing userId for the like
@@ -36,11 +34,9 @@ public interface LikeValidator {
      * Performs complete validation for tweet unlike operation.
      * <p>
      * This method validates unlike data including:
-     * <ul>
-     *   <li>Existence of the tweet (tweetId must not be null and tweet must exist and not be deleted)</li>
-     *   <li>Existence of the user (userId must not be null and user must exist)</li>
-     *   <li>Existence of the like (like must exist for the given tweet and user)</li>
-     * </ul>
+     * - Existence of the tweet (tweetId must not be null and tweet must exist and not be deleted)
+     * - Existence of the user (userId must not be null and user must exist)
+     * - Existence of the like (like must exist for the given tweet and user)
      *
      * @param tweetId    the unique identifier of the tweet to unlike
      * @param requestDto DTO containing userId for the unlike

@@ -103,11 +103,9 @@ public class RandomDataGenerator {
      * <p>
      * The password is generated using a combination of Datafaker's text generators
      * to ensure it meets the following constraints:
-     * <ul>
-     *   <li>Minimum length: 8 characters (required by UserRequestDto)</li>
-     *   <li>Maximum length: 20 characters</li>
-     *   <li>Includes digits, lowercase, and uppercase letters</li>
-     * </ul>
+     * - Minimum length: 8 characters (required by UserRequestDto)
+     * - Maximum length: 20 characters
+     * - Includes digits, lowercase, and uppercase letters
      *
      * @return random password string (8-20 characters)
      */
@@ -166,4 +164,3 @@ public class RandomDataGenerator {
         return content;
     }
 }
-

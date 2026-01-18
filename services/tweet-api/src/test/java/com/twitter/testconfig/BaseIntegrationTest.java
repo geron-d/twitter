@@ -22,12 +22,10 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
  * Provides shared configuration for test containers and WireMock server.
  * <p>
  * This class ensures that:
- * <ul>
- *   <li>PostgreSQL container is started once and shared across all tests</li>
- *   <li>WireMock server is started once and shared across all tests</li>
- *   <li>Spring properties are configured dynamically</li>
- *   <li>WireMock stubs can be set up in subclasses</li>
- * </ul>
+ * - PostgreSQL container is started once and shared across all tests
+ * - WireMock server is started once and shared across all tests
+ * - Spring properties are configured dynamically
+ * - WireMock stubs can be set up in subclasses
  */
 @Testcontainers
 public abstract class BaseIntegrationTest {
@@ -208,4 +206,3 @@ public abstract class BaseIntegrationTest {
         );
     }
 }
-

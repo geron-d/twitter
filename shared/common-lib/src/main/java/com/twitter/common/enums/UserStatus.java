@@ -12,10 +12,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * controlled by business rules and administrative actions.
  *
  * <p>The available statuses:</p>
- * <ul>
- *   <li><strong>ACTIVE</strong> - User account is active and fully functional</li>
- *   <li><strong>INACTIVE</strong> - User account is deactivated and restricted</li>
- * </ul>
+ * - <strong>ACTIVE</strong> - User account is active and fully functional
+ * - <strong>INACTIVE</strong> - User account is deactivated and restricted
  *
  * @author geron
  * @version 1.0
@@ -37,12 +35,10 @@ public enum UserStatus {
      * operational state of a user account.
      *
      * <p>Capabilities include:</p>
-     * <ul>
-     *   <li>Full access to all system features</li>
-     *   <li>Ability to create and manage content</li>
-     *   <li>Participation in social interactions</li>
-     *   <li>Access to user profile and settings</li>
-     * </ul>
+     * - Full access to all system features
+     * - Ability to create and manage content
+     * - Participation in social interactions
+     * - Access to user profile and settings
      */
     ACTIVE,
 
@@ -56,12 +52,10 @@ public enum UserStatus {
      * perform most operations until their status is changed back to ACTIVE.
      *
      * <p>Restrictions include:</p>
-     * <ul>
-     *   <li>Limited or no access to system features</li>
-     *   <li>Cannot create or modify content</li>
-     *   <li>Cannot participate in social interactions</li>
-     *   <li>May have limited profile access</li>
-     * </ul>
+     * - Limited or no access to system features
+     * - Cannot create or modify content
+     * - Cannot participate in social interactions
+     * - May have limited profile access
      */
     INACTIVE
-}
+}

@@ -19,11 +19,9 @@ public interface FollowValidator {
      * Performs complete validation for follow relationship creation.
      * <p>
      * This method validates follow relationship data for creation including:
-     * <ul>
-     *   <li>Self-follow check (users cannot follow themselves)</li>
-     *   <li>Uniqueness check (follow relationship must not already exist)</li>
-     *   <li>User existence check (both follower and following users must exist)</li>
-     * </ul>
+     * - Self-follow check (users cannot follow themselves)
+     * - Uniqueness check (follow relationship must not already exist)
+     * - User existence check (both follower and following users must exist)
      *
      * @param request DTO containing follow relationship data for creation
      * @throws BusinessRuleValidationException if users cannot follow themselves or users don't exist
@@ -31,4 +29,3 @@ public interface FollowValidator {
      */
     void validateForFollow(FollowRequestDto request);
 }
-

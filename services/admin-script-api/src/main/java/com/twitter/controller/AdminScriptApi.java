@@ -27,13 +27,11 @@ public interface AdminScriptApi {
      * Executes the base administrative script.
      * <p>
      * This endpoint executes an administrative script that performs the following operations:
-     * <ul>
-     *   <li>Creates nUsers users with random data (login, email, firstName, lastName, password)</li>
-     *   <li>Creates follow relationships between users (central user follows half of others, half of others follow central user)</li>
-     *   <li>Creates nTweetsPerUser tweets for each successfully created user with random content</li>
-     *   <li>Validates that lUsersForDeletion does not exceed the number of users with tweets</li>
-     *   <li>Deletes one tweet from lUsersForDeletion random users (if lUsersForDeletion > 0)</li>
-     * </ul>
+     * - Creates nUsers users with random data (login, email, firstName, lastName, password)
+     * - Creates follow relationships between users (central user follows half of others, half of others follow central user)
+     * - Creates nTweetsPerUser tweets for each successfully created user with random content
+     * - Validates that lUsersForDeletion does not exceed the number of users with tweets
+     * - Deletes one tweet from lUsersForDeletion random users (if lUsersForDeletion > 0)
      * <p>
      *
      * @param requestDto DTO containing script parameters (nUsers, nTweetsPerUser, lUsersForDeletion)

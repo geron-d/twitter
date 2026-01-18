@@ -12,11 +12,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * permissions from lower roles.
  *
  * <p>The role hierarchy (from lowest to highest):</p>
- * <ul>
- *   <li><strong>USER</strong> - Basic user with standard permissions</li>
- *   <li><strong>MODERATOR</strong> - Content moderation capabilities</li>
- *   <li><strong>ADMIN</strong> - Full system administration access</li>
- * </ul>
+ * - <strong>USER</strong> - Basic user with standard permissions
+ * - <strong>MODERATOR</strong> - Content moderation capabilities
+ * - <strong>ADMIN</strong> - Full system administration access
  *
  * @author geron
  * @version 1.0
@@ -38,13 +36,11 @@ public enum UserRole {
      * and requires special protection against accidental deactivation.
      *
      * <p>Permissions include:</p>
-     * <ul>
-     *   <li>All USER and MODERATOR permissions</li>
-     *   <li>User account management (create, update, deactivate)</li>
-     *   <li>System configuration and settings</li>
-     *   <li>Access to administrative dashboards</li>
-     *   <li>Role assignment and permission management</li>
-     * </ul>
+     * - All USER and MODERATOR permissions
+     * - User account management (create, update, deactivate)
+     * - System configuration and settings
+     * - Access to administrative dashboards
+     * - Role assignment and permission management
      */
     ADMIN,
 
@@ -58,13 +54,11 @@ public enum UserRole {
      * restrictions compared to full administrators.
      *
      * <p>Permissions include:</p>
-     * <ul>
-     *   <li>All USER permissions</li>
-     *   <li>Content moderation (flag, hide, delete inappropriate content)</li>
-     *   <li>User account management (limited scope)</li>
-     *   <li>Access to moderation tools and reports</li>
-     *   <li>User support and assistance</li>
-     * </ul>
+     * - All USER permissions
+     * - Content moderation (flag, hide, delete inappropriate content)
+     * - User account management (limited scope)
+     * - Access to moderation tools and reports
+     * - User support and assistance
      */
     MODERATOR,
 
@@ -77,12 +71,10 @@ public enum UserRole {
      * management. This is the default role assigned to new users.
      *
      * <p>Permissions include:</p>
-     * <ul>
-     *   <li>Create and manage personal tweets</li>
-     *   <li>Follow and unfollow other users</li>
-     *   <li>Update personal profile information</li>
-     *   <li>Access public content and feeds</li>
-     * </ul>
+     * - Create and manage personal tweets
+     * - Follow and unfollow other users
+     * - Update personal profile information
+     * - Access public content and feeds
      */
     USER
-}
+}

@@ -24,16 +24,14 @@ import java.time.Instant;
  * into standardized HTTP error responses with detailed problem information.
  *
  * <p>The handler processes the following exception types:</p>
- * <ul>
- *   <li>ResponseStatusException - HTTP status exceptions</li>
- *   <li>RuntimeException - General runtime errors</li>
- *   <li>ConstraintViolationException - Bean validation errors</li>
- *   <li>MethodArgumentTypeMismatchException - Invalid path variable format (e.g., invalid UUID)</li>
- *   <li>UniquenessValidationException - Duplicate data errors</li>
- *   <li>BusinessRuleValidationException - Business logic violations</li>
- *   <li>FormatValidationException - Data format errors</li>
- *   <li>ValidationException - General validation errors</li>
- * </ul>
+ * - ResponseStatusException - HTTP status exceptions
+ * - RuntimeException - General runtime errors
+ * - ConstraintViolationException - Bean validation errors
+ * - MethodArgumentTypeMismatchException - Invalid path variable format (e.g., invalid UUID)
+ * - UniquenessValidationException - Duplicate data errors
+ * - BusinessRuleValidationException - Business logic violations
+ * - FormatValidationException - Data format errors
+ * - ValidationException - General validation errors
  *
  * <p>All responses follow RFC 7807 Problem Details for HTTP APIs standard.</p>
  *

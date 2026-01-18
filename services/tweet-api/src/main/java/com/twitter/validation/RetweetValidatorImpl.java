@@ -114,10 +114,8 @@ public class RetweetValidatorImpl implements RetweetValidator {
      * Validates the comment field of the retweet request.
      * <p>
      * This method validates that if a comment is provided (not null), it must:
-     * <ul>
-     *   <li>Not be an empty string (after trimming whitespace)</li>
-     *   <li>Not exceed 280 characters (this is also checked by @Size annotation, but validated here for consistency)</li>
-     * </ul>
+     * - Not be an empty string (after trimming whitespace)
+     * - Not exceed 280 characters (this is also checked by @Size annotation, but validated here for consistency)
      * Null comments are allowed and will pass validation.
      *
      * @param comment the comment to validate (can be null)

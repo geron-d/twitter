@@ -11,10 +11,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * Provides shared configuration for test containers.
  * <p>
  * This class ensures that:
- * <ul>
- *   <li>PostgreSQL container is started once and shared across all tests</li>
- *   <li>Spring properties are configured dynamically</li>
- * </ul>
+ * - PostgreSQL container is started once and shared across all tests
+ * - Spring properties are configured dynamically
  */
 @Testcontainers
 public abstract class BaseIntegrationTest {
@@ -36,7 +34,6 @@ public abstract class BaseIntegrationTest {
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
     }
 }
-
 
 
 

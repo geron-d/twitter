@@ -29,14 +29,12 @@ import java.util.stream.Collectors;
  * responses, including headers, body content, and response status codes.
  *
  * <p>The aspect performs the following operations:</p>
- * <ul>
- *   <li>Intercepts method calls annotated with @LoggableRequest</li>
- *   <li>Extracts HTTP request information from the current request context</li>
- *   <li>Logs request details including method, URI, headers, and body</li>
- *   <li>Executes the original method</li>
- *   <li>Logs response details including status code and body information</li>
- *   <li>Supports hiding sensitive fields in request bodies</li>
- * </ul>
+ * - Intercepts method calls annotated with @LoggableRequest
+ * - Extracts HTTP request information from the current request context
+ * - Logs request details including method, URI, headers, and body
+ * - Executes the original method
+ * - Logs response details including status code and body information
+ * - Supports hiding sensitive fields in request bodies
  *
  * <p>Example usage:</p>
  * <pre>{@code
@@ -82,12 +80,10 @@ public class LoggableRequestAspect {
      * executes the original method, and then logs the response information.
      *
      * <p>The logging process includes:</p>
-     * <ul>
-     *   <li>Extracting HTTP request from Spring's RequestContextHolder</li>
-     *   <li>Logging request details (method, URI, headers, body)</li>
-     *   <li>Executing the original method via ProceedingJoinPoint</li>
-     *   <li>Logging response details (status code, body information)</li>
-     * </ul>
+     * - Extracting HTTP request from Spring's RequestContextHolder
+     * - Logging request details (method, URI, headers, body)
+     * - Executing the original method via ProceedingJoinPoint
+     * - Logging response details (status code, body information)
      *
      * @param proceedingJoinPoint the AOP join point containing method information
      * @return the result of the original method execution
@@ -113,10 +109,8 @@ public class LoggableRequestAspect {
      * be logged and which fields should be hidden for security purposes.
      *
      * <p>The logging behavior is controlled by:</p>
-     * <ul>
-     *   <li>{@code printRequestBody} - whether to log the request body</li>
-     *   <li>{@code hideFields} - array of field names to hide in the body</li>
-     * </ul>
+     * - {@code printRequestBody} - whether to log the request body
+     * - {@code hideFields} - array of field names to hide in the body
      *
      * <p>Log format examples:</p>
      * <pre>
@@ -170,12 +164,10 @@ public class LoggableRequestAspect {
      * - INFO level: logs status code and collection/map sizes for structured data
      *
      * <p>The method handles different response types:</p>
-     * <ul>
-     *   <li>ResponseEntity - logs status code and body information</li>
-     *   <li>Collection - logs status code and collection size</li>
-     *   <li>Map - logs status code and map size</li>
-     *   <li>Other types - logs status code only</li>
-     * </ul>
+     * - ResponseEntity - logs status code and body information
+     * - Collection - logs status code and collection size
+     * - Map - logs status code and map size
+     * - Other types - logs status code only
      *
      * <p>Log format examples:</p>
      * <pre>
@@ -220,12 +212,10 @@ public class LoggableRequestAspect {
      * and arrays by recursively processing all levels of the JSON structure.
      *
      * <p>The hiding algorithm:</p>
-     * <ol>
-     *   <li>Serialize the request body to JSON string</li>
-     *   <li>Parse the JSON string into a JsonNode tree</li>
-     *   <li>Recursively traverse the tree and hide specified fields</li>
-     *   <li>Return the modified JsonNode</li>
-     * </ol>
+     * 1. Serialize the request body to JSON string
+     * 2. Parse the JSON string into a JsonNode tree
+     * 3. Recursively traverse the tree and hide specified fields
+     * 4. Return the modified JsonNode
      *
      * <p>If JSON processing fails, the original object is returned with a warning log.</p>
      *
@@ -255,20 +245,12 @@ public class LoggableRequestAspect {
      * processing all nested elements.
      *
      * <p>The algorithm works as follows:</p>
-     * <ol>
-     *   <li>If the node is an object:
-     *     <ul>
-     *       <li>Check each field name against the hideFields array</li>
-     *       <li>Replace matching field values with "***"</li>
-     *       <li>Recursively process nested objects and arrays</li>
-     *     </ul>
-     *   </li>
-     *   <li>If the node is an array:
-     *     <ul>
-     *       <li>Recursively process each array element</li>
-     *     </ul>
-     *   </li>
-     * </ol>
+     * 1. If the node is an object:
+     *   - Check each field name against the hideFields array
+     *   - Replace matching field values with "***"
+     *   - Recursively process nested objects and arrays
+     * 2. If the node is an array:
+     *   - Recursively process each array element
      *
      * <p>Example transformation:</p>
      * <pre>
@@ -301,4 +283,4 @@ public class LoggableRequestAspect {
             }
         }
     }
-}
+}

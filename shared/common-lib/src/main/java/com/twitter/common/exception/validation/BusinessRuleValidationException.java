@@ -13,13 +13,11 @@ import lombok.Getter;
  * business requirements and maintains data integrity.
  *
  * <p>The exception provides the following functionality:</p>
- * <ul>
- *   <li>Identifies the specific business rule that was violated</li>
- *   <li>Provides context about the circumstances of the violation</li>
- *   <li>Supports custom error messages for specific scenarios</li>
- *   <li>Provides factory methods for common business rule violations</li>
- *   <li>Enables cause chaining for debugging complex validation failures</li>
- * </ul>
+ * - Identifies the specific business rule that was violated
+ * - Provides context about the circumstances of the violation
+ * - Supports custom error messages for specific scenarios
+ * - Provides factory methods for common business rule violations
+ * - Enables cause chaining for debugging complex validation failures
  *
  * @author geron
  * @version 1.0
@@ -160,4 +158,4 @@ public class BusinessRuleValidationException extends ValidationException {
         return new BusinessRuleValidationException("LAST_ADMIN_ROLE_CHANGE",
             String.format("userId=%s, newRole=%s", userId, newRole));
     }
-}
+}

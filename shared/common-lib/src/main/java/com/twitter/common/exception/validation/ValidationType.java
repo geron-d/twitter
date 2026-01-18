@@ -13,11 +13,9 @@ import lombok.RequiredArgsConstructor;
  * based on the validation type.
  *
  * <p>The validation types cover the main categories of validation failures:</p>
- * <ul>
- *   <li><strong>Data Integrity</strong> - Ensuring data uniqueness and consistency</li>
- *   <li><strong>Business Logic</strong> - Enforcing domain-specific rules and constraints</li>
- *   <li><strong>Technical Format</strong> - Validating data structure and syntax</li>
- * </ul>
+ * - <strong>Data Integrity</strong> - Ensuring data uniqueness and consistency
+ * - <strong>Business Logic</strong> - Enforcing domain-specific rules and constraints
+ * - <strong>Technical Format</strong> - Validating data structure and syntax
  *
  * @author geron
  * @version 1.0
@@ -65,4 +63,4 @@ public enum ValidationType {
      * @return the description of this validation type
      */
     private final String description;
-}
+}

@@ -15,12 +15,10 @@ public interface BaseScriptService {
      * Executes the administrative script to generate users and tweets.
      * <p>
      * This method performs the following operations:
-     * <ul>
-     *   <li>Creates nUsers users with random data</li>
-     *   <li>Creates nTweetsPerUser tweets for each successfully created user</li>
-     *   <li>Validates that lUsersForDeletion does not exceed users with tweets</li>
-     *   <li>Deletes one tweet from lUsersForDeletion random users</li>
-     * </ul>
+     * - Creates nUsers users with random data
+     * - Creates nTweetsPerUser tweets for each successfully created user
+     * - Validates that lUsersForDeletion does not exceed users with tweets
+     * - Deletes one tweet from lUsersForDeletion random users
      * <p>
      * Partial errors are handled gracefully - errors are logged and added to the
      * response statistics, but execution continues. The method always returns a
