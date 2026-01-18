@@ -21,7 +21,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * Aspect for automatic HTTP request/response logging in Twitter microservices.
+ * Aspect for automatic HTTP request/response logging.
  * <p>
  * This aspect provides comprehensive logging functionality across multiple
  * methods and classes. It uses Spring AOP to intercept method calls annotated
@@ -36,14 +36,6 @@ import java.util.stream.Collectors;
  * - Logs response details including status code and body information
  * - Supports hiding sensitive fields in request bodies
  *
- * <p>Example usage:</p>
- * <pre>{@code
- * @LoggableRequest
- * public ResponseEntity<User> createUser(@RequestBody User user) {
- *     return userService.createUser(user);
- * }
- * }</pre>
- *
  * @author geron
  * @version 1.0
  */
@@ -52,23 +44,10 @@ import java.util.stream.Collectors;
 @Component
 public class LoggableRequestAspect {
 
-    /**
-     * Default constructor for LoggableRequestAspect.
-     *
-     * <p>
-     * This constructor creates a new instance of LoggableRequestAspect.
-     * The aspect is automatically registered with Spring's AOP mechanism
-     * through the @Aspect and @Component annotations.
-     * </p>
-     */
     public LoggableRequestAspect() {
         // Default constructor - Spring will handle initialization
     }
 
-    /**
-     * Jackson ObjectMapper for JSON serialization/deserialization.
-     * Used for converting request bodies to JSON and hiding sensitive fields.
-     */
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
@@ -246,11 +225,11 @@ public class LoggableRequestAspect {
      *
      * <p>The algorithm works as follows:</p>
      * 1. If the node is an object:
-     *   - Check each field name against the hideFields array
-     *   - Replace matching field values with "***"
-     *   - Recursively process nested objects and arrays
+     * - Check each field name against the hideFields array
+     * - Replace matching field values with "***"
+     * - Recursively process nested objects and arrays
      * 2. If the node is an array:
-     *   - Recursively process each array element
+     * - Recursively process each array element
      *
      * <p>Example transformation:</p>
      * <pre>

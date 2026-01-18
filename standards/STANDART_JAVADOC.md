@@ -304,11 +304,39 @@ public Optional<UserResponseDto> getUserById(UUID id) {
 ### 3. Records (DTOs)
 
 #### Required Tags
-- `@param` - For each record component parameter
+- `@param` - For each record component parameter that is not documented via `@Schema(description = "...")` annotation
 - `@author geron`
 - `@version 1.0`
 
 #### Template
+
+**When fields have `@Schema(description = "...")` annotations, do not use `@param` in record-level JavaDoc:**
+
+```java
+/**
+ * Data Transfer Object for [specific purpose].
+ * <p>
+ * This record represents the data structure used for [specific purpose]
+ * in the system. It includes validation constraints to ensure data
+ * integrity and security requirements are met.
+ *
+ * @author geron
+ * @version 1.0
+ */
+@Schema(name = "ExampleRequest", description = "Data structure for...")
+public record ExampleDto(
+    @Schema(description = "Description of what this field represents", example = "...")
+    @NotBlank(message = "...")
+    String fieldName,
+    
+    @Schema(description = "Description of another field", example = "...")
+    String anotherField
+) {
+}
+```
+
+**When fields do not have `@Schema(description = "...")` annotations, use `@param` in record-level JavaDoc:**
+
 ```java
 /**
  * Data Transfer Object for [specific purpose].
@@ -324,23 +352,17 @@ public Optional<UserResponseDto> getUserById(UUID id) {
  */
 @Schema(name = "ExampleRequest", description = "Data structure for...")
 public record ExampleDto(
-    /**
-     * Description of what this field represents.
-     * <p>
-     * Additional details about constraints, format, or usage.
-     */
-    @Schema(description = "...", example = "...")
     @NotBlank(message = "...")
     String fieldName,
     
-    // other fields
+    String anotherField
 ) {
 }
 ```
 
 #### Examples from Project
 
-**Request DTO:**
+**Request DTO with @Schema annotations (no @param needed):**
 ```java
 /**
  * Data Transfer Object for user creation requests.
@@ -349,11 +371,6 @@ public record ExampleDto(
  * in the system. It includes validation constraints to ensure data
  * integrity and security requirements are met.
  *
- * @param login     unique login name for user authentication
- * @param firstName user's first name
- * @param lastName  user's last name
- * @param email     user's email address
- * @param password  user's password (will be hashed)
  * @author geron
  * @version 1.0
  */
@@ -371,12 +388,6 @@ public record ExampleDto(
         """
 )
 public record UserRequestDto(
-    /**
-     * Unique login name for user authentication.
-     * <p>
-     * This field must be unique across all users and is required for
-     * authentication purposes. Must be between 3 and 50 characters.
-     */
     @Schema(
         description = "Unique login name for user authentication",
         example = "jane_smith",
@@ -388,9 +399,6 @@ public record UserRequestDto(
     @Size(min = 3, max = 50, message = "Login must be between 3 and 50 characters")
     String login,
     
-    /**
-     * User's first name.
-     */
     @Schema(
         description = "User's first name (optional)",
         example = "Jane",
@@ -403,7 +411,7 @@ public record UserRequestDto(
 }
 ```
 
-**Simpler DTO:**
+**Simpler DTO with @Schema annotations (no @param needed):**
 ```java
 /**
  * Data Transfer Object for creating a new tweet.
@@ -448,8 +456,29 @@ public record CreateTweetRequestDto(
 }
 ```
 
+**DTO without @Schema annotations (use @param instead):**
+```java
+/**
+ * Data Transfer Object for internal processing.
+ * <p>
+ * This record is used for internal data transfer and does not require
+ * OpenAPI documentation. Field descriptions are provided via @param tags.
+ *
+ * @param internalId   internal identifier for processing
+ * @param metadata    additional metadata information
+ * @author geron
+ * @version 1.0
+ */
+public record InternalProcessingDto(
+    UUID internalId,
+    Map<String, String> metadata
+) {
+}
+```
+
 **Key Points for DTOs:**
-- Document the record itself with `@param` tags for all components
+- If a field has `@Schema(description = "...")`, do not include `@param` for that field in the record-level JavaDoc to avoid duplication
+- Document the record itself with `@param` tags only for components that are not documented via `@Schema(description = "...")` annotations
 - Optionally document individual fields with JavaDoc comments
 - Use `@Schema` annotations for OpenAPI documentation
 - Include validation constraints in JavaDoc when relevant
@@ -931,7 +960,7 @@ Before submitting code, ensure:
 - [ ] All public fields have field-level JavaDoc (if any)
 - [ ] All constructors have JavaDoc (if custom)
 - [ ] All enum constants have JavaDoc
-- [ ] All DTO records have record-level JavaDoc with `@param` tags
+- [ ] All DTO records have record-level JavaDoc with `@param` tags only for fields without `@Schema(description = "...")` annotations
 - [ ] All annotation elements have JavaDoc
 
 ### Accuracy
@@ -966,7 +995,8 @@ Before submitting code, ensure:
 - [ ] Complex business logic methods are documented
 
 ### DTO-Specific
-- [ ] Record has class-level JavaDoc with `@param` tags
+- [ ] Record has class-level JavaDoc with `@param` tags only for fields without `@Schema(description = "...")` annotations
+- [ ] Fields with `@Schema(description = "...")` do not have duplicate `@param` tags in record-level JavaDoc
 - [ ] Important fields have individual JavaDoc comments
 - [ ] Validation constraints are mentioned when relevant
 
@@ -1029,7 +1059,7 @@ public class UserServiceImpl implements UserService {
 }
 ```
 
-### Pattern 2: DTO Record with Field Documentation
+### Pattern 2: DTO Record with @Schema Annotations
 
 ```java
 /**
@@ -1039,26 +1069,28 @@ public class UserServiceImpl implements UserService {
  * in the system. It includes validation constraints to ensure data
  * integrity and security requirements are met.
  *
- * @param login     unique login name for user authentication
- * @param firstName user's first name
- * @param lastName  user's last name
- * @param email     user's email address
- * @param password  user's password (will be hashed)
  * @author geron
  * @version 1.0
  */
 @Schema(name = "UserRequest", description = "Data structure for creating new users")
 public record UserRequestDto(
-    /**
-     * Unique login name for user authentication.
-     * <p>
-     * This field must be unique across all users and is required for
-     * authentication purposes. Must be between 3 and 50 characters.
-     */
-    @Schema(description = "Unique login name for user authentication", example = "jane_smith")
+    @Schema(
+        description = "Unique login name for user authentication",
+        example = "jane_smith",
+        minLength = 3,
+        maxLength = 50,
+        requiredMode = Schema.RequiredMode.REQUIRED
+    )
     @NotBlank(message = "Login cannot be blank")
     @Size(min = 3, max = 50, message = "Login must be between 3 and 50 characters")
     String login,
+    
+    @Schema(
+        description = "User's first name (optional)",
+        example = "Jane",
+        maxLength = 100
+    )
+    String firstName,
     
     // other fields...
 ) {

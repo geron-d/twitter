@@ -1,6 +1,6 @@
 package com.twitter.mapper;
 
-import com.twitter.common.dto.request.CreateTweetRequestDto;
+import com.twitter.common.dto.request.tweet.CreateTweetRequestDto;
 import com.twitter.common.dto.response.TweetResponseDto;
 import com.twitter.dto.request.UpdateTweetRequestDto;
 import com.twitter.entity.Tweet;
@@ -47,4 +47,4 @@ public interface TweetMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "userId", ignore = true)
     void updateTweetFromUpdateDto(UpdateTweetRequestDto updateDto, @MappingTarget Tweet tweet);
-}
+}

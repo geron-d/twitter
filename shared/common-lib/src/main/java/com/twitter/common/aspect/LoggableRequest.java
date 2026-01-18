@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation for automatic HTTP request/response logging in Twitter microservices.
+ * Annotation for automatic HTTP request/response logging.
  * <p>
  * This annotation enables automatic logging of HTTP requests and responses
  * for methods annotated with it. It provides configuration options for

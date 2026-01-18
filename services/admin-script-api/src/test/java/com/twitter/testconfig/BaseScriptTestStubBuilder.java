@@ -2,7 +2,7 @@ package com.twitter.testconfig;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
-import com.twitter.common.dto.request.CreateTweetRequestDto;
+import com.twitter.common.dto.request.tweet.CreateTweetRequestDto;
 import com.twitter.common.dto.request.FollowRequestDto;
 import com.twitter.common.dto.request.LikeTweetRequestDto;
 import com.twitter.common.dto.request.RetweetRequestDto;

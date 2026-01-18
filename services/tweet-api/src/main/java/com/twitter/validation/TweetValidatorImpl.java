@@ -1,7 +1,7 @@
 package com.twitter.validation;
 
-import com.twitter.common.dto.request.CreateTweetRequestDto;
-import com.twitter.common.dto.request.DeleteTweetRequestDto;
+import com.twitter.common.dto.request.tweet.CreateTweetRequestDto;
+import com.twitter.common.dto.request.tweet.DeleteTweetRequestDto;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.FormatValidationException;
 import com.twitter.dto.request.UpdateTweetRequestDto;

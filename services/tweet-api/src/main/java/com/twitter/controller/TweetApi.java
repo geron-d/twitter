@@ -1,7 +1,7 @@
 package com.twitter.controller;
 
-import com.twitter.common.dto.request.CreateTweetRequestDto;
-import com.twitter.common.dto.request.DeleteTweetRequestDto;
+import com.twitter.common.dto.request.tweet.CreateTweetRequestDto;
+import com.twitter.common.dto.request.tweet.DeleteTweetRequestDto;
 import com.twitter.common.dto.response.TweetResponseDto;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.dto.request.UpdateTweetRequestDto;
@@ -810,4 +810,3 @@ public interface TweetApi {
         @Parameter(description = "Pagination parameters (page, size, sorting)", required = false)
         Pageable pageable);
 }
-

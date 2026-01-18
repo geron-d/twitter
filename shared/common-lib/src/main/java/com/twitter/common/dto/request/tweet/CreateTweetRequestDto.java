@@ -1,4 +1,4 @@
-package com.twitter.common.dto.request;
+package com.twitter.common.dto.request.tweet;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -10,8 +10,6 @@ import java.util.UUID;
 
 /**
  * Data Transfer Object for creating a new tweet.
- * <p>
- * This DTO contains validation rules for tweet content and user identification.
  *
  * @author geron
  * @version 1.0
