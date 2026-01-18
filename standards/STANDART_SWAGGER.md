@@ -289,11 +289,10 @@ Every operation must document all possible response codes using `@ApiResponses`:
 - Use for successful GET, PUT, PATCH, DELETE operations
 - Must include:
   - `schema = @Schema(implementation = [ResponseDto].class)`
-  - `@ExampleObject` with realistic example data
 
 **201 Created:**
 - Use for successful POST operations that create resources
-- Must include response schema and example
+- Must include response schema
 
 **Example:**
 ```java
@@ -302,20 +301,7 @@ Every operation must document all possible response codes using `@ApiResponses`:
     description = "Tweet created successfully",
     content = @Content(
         mediaType = "application/json",
-        schema = @Schema(implementation = TweetResponseDto.class),
-        examples = @ExampleObject(
-            name = "Created Tweet",
-            summary = "Example created tweet",
-            value = """
-                {
-                  "id": "123e4567-e89b-12d3-a456-426614174000",
-                  "userId": "987e6543-e21b-43d2-b654-321987654321",
-                  "content": "This is my first tweet!",
-                  "createdAt": "2025-01-27T15:30:00Z",
-                  "updatedAt": "2025-01-27T15:30:00Z"
-                }
-                """
-        )
+        schema = @Schema(implementation = TweetResponseDto.class)
     )
 )
 ```
@@ -324,16 +310,16 @@ Every operation must document all possible response codes using `@ApiResponses`:
 
 **400 Bad Request:**
 - Use for validation errors, constraint violations, business rule violations
-- Must include `@ExampleObject` with RFC 7807 Problem Details format
+- Must follow RFC 7807 Problem Details format
 - Document different error types separately if they return different structures
 
 **404 Not Found:**
 - Use when resource is not found
-- Include Problem Details example
+- Must follow RFC 7807 Problem Details format
 
 **409 Conflict:**
 - Use for uniqueness violations
-- Include field name and value in example
+- Must follow RFC 7807 Problem Details format
 
 **Example Error Response:**
 ```java
@@ -341,33 +327,14 @@ Every operation must document all possible response codes using `@ApiResponses`:
     responseCode = "400",
     description = "Validation error",
     content = @Content(
-        mediaType = "application/problem+json",
-        examples = @ExampleObject(
-            name = "Format Validation Error",
-            summary = "Content validation failed",
-            value = """
-                {
-                  "type": "https://example.com/errors/format-validation",
-                  "title": "Format Validation Error",
-                  "status": 400,
-                  "detail": "Tweet content must be between 1 and 280 characters",
-                  "fieldName": "content",
-                  "constraintName": "CONTENT_VALIDATION",
-                  "timestamp": "2025-01-27T15:30:00Z"
-                }
-                """
-        )
+        mediaType = "application/problem+json"
     )
 )
 ```
 
 ### 5.4 ExampleObject Requirements
 
-- **Name:** Descriptive name for the example (e.g., `"Created Tweet"`, `"Validation Error"`)
-- **Summary:** Brief summary (optional but recommended)
-- **Value:** Valid JSON string using triple quotes
-- Use realistic UUIDs, dates, and data
-- Match the actual response structure exactly
+**Note:** `@ExampleObject` is not used in `@ApiResponse` annotations for controller endpoints. Examples should be defined in DTO classes using `@Schema(example = "...")` annotation at the class or field level. This ensures examples are automatically included in the OpenAPI documentation through the schema definition.
 
 ### 5.5 Multiple Error Types
 
@@ -733,7 +700,6 @@ import com.twitter.dto.response.TweetResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -773,63 +739,21 @@ public interface TweetApi {
             description = "Tweet created successfully",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = TweetResponseDto.class),
-                examples = @ExampleObject(
-                    name = "Created Tweet",
-                    summary = "Example created tweet",
-                    value = """
-                        {
-                          "id": "123e4567-e89b-12d3-a456-426614174000",
-                          "userId": "987e6543-e21b-43d2-b654-321987654321",
-                          "content": "This is my first tweet!",
-                          "createdAt": "2025-01-27T15:30:00Z",
-                          "updatedAt": "2025-01-27T15:30:00Z"
-                        }
-                        """
-                )
+                schema = @Schema(implementation = TweetResponseDto.class)
             )
         ),
         @ApiResponse(
             responseCode = "400",
             description = "Validation error",
             content = @Content(
-                mediaType = "application/problem+json",
-                examples = @ExampleObject(
-                    name = "Format Validation Error",
-                    summary = "Content validation failed",
-                    value = """
-                        {
-                          "type": "https://example.com/errors/format-validation",
-                          "title": "Format Validation Error",
-                          "status": 400,
-                          "detail": "Tweet content must be between 1 and 280 characters",
-                          "fieldName": "content",
-                          "constraintName": "CONTENT_VALIDATION",
-                          "timestamp": "2025-01-27T15:30:00Z"
-                        }
-                        """
-                )
+                mediaType = "application/problem+json"
             )
         ),
         @ApiResponse(
             responseCode = "400",
             description = "Business rule violation",
             content = @Content(
-                mediaType = "application/problem+json",
-                examples = @ExampleObject(
-                    name = "User Not Found Error",
-                    summary = "User does not exist",
-                    value = """
-                        {
-                          "type": "https://example.com/errors/business-rule-validation",
-                          "title": "Business Rule Validation Error",
-                          "status": 400,
-                          "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 987e6543-e21b-43d2-b654-321987654321",
-                          "ruleName": "USER_NOT_EXISTS",
-                          "timestamp": "2025-01-27T15:30:00Z"
-                        }
-                        """
-                )
+                mediaType = "application/problem+json"
             )
         )
     })
@@ -907,10 +831,11 @@ public class TweetController implements TweetApi {
 
 ### 9.3 Examples
 
-- **Provide examples for all responses:** Both success and error responses should have examples
+- **Define examples in DTOs:** Examples should be defined in DTO classes using `@Schema(example = "...")` annotation at the class or field level
+- **Provide examples for all DTOs:** Both request and response DTOs should have examples
 - **Use realistic data:** Examples should use realistic UUIDs, dates, and values
 - **Match actual structure:** Examples must match the actual response structure exactly
-- **Include multiple error examples:** If multiple error types exist, provide examples for each
+- **Examples in @ApiResponse:** Do not use `@ExampleObject` in `@ApiResponse` annotations; examples are automatically included from DTO schema definitions
 
 ### 9.4 Error Documentation
 
@@ -1020,9 +945,9 @@ Use this checklist when documenting a new API endpoint:
 
 ### Response Documentation
 - [ ] `@ApiResponses` annotation with all possible status codes
-- [ ] Success response (200/201) with `@Schema` and `@ExampleObject`
-- [ ] Error responses (400, 404, 409, etc.) with Problem Details examples
-- [ ] All examples use realistic data
+- [ ] Success response (200/201) with `@Schema` implementation
+- [ ] Error responses (400, 404, 409, etc.) with Problem Details format
+- [ ] Examples defined in DTO classes using `@Schema(example = "...")`
 
 ### Parameter Documentation
 - [ ] All parameters have `@Parameter` annotation
@@ -1067,4 +992,4 @@ Use this checklist when documenting a new API endpoint:
 
 
 
-
+

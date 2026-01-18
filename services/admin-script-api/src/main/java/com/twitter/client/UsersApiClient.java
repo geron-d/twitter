@@ -23,7 +23,7 @@ public interface UsersApiClient {
      * Creates a new user in the users-api service.
      *
      * @param userRequest DTO containing user data for creation
-     * @return UserResponseDto containing the created user information including ID
+     * @return UserResponseDto containing the created user information
      */
     @PostMapping
     UserResponseDto createUser(@RequestBody UserRequestDto userRequest);

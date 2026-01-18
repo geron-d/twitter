@@ -11,7 +11,6 @@ import com.twitter.common.dto.response.follow.FollowingResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -59,103 +58,35 @@ public interface FollowApi {
             description = "Follow relationship created successfully",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = FollowResponseDto.class),
-                examples = @ExampleObject(
-                    name = "Created Follow Relationship",
-                    summary = "Example created follow relationship",
-                    value = """
-                        {
-                          "id": "456e7890-e89b-12d3-a456-426614174111",
-                          "followerId": "123e4567-e89b-12d3-a456-426614174000",
-                          "followingId": "987fcdeb-51a2-43d7-b123-426614174999",
-                          "createdAt": "2025-01-27T10:30:00Z"
-                        }
-                        """
-                )
+                schema = @Schema(implementation = FollowResponseDto.class)
             )
         ),
         @ApiResponse(
             responseCode = "400",
             description = "Validation error - Invalid request format",
             content = @Content(
-                mediaType = "application/problem+json",
-                examples = @ExampleObject(
-                    name = "Validation Error",
-                    summary = "Invalid UUID format or null fields",
-                    value = """
-                        {
-                          "type": "https://example.com/errors/validation-error",
-                          "title": "Validation Error",
-                          "status": 400,
-                          "detail": "Validation failed: followerId: Follower ID cannot be null",
-                          "timestamp": "2025-01-27T10:30:00Z"
-                        }
-                        """
-                )
+                mediaType = "application/problem+json"
             )
         ),
         @ApiResponse(
             responseCode = "409",
             description = "Business rule violation - Self follow not allowed",
             content = @Content(
-                mediaType = "application/problem+json",
-                examples = @ExampleObject(
-                    name = "Self Follow Error",
-                    summary = "User attempted to follow themselves",
-                    value = """
-                        {
-                          "type": "https://example.com/errors/business-rule-validation",
-                          "title": "Business Rule Validation Error",
-                          "status": 409,
-                          "detail": "Business rule 'SELF_FOLLOW_NOT_ALLOWED' violated for context: User cannot follow themselves (userId=123e4567-e89b-12d3-a456-426614174000)",
-                          "ruleName": "SELF_FOLLOW_NOT_ALLOWED",
-                          "context": "User cannot follow themselves (userId=123e4567-e89b-12d3-a456-426614174000)",
-                          "timestamp": "2025-01-27T10:30:00Z"
-                        }
-                        """
-                )
+                mediaType = "application/problem+json"
             )
         ),
         @ApiResponse(
             responseCode = "409",
             description = "Uniqueness violation - Follow relationship already exists",
             content = @Content(
-                mediaType = "application/problem+json",
-                examples = @ExampleObject(
-                    name = "Uniqueness Error",
-                    summary = "Follow relationship already exists",
-                    value = """
-                        {
-                          "type": "https://example.com/errors/uniqueness-validation",
-                          "title": "Uniqueness Validation Error",
-                          "status": 409,
-                          "detail": "Follow relationship already exists",
-                          "timestamp": "2025-01-27T10:30:00Z"
-                        }
-                        """
-                )
+                mediaType = "application/problem+json"
             )
         ),
         @ApiResponse(
             responseCode = "409",
             description = "Business rule violation - User does not exist",
             content = @Content(
-                mediaType = "application/problem+json",
-                examples = @ExampleObject(
-                    name = "User Not Found Error",
-                    summary = "User does not exist",
-                    value = """
-                        {
-                          "type": "https://example.com/errors/business-rule-validation",
-                          "title": "Business Rule Validation Error",
-                          "status": 409,
-                          "detail": "Business rule 'FOLLOWER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
-                          "ruleName": "FOLLOWER_NOT_EXISTS",
-                          "context": "123e4567-e89b-12d3-a456-426614174000",
-                          "timestamp": "2025-01-27T10:30:00Z"
-                        }
-                        """
-                )
+                mediaType = "application/problem+json"
             )
         )
     })
@@ -190,42 +121,14 @@ public interface FollowApi {
             responseCode = "404",
             description = "Follow relationship not found",
             content = @Content(
-                mediaType = "application/problem+json",
-                examples = @ExampleObject(
-                    name = "Follow Not Found",
-                    summary = "Follow relationship does not exist",
-                    value = """
-                        {
-                          "type": "https://example.com/errors/business-rule-validation",
-                          "title": "Business Rule Validation Error",
-                          "status": 404,
-                          "detail": "Business rule 'FOLLOW_NOT_FOUND' violated for context: Follow relationship between followerId=123e4567-e89b-12d3-a456-426614174000 and followingId=987fcdeb-51a2-43d7-b123-426614174999 does not exist",
-                          "ruleName": "FOLLOW_NOT_FOUND",
-                          "context": "Follow relationship between followerId=123e4567-e89b-12d3-a456-426614174000 and followingId=987fcdeb-51a2-43d7-b123-426614174999 does not exist",
-                          "timestamp": "2025-01-27T10:30:00Z"
-                        }
-                        """
-                )
+                mediaType = "application/problem+json"
             )
         ),
         @ApiResponse(
             responseCode = "400",
             description = "Validation error - Invalid UUID format",
             content = @Content(
-                mediaType = "application/problem+json",
-                examples = @ExampleObject(
-                    name = "Invalid UUID Format Error",
-                    summary = "Invalid UUID format for path parameters",
-                    value = """
-                        {
-                          "type": "https://example.com/errors/validation-error",
-                          "title": "Validation Error",
-                          "status": 400,
-                          "detail": "Invalid UUID format for followerId or followingId parameter",
-                          "timestamp": "2025-01-27T10:30:00Z"
-                        }
-                        """
-                )
+                mediaType = "application/problem+json"
             )
         )
     })
@@ -269,48 +172,14 @@ public interface FollowApi {
             description = "Followers retrieved successfully",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = PagedModel.class),
-                examples = @ExampleObject(
-                    name = "Paginated Followers",
-                    summary = "Example paginated followers response",
-                    value = """
-                        {
-                          "content": [
-                            {
-                              "id": "123e4567-e89b-12d3-a456-426614174000",
-                              "login": "john_doe",
-                              "createdAt": "2025-01-20T15:30:00Z"
-                            }
-                          ],
-                          "page": {
-                            "size": 10,
-                            "number": 0,
-                            "totalElements": 1,
-                            "totalPages": 1
-                          }
-                        }
-                        """
-                )
+                schema = @Schema(implementation = PagedModel.class)
             )
         ),
         @ApiResponse(
             responseCode = "400",
             description = "Validation error - Invalid UUID format",
             content = @Content(
-                mediaType = "application/problem+json",
-                examples = @ExampleObject(
-                    name = "Invalid UUID Format Error",
-                    summary = "Invalid UUID format for userId parameter",
-                    value = """
-                        {
-                          "type": "https://example.com/errors/validation-error",
-                          "title": "Validation Error",
-                          "status": 400,
-                          "detail": "Invalid UUID format for userId parameter",
-                          "timestamp": "2025-01-27T10:30:00Z"
-                        }
-                        """
-                )
+                mediaType = "application/problem+json"
             )
         )
     })
@@ -353,48 +222,14 @@ public interface FollowApi {
             description = "Following retrieved successfully",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = PagedModel.class),
-                examples = @ExampleObject(
-                    name = "Paginated Following",
-                    summary = "Example paginated following response",
-                    value = """
-                        {
-                          "content": [
-                            {
-                              "id": "987fcdeb-51a2-43d7-b123-426614174999",
-                              "login": "jane_doe",
-                              "createdAt": "2025-01-20T15:30:00Z"
-                            }
-                          ],
-                          "page": {
-                            "size": 10,
-                            "number": 0,
-                            "totalElements": 1,
-                            "totalPages": 1
-                          }
-                        }
-                        """
-                )
+                schema = @Schema(implementation = PagedModel.class)
             )
         ),
         @ApiResponse(
             responseCode = "400",
             description = "Validation error - Invalid UUID format",
             content = @Content(
-                mediaType = "application/problem+json",
-                examples = @ExampleObject(
-                    name = "Invalid UUID Format Error",
-                    summary = "Invalid UUID format for userId parameter",
-                    value = """
-                        {
-                          "type": "https://example.com/errors/validation-error",
-                          "title": "Validation Error",
-                          "status": 400,
-                          "detail": "Invalid UUID format for userId parameter",
-                          "timestamp": "2025-01-27T10:30:00Z"
-                        }
-                        """
-                )
+                mediaType = "application/problem+json"
             )
         )
     })
@@ -435,49 +270,14 @@ public interface FollowApi {
             description = "Follow relationship status retrieved successfully",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = FollowStatusResponseDto.class),
-                examples = {
-                    @ExampleObject(
-                        name = "Follow Relationship Exists",
-                        summary = "Example when follow relationship exists",
-                        value = """
-                            {
-                              "isFollowing": true,
-                              "createdAt": "2025-01-20T15:30:00Z"
-                            }
-                            """
-                    ),
-                    @ExampleObject(
-                        name = "Follow Relationship Does Not Exist",
-                        summary = "Example when follow relationship does not exist",
-                        value = """
-                            {
-                              "isFollowing": false,
-                              "createdAt": null
-                            }
-                            """
-                    )
-                }
+                schema = @Schema(implementation = FollowStatusResponseDto.class)
             )
         ),
         @ApiResponse(
             responseCode = "400",
             description = "Validation error - Invalid UUID format",
             content = @Content(
-                mediaType = "application/problem+json",
-                examples = @ExampleObject(
-                    name = "Invalid UUID Format Error",
-                    summary = "Invalid UUID format for path parameters",
-                    value = """
-                        {
-                          "type": "https://example.com/errors/validation-error",
-                          "title": "Validation Error",
-                          "status": 400,
-                          "detail": "Invalid UUID format for followerId or followingId parameter",
-                          "timestamp": "2025-01-27T10:30:00Z"
-                        }
-                        """
-                )
+                mediaType = "application/problem+json"
             )
         )
     })
@@ -516,37 +316,14 @@ public interface FollowApi {
             description = "Follow statistics retrieved successfully",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = FollowStatsResponseDto.class),
-                examples = @ExampleObject(
-                    name = "Follow Statistics",
-                    summary = "Example follow statistics response",
-                    value = """
-                        {
-                          "followersCount": 150,
-                          "followingCount": 75
-                        }
-                        """
-                )
+                schema = @Schema(implementation = FollowStatsResponseDto.class)
             )
         ),
         @ApiResponse(
             responseCode = "400",
             description = "Validation error - Invalid UUID format",
             content = @Content(
-                mediaType = "application/problem+json",
-                examples = @ExampleObject(
-                    name = "Invalid UUID Format Error",
-                    summary = "Invalid UUID format for userId parameter",
-                    value = """
-                        {
-                          "type": "https://example.com/errors/validation-error",
-                          "title": "Validation Error",
-                          "status": 400,
-                          "detail": "Invalid UUID format for userId parameter",
-                          "timestamp": "2025-01-27T10:30:00Z"
-                        }
-                        """
-                )
+                mediaType = "application/problem+json"
             )
         )
     })

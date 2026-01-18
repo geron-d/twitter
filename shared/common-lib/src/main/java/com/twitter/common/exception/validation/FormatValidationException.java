@@ -1,5 +1,6 @@
 package com.twitter.common.exception.validation;
 
+import com.twitter.common.enums.validation.ValidationType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
@@ -72,13 +73,7 @@ public class FormatValidationException extends ValidationException {
     }
 
     /**
-     * Returns the validation type for this exception.
-     * <p>
-     * This method identifies this exception as a format validation error,
-     * enabling the GlobalExceptionHandler to provide appropriate error handling
-     * and response formatting.
-     *
-     * @return ValidationType.FORMAT indicating this is a format validation error
+     * @see ValidationException#getValidationType
      */
     @Override
     public ValidationType getValidationType() {

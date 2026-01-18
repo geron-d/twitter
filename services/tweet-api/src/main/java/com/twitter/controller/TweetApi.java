@@ -8,7 +8,6 @@ import com.twitter.dto.request.UpdateTweetRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -55,83 +54,28 @@ public interface TweetApi {
             description = "Tweet created successfully",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = TweetResponseDto.class),
-                examples = @ExampleObject(
-                    name = "Created Tweet",
-                    summary = "Example created tweet",
-                    value = """
-                        {
-                          "id": "123e4567-e89b-12d3-a456-426614174000",
-                          "userId": "987e6543-e21b-43d2-b654-321987654321",
-                          "content": "This is my first tweet!",
-                          "createdAt": "2025-01-27T15:30:00Z",
-                          "updatedAt": "2025-01-27T15:30:00Z"
-                        }
-                        """
-                )
+                schema = @Schema(implementation = TweetResponseDto.class)
             )
         ),
         @ApiResponse(
             responseCode = "400",
             description = "Validation error",
             content = @Content(
-                mediaType = "application/problem+json",
-                examples = @ExampleObject(
-                    name = "Format Validation Error",
-                    summary = "Content validation failed",
-                    value = """
-                        {
-                          "type": "https://example.com/errors/format-validation",
-                          "title": "Format Validation Error",
-                          "status": 400,
-                          "detail": "Tweet content must be between 1 and 280 characters",
-                          "fieldName": "content",
-                          "constraintName": "CONTENT_VALIDATION",
-                          "timestamp": "2025-01-27T15:30:00Z"
-                        }
-                        """
-                )
+                mediaType = "application/problem+json"
             )
         ),
         @ApiResponse(
             responseCode = "400",
             description = "Business rule violation",
             content = @Content(
-                mediaType = "application/problem+json",
-                examples = @ExampleObject(
-                    name = "User Not Found Error",
-                    summary = "User does not exist",
-                    value = """
-                        {
-                          "type": "https://example.com/errors/business-rule-validation",
-                          "title": "Business Rule Validation Error",
-                          "status": 400,
-                          "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 987e6543-e21b-43d2-b654-321987654321",
-                          "ruleName": "USER_NOT_EXISTS",
-                          "timestamp": "2025-01-27T15:30:00Z"
-                        }
-                        """
-                )
+                mediaType = "application/problem+json"
             )
         ),
         @ApiResponse(
             responseCode = "400",
             description = "Constraint violation error",
             content = @Content(
-                mediaType = "application/problem+json",
-                examples = @ExampleObject(
-                    name = "Constraint Violation Error",
-                    summary = "Bean validation failed",
-                    value = """
-                        {
-                          "type": "https://example.com/errors/validation-error",
-                          "title": "Validation Error",
-                          "status": 400,
-                          "detail": "Validation failed: content: Tweet content cannot be empty",
-                          "timestamp": "2025-01-27T15:30:00Z"
-                        }
-                        """
-                )
+                mediaType = "application/problem+json"
             )
         )
     })
@@ -161,60 +105,21 @@ public interface TweetApi {
             description = "Tweet found successfully",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = TweetResponseDto.class),
-                examples = @ExampleObject(
-                    name = "Tweet Response",
-                    summary = "Example tweet data",
-                    value = """
-                        {
-                          "id": "123e4567-e89b-12d3-a456-426614174000",
-                          "userId": "987e6543-e21b-43d2-b654-321987654321",
-                          "content": "This is my first tweet!",
-                          "createdAt": "2025-01-27T15:30:00Z",
-                          "updatedAt": "2025-01-27T15:30:00Z"
-                        }
-                        """
-                )
+                schema = @Schema(implementation = TweetResponseDto.class)
             )
         ),
         @ApiResponse(
             responseCode = "404",
             description = "Tweet not found",
             content = @Content(
-                mediaType = "application/problem+json",
-                examples = @ExampleObject(
-                    name = "Tweet Not Found Error",
-                    summary = "Tweet does not exist",
-                    value = """
-                        {
-                          "type": "https://example.com/errors/not-found",
-                          "title": "Tweet Not Found",
-                          "status": 404,
-                          "detail": "Tweet with ID '123e4567-e89b-12d3-a456-426614174000' not found",
-                          "timestamp": "2025-01-27T15:30:00Z"
-                        }
-                        """
-                )
+                mediaType = "application/problem+json"
             )
         ),
         @ApiResponse(
             responseCode = "400",
             description = "Invalid UUID format",
             content = @Content(
-                mediaType = "application/problem+json",
-                examples = @ExampleObject(
-                    name = "Invalid UUID Format Error",
-                    summary = "Invalid tweet ID format",
-                    value = """
-                        {
-                          "type": "https://example.com/errors/validation-error",
-                          "title": "Validation Error",
-                          "status": 400,
-                          "detail": "Invalid UUID format for tweetId parameter",
-                          "timestamp": "2025-01-27T15:30:00Z"
-                        }
-                        """
-                )
+                mediaType = "application/problem+json"
             )
         )
     })
@@ -252,126 +157,42 @@ public interface TweetApi {
             description = "Tweet updated successfully",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = TweetResponseDto.class),
-                examples = @ExampleObject(
-                    name = "Updated Tweet",
-                    summary = "Example updated tweet",
-                    value = """
-                        {
-                          "id": "123e4567-e89b-12d3-a456-426614174000",
-                          "userId": "987e6543-e21b-43d2-b654-321987654321",
-                          "content": "This is updated tweet content",
-                          "createdAt": "2025-01-20T10:30:00Z",
-                          "updatedAt": "2025-01-27T15:30:00Z"
-                        }
-                        """
-                )
+                schema = @Schema(implementation = TweetResponseDto.class)
             )
         ),
         @ApiResponse(
             responseCode = "400",
             description = "Validation error",
             content = @Content(
-                mediaType = "application/problem+json",
-                examples = @ExampleObject(
-                    name = "Format Validation Error",
-                    summary = "Content validation failed",
-                    value = """
-                        {
-                          "type": "https://example.com/errors/format-validation",
-                          "title": "Format Validation Error",
-                          "status": 400,
-                          "detail": "Tweet content must be between 1 and 280 characters",
-                          "fieldName": "content",
-                          "constraintName": "CONTENT_VALIDATION",
-                          "timestamp": "2025-01-27T15:30:00Z"
-                        }
-                        """
-                )
+                mediaType = "application/problem+json"
             )
         ),
         @ApiResponse(
             responseCode = "400",
             description = "Constraint violation error",
             content = @Content(
-                mediaType = "application/problem+json",
-                examples = @ExampleObject(
-                    name = "Constraint Violation Error",
-                    summary = "Bean validation failed",
-                    value = """
-                        {
-                          "type": "https://example.com/errors/validation-error",
-                          "title": "Validation Error",
-                          "status": 400,
-                          "detail": "Validation failed: content: Tweet content cannot be empty",
-                          "timestamp": "2025-01-27T15:30:00Z"
-                        }
-                        """
-                )
+                mediaType = "application/problem+json"
             )
         ),
         @ApiResponse(
             responseCode = "409",
             description = "Business rule violation - Access denied",
             content = @Content(
-                mediaType = "application/problem+json",
-                examples = @ExampleObject(
-                    name = "Access Denied Error",
-                    summary = "User is not the tweet author",
-                    value = """
-                        {
-                          "type": "https://example.com/errors/business-rule-validation",
-                          "title": "Business Rule Validation Error",
-                          "status": 409,
-                          "detail": "Business rule 'TWEET_ACCESS_DENIED' violated for context: Only the tweet author can update their tweet",
-                          "ruleName": "TWEET_ACCESS_DENIED",
-                          "context": "Only the tweet author can update their tweet",
-                          "timestamp": "2025-01-27T15:30:00Z"
-                        }
-                        """
-                )
+                mediaType = "application/problem+json"
             )
         ),
         @ApiResponse(
             responseCode = "409",
             description = "Business rule violation - Tweet not found",
             content = @Content(
-                mediaType = "application/problem+json",
-                examples = @ExampleObject(
-                    name = "Tweet Not Found Error",
-                    summary = "Tweet does not exist",
-                    value = """
-                        {
-                          "type": "https://example.com/errors/business-rule-validation",
-                          "title": "Business Rule Validation Error",
-                          "status": 409,
-                          "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 123e4567-e89b-12d3-a456-426614174000",
-                          "ruleName": "TWEET_NOT_FOUND",
-                          "context": "123e4567-e89b-12d3-a456-426614174000",
-                          "timestamp": "2025-01-27T15:30:00Z"
-                        }
-                        """
-                )
+                mediaType = "application/problem+json"
             )
         ),
         @ApiResponse(
             responseCode = "400",
             description = "Invalid UUID format",
             content = @Content(
-                mediaType = "application/problem+json",
-                examples = @ExampleObject(
-                    name = "Invalid UUID Format Error",
-                    summary = "Invalid tweet ID format",
-                    value = """
-                        {
-                          "type": "https://example.com/errors/validation-error",
-                          "title": "Validation Error",
-                          "status": 400,
-                          "detail": "Invalid UUID format for tweetId parameter",
-                          "timestamp": "2025-01-27T15:30:00Z"
-                        }
-                        """
-                )
+                mediaType = "application/problem+json"
             )
         )
     })
@@ -415,96 +236,21 @@ public interface TweetApi {
             responseCode = "404",
             description = "Tweet not found or already deleted",
             content = @Content(
-                mediaType = "application/problem+json",
-                examples = {
-                    @ExampleObject(
-                        name = "Tweet Not Found",
-                        summary = "Tweet does not exist",
-                        value = """
-                            {
-                              "type": "https://example.com/errors/business-rule-validation",
-                              "title": "Business Rule Validation Error",
-                              "status": 404,
-                              "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 123e4567-e89b-12d3-a456-426614174000",
-                              "ruleName": "TWEET_NOT_FOUND",
-                              "context": "123e4567-e89b-12d3-a456-426614174000",
-                              "timestamp": "2025-01-27T15:45:00Z"
-                            }
-                            """
-                    ),
-                    @ExampleObject(
-                        name = "Tweet Already Deleted",
-                        summary = "Tweet is already soft deleted",
-                        value = """
-                            {
-                              "type": "https://example.com/errors/business-rule-validation",
-                              "title": "Business Rule Validation Error",
-                              "status": 404,
-                              "detail": "Business rule 'TWEET_ALREADY_DELETED' violated for context: 123e4567-e89b-12d3-a456-426614174000",
-                              "ruleName": "TWEET_ALREADY_DELETED",
-                              "context": "123e4567-e89b-12d3-a456-426614174000",
-                              "timestamp": "2025-01-27T15:45:00Z"
-                            }
-                            """
-                    )
-                }
+                mediaType = "application/problem+json"
             )
         ),
         @ApiResponse(
             responseCode = "409",
             description = "Business rule violation - Access denied",
             content = @Content(
-                mediaType = "application/problem+json",
-                examples = @ExampleObject(
-                    name = "Access Denied Error",
-                    summary = "User is not the tweet author",
-                    value = """
-                        {
-                          "type": "https://example.com/errors/business-rule-validation",
-                          "title": "Business Rule Validation Error",
-                          "status": 409,
-                          "detail": "Business rule 'TWEET_ACCESS_DENIED' violated for context: Only the tweet author can delete their tweet",
-                          "ruleName": "TWEET_ACCESS_DENIED",
-                          "context": "Only the tweet author can delete their tweet",
-                          "timestamp": "2025-01-27T15:45:00Z"
-                        }
-                        """
-                )
+                mediaType = "application/problem+json"
             )
         ),
         @ApiResponse(
             responseCode = "400",
             description = "Validation error",
             content = @Content(
-                mediaType = "application/problem+json",
-                examples = {
-                    @ExampleObject(
-                        name = "Invalid UUID Format Error",
-                        summary = "Invalid tweet ID format",
-                        value = """
-                            {
-                              "type": "https://example.com/errors/validation-error",
-                              "title": "Validation Error",
-                              "status": 400,
-                              "detail": "Invalid UUID format for tweetId parameter",
-                              "timestamp": "2025-01-27T15:45:00Z"
-                            }
-                            """
-                    ),
-                    @ExampleObject(
-                        name = "User ID Validation Error",
-                        summary = "User ID is null or invalid",
-                        value = """
-                            {
-                              "type": "https://example.com/errors/validation-error",
-                              "title": "Validation Error",
-                              "status": 400,
-                              "detail": "Validation failed: userId: User ID cannot be null",
-                              "timestamp": "2025-01-27T15:45:00Z"
-                            }
-                            """
-                    )
-                }
+                mediaType = "application/problem+json"
             )
         )
     })
@@ -544,58 +290,7 @@ public interface TweetApi {
             description = "User tweets retrieved successfully",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = PagedModel.class),
-                examples = {
-                    @ExampleObject(
-                        name = "Paginated Tweets",
-                        summary = "Example paginated response with tweets",
-                        value = """
-                            {
-                              "content": [
-                                {
-                                  "id": "111e4567-e89b-12d3-a456-426614174000",
-                                  "userId": "123e4567-e89b-12d3-a456-426614174000",
-                                  "content": "This is my latest tweet!",
-                                  "createdAt": "2025-01-27T15:30:00Z",
-                                  "updatedAt": "2025-01-27T15:30:00Z",
-                                  "isDeleted": false,
-                                  "deletedAt": null
-                                },
-                                {
-                                  "id": "222e4567-e89b-12d3-a456-426614174000",
-                                  "userId": "123e4567-e89b-12d3-a456-426614174000",
-                                  "content": "Another tweet from yesterday",
-                                  "createdAt": "2025-01-26T10:15:00Z",
-                                  "updatedAt": "2025-01-26T10:15:00Z",
-                                  "isDeleted": false,
-                                  "deletedAt": null
-                                }
-                              ],
-                              "page": {
-                                "size": 20,
-                                "number": 0,
-                                "totalElements": 150,
-                                "totalPages": 8
-                              }
-                            }
-                            """
-                    ),
-                    @ExampleObject(
-                        name = "Empty Tweets List",
-                        summary = "Example response when user has no tweets",
-                        value = """
-                            {
-                              "content": [],
-                              "page": {
-                                "size": 20,
-                                "number": 0,
-                                "totalElements": 0,
-                                "totalPages": 0
-                              }
-                            }
-                            """
-                    )
-                }
+                schema = @Schema(implementation = PagedModel.class)
             )
         )
     })
@@ -642,161 +337,35 @@ public interface TweetApi {
             description = "Timeline retrieved successfully",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = PagedModel.class),
-                examples = {
-                    @ExampleObject(
-                        name = "Timeline with Tweets",
-                        summary = "Example timeline response with tweets from followed users",
-                        value = """
-                            {
-                              "content": [
-                                {
-                                  "id": "111e4567-e89b-12d3-a456-426614174000",
-                                  "userId": "222e4567-e89b-12d3-a456-426614174111",
-                                  "content": "This is a tweet from a followed user!",
-                                  "createdAt": "2025-01-27T15:30:00Z",
-                                  "updatedAt": "2025-01-27T15:30:00Z",
-                                  "isDeleted": false,
-                                  "deletedAt": null
-                                },
-                                {
-                                  "id": "333e4567-e89b-12d3-a456-426614174222",
-                                  "userId": "444e4567-e89b-12d3-a456-426614174333",
-                                  "content": "Another tweet from another followed user",
-                                  "createdAt": "2025-01-27T14:20:00Z",
-                                  "updatedAt": "2025-01-27T14:20:00Z",
-                                  "isDeleted": false,
-                                  "deletedAt": null
-                                }
-                              ],
-                              "page": {
-                                "size": 20,
-                                "number": 0,
-                                "totalElements": 150,
-                                "totalPages": 8,
-                                "first": true,
-                                "last": false
-                              }
-                            }
-                            """
-                    ),
-                    @ExampleObject(
-                        name = "Empty Timeline",
-                        summary = "Example response when user has no following relationships",
-                        value = """
-                            {
-                              "content": [],
-                              "page": {
-                                "size": 20,
-                                "number": 0,
-                                "totalElements": 0,
-                                "totalPages": 0,
-                                "first": true,
-                                "last": true
-                              }
-                            }
-                            """
-                    ),
-                    @ExampleObject(
-                        name = "Empty Timeline - No Tweets",
-                        summary = "Example response when followed users have no tweets",
-                        value = """
-                            {
-                              "content": [],
-                              "page": {
-                                "size": 20,
-                                "number": 0,
-                                "totalElements": 0,
-                                "totalPages": 0,
-                                "first": true,
-                                "last": true
-                              }
-                            }
-                            """
-                    )
-                }
+                schema = @Schema(implementation = PagedModel.class)
             )
         ),
         @ApiResponse(
             responseCode = "400",
             description = "Invalid UUID format for userId",
             content = @Content(
-                mediaType = "application/problem+json",
-                examples = @ExampleObject(
-                    name = "Invalid UUID Format Error",
-                    summary = "Invalid user ID format",
-                    value = """
-                        {
-                          "type": "https://example.com/errors/validation-error",
-                          "title": "Validation Error",
-                          "status": 400,
-                          "detail": "Invalid UUID format for userId parameter",
-                          "timestamp": "2025-01-27T15:30:00Z"
-                        }
-                        """
-                )
+                mediaType = "application/problem+json"
             )
         ),
         @ApiResponse(
             responseCode = "400",
             description = "User does not exist",
             content = @Content(
-                mediaType = "application/problem+json",
-                examples = @ExampleObject(
-                    name = "User Not Found Error",
-                    summary = "User does not exist",
-                    value = """
-                        {
-                          "type": "https://example.com/errors/business-rule-validation",
-                          "title": "Business Rule Validation Error",
-                          "status": 400,
-                          "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
-                          "ruleName": "USER_NOT_EXISTS",
-                          "context": "123e4567-e89b-12d3-a456-426614174000",
-                          "timestamp": "2025-01-27T15:30:00Z"
-                        }
-                        """
-                )
+                mediaType = "application/problem+json"
             )
         ),
         @ApiResponse(
             responseCode = "400",
             description = "Invalid pagination parameters",
             content = @Content(
-                mediaType = "application/problem+json",
-                examples = @ExampleObject(
-                    name = "Invalid Pagination Error",
-                    summary = "Invalid page or size parameters",
-                    value = """
-                        {
-                          "type": "https://example.com/errors/validation-error",
-                          "title": "Validation Error",
-                          "status": 400,
-                          "detail": "Invalid pagination parameters: page must be >= 0, size must be between 1 and 100",
-                          "timestamp": "2025-01-27T15:30:00Z"
-                        }
-                        """
-                )
+                mediaType = "application/problem+json"
             )
         ),
         @ApiResponse(
             responseCode = "503",
             description = "Follower API service unavailable",
             content = @Content(
-                mediaType = "application/problem+json",
-                examples = @ExampleObject(
-                    name = "Service Unavailable Error",
-                    summary = "Follower API is unavailable",
-                    value = """
-                        {
-                          "type": "https://example.com/errors/service-unavailable",
-                          "title": "Service Unavailable",
-                          "status": 503,
-                          "detail": "Follower API service is currently unavailable. Please try again later.",
-                          "timestamp": "2025-01-27T15:30:00Z"
-                        }
-                        """
-                )
+                mediaType = "application/problem+json"
             )
         )
     })

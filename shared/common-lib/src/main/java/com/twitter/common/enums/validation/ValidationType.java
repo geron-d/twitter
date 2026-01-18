@@ -1,4 +1,4 @@
-package com.twitter.common.exception.validation;
+package com.twitter.common.enums.validation;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -55,12 +55,6 @@ public enum ValidationType {
 
     /**
      * Human-readable description of the validation type.
-     * <p>
-     * This field provides a descriptive string that explains what type
-     * of validation this enum value represents. It is useful for logging,
-     * debugging, and generating user-friendly error messages.
-     *
-     * @return the description of this validation type
      */
     private final String description;
-}
+}

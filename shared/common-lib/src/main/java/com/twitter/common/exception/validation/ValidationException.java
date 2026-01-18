@@ -1,5 +1,6 @@
 package com.twitter.common.exception.validation;
 
+import com.twitter.common.enums.validation.ValidationType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
@@ -10,12 +11,6 @@ import lombok.Getter;
  * errors in the Twitter microservices architecture. It establishes a unified
  * exception hierarchy that allows for consistent error handling and categorization
  * of different types of validation failures.
- *
- * <p>The validation architecture follows these principles:</p>
- * - <strong>Type Safety</strong> - Each validation exception has a specific type
- * - <strong>Consistency</strong> - All validation errors follow the same structure
- * - <strong>Extensibility</strong> - New validation types can be easily added
- * - <strong>Centralized Handling</strong> - GlobalExceptionHandler processes all types
  *
  * @author geron
  * @version 1.0
@@ -35,30 +30,11 @@ import lombok.Getter;
 )
 @Getter
 public abstract class ValidationException extends RuntimeException {
-
-    /**
-     * Constructs a new validation exception with the specified detail message.
-     * <p>
-     * This constructor creates a validation exception with a custom error message
-     * that describes the specific validation failure. The message should be clear
-     * and informative to help developers understand what went wrong.
-     *
-     * @param message the detail message describing the validation error
-     */
+    
     public ValidationException(String message) {
         super(message);
     }
-
-    /**
-     * Constructs a new validation exception with the specified detail message and cause.
-     * <p>
-     * This constructor allows wrapping another exception while providing context
-     * about the validation failure. This is useful when validation errors occur
-     * as a result of other exceptions (e.g., database errors during uniqueness checks).
-     *
-     * @param message the detail message describing the validation error
-     * @param cause   the cause of the validation error
-     */
+    
     public ValidationException(String message, Throwable cause) {
         super(message, cause);
     }

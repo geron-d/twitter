@@ -8,7 +8,6 @@ import com.twitter.common.dto.response.retweet.RetweetResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -60,154 +59,21 @@ public interface RetweetApi {
             description = "Tweet retweeted successfully",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = RetweetResponseDto.class),
-                examples = {
-                    @ExampleObject(
-                        name = "Created Retweet With Comment",
-                        summary = "Example created retweet with comment",
-                        value = """
-                            {
-                              "id": "987e6543-e21b-43d2-b654-321987654321",
-                              "tweetId": "223e4567-e89b-12d3-a456-426614174001",
-                              "userId": "123e4567-e89b-12d3-a456-426614174000",
-                              "comment": "Great tweet!",
-                              "createdAt": "2025-01-27T15:30:00Z"
-                            }
-                            """
-                    ),
-                    @ExampleObject(
-                        name = "Created Retweet Without Comment",
-                        summary = "Example created retweet without comment",
-                        value = """
-                            {
-                              "id": "987e6543-e21b-43d2-b654-321987654321",
-                              "tweetId": "223e4567-e89b-12d3-a456-426614174001",
-                              "userId": "123e4567-e89b-12d3-a456-426614174000",
-                              "comment": null,
-                              "createdAt": "2025-01-27T15:30:00Z"
-                            }
-                            """
-                    )
-                }
+                schema = @Schema(implementation = RetweetResponseDto.class)
             )
         ),
         @ApiResponse(
             responseCode = "400",
             description = "Validation error",
             content = @Content(
-                mediaType = "application/problem+json",
-                examples = {
-                    @ExampleObject(
-                        name = "User ID Validation Error",
-                        summary = "User ID is null or invalid",
-                        value = """
-                            {
-                              "type": "https://example.com/errors/validation-error",
-                              "title": "Validation Error",
-                              "status": 400,
-                              "detail": "Validation failed: userId: User ID cannot be null",
-                              "timestamp": "2025-01-27T15:30:00Z"
-                            }
-                            """
-                    ),
-                    @ExampleObject(
-                        name = "Comment Validation Error",
-                        summary = "Comment is empty string or exceeds max length",
-                        value = """
-                            {
-                              "type": "https://example.com/errors/format-validation",
-                              "title": "Format Validation Error",
-                              "status": 400,
-                              "detail": "Comment cannot be empty string. Use null if no comment is provided.",
-                              "fieldName": "comment",
-                              "constraintName": "NOT_EMPTY",
-                              "timestamp": "2025-01-27T15:30:00Z"
-                            }
-                            """
-                    ),
-                    @ExampleObject(
-                        name = "Invalid UUID Format Error",
-                        summary = "Invalid tweet ID format",
-                        value = """
-                            {
-                              "type": "https://example.com/errors/validation-error",
-                              "title": "Validation Error",
-                              "status": 400,
-                              "detail": "Invalid UUID format for tweetId parameter",
-                              "timestamp": "2025-01-27T15:30:00Z"
-                            }
-                            """
-                    )
-                }
+                mediaType = "application/problem+json"
             )
         ),
         @ApiResponse(
             responseCode = "409",
             description = "Business rule violation or uniqueness violation",
             content = @Content(
-                mediaType = "application/problem+json",
-                examples = {
-                    @ExampleObject(
-                        name = "Tweet Not Found Error",
-                        summary = "Tweet does not exist or is deleted",
-                        value = """
-                            {
-                              "type": "https://example.com/errors/business-rule-validation",
-                              "title": "Business Rule Validation Error",
-                              "status": 409,
-                              "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
-                              "ruleName": "TWEET_NOT_FOUND",
-                              "context": "223e4567-e89b-12d3-a456-426614174001",
-                              "timestamp": "2025-01-27T15:30:00Z"
-                            }
-                            """
-                    ),
-                    @ExampleObject(
-                        name = "User Not Found Error",
-                        summary = "User does not exist",
-                        value = """
-                            {
-                              "type": "https://example.com/errors/business-rule-validation",
-                              "title": "Business Rule Validation Error",
-                              "status": 409,
-                              "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
-                              "ruleName": "USER_NOT_EXISTS",
-                              "context": "123e4567-e89b-12d3-a456-426614174000",
-                              "timestamp": "2025-01-27T15:30:00Z"
-                            }
-                            """
-                    ),
-                    @ExampleObject(
-                        name = "Self-Retweet Error",
-                        summary = "User cannot retweet their own tweet",
-                        value = """
-                            {
-                              "type": "https://example.com/errors/business-rule-validation",
-                              "title": "Business Rule Validation Error",
-                              "status": 409,
-                              "detail": "Business rule 'SELF_RETWEET_NOT_ALLOWED' violated for context: Users cannot retweet their own tweets",
-                              "ruleName": "SELF_RETWEET_NOT_ALLOWED",
-                              "context": "Users cannot retweet their own tweets",
-                              "timestamp": "2025-01-27T15:30:00Z"
-                            }
-                            """
-                    ),
-                    @ExampleObject(
-                        name = "Duplicate Retweet Error",
-                        summary = "User already retweeted this tweet",
-                        value = """
-                            {
-                              "type": "https://example.com/errors/uniqueness-validation",
-                              "title": "Uniqueness Validation Error",
-                              "status": 409,
-                              "detail": "A retweet already exists for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
-                              "fieldName": "retweet",
-                              "fieldValue": "tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
-                              "timestamp": "2025-01-27T15:30:00Z"
-                            }
-                            """
-                    )
-                }
+                mediaType = "application/problem+json"
             )
         )
     })
@@ -250,94 +116,21 @@ public interface RetweetApi {
             responseCode = "400",
             description = "Validation error",
             content = @Content(
-                mediaType = "application/problem+json",
-                examples = @ExampleObject(
-                    name = "User ID Validation Error",
-                    summary = "User ID is null or invalid",
-                    value = """
-                        {
-                          "type": "https://example.com/errors/validation-error",
-                          "title": "Validation Error",
-                          "status": 400,
-                          "detail": "Validation failed: userId: User ID cannot be null",
-                          "timestamp": "2025-01-27T15:30:00Z"
-                        }
-                        """
-                )
+                mediaType = "application/problem+json"
             )
         ),
         @ApiResponse(
             responseCode = "409",
             description = "Business rule violation",
             content = @Content(
-                mediaType = "application/problem+json",
-                examples = {
-                    @ExampleObject(
-                        name = "Tweet Not Found Error",
-                        summary = "Tweet does not exist or is deleted",
-                        value = """
-                            {
-                              "type": "https://example.com/errors/business-rule-validation",
-                              "title": "Business Rule Validation Error",
-                              "status": 409,
-                              "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
-                              "ruleName": "TWEET_NOT_FOUND",
-                              "context": "223e4567-e89b-12d3-a456-426614174001",
-                              "timestamp": "2025-01-27T15:30:00Z"
-                            }
-                            """
-                    ),
-                    @ExampleObject(
-                        name = "User Not Found Error",
-                        summary = "User does not exist",
-                        value = """
-                            {
-                              "type": "https://example.com/errors/business-rule-validation",
-                              "title": "Business Rule Validation Error",
-                              "status": 409,
-                              "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
-                              "ruleName": "USER_NOT_EXISTS",
-                              "context": "123e4567-e89b-12d3-a456-426614174000",
-                              "timestamp": "2025-01-27T15:30:00Z"
-                            }
-                            """
-                    ),
-                    @ExampleObject(
-                        name = "Retweet Not Found Error",
-                        summary = "Retweet does not exist",
-                        value = """
-                            {
-                              "type": "https://example.com/errors/business-rule-validation",
-                              "title": "Business Rule Validation Error",
-                              "status": 409,
-                              "detail": "Business rule 'RETWEET_NOT_FOUND' violated for context: Retweet not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
-                              "ruleName": "RETWEET_NOT_FOUND",
-                              "context": "Retweet not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
-                              "timestamp": "2025-01-27T15:30:00Z"
-                            }
-                            """
-                    )
-                }
+                mediaType = "application/problem+json"
             )
         ),
         @ApiResponse(
             responseCode = "400",
             description = "Invalid UUID format",
             content = @Content(
-                mediaType = "application/problem+json",
-                examples = @ExampleObject(
-                    name = "Invalid UUID Format Error",
-                    summary = "Invalid tweet ID format",
-                    value = """
-                        {
-                          "type": "https://example.com/errors/validation-error",
-                          "title": "Validation Error",
-                          "status": 400,
-                          "detail": "Invalid UUID format for tweetId parameter",
-                          "timestamp": "2025-01-27T15:30:00Z"
-                        }
-                        """
-                )
+                mediaType = "application/problem+json"
             )
         )
     })
@@ -378,116 +171,28 @@ public interface RetweetApi {
             description = "Tweet retweets retrieved successfully",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = PagedModel.class),
-                examples = {
-                    @ExampleObject(
-                        name = "Paginated Retweets",
-                        summary = "Example paginated response with retweets",
-                        value = """
-                            {
-                              "content": [
-                                {
-                                  "id": "987e6543-e21b-43d2-b654-321987654321",
-                                  "tweetId": "223e4567-e89b-12d3-a456-426614174001",
-                                  "userId": "123e4567-e89b-12d3-a456-426614174000",
-                                  "comment": "Great tweet!",
-                                  "createdAt": "2025-01-27T15:30:00Z"
-                                },
-                                {
-                                  "id": "876e5432-e10a-32c1-a543-210876543210",
-                                  "tweetId": "223e4567-e89b-12d3-a456-426614174001",
-                                  "userId": "234e5678-f90c-23e4-b567-537725285112",
-                                  "comment": null,
-                                  "createdAt": "2025-01-27T14:20:00Z"
-                                }
-                              ],
-                              "page": {
-                                "size": 20,
-                                "number": 0,
-                                "totalElements": 45,
-                                "totalPages": 3
-                              }
-                            }
-                            """
-                    ),
-                    @ExampleObject(
-                        name = "Empty Retweets List",
-                        summary = "Example response when tweet has no retweets",
-                        value = """
-                            {
-                              "content": [],
-                              "page": {
-                                "size": 20,
-                                "number": 0,
-                                "totalElements": 0,
-                                "totalPages": 0
-                              }
-                            }
-                            """
-                    )
-                }
+                schema = @Schema(implementation = PagedModel.class)
             )
         ),
         @ApiResponse(
             responseCode = "400",
             description = "Validation error",
             content = @Content(
-                mediaType = "application/problem+json",
-                examples = @ExampleObject(
-                    name = "Invalid Pagination Error",
-                    summary = "Invalid page or size parameters",
-                    value = """
-                        {
-                          "type": "https://example.com/errors/validation-error",
-                          "title": "Validation Error",
-                          "status": 400,
-                          "detail": "Invalid pagination parameters: page must be >= 0, size must be between 1 and 100",
-                          "timestamp": "2025-01-27T15:30:00Z"
-                        }
-                        """
-                )
+                mediaType = "application/problem+json"
             )
         ),
         @ApiResponse(
             responseCode = "409",
             description = "Business rule violation",
             content = @Content(
-                mediaType = "application/problem+json",
-                examples = @ExampleObject(
-                    name = "Tweet Not Found Error",
-                    summary = "Tweet does not exist or is deleted",
-                    value = """
-                        {
-                          "type": "https://example.com/errors/business-rule-validation",
-                          "title": "Business Rule Validation Error",
-                          "status": 409,
-                          "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
-                          "ruleName": "TWEET_NOT_FOUND",
-                          "context": "223e4567-e89b-12d3-a456-426614174001",
-                          "timestamp": "2025-01-27T15:30:00Z"
-                        }
-                        """
-                )
+                mediaType = "application/problem+json"
             )
         ),
         @ApiResponse(
             responseCode = "400",
             description = "Invalid UUID format",
             content = @Content(
-                mediaType = "application/problem+json",
-                examples = @ExampleObject(
-                    name = "Invalid UUID Format Error",
-                    summary = "Invalid tweet ID format",
-                    value = """
-                        {
-                          "type": "https://example.com/errors/validation-error",
-                          "title": "Validation Error",
-                          "status": 400,
-                          "detail": "Invalid UUID format for tweetId parameter",
-                          "timestamp": "2025-01-27T15:30:00Z"
-                        }
-                        """
-                )
+                mediaType = "application/problem+json"
             )
         )
     })

@@ -1,6 +1,7 @@
 package com.twitter.common.exception.validation;
 
 import com.twitter.common.enums.user.UserRole;
+import com.twitter.common.enums.validation.ValidationType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
@@ -72,13 +73,7 @@ public class BusinessRuleValidationException extends ValidationException {
     }
 
     /**
-     * Returns the validation type for this exception.
-     * <p>
-     * This method identifies this exception as a business rule validation error,
-     * enabling the GlobalExceptionHandler to provide appropriate error handling
-     * and response formatting.
-     *
-     * @return ValidationType.BUSINESS_RULE indicating this is a business rule validation error
+     * @see ValidationException#getValidationType
      */
     @Override
     public ValidationType getValidationType() {
