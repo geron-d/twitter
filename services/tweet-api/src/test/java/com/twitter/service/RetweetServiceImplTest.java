@@ -1,7 +1,7 @@
 package com.twitter.service;
 
-import com.twitter.common.dto.request.RetweetRequestDto;
-import com.twitter.common.dto.response.RetweetResponseDto;
+import com.twitter.common.dto.request.retweet.RetweetRequestDto;
+import com.twitter.common.dto.response.retweet.RetweetResponseDto;
 import com.twitter.entity.Retweet;
 import com.twitter.entity.Tweet;
 import com.twitter.mapper.RetweetMapper;

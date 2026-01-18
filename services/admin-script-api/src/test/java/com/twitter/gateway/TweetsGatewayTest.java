@@ -1,10 +1,10 @@
 package com.twitter.gateway;
 
 import com.twitter.client.TweetsApiClient;
-import com.twitter.common.dto.request.LikeTweetRequestDto;
-import com.twitter.common.dto.request.RetweetRequestDto;
-import com.twitter.common.dto.response.LikeResponseDto;
-import com.twitter.common.dto.response.RetweetResponseDto;
+import com.twitter.common.dto.request.like.LikeTweetRequestDto;
+import com.twitter.common.dto.request.retweet.RetweetRequestDto;
+import com.twitter.common.dto.response.like.LikeResponseDto;
+import com.twitter.common.dto.response.retweet.RetweetResponseDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -269,4 +269,4 @@ class TweetsGatewayTest {
             verify(tweetsApiClient, times(1)).retweetTweet(eq(tweetId), eq(validRetweetRequest));
         }
     }
-}
+}

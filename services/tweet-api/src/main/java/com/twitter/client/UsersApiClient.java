@@ -1,6 +1,6 @@
 package com.twitter.client;
 
-import com.twitter.common.dto.UserExistsResponseDto;
+import com.twitter.common.dto.response.user.UserExistsResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

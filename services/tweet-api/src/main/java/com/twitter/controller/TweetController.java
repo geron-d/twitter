@@ -3,7 +3,7 @@ package com.twitter.controller;
 import com.twitter.common.aspect.LoggableRequest;
 import com.twitter.common.dto.request.tweet.CreateTweetRequestDto;
 import com.twitter.common.dto.request.tweet.DeleteTweetRequestDto;
-import com.twitter.common.dto.response.TweetResponseDto;
+import com.twitter.common.dto.response.tweet.TweetResponseDto;
 import com.twitter.dto.request.UpdateTweetRequestDto;
 import com.twitter.service.TweetService;
 import jakarta.validation.Valid;

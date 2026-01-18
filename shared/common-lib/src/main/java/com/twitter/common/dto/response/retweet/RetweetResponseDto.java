@@ -1,4 +1,4 @@
-package com.twitter.common.dto.response;
+package com.twitter.common.dto.response.retweet;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -10,11 +10,6 @@ import java.util.UUID;
 /**
  * Response DTO for Retweet data.
  *
- * @param id        unique identifier for the retweet
- * @param tweetId   ID of the tweet that was retweeted
- * @param userId    ID of the user who retweeted the tweet
- * @param comment   optional comment for the retweet (can be null)
- * @param createdAt timestamp when the retweet was created
  * @author geron
  * @version 1.0
  */

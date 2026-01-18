@@ -1,9 +1,12 @@
-package com.twitter.common.dto;
+package com.twitter.common.dto.response.user;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Data Transfer Object for user existence check response.
+ *
+ * @author geron
+ * @version 1.0
  */
 @Schema(
     name = "UserExistsResponse",
@@ -11,16 +14,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
     example = "{\"exists\": true}"
 )
 public record UserExistsResponseDto(
-    /**
-     * Indicates whether the user exists in the system.
-     * <p>
-     * This field is set to true if a user with the specified ID exists
-     * and is found in the database, false otherwise.
-     */
     @Schema(
         description = "Indicates whether the user exists in the system",
-        example = "true",
-        required = true
+        example = "true"
     )
     boolean exists
 ) {

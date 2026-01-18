@@ -1,8 +1,8 @@
 package com.twitter.gateway;
 
 import com.twitter.client.UsersApiClient;
-import com.twitter.common.dto.request.UserRequestDto;
-import com.twitter.common.dto.response.UserResponseDto;
+import com.twitter.common.dto.request.user.UserRequestDto;
+import com.twitter.common.dto.response.user.UserResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -43,4 +43,4 @@ public class UsersGateway {
         }
     }
 }
-
+

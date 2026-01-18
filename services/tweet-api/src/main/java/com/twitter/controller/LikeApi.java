@@ -2,8 +2,8 @@ package com.twitter.controller;
 
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.UniquenessValidationException;
-import com.twitter.common.dto.request.LikeTweetRequestDto;
-import com.twitter.common.dto.response.LikeResponseDto;
+import com.twitter.common.dto.request.like.LikeTweetRequestDto;
+import com.twitter.common.dto.response.like.LikeResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;

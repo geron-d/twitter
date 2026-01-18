@@ -1,8 +1,8 @@
 package com.twitter.gateway;
 
 import com.twitter.client.FollowApiClient;
-import com.twitter.common.dto.request.FollowRequestDto;
-import com.twitter.common.dto.response.FollowResponseDto;
+import com.twitter.common.dto.request.follow.FollowRequestDto;
+import com.twitter.common.dto.response.follow.FollowResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

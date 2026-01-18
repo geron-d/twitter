@@ -1,4 +1,4 @@
-package com.twitter.common.dto.request;
+package com.twitter.common.dto.request.like;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
@@ -9,7 +9,6 @@ import java.util.UUID;
 /**
  * Data Transfer Object for liking a tweet.
  *
- * @param userId the ID of the user who likes the tweet
  * @author geron
  * @version 1.0
  */

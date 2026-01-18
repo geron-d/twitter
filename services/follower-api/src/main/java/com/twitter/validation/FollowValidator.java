@@ -2,7 +2,7 @@ package com.twitter.validation;
 
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.UniquenessValidationException;
-import com.twitter.common.dto.request.FollowRequestDto;
+import com.twitter.common.dto.request.follow.FollowRequestDto;
 
 /**
  * Interface for follow relationship validation in Twitter system.

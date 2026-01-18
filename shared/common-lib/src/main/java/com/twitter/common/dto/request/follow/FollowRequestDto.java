@@ -1,4 +1,4 @@
-package com.twitter.common.dto.request;
+package com.twitter.common.dto.request.follow;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
@@ -8,13 +8,7 @@ import java.util.UUID;
 
 /**
  * Data Transfer Object for creating a new follow relationship.
- * <p>
- * This record represents the data structure used for creating follow relationships
- * between users in the system. It includes validation constraints to ensure
- * both follower and following user IDs are provided.
  *
- * @param followerId  ID of the user who is following (the follower)
- * @param followingId ID of the user being followed (the following)
  * @author geron
  * @version 1.0
  */

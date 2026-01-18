@@ -1,7 +1,7 @@
 package com.twitter.mapper;
 
-import com.twitter.common.dto.request.UserRequestDto;
-import com.twitter.common.dto.response.UserResponseDto;
+import com.twitter.common.dto.request.user.UserRequestDto;
+import com.twitter.common.dto.response.user.UserResponseDto;
 import com.twitter.common.enums.UserRole;
 import com.twitter.common.enums.UserStatus;
 import com.twitter.dto.UserPatchDto;
@@ -591,4 +591,4 @@ class UserMapperTest {
             assertThat(user.getRole()).isEqualTo(originalRole);
         }
     }
-}
+}

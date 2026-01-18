@@ -1,13 +1,13 @@
 package com.twitter.controller;
 
-import com.twitter.common.dto.request.FollowRequestDto;
-import com.twitter.common.dto.response.FollowResponseDto;
+import com.twitter.common.dto.request.follow.FollowRequestDto;
+import com.twitter.common.dto.response.follow.FollowResponseDto;
 import com.twitter.dto.filter.FollowerFilter;
 import com.twitter.dto.filter.FollowingFilter;
 import com.twitter.dto.response.FollowStatsResponseDto;
 import com.twitter.dto.response.FollowStatusResponseDto;
 import com.twitter.dto.response.FollowerResponseDto;
-import com.twitter.common.dto.response.FollowingResponseDto;
+import com.twitter.common.dto.response.follow.FollowingResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;

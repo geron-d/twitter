@@ -2,7 +2,7 @@ package com.twitter.validation;
 
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.UniquenessValidationException;
-import com.twitter.common.dto.request.FollowRequestDto;
+import com.twitter.common.dto.request.follow.FollowRequestDto;
 import com.twitter.gateway.UserGateway;
 import com.twitter.repository.FollowRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -203,4 +203,3 @@ class FollowValidatorImplTest {
         }
     }
 }
-

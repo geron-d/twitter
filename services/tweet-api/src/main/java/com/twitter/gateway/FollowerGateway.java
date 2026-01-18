@@ -1,7 +1,7 @@
 package com.twitter.gateway;
 
 import com.twitter.client.FollowerApiClient;
-import com.twitter.common.dto.response.FollowingResponseDto;
+import com.twitter.common.dto.response.follow.FollowingResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -80,4 +80,3 @@ public class FollowerGateway {
         }
     }
 }
-

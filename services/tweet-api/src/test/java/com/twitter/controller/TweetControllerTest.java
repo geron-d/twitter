@@ -3,7 +3,7 @@ package com.twitter.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.twitter.common.dto.request.tweet.CreateTweetRequestDto;
 import com.twitter.common.dto.request.tweet.DeleteTweetRequestDto;
-import com.twitter.common.dto.response.TweetResponseDto;
+import com.twitter.common.dto.response.tweet.TweetResponseDto;
 import com.twitter.dto.request.UpdateTweetRequestDto;
 import com.twitter.entity.Tweet;
 import com.twitter.repository.TweetRepository;

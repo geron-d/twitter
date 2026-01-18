@@ -1,7 +1,7 @@
 package com.twitter.mapper;
 
-import com.twitter.common.dto.request.UserRequestDto;
-import com.twitter.common.dto.response.UserResponseDto;
+import com.twitter.common.dto.request.user.UserRequestDto;
+import com.twitter.common.dto.response.user.UserResponseDto;
 import com.twitter.dto.UserPatchDto;
 import com.twitter.dto.UserUpdateDto;
 import com.twitter.entity.User;
@@ -74,4 +74,4 @@ public interface UserMapper {
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "role", ignore = true)
     void updateUserFromUpdateDto(UserUpdateDto userUpdateDto, @MappingTarget User user);
-}
+}

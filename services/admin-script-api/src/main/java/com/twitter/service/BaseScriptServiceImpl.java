@@ -2,12 +2,12 @@ package com.twitter.service;
 
 import com.twitter.common.dto.request.tweet.CreateTweetRequestDto;
 import com.twitter.common.dto.request.tweet.DeleteTweetRequestDto;
-import com.twitter.common.dto.request.FollowRequestDto;
-import com.twitter.common.dto.request.LikeTweetRequestDto;
-import com.twitter.common.dto.request.RetweetRequestDto;
-import com.twitter.common.dto.request.UserRequestDto;
-import com.twitter.common.dto.response.TweetResponseDto;
-import com.twitter.common.dto.response.UserResponseDto;
+import com.twitter.common.dto.request.follow.FollowRequestDto;
+import com.twitter.common.dto.request.like.LikeTweetRequestDto;
+import com.twitter.common.dto.request.retweet.RetweetRequestDto;
+import com.twitter.common.dto.request.user.UserRequestDto;
+import com.twitter.common.dto.response.tweet.TweetResponseDto;
+import com.twitter.common.dto.response.user.UserResponseDto;
 import com.twitter.dto.request.BaseScriptRequestDto;
 import com.twitter.dto.response.BaseScriptResponseDto;
 import com.twitter.dto.response.ScriptStatisticsDto;

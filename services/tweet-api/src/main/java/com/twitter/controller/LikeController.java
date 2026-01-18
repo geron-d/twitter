@@ -1,8 +1,8 @@
 package com.twitter.controller;
 
 import com.twitter.common.aspect.LoggableRequest;
-import com.twitter.common.dto.request.LikeTweetRequestDto;
-import com.twitter.common.dto.response.LikeResponseDto;
+import com.twitter.common.dto.request.like.LikeTweetRequestDto;
+import com.twitter.common.dto.response.like.LikeResponseDto;
 import com.twitter.service.LikeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

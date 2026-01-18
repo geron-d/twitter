@@ -1,4 +1,4 @@
-package com.twitter.common.dto.response;
+package com.twitter.common.dto.response.user;
 
 import com.twitter.common.enums.UserRole;
 import com.twitter.common.enums.UserStatus;
@@ -9,19 +9,7 @@ import java.util.UUID;
 
 /**
  * Data Transfer Object for user response data.
- * <p>
- * This record represents the data structure used for returning user information
- * to clients. It excludes sensitive fields like password hash and salt for
- * security purposes while providing all necessary user data for display.
  *
- * @param id        unique identifier for the user
- * @param login     user's login name
- * @param firstName user's first name
- * @param lastName  user's last name
- * @param email     user's email address
- * @param status    current status of the user account
- * @param role      user's role in the system
- * @param createdAt date and time when the user account was created
  * @author geron
  * @version 1.0
  */
@@ -42,12 +30,6 @@ import java.util.UUID;
         """
 )
 public record UserResponseDto(
-    /**
-     * Unique identifier for the user.
-     * <p>
-     * This field contains the UUID that uniquely identifies the user
-     * in the system .
-     */
     @Schema(
         description = "Unique identifier for the user",
         example = "123e4567-e89b-12d3-a456-426614174000",
@@ -55,9 +37,6 @@ public record UserResponseDto(
     )
     UUID id,
 
-    /**
-     * User's login name.
-     */
     @Schema(
         description = "User's unique login name",
         example = "jane_smith",
@@ -65,11 +44,6 @@ public record UserResponseDto(
     )
     String login,
 
-    /**
-     * User's first name.
-     * <p>
-     * May be null if not provided during registration.
-     */
     @Schema(
         description = "User's first name (optional)",
         example = "Jane",
@@ -78,11 +52,6 @@ public record UserResponseDto(
     )
     String firstName,
 
-    /**
-     * User's last name.
-     * <p>
-     * May be null if not provided during registration.
-     */
     @Schema(
         description = "User's last name (optional)",
         example = "Smith",
@@ -91,9 +60,6 @@ public record UserResponseDto(
     )
     String lastName,
 
-    /**
-     * User's email address.
-     */
     @Schema(
         description = "User's unique email address",
         example = "jane.smith@example.com",
@@ -101,11 +67,6 @@ public record UserResponseDto(
     )
     String email,
 
-    /**
-     * Current status of the user account.
-     * <p>
-     * Affects the user's ability to access the system.
-     */
     @Schema(
         description = "Current status of the user account",
         example = "ACTIVE",
@@ -113,12 +74,6 @@ public record UserResponseDto(
     )
     UserStatus status,
 
-    /**
-     * Role assigned to the user.
-     * <p>
-     * This field determines the user's permissions and access level
-     * within the system.
-     */
     @Schema(
         description = "Role assigned to the user",
         example = "USER",
@@ -126,9 +81,6 @@ public record UserResponseDto(
     )
     UserRole role,
 
-    /**
-     * Date and time when the user account was created.
-     */
     @Schema(
         description = "Date and time when the user account was created",
         example = "2025-01-21T20:30:00",

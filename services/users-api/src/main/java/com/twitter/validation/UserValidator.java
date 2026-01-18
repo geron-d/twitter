@@ -1,7 +1,7 @@
 package com.twitter.validation;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.twitter.common.dto.request.UserRequestDto;
+import com.twitter.common.dto.request.user.UserRequestDto;
 import com.twitter.common.enums.UserRole;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.FormatValidationException;
@@ -136,4 +136,4 @@ public interface UserValidator {
      * @throws FormatValidationException if validation constraints are violated
      */
     void validatePatchConstraints(UserPatchDto patchDto);
-}
+}

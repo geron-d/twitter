@@ -1,4 +1,4 @@
-package com.twitter.common.dto.response;
+package com.twitter.common.dto.response.like;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -10,10 +10,6 @@ import java.util.UUID;
 /**
  * Response DTO for Like data.
  *
- * @param id        unique identifier for the like
- * @param tweetId   ID of the tweet that was liked
- * @param userId    ID of the user who liked the tweet
- * @param createdAt timestamp when the like was created
  * @author geron
  * @version 1.0
  */

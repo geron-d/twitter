@@ -2,8 +2,8 @@ package com.twitter.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.twitter.common.dto.request.UserRequestDto;
-import com.twitter.common.dto.response.UserResponseDto;
+import com.twitter.common.dto.request.user.UserRequestDto;
+import com.twitter.common.dto.response.user.UserResponseDto;
 import com.twitter.common.enums.UserRole;
 import com.twitter.common.enums.UserStatus;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
@@ -1879,4 +1879,4 @@ class UserServiceImplTest {
             verify(userRepository, never()).existsById(any());
         }
     }
-}
+}

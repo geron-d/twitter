@@ -1,7 +1,7 @@
 package com.twitter.validation;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.twitter.common.dto.request.UserRequestDto;
+import com.twitter.common.dto.request.user.UserRequestDto;
 import com.twitter.common.enums.UserRole;
 import com.twitter.common.enums.UserStatus;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
@@ -167,4 +167,4 @@ public class UserValidatorImpl implements UserValidator {
             throw new FormatValidationException("Validation failed: " + errorMessage);
         }
     }
-}
+}

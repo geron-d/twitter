@@ -1,9 +1,9 @@
 package com.twitter.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.twitter.common.dto.UserExistsResponseDto;
-import com.twitter.common.dto.request.UserRequestDto;
-import com.twitter.common.dto.response.UserResponseDto;
+import com.twitter.common.dto.response.user.UserExistsResponseDto;
+import com.twitter.common.dto.request.user.UserRequestDto;
+import com.twitter.common.dto.response.user.UserResponseDto;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.ValidationException;
 import com.twitter.dto.UserRoleUpdateDto;
@@ -679,4 +679,4 @@ public interface UserApi {
         UUID id,
         @Parameter(description = "Data containing the new role information", required = true)
         UserRoleUpdateDto roleUpdate);
-}
+}

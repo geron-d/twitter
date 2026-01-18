@@ -1,7 +1,7 @@
 package com.twitter.client;
 
-import com.twitter.common.dto.request.UserRequestDto;
-import com.twitter.common.dto.response.UserResponseDto;
+import com.twitter.common.dto.request.user.UserRequestDto;
+import com.twitter.common.dto.response.user.UserResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,4 +28,4 @@ public interface UsersApiClient {
     @PostMapping
     UserResponseDto createUser(@RequestBody UserRequestDto userRequest);
 }
-
+

@@ -1,7 +1,7 @@
 package com.twitter.client;
 
-import com.twitter.common.dto.request.FollowRequestDto;
-import com.twitter.common.dto.response.FollowResponseDto;
+import com.twitter.common.dto.request.follow.FollowRequestDto;
+import com.twitter.common.dto.response.follow.FollowResponseDto;
 import feign.FeignException;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,4 +34,3 @@ public interface FollowApiClient {
     @PostMapping
     FollowResponseDto createFollow(@RequestBody FollowRequestDto request);
 }
-

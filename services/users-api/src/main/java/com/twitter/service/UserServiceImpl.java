@@ -1,8 +1,8 @@
 package com.twitter.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.twitter.common.dto.request.UserRequestDto;
-import com.twitter.common.dto.response.UserResponseDto;
+import com.twitter.common.dto.request.user.UserRequestDto;
+import com.twitter.common.dto.response.user.UserResponseDto;
 import com.twitter.common.enums.UserRole;
 import com.twitter.common.enums.UserStatus;
 import com.twitter.dto.UserPatchDto;
@@ -189,4 +189,4 @@ public class UserServiceImpl implements UserService {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error hashing password: " + e.getMessage(), e);
         }
     }
-}
+}

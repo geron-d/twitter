@@ -1,4 +1,4 @@
-package com.twitter.common.dto.response;
+package com.twitter.common.dto.response.follow;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -9,15 +9,7 @@ import java.util.UUID;
 
 /**
  * Response DTO for follow relationship data.
- * <p>
- * This record contains all relevant follow relationship data including identifier,
- * follower and following user references, and creation timestamp. It is used to
- * return follow relationship data from the API endpoints.
  *
- * @param id          unique identifier for the follow relationship
- * @param followerId  ID of the user who is following (the follower)
- * @param followingId ID of the user being followed (the following)
- * @param createdAt   timestamp when the follow relationship was created
  * @author geron
  * @version 1.0
  */
