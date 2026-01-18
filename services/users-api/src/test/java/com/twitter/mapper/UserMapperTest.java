@@ -2,8 +2,8 @@ package com.twitter.mapper;
 
 import com.twitter.common.dto.request.user.UserRequestDto;
 import com.twitter.common.dto.response.user.UserResponseDto;
-import com.twitter.common.enums.UserRole;
-import com.twitter.common.enums.UserStatus;
+import com.twitter.common.enums.user.UserRole;
+import com.twitter.common.enums.user.UserStatus;
 import com.twitter.dto.UserPatchDto;
 import com.twitter.dto.UserUpdateDto;
 import com.twitter.entity.User;

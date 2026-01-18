@@ -1,7 +1,7 @@
 package com.twitter.repository;
 
-import com.twitter.common.enums.UserRole;
-import com.twitter.common.enums.UserStatus;
+import com.twitter.common.enums.user.UserRole;
+import com.twitter.common.enums.user.UserStatus;
 import com.twitter.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -25,4 +25,4 @@ public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificat
     boolean existsByLoginAndIdNot(String login, UUID id);
 
     boolean existsByEmailAndIdNot(String email, UUID id);
-}
+}

@@ -12,8 +12,8 @@ import com.twitter.common.dto.response.like.LikeResponseDto;
 import com.twitter.common.dto.response.retweet.RetweetResponseDto;
 import com.twitter.common.dto.response.tweet.TweetResponseDto;
 import com.twitter.common.dto.response.user.UserResponseDto;
-import com.twitter.common.enums.UserRole;
-import com.twitter.common.enums.UserStatus;
+import com.twitter.common.enums.user.UserRole;
+import com.twitter.common.enums.user.UserStatus;
 
 import java.time.LocalDateTime;
 import java.util.*;

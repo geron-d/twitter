@@ -2,8 +2,8 @@ package com.twitter.validation;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.twitter.common.dto.request.user.UserRequestDto;
-import com.twitter.common.enums.UserRole;
-import com.twitter.common.enums.UserStatus;
+import com.twitter.common.enums.user.UserRole;
+import com.twitter.common.enums.user.UserStatus;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.FormatValidationException;
 import com.twitter.common.exception.validation.UniquenessValidationException;

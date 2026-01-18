@@ -1,4 +1,4 @@
-package com.twitter.common.enums;
+package com.twitter.common.enums.user;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -34,13 +34,6 @@ public enum UserRole {
      * including user management, system configuration, and administrative
      * operations. This role is typically reserved for system administrators
      * and requires special protection against accidental deactivation.
-     *
-     * <p>Permissions include:</p>
-     * - All USER and MODERATOR permissions
-     * - User account management (create, update, deactivate)
-     * - System configuration and settings
-     * - Access to administrative dashboards
-     * - Role assignment and permission management
      */
     ADMIN,
 
@@ -52,13 +45,6 @@ public enum UserRole {
      * moderation and user management. They can perform moderation tasks
      * while maintaining some administrative capabilities, but with
      * restrictions compared to full administrators.
-     *
-     * <p>Permissions include:</p>
-     * - All USER permissions
-     * - Content moderation (flag, hide, delete inappropriate content)
-     * - User account management (limited scope)
-     * - Access to moderation tools and reports
-     * - User support and assistance
      */
     MODERATOR,
 
@@ -69,12 +55,6 @@ public enum UserRole {
      * Users with the USER role have access to standard Twitter functionality
      * including posting tweets, following other users, and basic profile
      * management. This is the default role assigned to new users.
-     *
-     * <p>Permissions include:</p>
-     * - Create and manage personal tweets
-     * - Follow and unfollow other users
-     * - Update personal profile information
-     * - Access public content and feeds
      */
     USER
-}
+}

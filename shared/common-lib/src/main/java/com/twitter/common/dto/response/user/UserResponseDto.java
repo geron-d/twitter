@@ -1,7 +1,7 @@
 package com.twitter.common.dto.response.user;
 
-import com.twitter.common.enums.UserRole;
-import com.twitter.common.enums.UserStatus;
+import com.twitter.common.enums.user.UserRole;
+import com.twitter.common.enums.user.UserStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDateTime;
@@ -89,4 +89,4 @@ public record UserResponseDto(
     LocalDateTime createdAt
 ) {
 }
-
+

@@ -1,6 +1,6 @@
 package com.twitter.dto.filter;
 
-import com.twitter.common.enums.UserRole;
+import com.twitter.common.enums.user.UserRole;
 import com.twitter.entity.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.data.jpa.domain.Specification;
@@ -105,4 +105,4 @@ public record UserFilter(String firstNameContains, String lastNameContains, Stri
             ? cb.equal(root.get("role"), role)
             : null);
     }
-}
+}
