@@ -23,8 +23,8 @@ public class UsersGateway {
     /**
      * Creates a new user in the users-api service.
      *
-     * @param userRequest DTO containing user data for creation (login, email, password, etc.)
-     * @return UserResponseDto containing the created user information including ID
+     * @param userRequest DTO containing user data for creation
+     * @return UserResponseDto containing the created user information
      * @throws RuntimeException if the user creation fails (e.g., duplicate login/email, service unavailable)
      */
     public UserResponseDto createUser(UserRequestDto userRequest) {
@@ -43,4 +43,4 @@ public class UsersGateway {
         }
     }
 }
-
+

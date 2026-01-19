@@ -38,7 +38,7 @@ class FollowGatewayTest {
     void setUp() {
         followerId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
         followingId = UUID.fromString("223e4567-e89b-12d3-a456-426614174001");
-        
+
         validRequest = FollowRequestDto.builder()
             .followerId(followerId)
             .followingId(followingId)

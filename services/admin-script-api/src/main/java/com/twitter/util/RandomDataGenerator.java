@@ -8,10 +8,6 @@ import java.util.UUID;
 
 /**
  * Utility class for generating random data using Datafaker library.
- * <p>
- * This component provides methods for generating random user and tweet data
- * with guaranteed uniqueness for login and email fields through timestamp and UUID.
- * All generated data conforms to the validation constraints defined in the DTOs.
  *
  * @author geron
  * @version 1.0
@@ -40,10 +36,6 @@ public class RandomDataGenerator {
 
         if (login.length() > 50) {
             login = login.substring(0, 50);
-        }
-
-        if (login.length() < 3) {
-            login = login + "ab";
         }
 
         log.debug("Generated login: {}", login);
@@ -75,7 +67,7 @@ public class RandomDataGenerator {
      * This field is optional in UserRequestDto, so it may be null in some cases,
      * but this method always returns a non-null value.
      *
-     * @return random first name string (may be null if not needed)
+     * @return random first name string (maybe null if not needed)
      */
     public String generateFirstName() {
         String firstName = faker.name().firstName();
@@ -90,7 +82,7 @@ public class RandomDataGenerator {
      * This field is optional in UserRequestDto, so it may be null in some cases,
      * but this method always returns a non-null value.
      *
-     * @return random last name string (may be null if not needed)
+     * @return random last name string (maybe null if not needed)
      */
     public String generateLastName() {
         String lastName = faker.name().lastName();
@@ -117,8 +109,8 @@ public class RandomDataGenerator {
         String numbers = String.valueOf(faker.number().numberBetween(1000, 9999));
         String password = (part1 + part2 + numbers).replaceAll("[^a-zA-Z0-9]", "");
 
-        if (password.length() > 0) {
-            password = password.substring(0, 1).toUpperCase() + 
+        if (!password.isEmpty()) {
+            password = password.substring(0, 1).toUpperCase() +
                 (password.length() > 1 ? password.substring(1).toLowerCase() : "") + numbers;
         } else {
             password = "A" + numbers;
@@ -130,7 +122,7 @@ public class RandomDataGenerator {
         if (password.length() > 20) {
             password = password.substring(0, 20);
         }
-        
+
         log.debug("Generated password (length: {})", password.length());
         return password;
     }

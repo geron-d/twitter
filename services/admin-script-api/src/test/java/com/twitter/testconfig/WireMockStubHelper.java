@@ -3,11 +3,10 @@ package com.twitter.testconfig;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
-import com.twitter.common.dto.request.tweet.CreateTweetRequestDto;
 import com.twitter.common.dto.request.follow.FollowRequestDto;
 import com.twitter.common.dto.request.like.LikeTweetRequestDto;
 import com.twitter.common.dto.request.retweet.RetweetRequestDto;
-import com.twitter.common.dto.request.user.UserRequestDto;
+import com.twitter.common.dto.request.tweet.CreateTweetRequestDto;
 import com.twitter.common.dto.response.follow.FollowResponseDto;
 import com.twitter.common.dto.response.like.LikeResponseDto;
 import com.twitter.common.dto.response.retweet.RetweetResponseDto;
@@ -47,14 +46,12 @@ public final class WireMockStubHelper {
      *
      * @param wireMockServer the WireMock server instance
      * @param objectMapper   the ObjectMapper for JSON serialization
-     * @param userRequest    the user request DTO (not used in stub matching, but kept for consistency)
      * @param userResponse   the user response DTO to return
      * @throws RuntimeException if JSON serialization fails
      */
     public static void setupCreateUserStub(
         WireMockServer wireMockServer,
         ObjectMapper objectMapper,
-        UserRequestDto userRequest,
         UserResponseDto userResponse) {
         if (wireMockServer == null) {
             return;
@@ -229,10 +226,10 @@ public final class WireMockStubHelper {
      * the request by followerId and followingId and returns the provided follow response
      * with HTTP status 201 Created.
      *
-     * @param wireMockServer   the WireMock server instance
-     * @param objectMapper     the ObjectMapper for JSON serialization
-     * @param followRequest    the follow request DTO (used for matching followerId and followingId in request body)
-     * @param followResponse   the follow response DTO to return
+     * @param wireMockServer the WireMock server instance
+     * @param objectMapper   the ObjectMapper for JSON serialization
+     * @param followRequest  the follow request DTO (used for matching followerId and followingId in request body)
+     * @param followResponse the follow response DTO to return
      * @throws RuntimeException if JSON serialization fails
      */
     public static void setupCreateFollowStub(
@@ -294,11 +291,11 @@ public final class WireMockStubHelper {
      * This method configures a stub for POST /api/v1/tweets/{tweetId}/like endpoint that matches
      * the request by userId and returns the provided like response with HTTP status 201 Created.
      *
-     * @param wireMockServer     the WireMock server instance
-     * @param objectMapper       the ObjectMapper for JSON serialization
-     * @param tweetId            the tweet ID to like
-     * @param likeTweetRequest   the like request DTO (used for matching userId in request body)
-     * @param likeResponse       the like response DTO to return
+     * @param wireMockServer   the WireMock server instance
+     * @param objectMapper     the ObjectMapper for JSON serialization
+     * @param tweetId          the tweet ID to like
+     * @param likeTweetRequest the like request DTO (used for matching userId in request body)
+     * @param likeResponse     the like response DTO to return
      * @throws RuntimeException if JSON serialization fails
      */
     public static void setupLikeTweetStub(
@@ -334,12 +331,10 @@ public final class WireMockStubHelper {
      * an error response with the specified HTTP status code.
      *
      * @param wireMockServer the WireMock server instance
-     * @param tweetId        the tweet ID to like
      * @param statusCode     the HTTP status code to return
      */
     public static void setupLikeTweetStubWithError(
         WireMockServer wireMockServer,
-        UUID tweetId,
         int statusCode) {
         if (wireMockServer == null) {
             return;
@@ -360,11 +355,11 @@ public final class WireMockStubHelper {
      * This method configures a stub for POST /api/v1/tweets/{tweetId}/retweet endpoint that matches
      * the request by userId and returns the provided retweet response with HTTP status 201 Created.
      *
-     * @param wireMockServer     the WireMock server instance
-     * @param objectMapper       the ObjectMapper for JSON serialization
-     * @param tweetId            the tweet ID to retweet
-     * @param retweetRequest     the retweet request DTO (used for matching userId in request body)
-     * @param retweetResponse    the retweet response DTO to return
+     * @param wireMockServer  the WireMock server instance
+     * @param objectMapper    the ObjectMapper for JSON serialization
+     * @param tweetId         the tweet ID to retweet
+     * @param retweetRequest  the retweet request DTO (used for matching userId in request body)
+     * @param retweetResponse the retweet response DTO to return
      * @throws RuntimeException if JSON serialization fails
      */
     public static void setupRetweetTweetStub(

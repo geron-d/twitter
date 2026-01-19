@@ -26,7 +26,6 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureWebMvc
@@ -355,7 +354,7 @@ public class BaseScriptControllerTest extends BaseIntegrationTest {
             // Setup like error for all tweets (409 Conflict - self-like/duplicate)
             for (List<UUID> tweetIds : userTweetsMap.values()) {
                 for (UUID tweetId : tweetIds) {
-                    stubBuilder.setupLikeCreationError(tweetId, 409);
+                    stubBuilder.setupLikeCreationError(409);
                 }
             }
 
