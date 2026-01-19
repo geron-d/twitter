@@ -2,12 +2,12 @@ package com.twitter.controller;
 
 import com.twitter.common.dto.request.follow.FollowRequestDto;
 import com.twitter.common.dto.response.follow.FollowResponseDto;
+import com.twitter.common.dto.response.follow.FollowingResponseDto;
 import com.twitter.dto.filter.FollowerFilter;
 import com.twitter.dto.filter.FollowingFilter;
 import com.twitter.dto.response.FollowStatsResponseDto;
 import com.twitter.dto.response.FollowStatusResponseDto;
 import com.twitter.dto.response.FollowerResponseDto;
-import com.twitter.common.dto.response.follow.FollowingResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -32,18 +32,6 @@ import java.util.UUID;
 @Tag(name = "Follow Management", description = "API for managing follow relationships in the Twitter system")
 public interface FollowApi {
 
-    /**
-     * Creates a new follow relationship between two users.
-     * <p>
-     * This method creates a follow relationship where one user (follower) follows
-     * another user (following). It performs validation on the request data, checks
-     * if both users exist via users-api integration, and saves the follow relationship
-     * to the database. Business rules are enforced: users cannot follow themselves,
-     * follow relationships must be unique, and both users must exist in the system.
-     *
-     * @param request DTO containing follow relationship data for creation (followerId and followingId)
-     * @return ResponseEntity containing the created follow relationship data with HTTP 201 status
-     */
     @Operation(
         summary = "Create follow relationship",
         description = "Creates a new follow relationship between two users. " +
@@ -94,18 +82,6 @@ public interface FollowApi {
         @Parameter(description = "Follow relationship data for creation", required = true)
         FollowRequestDto request);
 
-    /**
-     * Removes a follow relationship between two users.
-     * <p>
-     * This method removes an existing follow relationship where one user (follower)
-     * was following another user (following). It checks if the follow relationship
-     * exists before attempting to delete it. If the relationship does not exist,
-     * a 404 Not Found response is returned.
-     *
-     * @param followerId  the ID of the user who is following (the follower)
-     * @param followingId the ID of the user being followed (the following)
-     * @return ResponseEntity with HTTP 204 status if deletion is successful
-     */
     @Operation(
         summary = "Delete follow relationship",
         description = "Removes an existing follow relationship between two users. " +
@@ -146,19 +122,6 @@ public interface FollowApi {
         )
         UUID followingId);
 
-    /**
-     * Retrieves a paginated list of followers for a specific user.
-     * <p>
-     * This method retrieves all users who follow the specified user, with optional
-     * filtering by login name. The results are paginated and sorted by creation date
-     * in descending order (newest first). User login information is retrieved from
-     * the users-api service.
-     *
-     * @param userId   the ID of the user whose followers should be retrieved
-     * @param filter   optional filter criteria for filtering followers by login (partial match)
-     * @param pageable pagination parameters (page, size, sorting)
-     * @return PagedModel containing paginated list of followers with metadata and HATEOAS links
-     */
     @Operation(
         summary = "Get followers list",
         description = "Retrieves a paginated list of followers for a specific user. " +
@@ -193,22 +156,9 @@ public interface FollowApi {
         @Parameter(description = "Filter criteria for filtering followers by login (partial match)")
         FollowerFilter filter,
         @Parameter(description = "Pagination parameters (page, size, sorting)")
-        @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC)
+        @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC)
         Pageable pageable);
 
-    /**
-     * Retrieves a paginated list of following for a specific user.
-     * <p>
-     * This method retrieves all users that the specified user is following, with optional
-     * filtering by login name. The results are paginated and sorted by creation date
-     * in descending order (newest first). User login information is retrieved from
-     * the users-api service.
-     *
-     * @param userId   the ID of the user whose following should be retrieved
-     * @param filter   optional filter criteria for filtering following by login (partial match)
-     * @param pageable pagination parameters (page, size, sorting)
-     * @return PagedModel containing paginated list of following with metadata and HATEOAS links
-     */
     @Operation(
         summary = "Get following list",
         description = "Retrieves a paginated list of following for a specific user. " +
@@ -243,21 +193,9 @@ public interface FollowApi {
         @Parameter(description = "Filter criteria for filtering following by login (partial match)")
         FollowingFilter filter,
         @Parameter(description = "Pagination parameters (page, size, sorting)")
-        @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC)
+        @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC)
         Pageable pageable);
 
-    /**
-     * Retrieves the status of a follow relationship between two users.
-     * <p>
-     * This method checks if a follow relationship exists between the specified follower
-     * and following users. If the relationship exists, it returns isFollowing=true and
-     * the creation timestamp. If the relationship does not exist, it returns
-     * isFollowing=false and createdAt=null.
-     *
-     * @param followerId  the ID of the user who is following (the follower)
-     * @param followingId the ID of the user being followed (the following)
-     * @return ResponseEntity containing the status of the follow relationship with HTTP 200 status
-     */
     @Operation(
         summary = "Get follow relationship status",
         description = "Retrieves the status of a follow relationship between two users. " +
@@ -295,15 +233,6 @@ public interface FollowApi {
         )
         UUID followingId);
 
-    /**
-     * Retrieves follow statistics for a specific user.
-     * <p>
-     * This method calculates and returns the total number of followers (users following
-     * this user) and the total number of following (users this user is following).
-     *
-     * @param userId the ID of the user whose statistics should be retrieved
-     * @return ResponseEntity containing follow statistics with HTTP 200 status
-     */
     @Operation(
         summary = "Get follow statistics",
         description = "Retrieves follow statistics for a specific user. " +

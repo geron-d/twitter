@@ -20,7 +20,7 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui") {
         exclude group: "io.swagger.core.v3", module: "swagger-annotations"
     }
-    
+
     // Трейсинг и мониторинг
     implementation 'io.micrometer:micrometer-tracing-bridge-otel'
 
@@ -44,8 +44,8 @@ dependencies {
 compileJava {
     options.annotationProcessorPath = configurations.annotationProcessor
     options.compilerArgs += [
-            '-Amapstruct.defaultComponentModel=spring',
-            '-Amapstruct.unmappedTargetPolicy=IGNORE'
+        '-Amapstruct.defaultComponentModel=spring',
+        '-Amapstruct.unmappedTargetPolicy=IGNORE'
     ]
 }
 

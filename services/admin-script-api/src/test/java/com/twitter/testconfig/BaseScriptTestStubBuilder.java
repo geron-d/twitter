@@ -6,7 +6,6 @@ import com.twitter.common.dto.request.follow.FollowRequestDto;
 import com.twitter.common.dto.request.like.LikeTweetRequestDto;
 import com.twitter.common.dto.request.retweet.RetweetRequestDto;
 import com.twitter.common.dto.request.tweet.CreateTweetRequestDto;
-import com.twitter.common.dto.request.user.UserRequestDto;
 import com.twitter.common.dto.response.follow.FollowResponseDto;
 import com.twitter.common.dto.response.like.LikeResponseDto;
 import com.twitter.common.dto.response.retweet.RetweetResponseDto;
@@ -44,22 +43,6 @@ public final class BaseScriptTestStubBuilder {
     public BaseScriptTestStubBuilder(WireMockServer wireMockServer, ObjectMapper objectMapper) {
         this.wireMockServer = wireMockServer;
         this.objectMapper = objectMapper;
-    }
-
-    /**
-     * Creates a UserRequestDto for testing.
-     *
-     * @param index the index of the user (used for generating unique data)
-     * @return UserRequestDto instance with test data
-     */
-    private UserRequestDto createUserRequest(int index) {
-        return UserRequestDto.builder()
-            .login("user" + index)
-            .firstName("First" + index)
-            .lastName("Last" + index)
-            .email("user" + index + "@example.com")
-            .password("password123")
-            .build();
     }
 
     /**
@@ -131,7 +114,6 @@ public final class BaseScriptTestStubBuilder {
             UUID userId = UUID.randomUUID();
             userIds.add(userId);
 
-            UserRequestDto userRequest = createUserRequest(i);
             UserResponseDto userResponse = createUserResponse(userId, i);
 
             WireMockStubHelper.setupCreateUserStub(wireMockServer, objectMapper, userResponse);
@@ -468,9 +450,8 @@ public final class BaseScriptTestStubBuilder {
      * @param nUsers          number of users to create
      * @param nTweetsPerUser  number of tweets per user
      * @param nTweetsToDelete number of tweets to delete (deletes first N tweets from the list)
-     * @return TestStubData containing the generated user IDs, follow IDs, and tweet IDs
      */
-    public TestStubData setupFullScenario(int nUsers, int nTweetsPerUser, int nTweetsToDelete) {
+    public void setupFullScenario(int nUsers, int nTweetsPerUser, int nTweetsToDelete) {
         List<UUID> userIds = setupUsersStubs(nUsers);
         List<UUID> followIds = setupFollowsStubs(userIds);
         Map<UUID, List<UUID>> userTweetsMap = setupTweetsStubs(userIds, nTweetsPerUser);
@@ -492,14 +473,11 @@ public final class BaseScriptTestStubBuilder {
             setupLikesAndRetweetsStubs(userTweetsMap, userIds);
         }
 
-        return new TestStubData(userIds, followIds, allTweetIds);
+        new TestStubData(userIds, followIds, allTweetIds);
     }
 
     /**
-     * Record containing test stub data (user IDs, follow IDs, and tweet IDs).
-     * <p>
-     * This record is used to return the generated IDs from setup methods
-     * so that tests can access them if needed.
+     * Record containing test stub data
      *
      * @param userIds   list of generated user IDs
      * @param followIds list of generated follow IDs
@@ -512,8 +490,5 @@ public final class BaseScriptTestStubBuilder {
         List<UUID> followIds,
         List<UUID> tweetIds
     ) {
-        public TestStubData(List<UUID> userIds, List<UUID> tweetIds) {
-            this(userIds, new ArrayList<>(), tweetIds);
-        }
     }
 }

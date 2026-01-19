@@ -5,12 +5,7 @@ import lombok.Builder;
 
 /**
  * Response DTO for follow statistics.
- * <p>
- * This record contains statistics about follow relationships for a user,
- * including the count of followers and the count of users being followed.
  *
- * @param followersCount total number of users following this user
- * @param followingCount total number of users this user is following
  * @author geron
  * @version 1.0
  */

@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * Note: Filtering by login is performed at the service layer after retrieving
  * user data from users-api, as login information is not stored in the follows table.
  *
- * @param login partial match for following login name (can be null)
  * @author geron
  * @version 1.0
  */
