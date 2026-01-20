@@ -33,10 +33,6 @@ import java.util.stream.Collectors;
 
 /**
  * Implementation of the follow relationship management service.
- * <p>
- * This service provides business logic for follow relationship operations, including
- * creation, validation, and data transformation. It handles data validation, user
- * existence checks via users-api integration, and business rule enforcement.
  *
  * @author geron
  * @version 1.0
@@ -204,8 +200,6 @@ public class FollowServiceImpl implements FollowService {
         long followersCount = followRepository.countByFollowingId(userId);
         long followingCount = followRepository.countByFollowerId(userId);
 
-        FollowStatsResponseDto stats = followMapper.toFollowStatsResponseDto(followersCount, followingCount);
-
-        return stats;
+        return followMapper.toFollowStatsResponseDto(followersCount, followingCount);
     }
 }
