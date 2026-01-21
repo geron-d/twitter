@@ -4,9 +4,9 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 
 import java.util.UUID;
 
@@ -29,8 +29,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 public abstract class BaseIntegrationTest {
 
     @Container
-    @SuppressWarnings("resource")
-    protected static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine")
+    protected static final PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15-alpine")
         .withDatabaseName("twitter_test")
         .withUsername("test")
         .withPassword("test");

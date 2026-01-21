@@ -1,15 +1,15 @@
 package com.twitter.service;
 
+import com.twitter.common.dto.request.follow.FollowRequestDto;
+import com.twitter.common.dto.response.follow.FollowResponseDto;
+import com.twitter.common.dto.response.follow.FollowingResponseDto;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.UniquenessValidationException;
 import com.twitter.dto.filter.FollowerFilter;
 import com.twitter.dto.filter.FollowingFilter;
-import com.twitter.common.dto.request.follow.FollowRequestDto;
-import com.twitter.common.dto.response.follow.FollowResponseDto;
 import com.twitter.dto.response.FollowStatsResponseDto;
 import com.twitter.dto.response.FollowStatusResponseDto;
 import com.twitter.dto.response.FollowerResponseDto;
-import com.twitter.common.dto.response.follow.FollowingResponseDto;
 import com.twitter.entity.Follow;
 import com.twitter.gateway.UserGateway;
 import com.twitter.mapper.FollowMapper;
@@ -22,11 +22,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -396,7 +392,7 @@ class FollowServiceImplTest {
             assertThat(result).isNotNull();
             assertThat(result.getContent()).hasSize(1);
             assertThat(result.getContent()).containsExactly(followerResponseDto1);
-            assertThat(result.getContent().get(0).login()).isEqualTo("john_doe");
+            assertThat(result.getContent().getFirst().login()).isEqualTo("john_doe");
         }
 
         @Test
@@ -443,7 +439,7 @@ class FollowServiceImplTest {
 
             assertThat(result).isNotNull();
             assertThat(result.getContent()).hasSize(1);
-            assertThat(result.getContent().get(0).login()).isEqualTo("unknown");
+            assertThat(result.getContent().getFirst().login()).isEqualTo("unknown");
 
             verify(userGateway, times(1)).getUserLogin(eq(testFollowerId1));
             verify(followMapper, times(1))
@@ -607,7 +603,7 @@ class FollowServiceImplTest {
             assertThat(result).isNotNull();
             assertThat(result.getContent()).hasSize(1);
             assertThat(result.getContent()).containsExactly(followingResponseDto1);
-            assertThat(result.getContent().get(0).login()).isEqualTo("jane_doe");
+            assertThat(result.getContent().getFirst().login()).isEqualTo("jane_doe");
         }
 
         @Test
@@ -654,7 +650,7 @@ class FollowServiceImplTest {
 
             assertThat(result).isNotNull();
             assertThat(result.getContent()).hasSize(1);
-            assertThat(result.getContent().get(0).login()).isEqualTo("unknown");
+            assertThat(result.getContent().getFirst().login()).isEqualTo("unknown");
 
             verify(userGateway, times(1)).getUserLogin(eq(testFollowingId1));
             verify(followMapper, times(1))

@@ -63,9 +63,7 @@ class UserGatewayTest {
 
         @Test
         void existsUser_WhenUserIdIsNull_ShouldReturnFalseWithoutCallingClient() {
-            UUID nullUserId = null;
-
-            boolean result = userGateway.existsUser(nullUserId);
+            boolean result = userGateway.existsUser(null);
 
             assertThat(result).isFalse();
             verify(usersApiClient, never()).existsUser(any());
@@ -141,9 +139,7 @@ class UserGatewayTest {
 
         @Test
         void getUserLogin_WhenUserIdIsNull_ShouldReturnEmptyOptionalWithoutCallingClient() {
-            UUID nullUserId = null;
-
-            Optional<String> result = userGateway.getUserLogin(nullUserId);
+            Optional<String> result = userGateway.getUserLogin(null);
 
             assertThat(result).isEmpty();
             verify(usersApiClient, never()).getUserById(any());

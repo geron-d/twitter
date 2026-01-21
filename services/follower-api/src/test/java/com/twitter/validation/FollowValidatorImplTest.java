@@ -1,8 +1,8 @@
 package com.twitter.validation;
 
+import com.twitter.common.dto.request.follow.FollowRequestDto;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.UniquenessValidationException;
-import com.twitter.common.dto.request.follow.FollowRequestDto;
 import com.twitter.gateway.UserGateway;
 import com.twitter.repository.FollowRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,19 +15,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-/**
- * Unit tests for {@link FollowValidatorImpl}.
- *
- * @author geron
- * @version 1.0
- */
 @ExtendWith(MockitoExtension.class)
 class FollowValidatorImplTest {
 
