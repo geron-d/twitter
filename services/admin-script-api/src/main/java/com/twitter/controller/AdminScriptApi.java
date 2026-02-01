@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 
@@ -28,23 +27,14 @@ public interface AdminScriptApi {
             "Parameters: nUsers (1-1000), nTweetsPerUser (1-100), " +
             "lUsersForDeletion (0+, must not exceed number of users with tweets)."
     )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Script executed successfully",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = BaseScriptResponseDto.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Validation error",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
+    @ApiResponse(
+        responseCode = "200",
+        description = "Script executed successfully",
+        content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = BaseScriptResponseDto.class)
         )
-    })
+    )
     ResponseEntity<BaseScriptResponseDto> baseScript(
         @Parameter(
             description = "Script parameters: nUsers (1-1000), nTweetsPerUser (1-100), lUsersForDeletion (0+)",

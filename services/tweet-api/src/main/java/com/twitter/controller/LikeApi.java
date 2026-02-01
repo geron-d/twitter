@@ -1,15 +1,14 @@
 package com.twitter.controller;
 
-import com.twitter.common.exception.validation.BusinessRuleValidationException;
-import com.twitter.common.exception.validation.UniquenessValidationException;
 import com.twitter.common.dto.request.like.LikeTweetRequestDto;
 import com.twitter.common.dto.response.like.LikeResponseDto;
+import com.twitter.common.exception.validation.BusinessRuleValidationException;
+import com.twitter.common.exception.validation.UniquenessValidationException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
@@ -35,8 +34,8 @@ public interface LikeApi {
      * ensures uniqueness (a user can only like a tweet once). The like operation is
      * atomic and updates the tweet's likes count.
      *
-     * @param tweetId            the unique identifier of the tweet to like (UUID format)
-     * @param likeTweetRequest   DTO containing userId for the like operation
+     * @param tweetId          the unique identifier of the tweet to like (UUID format)
+     * @param likeTweetRequest DTO containing userId for the like operation
      * @return ResponseEntity containing the created like data with HTTP 201 status
      * @throws BusinessRuleValidationException if tweetId is null, tweet doesn't exist, user doesn't exist, or self-like attempt
      * @throws UniquenessValidationException   if duplicate like attempt
@@ -49,44 +48,14 @@ public interface LikeApi {
             "and ensures uniqueness (a user can only like a tweet once). " +
             "The like operation is atomic and updates the tweet's likes count."
     )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "201",
-            description = "Tweet liked successfully",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = LikeResponseDto.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Validation error",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        ),
-        @ApiResponse(
-            responseCode = "409",
-            description = "Business rule violation",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        ),
-        @ApiResponse(
-            responseCode = "409",
-            description = "Uniqueness violation - duplicate like",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Invalid UUID format",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
+    @ApiResponse(
+        responseCode = "201",
+        description = "Tweet liked successfully",
+        content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = LikeResponseDto.class)
         )
-    })
+    )
     ResponseEntity<LikeResponseDto> likeTweet(
         @Parameter(
             description = "Unique identifier of the tweet to like",
@@ -94,7 +63,7 @@ public interface LikeApi {
             example = "223e4567-e89b-12d3-a456-426614174001"
         )
         UUID tweetId,
-        @Parameter(description = "Like request containing userId", required = true)
+        @Parameter(description = "Like request", required = true)
         LikeTweetRequestDto likeTweetRequest);
 
     /**
@@ -105,8 +74,8 @@ public interface LikeApi {
      * the user exists, and ensures that the like exists before removal. The unlike operation
      * is atomic and updates the tweet's likes count by decrementing it.
      *
-     * @param tweetId            the unique identifier of the tweet to unlike (UUID format)
-     * @param likeTweetRequest   DTO containing userId for the unlike operation
+     * @param tweetId          the unique identifier of the tweet to unlike (UUID format)
+     * @param likeTweetRequest DTO containing userId for the unlike operation
      * @return ResponseEntity with HTTP 204 No Content status (no response body)
      * @throws BusinessRuleValidationException if tweetId is null, tweet doesn't exist, user doesn't exist, or like doesn't exist
      */
@@ -117,33 +86,10 @@ public interface LikeApi {
             "verifies that the user exists, and ensures that the like exists before removal. " +
             "The unlike operation is atomic and updates the tweet's likes count by decrementing it."
     )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "204",
-            description = "Like removed successfully"
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Validation error",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        ),
-        @ApiResponse(
-            responseCode = "409",
-            description = "Business rule violation",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Invalid UUID format",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        )
-    })
+    @ApiResponse(
+        responseCode = "204",
+        description = "Like removed successfully"
+    )
     ResponseEntity<Void> removeLike(
         @Parameter(
             description = "Unique identifier of the tweet to unlike",
@@ -151,7 +97,7 @@ public interface LikeApi {
             example = "223e4567-e89b-12d3-a456-426614174001"
         )
         UUID tweetId,
-        @Parameter(description = "Unlike request containing userId", required = true)
+        @Parameter(description = "Unlike request", required = true)
         LikeTweetRequestDto likeTweetRequest);
 
     /**
@@ -164,7 +110,7 @@ public interface LikeApi {
      *
      * @param tweetId  the unique identifier of the tweet whose likes to retrieve
      * @param pageable pagination parameters (page, size, sorting)
-     * @return PagedModel containing paginated list of likes with metadata and HATEOAS links
+     * @return PagedModel containing paginated list of likes with metadata
      * @throws BusinessRuleValidationException if tweetId is null or tweet doesn't exist
      */
     @Operation(
@@ -175,37 +121,14 @@ public interface LikeApi {
             "If the tweet has no likes, an empty page is returned (not an error). " +
             "Default pagination: page=0, size=20, sort=createdAt,DESC."
     )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Tweet likes retrieved successfully",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = PagedModel.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Validation error",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        ),
-        @ApiResponse(
-            responseCode = "409",
-            description = "Business rule violation",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Invalid UUID format",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
+    @ApiResponse(
+        responseCode = "200",
+        description = "Tweet likes retrieved successfully",
+        content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = PagedModel.class)
         )
-    })
+    )
     PagedModel<LikeResponseDto> getLikesByTweetId(
         @Parameter(
             description = "Unique identifier of the tweet",
@@ -213,6 +136,6 @@ public interface LikeApi {
             example = "223e4567-e89b-12d3-a456-426614174001"
         )
         UUID tweetId,
-        @Parameter(description = "Pagination parameters (page, size, sorting)", required = false)
+        @Parameter(description = "Pagination parameters (page, size, sorting)")
         Pageable pageable);
 }

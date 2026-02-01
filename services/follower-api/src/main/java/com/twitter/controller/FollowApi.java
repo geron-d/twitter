@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -40,44 +39,14 @@ public interface FollowApi {
             "Business rules are enforced: users cannot follow themselves, follow relationships " +
             "must be unique, and both users must exist in the system."
     )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "201",
-            description = "Follow relationship created successfully",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = FollowResponseDto.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Validation error - Invalid request format",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        ),
-        @ApiResponse(
-            responseCode = "409",
-            description = "Business rule violation - Self follow not allowed",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        ),
-        @ApiResponse(
-            responseCode = "409",
-            description = "Uniqueness violation - Follow relationship already exists",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        ),
-        @ApiResponse(
-            responseCode = "409",
-            description = "Business rule violation - User does not exist",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
+    @ApiResponse(
+        responseCode = "201",
+        description = "Follow relationship created successfully",
+        content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = FollowResponseDto.class)
         )
-    })
+    )
     ResponseEntity<FollowResponseDto> createFollow(
         @Parameter(description = "Follow relationship data for creation", required = true)
         FollowRequestDto request);
@@ -88,26 +57,10 @@ public interface FollowApi {
             "It checks if the follow relationship exists before attempting to delete it. " +
             "If the relationship does not exist, a 404 Not Found response is returned."
     )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "204",
-            description = "Follow relationship deleted successfully"
-        ),
-        @ApiResponse(
-            responseCode = "404",
-            description = "Follow relationship not found",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Validation error - Invalid UUID format",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        )
-    })
+    @ApiResponse(
+        responseCode = "204",
+        description = "Follow relationship deleted successfully"
+    )
     ResponseEntity<Void> deleteFollow(
         @Parameter(
             description = "ID of the user who is following (the follower)",
@@ -129,23 +82,14 @@ public interface FollowApi {
             "Results are sorted by creation date in descending order (newest first). " +
             "User login information is retrieved from the users-api service."
     )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Followers retrieved successfully",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = PagedModel.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Validation error - Invalid UUID format",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
+    @ApiResponse(
+        responseCode = "200",
+        description = "Followers retrieved successfully",
+        content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = PagedModel.class)
         )
-    })
+    )
     PagedModel<FollowerResponseDto> getFollowers(
         @Parameter(
             description = "Unique identifier of the user whose followers should be retrieved",
@@ -166,23 +110,14 @@ public interface FollowApi {
             "Results are sorted by creation date in descending order (newest first). " +
             "User login information is retrieved from the users-api service."
     )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Following retrieved successfully",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = PagedModel.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Validation error - Invalid UUID format",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
+    @ApiResponse(
+        responseCode = "200",
+        description = "Following retrieved successfully",
+        content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = PagedModel.class)
         )
-    })
+    )
     PagedModel<FollowingResponseDto> getFollowing(
         @Parameter(
             description = "Unique identifier of the user whose following should be retrieved",
@@ -202,23 +137,14 @@ public interface FollowApi {
             "If the relationship exists, it returns isFollowing=true and the creation timestamp. " +
             "If the relationship does not exist, it returns isFollowing=false and createdAt=null."
     )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Follow relationship status retrieved successfully",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = FollowStatusResponseDto.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Validation error - Invalid UUID format",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
+    @ApiResponse(
+        responseCode = "200",
+        description = "Follow relationship status retrieved successfully",
+        content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = FollowStatusResponseDto.class)
         )
-    })
+    )
     ResponseEntity<FollowStatusResponseDto> getFollowStatus(
         @Parameter(
             description = "ID of the user who is following (the follower)",
@@ -239,23 +165,14 @@ public interface FollowApi {
             "Returns the total number of followers (users following this user) and " +
             "the total number of following (users this user is following)."
     )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Follow statistics retrieved successfully",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = FollowStatsResponseDto.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Validation error - Invalid UUID format",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
+    @ApiResponse(
+        responseCode = "200",
+        description = "Follow statistics retrieved successfully",
+        content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = FollowStatsResponseDto.class)
         )
-    })
+    )
     ResponseEntity<FollowStatsResponseDto> getFollowStats(
         @Parameter(
             description = "Unique identifier of the user whose statistics should be retrieved",
