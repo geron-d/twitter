@@ -1,8 +1,8 @@
 package com.twitter.validation;
 
+import com.twitter.common.dto.request.like.LikeTweetRequestDto;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.UniquenessValidationException;
-import com.twitter.common.dto.request.like.LikeTweetRequestDto;
 import com.twitter.entity.Tweet;
 import com.twitter.gateway.UserGateway;
 import com.twitter.repository.LikeRepository;
@@ -75,9 +75,6 @@ public class LikeValidatorImpl implements LikeValidator {
 
     /**
      * Validates that a user cannot like their own tweet.
-     * <p>
-     * This method checks if the user attempting to like the tweet is the same
-     * as the tweet author, which is not allowed by business rules.
      *
      * @param tweet  the tweet being liked
      * @param userId the ID of the user attempting to like the tweet
@@ -92,9 +89,6 @@ public class LikeValidatorImpl implements LikeValidator {
 
     /**
      * Validates that the like does not already exist.
-     * <p>
-     * This method checks if a like already exists for the given tweet and user
-     * using the repository.
      *
      * @param tweetId the ID of the tweet being liked
      * @param userId  the ID of the user attempting to like the tweet
@@ -140,9 +134,6 @@ public class LikeValidatorImpl implements LikeValidator {
 
     /**
      * Validates that the like exists for the given tweet and user.
-     * <p>
-     * This method checks if a like exists for the given tweet and user
-     * using the repository. This validation is required before removing a like.
      *
      * @param tweetId the ID of the tweet being unliked
      * @param userId  the ID of the user attempting to unlike the tweet

@@ -31,12 +31,10 @@ public interface TweetApi {
     /**
      * Creates a new tweet in the system.
      * <p>
-     * This method creates a new tweet with the provided content and user ID.
-     * It performs validation on the request data, checks if the user exists via
-     * users-api integration, and saves the tweet to the database. The tweet content
+     * It performs validation on the request data, checks if the user exists. The tweet content
      * must be between 1 and 280 characters and cannot be empty or only whitespace.
      *
-     * @param createTweetRequest DTO containing tweet data for creation (content and userId)
+     * @param createTweetRequest DTO containing tweet data for creation
      * @return ResponseEntity containing the created tweet data with HTTP 201 status
      * @throws ConstraintViolationException if content validation fails
      * @throws IllegalArgumentException     if user doesn't exist
@@ -44,50 +42,23 @@ public interface TweetApi {
     @Operation(
         summary = "Create new tweet",
         description = "Creates a new tweet with the provided content and user ID. " +
-            "It performs validation on the request data, checks if the user exists via " +
-            "users-api integration, and saves the tweet to the database. " +
+            "It performs validation on the request data, checks if the user exists. " +
             "The tweet content must be between 1 and 280 characters and cannot be empty or only whitespace."
     )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "201",
-            description = "Tweet created successfully",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = TweetResponseDto.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Validation error",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Business rule violation",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Constraint violation error",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
+    @ApiResponse(
+        responseCode = "201",
+        description = "Tweet created successfully",
+        content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = TweetResponseDto.class)
         )
-    })
+    )
     ResponseEntity<TweetResponseDto> createTweet(
         @Parameter(description = "Tweet data for creation", required = true)
         CreateTweetRequestDto createTweetRequest);
 
     /**
      * Retrieves a tweet by its unique identifier.
-     * <p>
-     * Returns 200 OK with tweet data if found, or 404 Not Found if the tweet
-     * does not exist. The tweetId must be a valid UUID format.
      *
      * @param tweetId the unique identifier of the tweet (UUID format)
      * @return ResponseEntity containing tweet data with HTTP 200 status if found,
@@ -95,34 +66,15 @@ public interface TweetApi {
      */
     @Operation(
         summary = "Get tweet by ID",
-        description = "Retrieves a tweet from the database by its unique identifier. " +
-            "Returns 200 OK with tweet data if the tweet exists, or 404 Not Found " +
-            "if the tweet does not exist. The tweetId must be a valid UUID format."
-    )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Tweet found successfully",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = TweetResponseDto.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "404",
-            description = "Tweet not found",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Invalid UUID format",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
+        description = "Retrieves a tweet from the database by its unique identifier. ")
+    @ApiResponse(
+        responseCode = "200",
+        description = "Tweet found successfully",
+        content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = TweetResponseDto.class)
         )
-    })
+    )
     ResponseEntity<TweetResponseDto> getTweetById(
         @Parameter(
             description = "Unique identifier of the tweet",
@@ -139,7 +91,7 @@ public interface TweetApi {
      * The tweet content must be between 1 and 280 characters and cannot be empty or only whitespace.
      *
      * @param tweetId            the unique identifier of the tweet to update (UUID format)
-     * @param updateTweetRequest DTO containing tweet data for update (content and userId)
+     * @param updateTweetRequest DTO containing tweet data for update
      * @return ResponseEntity containing the updated tweet data with HTTP 200 status
      * @throws ConstraintViolationException if content validation fails
      * @throws IllegalArgumentException     if tweet doesn't exist or access denied
@@ -151,51 +103,14 @@ public interface TweetApi {
             "verifies authorization, and updates the tweet content. " +
             "The tweet content must be between 1 and 280 characters and cannot be empty or only whitespace."
     )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Tweet updated successfully",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = TweetResponseDto.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Validation error",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Constraint violation error",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        ),
-        @ApiResponse(
-            responseCode = "409",
-            description = "Business rule violation - Access denied",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        ),
-        @ApiResponse(
-            responseCode = "409",
-            description = "Business rule violation - Tweet not found",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Invalid UUID format",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
+    @ApiResponse(
+        responseCode = "200",
+        description = "Tweet updated successfully",
+        content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = TweetResponseDto.class)
         )
-    })
+    )
     ResponseEntity<TweetResponseDto> updateTweet(
         @Parameter(
             description = "Unique identifier of the tweet to update",
@@ -224,36 +139,12 @@ public interface TweetApi {
             "Only the tweet author can delete their tweet. " +
             "The method performs validation on the request data, checks tweet existence, " +
             "verifies authorization, and performs soft delete by setting isDeleted flag " +
-            "and deletedAt timestamp. The tweet data is preserved in the database " +
-            "for analytics and recovery purposes."
+            "and deletedAt timestamp."
     )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "204",
-            description = "Tweet deleted successfully"
-        ),
-        @ApiResponse(
-            responseCode = "404",
-            description = "Tweet not found or already deleted",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        ),
-        @ApiResponse(
-            responseCode = "409",
-            description = "Business rule violation - Access denied",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Validation error",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        )
-    })
+    @ApiResponse(
+        responseCode = "204",
+        description = "Tweet deleted successfully"
+    )
     ResponseEntity<Void> deleteTweet(
         @Parameter(
             description = "Unique identifier of the tweet to delete",
@@ -267,14 +158,13 @@ public interface TweetApi {
     /**
      * Retrieves a paginated list of tweets for a specific user.
      * <p>
-     * This endpoint retrieves all tweets created by a specific user with pagination support.
      * Tweets are sorted by creation date in descending order (newest first). Deleted tweets
      * (soft delete) are automatically excluded from the results. Supports pagination with
      * page, size, and sort parameters.
      *
      * @param userId   the unique identifier of the user whose tweets to retrieve
      * @param pageable pagination parameters (page, size, sorting)
-     * @return PagedModel containing paginated list of tweets with metadata and HATEOAS links
+     * @return PagedModel containing paginated list of tweets with metadata
      */
     @Operation(
         summary = "Get user tweets with pagination",
@@ -301,7 +191,7 @@ public interface TweetApi {
             example = "123e4567-e89b-12d3-a456-426614174000"
         )
         UUID userId,
-        @Parameter(description = "Pagination parameters (page, size, sorting)", required = false)
+        @Parameter(description = "Pagination parameters (page, size, sorting)")
         Pageable pageable);
 
     /**
@@ -312,13 +202,12 @@ public interface TweetApi {
      * descending order (newest first). Deleted tweets (soft delete) are automatically
      * excluded from the results. Supports pagination with page, size, and sort parameters.
      * If the user has no following relationships, an empty page is returned (not an error).
-     * Integration with follower-api is used to retrieve the list of followed users.
      *
      * @param userId   the unique identifier of the user whose timeline to retrieve
      * @param pageable pagination parameters (page, size, sorting)
-     * @return PagedModel containing paginated list of tweets with metadata and HATEOAS links
+     * @return PagedModel containing paginated list of tweets with metadata
      * @throws BusinessRuleValidationException if userId is null or user doesn't exist
-     * @throws ConstraintViolationException   if pagination parameters are invalid
+     * @throws ConstraintViolationException    if pagination parameters are invalid
      */
     @Operation(
         summary = "Get user timeline with pagination",
@@ -328,47 +217,16 @@ public interface TweetApi {
             "Deleted tweets (soft delete) are excluded from the results. " +
             "Supports pagination with page, size, and sort parameters. " +
             "If the user has no following relationships, an empty page is returned (not an error). " +
-            "Integration with follower-api is used to retrieve the list of followed users. " +
             "Default pagination: page=0, size=20, sort=createdAt,DESC."
     )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Timeline retrieved successfully",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = PagedModel.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Invalid UUID format for userId",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "User does not exist",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Invalid pagination parameters",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        ),
-        @ApiResponse(
-            responseCode = "503",
-            description = "Follower API service unavailable",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
+    @ApiResponse(
+        responseCode = "200",
+        description = "Timeline retrieved successfully",
+        content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = PagedModel.class)
         )
-    })
+    )
     PagedModel<TweetResponseDto> getTimeline(
         @Parameter(
             description = "Unique identifier of the user whose timeline to retrieve",
@@ -376,6 +234,6 @@ public interface TweetApi {
             example = "123e4567-e89b-12d3-a456-426614174000"
         )
         UUID userId,
-        @Parameter(description = "Pagination parameters (page, size, sorting)", required = false)
+        @Parameter(description = "Pagination parameters (page, size, sorting)")
         Pageable pageable);
 }

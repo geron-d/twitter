@@ -62,28 +62,4 @@ public class Like {
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
-
-    /**
-     * Checks if the like is by a specific user.
-     * <p>
-     * This method returns true if the like was created by the specified user.
-     *
-     * @param userId the user ID to check
-     * @return true if the like is by the specified user, false otherwise
-     */
-    public boolean isByUser(UUID userId) {
-        return this.userId != null && this.userId.equals(userId);
-    }
-
-    /**
-     * Checks if the like is for a specific tweet.
-     * <p>
-     * This method returns true if the like is for the specified tweet.
-     *
-     * @param tweetId the tweet ID to check
-     * @return true if the like is for the specified tweet, false otherwise
-     */
-    public boolean isForTweet(UUID tweetId) {
-        return this.tweetId != null && this.tweetId.equals(tweetId);
-    }
 }

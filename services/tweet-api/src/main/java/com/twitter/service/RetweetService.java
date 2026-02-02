@@ -1,10 +1,10 @@
 package com.twitter.service;
 
+import com.twitter.common.dto.request.retweet.RetweetRequestDto;
+import com.twitter.common.dto.response.retweet.RetweetResponseDto;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.FormatValidationException;
 import com.twitter.common.exception.validation.UniquenessValidationException;
-import com.twitter.common.dto.request.retweet.RetweetRequestDto;
-import com.twitter.common.dto.response.retweet.RetweetResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -35,11 +35,9 @@ public interface RetweetService {
      * A user cannot retweet their own tweet, and duplicate retweets are prevented by a unique constraint in the database.
      * The tweet must exist and not be deleted for the retweet operation to succeed.
      * An optional comment can be provided (1-280 characters), but null comment is also allowed.
-     * The operation is atomic and executed within a transaction. If any step fails,
-     * the entire operation is rolled back.
      *
      * @param tweetId    the unique identifier of the tweet to retweet
-     * @param requestDto the retweet request containing userId and optional comment
+     * @param requestDto the retweet request
      * @return RetweetResponseDto containing the created retweet data
      * @throws BusinessRuleValidationException if tweetId is null, tweet doesn't exist, user doesn't exist, or self-retweet attempt
      * @throws UniquenessValidationException   if duplicate retweet attempt
@@ -56,12 +54,9 @@ public interface RetweetService {
      * 3. Deletes the retweet record
      * 4. Decrements the tweet's retweets count
      * 5. Saves the updated tweet
-     * <p>
-     * The operation is atomic and executed within a transaction. If any step fails,
-     * the entire operation is rolled back.
      *
      * @param tweetId    the unique identifier of the tweet to remove retweet from
-     * @param requestDto the retweet removal request containing userId
+     * @param requestDto the retweet removal request
      * @throws BusinessRuleValidationException if tweetId is null, tweet doesn't exist, user doesn't exist, or retweet doesn't exist
      */
     void removeRetweet(UUID tweetId, RetweetRequestDto requestDto);
@@ -75,8 +70,7 @@ public interface RetweetService {
      * 3. Converts Retweet entities to RetweetResponseDto
      * 4. Returns a Page containing paginated retweets with metadata
      * <p>
-     * The method is read-only and transactional, ensuring data consistency. Retweets are
-     * sorted by creation date in descending order (newest first). If the tweet doesn't
+     * Retweets are sorted by creation date in descending order (newest first). If the tweet doesn't
      * exist or is deleted, a BusinessRuleValidationException is thrown. If there are no
      * retweets for the tweet, an empty page is returned (not an error).
      *

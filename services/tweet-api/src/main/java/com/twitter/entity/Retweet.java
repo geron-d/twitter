@@ -62,7 +62,7 @@ public class Retweet {
      * Can be null, but if provided, must not exceed 280 characters and cannot be an empty string.
      */
     @Size(max = 280, message = "Comment must not exceed 280 characters")
-    @Column(name = "comment", length = 280, nullable = true)
+    @Column(name = "comment", length = 280)
     private String comment;
 
     /**
@@ -74,33 +74,7 @@ public class Retweet {
     private LocalDateTime createdAt;
 
     /**
-     * Checks if the retweet is by a specific user.
-     * <p>
-     * This method returns true if the retweet was created by the specified user.
-     *
-     * @param userId the user ID to check
-     * @return true if the retweet is by the specified user, false otherwise
-     */
-    public boolean isByUser(UUID userId) {
-        return this.userId != null && this.userId.equals(userId);
-    }
-
-    /**
-     * Checks if the retweet is for a specific tweet.
-     * <p>
-     * This method returns true if the retweet is for the specified tweet.
-     *
-     * @param tweetId the tweet ID to check
-     * @return true if the retweet is for the specified tweet, false otherwise
-     */
-    public boolean isForTweet(UUID tweetId) {
-        return this.tweetId != null && this.tweetId.equals(tweetId);
-    }
-
-    /**
      * Checks if the retweet has a comment.
-     * <p>
-     * This method returns true if the comment is not null and not empty (after trimming).
      *
      * @return true if the retweet has a non-empty comment, false otherwise
      */

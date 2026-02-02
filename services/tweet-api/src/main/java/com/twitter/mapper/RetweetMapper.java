@@ -20,7 +20,7 @@ public interface RetweetMapper {
     /**
      * Converts RetweetRequestDto and tweetId to Retweet entity.
      *
-     * @param requestDto DTO containing userId and optional comment for the retweet
+     * @param requestDto DTO for the retweet
      * @param tweetId    the unique identifier of the tweet being retweeted
      * @return Retweet entity without service-managed fields (id, createdAt)
      */
@@ -34,7 +34,7 @@ public interface RetweetMapper {
     /**
      * Converts Retweet entity to RetweetResponseDto.
      *
-     * @param retweet Retweet entity from database
+     * @param retweet Retweet entity
      * @return DTO containing retweet data for client response
      */
     RetweetResponseDto toRetweetResponseDto(Retweet retweet);

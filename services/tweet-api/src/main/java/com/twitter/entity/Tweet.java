@@ -17,7 +17,6 @@ import java.util.UUID;
 /**
  * JPA Entity representing a Tweet in the database.
  * <p>
- * Maps to the 'tweets' table with all necessary fields and constraints.
  * This entity represents a tweet created by a user in the Twitter system.
  * Supports soft delete functionality through isDeleted flag and deletedAt timestamp.
  *
@@ -83,7 +82,7 @@ public class Tweet {
     /**
      * Timestamp when the tweet was soft deleted.
      */
-    @Column(name = "deleted_at", nullable = true)
+    @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
     /**
@@ -133,18 +132,6 @@ public class Tweet {
     public void softDelete() {
         this.isDeleted = true;
         this.deletedAt = LocalDateTime.now();
-    }
-
-    /**
-     * Checks if the tweet is active (not deleted).
-     * <p>
-     * This method returns true if the tweet has not been soft deleted, false otherwise.
-     * A tweet is considered active when isDeleted is false or null.
-     *
-     * @return true if the tweet is active (not deleted), false otherwise
-     */
-    public boolean isActive() {
-        return !Boolean.TRUE.equals(isDeleted);
     }
 
     /**

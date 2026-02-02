@@ -1,8 +1,8 @@
 package com.twitter.validation;
 
+import com.twitter.common.dto.request.like.LikeTweetRequestDto;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.UniquenessValidationException;
-import com.twitter.common.dto.request.like.LikeTweetRequestDto;
 
 import java.util.UUID;
 
@@ -24,7 +24,7 @@ public interface LikeValidator {
      * - Duplicate like check (user cannot like the same tweet twice)
      *
      * @param tweetId    the unique identifier of the tweet to like
-     * @param requestDto DTO containing userId for the like
+     * @param requestDto DTO for the like
      * @throws BusinessRuleValidationException if tweetId is null, tweet doesn't exist, user doesn't exist, or self-like attempt
      * @throws UniquenessValidationException   if duplicate like attempt
      */
@@ -39,7 +39,7 @@ public interface LikeValidator {
      * - Existence of the like (like must exist for the given tweet and user)
      *
      * @param tweetId    the unique identifier of the tweet to unlike
-     * @param requestDto DTO containing userId for the unlike
+     * @param requestDto DTO for the unlike
      * @throws BusinessRuleValidationException if tweetId is null, tweet doesn't exist, user doesn't exist, or like doesn't exist
      */
     void validateForUnlike(UUID tweetId, LikeTweetRequestDto requestDto);
@@ -48,8 +48,7 @@ public interface LikeValidator {
      * Validates that a tweet exists and is not deleted.
      * <p>
      * This method checks if the tweet with the given ID exists in the database
-     * and is not soft deleted. This validation is used for read operations like
-     * retrieving likes for a tweet.
+     * and is not soft deleted.
      *
      * @param tweetId the unique identifier of the tweet to validate
      * @throws BusinessRuleValidationException if tweetId is null, tweet doesn't exist, or tweet is deleted

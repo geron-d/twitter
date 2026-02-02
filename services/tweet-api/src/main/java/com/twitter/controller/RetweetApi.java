@@ -1,16 +1,15 @@
 package com.twitter.controller;
 
+import com.twitter.common.dto.request.retweet.RetweetRequestDto;
+import com.twitter.common.dto.response.retweet.RetweetResponseDto;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.FormatValidationException;
 import com.twitter.common.exception.validation.UniquenessValidationException;
-import com.twitter.common.dto.request.retweet.RetweetRequestDto;
-import com.twitter.common.dto.response.retweet.RetweetResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
@@ -37,8 +36,8 @@ public interface RetweetApi {
      * atomic and updates the tweet's retweets count. An optional comment can be provided
      * (1-280 characters), but null comment is also allowed.
      *
-     * @param tweetId         the unique identifier of the tweet to retweet (UUID format)
-     * @param retweetRequest   DTO containing userId and optional comment for the retweet operation
+     * @param tweetId        the unique identifier of the tweet to retweet (UUID format)
+     * @param retweetRequest DTO for the retweet operation
      * @return ResponseEntity containing the created retweet data with HTTP 201 status
      * @throws BusinessRuleValidationException if tweetId is null, tweet doesn't exist, user doesn't exist, or self-retweet attempt
      * @throws UniquenessValidationException   if duplicate retweet attempt
@@ -53,30 +52,14 @@ public interface RetweetApi {
             "The retweet operation is atomic and updates the tweet's retweets count. " +
             "An optional comment can be provided (1-280 characters), but null comment is also allowed."
     )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "201",
-            description = "Tweet retweeted successfully",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = RetweetResponseDto.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Validation error",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        ),
-        @ApiResponse(
-            responseCode = "409",
-            description = "Business rule violation or uniqueness violation",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
+    @ApiResponse(
+        responseCode = "201",
+        description = "Tweet retweeted successfully",
+        content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = RetweetResponseDto.class)
         )
-    })
+    )
     ResponseEntity<RetweetResponseDto> retweetTweet(
         @Parameter(
             description = "Unique identifier of the tweet to retweet",
@@ -84,7 +67,7 @@ public interface RetweetApi {
             example = "223e4567-e89b-12d3-a456-426614174001"
         )
         UUID tweetId,
-        @Parameter(description = "Retweet request containing userId and optional comment", required = true)
+        @Parameter(description = "Retweet request", required = true)
         RetweetRequestDto retweetRequest);
 
     /**
@@ -95,8 +78,8 @@ public interface RetweetApi {
      * the user exists, and ensures that the retweet exists before removal. The retweet removal operation
      * is atomic and updates the tweet's retweets count by decrementing it.
      *
-     * @param tweetId            the unique identifier of the tweet to remove retweet from (UUID format)
-     * @param retweetRequest     DTO containing userId for the retweet removal operation
+     * @param tweetId        the unique identifier of the tweet to remove retweet from (UUID format)
+     * @param retweetRequest DTO for the retweet removal operation
      * @return ResponseEntity with HTTP 204 No Content status (no response body)
      * @throws BusinessRuleValidationException if tweetId is null, tweet doesn't exist, user doesn't exist, or retweet doesn't exist
      */
@@ -107,33 +90,10 @@ public interface RetweetApi {
             "verifies that the user exists, and ensures that the retweet exists before removal. " +
             "The retweet removal operation is atomic and updates the tweet's retweets count by decrementing it."
     )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "204",
-            description = "Retweet removed successfully"
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Validation error",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        ),
-        @ApiResponse(
-            responseCode = "409",
-            description = "Business rule violation",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Invalid UUID format",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        )
-    })
+    @ApiResponse(
+        responseCode = "204",
+        description = "Retweet removed successfully"
+    )
     ResponseEntity<Void> removeRetweet(
         @Parameter(
             description = "Unique identifier of the tweet to remove retweet from",
@@ -141,7 +101,7 @@ public interface RetweetApi {
             example = "223e4567-e89b-12d3-a456-426614174001"
         )
         UUID tweetId,
-        @Parameter(description = "Retweet removal request containing userId", required = true)
+        @Parameter(description = "Retweet removal request", required = true)
         RetweetRequestDto retweetRequest);
 
     /**
@@ -154,7 +114,7 @@ public interface RetweetApi {
      *
      * @param tweetId  the unique identifier of the tweet whose retweets to retrieve
      * @param pageable pagination parameters (page, size, sorting)
-     * @return PagedModel containing paginated list of retweets with metadata and HATEOAS links
+     * @return PagedModel containing paginated list of retweets with metadata
      * @throws BusinessRuleValidationException if tweetId is null or tweet doesn't exist
      */
     @Operation(
@@ -165,37 +125,14 @@ public interface RetweetApi {
             "If the tweet has no retweets, an empty page is returned (not an error). " +
             "Default pagination: page=0, size=20, sort=createdAt,DESC."
     )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Tweet retweets retrieved successfully",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = PagedModel.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Validation error",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        ),
-        @ApiResponse(
-            responseCode = "409",
-            description = "Business rule violation",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Invalid UUID format",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
+    @ApiResponse(
+        responseCode = "200",
+        description = "Tweet retweets retrieved successfully",
+        content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = PagedModel.class)
         )
-    })
+    )
     PagedModel<RetweetResponseDto> getRetweetsByTweetId(
         @Parameter(
             description = "Unique identifier of the tweet",
@@ -203,6 +140,6 @@ public interface RetweetApi {
             example = "223e4567-e89b-12d3-a456-426614174001"
         )
         UUID tweetId,
-        @Parameter(description = "Pagination parameters (page, size, sorting)", required = false)
+        @Parameter(description = "Pagination parameters (page, size, sorting)")
         Pageable pageable);
 }
