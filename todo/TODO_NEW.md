@@ -1,2 +1,1 @@
-- почистить javadoc и open-api и поправить стандарты
-- нужны ли defaultValueComputed="CURRENT_TIMESTAMP" если уже есть     @CreationTimestamp
+- нужны ли defaultValueComputed="CURRENT_TIMESTAMP" если уже есть @CreationTimestamp

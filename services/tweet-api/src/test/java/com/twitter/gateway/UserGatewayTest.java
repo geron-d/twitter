@@ -1,7 +1,7 @@
 package com.twitter.gateway;
 
 import com.twitter.client.UsersApiClient;
-import com.twitter.common.dto.UserExistsResponseDto;
+import com.twitter.common.dto.response.user.UserExistsResponseDto;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -56,9 +56,7 @@ class UserGatewayTest {
 
         @Test
         void existsUser_WhenUserIdIsNull_ShouldReturnFalseWithoutCallingClient() {
-            UUID nullUserId = null;
-
-            boolean result = userGateway.existsUser(nullUserId);
+            boolean result = userGateway.existsUser(null);
 
             assertThat(result).isFalse();
             verify(usersApiClient, never()).existsUser(any());
@@ -78,4 +76,4 @@ class UserGatewayTest {
         }
     }
 }
-
+

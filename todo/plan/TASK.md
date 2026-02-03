@@ -1,2 +1,2 @@
-Есть промпт для создания плана реализации задачи D:\projects\twitter\.cursor\commands\main-plan.md
-Добавить в него пункт по доработкам по docker согласно D:\projects\twitter\standards\STANDART_DOCKER.md
+Внести изменения в STANDART_SWAGGER.md
+Не использовать в описании свагер для эндпоинтов контроллеров в @ApiResponse параметр examples

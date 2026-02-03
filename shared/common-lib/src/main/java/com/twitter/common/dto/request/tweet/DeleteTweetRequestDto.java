@@ -1,4 +1,4 @@
-package com.twitter.common.dto.request;
+package com.twitter.common.dto.request.tweet;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
@@ -9,7 +9,6 @@ import java.util.UUID;
 /**
  * Data Transfer Object for deleting a tweet.
  *
- * @param userId the ID of the user performing the delete (used for authorization check)
  * @author geron
  * @version 1.0
  */

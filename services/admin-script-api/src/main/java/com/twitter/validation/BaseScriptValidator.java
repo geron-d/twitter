@@ -15,7 +15,7 @@ public interface BaseScriptValidator {
      * Validates that the number of users for deletion does not exceed
      * the number of users who have tweets.
      *
-     * @param requestDto           DTO containing script parameters (nUsers, nTweetsPerUser, lUsersForDeletion)
+     * @param requestDto           DTO containing script parameters
      * @param usersWithTweetsCount actual number of users who have tweets (after creation)
      * @throws BusinessRuleValidationException if lUsersForDeletion > usersWithTweetsCount
      */

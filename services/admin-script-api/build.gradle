@@ -32,7 +32,7 @@ dependencies {
     implementation 'org.mapstruct:mapstruct'
     annotationProcessor 'org.mapstruct:mapstruct-processor'
     annotationProcessor 'org.projectlombok:lombok-mapstruct-binding'
-    
+
     implementation 'org.liquibase:liquibase-core'
 
     runtimeOnly 'org.postgresql:postgresql'
@@ -49,8 +49,8 @@ dependencies {
 compileJava {
     options.annotationProcessorPath = configurations.annotationProcessor
     options.compilerArgs += [
-            '-Amapstruct.defaultComponentModel=spring',
-            '-Amapstruct.unmappedTargetPolicy=IGNORE'
+        '-Amapstruct.defaultComponentModel=spring',
+        '-Amapstruct.unmappedTargetPolicy=IGNORE'
     ]
 }
 

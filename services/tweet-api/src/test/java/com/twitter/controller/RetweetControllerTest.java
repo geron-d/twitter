@@ -1,8 +1,8 @@
 package com.twitter.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.twitter.common.dto.request.RetweetRequestDto;
-import com.twitter.common.dto.response.RetweetResponseDto;
+import com.twitter.common.dto.request.retweet.RetweetRequestDto;
+import com.twitter.common.dto.response.retweet.RetweetResponseDto;
 import com.twitter.entity.Retweet;
 import com.twitter.entity.Tweet;
 import com.twitter.repository.RetweetRepository;
@@ -24,9 +24,7 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -855,4 +853,3 @@ public class RetweetControllerTest extends BaseIntegrationTest {
         }
     }
 }
-

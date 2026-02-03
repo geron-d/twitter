@@ -1,8 +1,8 @@
 package com.twitter.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.twitter.common.dto.request.FollowRequestDto;
-import com.twitter.common.dto.response.FollowResponseDto;
+import com.twitter.common.dto.request.follow.FollowRequestDto;
+import com.twitter.common.dto.response.follow.FollowResponseDto;
 import com.twitter.entity.Follow;
 import com.twitter.repository.FollowRepository;
 import com.twitter.testconfig.BaseIntegrationTest;
@@ -22,9 +22,7 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -764,4 +762,3 @@ public class FollowControllerTest extends BaseIntegrationTest {
         }
     }
 }
-

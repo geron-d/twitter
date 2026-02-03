@@ -99,20 +99,20 @@ http://localhost:8082/api/v1/tweets
 
 ### Эндпоинты
 
-| Метод    | Путь                  | Описание                      | Тело запроса            | Ответ                        |
-|----------|-----------------------|-------------------------------|-------------------------|------------------------------|
-| `POST`   | `/`                   | Создать новый твит            | `CreateTweetRequestDto` | `TweetResponseDto`           |
-| `GET`    | `/{tweetId}`          | Получить твит по ID            | -                       | `TweetResponseDto`           |
-| `GET`    | `/user/{userId}`      | Получить твиты пользователя   | -                       | `PagedModel<TweetResponseDto>`|
-| `GET`    | `/timeline/{userId}`  | Получить ленту новостей        | -                       | `PagedModel<TweetResponseDto>`|
-| `PUT`    | `/{tweetId}`          | Обновить твит                 | `UpdateTweetRequestDto` | `TweetResponseDto`           |
-| `DELETE` | `/{tweetId}`          | Удалить твит (soft delete)    | `DeleteTweetRequestDto` | -                            |
-| `POST`   | `/{tweetId}/like`     | Лайкнуть твит                 | `LikeTweetRequestDto`   | `LikeResponseDto`            |
-| `DELETE` | `/{tweetId}/like`     | Убрать лайк твита             | `LikeTweetRequestDto`   | -                            |
-| `GET`    | `/{tweetId}/likes`    | Получить пользователей, лайкнувших твит | - | `PagedModel<LikeResponseDto>` |
-| `POST`   | `/{tweetId}/retweet`  | Ретвитнуть твит               | `RetweetRequestDto`     | `RetweetResponseDto`         |
-| `DELETE` | `/{tweetId}/retweet` | Убрать ретвит твита           | `RetweetRequestDto`     | -                            |
-| `GET`    | `/{tweetId}/retweets` | Получить пользователей, ретвитнувших твит | - | `PagedModel<RetweetResponseDto>` |
+| Метод    | Путь                  | Описание                                  | Тело запроса            | Ответ                            |
+|----------|-----------------------|-------------------------------------------|-------------------------|----------------------------------|
+| `POST`   | `/`                   | Создать новый твит                        | `CreateTweetRequestDto` | `TweetResponseDto`               |
+| `GET`    | `/{tweetId}`          | Получить твит по ID                       | -                       | `TweetResponseDto`               |
+| `GET`    | `/user/{userId}`      | Получить твиты пользователя               | -                       | `PagedModel<TweetResponseDto>`   |
+| `GET`    | `/timeline/{userId}`  | Получить ленту новостей                   | -                       | `PagedModel<TweetResponseDto>`   |
+| `PUT`    | `/{tweetId}`          | Обновить твит                             | `UpdateTweetRequestDto` | `TweetResponseDto`               |
+| `DELETE` | `/{tweetId}`          | Удалить твит (soft delete)                | `DeleteTweetRequestDto` | -                                |
+| `POST`   | `/{tweetId}/like`     | Лайкнуть твит                             | `LikeTweetRequestDto`   | `LikeResponseDto`                |
+| `DELETE` | `/{tweetId}/like`     | Убрать лайк твита                         | `LikeTweetRequestDto`   | -                                |
+| `GET`    | `/{tweetId}/likes`    | Получить пользователей, лайкнувших твит   | -                       | `PagedModel<LikeResponseDto>`    |
+| `POST`   | `/{tweetId}/retweet`  | Ретвитнуть твит                           | `RetweetRequestDto`     | `RetweetResponseDto`             |
+| `DELETE` | `/{tweetId}/retweet`  | Убрать ретвит твита                       | `RetweetRequestDto`     | -                                |
+| `GET`    | `/{tweetId}/retweets` | Получить пользователей, ретвитнувших твит | -                       | `PagedModel<RetweetResponseDto>` |
 
 ### Детальное описание эндпоинтов
 
@@ -127,8 +127,8 @@ Content-Type: application/json
 
 ```json
 {
-  "content": "This is my first tweet!",
-  "userId": "123e4567-e89b-12d3-a456-426614174000"
+    "content": "This is my first tweet!",
+    "userId": "123e4567-e89b-12d3-a456-426614174000"
 }
 ```
 
@@ -147,11 +147,11 @@ Content-Type: application/json
 
 ```json
 {
-  "id": "987e6543-e21b-43d2-b654-321987654321",
-  "userId": "123e4567-e89b-12d3-a456-426614174000",
-  "content": "This is my first tweet!",
-  "createdAt": "2025-01-27T15:30:00Z",
-  "updatedAt": "2025-01-27T15:30:00Z"
+    "id": "987e6543-e21b-43d2-b654-321987654321",
+    "userId": "123e4567-e89b-12d3-a456-426614174000",
+    "content": "This is my first tweet!",
+    "createdAt": "2025-01-27T15:30:00Z",
+    "updatedAt": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -159,13 +159,13 @@ Content-Type: application/json
 
 ```json
 {
-  "type": "https://example.com/errors/format-validation",
-  "title": "Format Validation Error",
-  "status": 400,
-  "detail": "Tweet content must be between 1 and 280 characters",
-  "fieldName": "content",
-  "constraintName": "CONTENT_VALIDATION",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/format-validation",
+    "title": "Format Validation Error",
+    "status": 400,
+    "detail": "Tweet content must be between 1 and 280 characters",
+    "fieldName": "content",
+    "constraintName": "CONTENT_VALIDATION",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -173,12 +173,12 @@ Content-Type: application/json
 
 ```json
 {
-  "type": "https://example.com/errors/business-rule-validation",
-  "title": "Business Rule Validation Error",
-  "status": 400,
-  "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
-  "ruleName": "USER_NOT_EXISTS",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/business-rule-validation",
+    "title": "Business Rule Validation Error",
+    "status": 400,
+    "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+    "ruleName": "USER_NOT_EXISTS",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -205,11 +205,11 @@ GET /api/v1/tweets/{tweetId}
 
 ```json
 {
-  "id": "123e4567-e89b-12d3-a456-426614174000",
-  "userId": "987e6543-e21b-43d2-b654-321987654321",
-  "content": "This is my first tweet!",
-  "createdAt": "2025-01-27T15:30:00Z",
-  "updatedAt": "2025-01-27T15:30:00Z"
+    "id": "123e4567-e89b-12d3-a456-426614174000",
+    "userId": "987e6543-e21b-43d2-b654-321987654321",
+    "content": "This is my first tweet!",
+    "createdAt": "2025-01-27T15:30:00Z",
+    "updatedAt": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -217,11 +217,11 @@ GET /api/v1/tweets/{tweetId}
 
 ```json
 {
-  "type": "https://example.com/errors/not-found",
-  "title": "Tweet Not Found",
-  "status": 404,
-  "detail": "Tweet with ID '123e4567-e89b-12d3-a456-426614174000' not found",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/not-found",
+    "title": "Tweet Not Found",
+    "status": 404,
+    "detail": "Tweet with ID '123e4567-e89b-12d3-a456-426614174000' not found",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -240,8 +240,8 @@ Content-Type: application/json
 
 ```json
 {
-  "content": "This is updated tweet content",
-  "userId": "123e4567-e89b-12d3-a456-426614174000"
+    "content": "This is updated tweet content",
+    "userId": "123e4567-e89b-12d3-a456-426614174000"
 }
 ```
 
@@ -267,11 +267,11 @@ Content-Type: application/json
 
 ```json
 {
-  "id": "123e4567-e89b-12d3-a456-426614174000",
-  "userId": "987e6543-e21b-43d2-b654-321987654321",
-  "content": "This is updated tweet content",
-  "createdAt": "2025-01-27T15:30:00Z",
-  "updatedAt": "2025-01-27T16:45:00Z"
+    "id": "123e4567-e89b-12d3-a456-426614174000",
+    "userId": "987e6543-e21b-43d2-b654-321987654321",
+    "content": "This is updated tweet content",
+    "createdAt": "2025-01-27T15:30:00Z",
+    "updatedAt": "2025-01-27T16:45:00Z"
 }
 ```
 
@@ -279,13 +279,13 @@ Content-Type: application/json
 
 ```json
 {
-  "type": "https://example.com/errors/format-validation",
-  "title": "Format Validation Error",
-  "status": 400,
-  "detail": "Tweet content must be between 1 and 280 characters",
-  "fieldName": "content",
-  "constraintName": "CONTENT_VALIDATION",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/format-validation",
+    "title": "Format Validation Error",
+    "status": 400,
+    "detail": "Tweet content must be between 1 and 280 characters",
+    "fieldName": "content",
+    "constraintName": "CONTENT_VALIDATION",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -293,13 +293,13 @@ Content-Type: application/json
 
 ```json
 {
-  "type": "https://example.com/errors/business-rule-validation",
-  "title": "Business Rule Validation Error",
-  "status": 409,
-  "detail": "Business rule 'TWEET_ACCESS_DENIED' violated for context: Only the tweet author can update their tweet",
-  "ruleName": "TWEET_ACCESS_DENIED",
-  "context": "Only the tweet author can update their tweet",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/business-rule-validation",
+    "title": "Business Rule Validation Error",
+    "status": 409,
+    "detail": "Business rule 'TWEET_ACCESS_DENIED' violated for context: Only the tweet author can update their tweet",
+    "ruleName": "TWEET_ACCESS_DENIED",
+    "context": "Only the tweet author can update their tweet",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -307,13 +307,13 @@ Content-Type: application/json
 
 ```json
 {
-  "type": "https://example.com/errors/business-rule-validation",
-  "title": "Business Rule Validation Error",
-  "status": 409,
-  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 123e4567-e89b-12d3-a456-426614174000",
-  "ruleName": "TWEET_NOT_FOUND",
-  "context": "123e4567-e89b-12d3-a456-426614174000",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/business-rule-validation",
+    "title": "Business Rule Validation Error",
+    "status": 409,
+    "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+    "ruleName": "TWEET_NOT_FOUND",
+    "context": "123e4567-e89b-12d3-a456-426614174000",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -355,32 +355,32 @@ GET /api/v1/tweets/user/{userId}?page=0&size=20&sort=createdAt,DESC
 
 ```json
 {
-  "content": [
-    {
-      "id": "111e4567-e89b-12d3-a456-426614174000",
-      "userId": "123e4567-e89b-12d3-a456-426614174000",
-      "content": "This is my latest tweet!",
-      "createdAt": "2025-01-27T15:30:00Z",
-      "updatedAt": "2025-01-27T15:30:00Z",
-      "isDeleted": false,
-      "deletedAt": null
-    },
-    {
-      "id": "222e4567-e89b-12d3-a456-426614174000",
-      "userId": "123e4567-e89b-12d3-a456-426614174000",
-      "content": "Another tweet from yesterday",
-      "createdAt": "2025-01-26T10:15:00Z",
-      "updatedAt": "2025-01-26T10:15:00Z",
-      "isDeleted": false,
-      "deletedAt": null
+    "content": [
+        {
+            "id": "111e4567-e89b-12d3-a456-426614174000",
+            "userId": "123e4567-e89b-12d3-a456-426614174000",
+            "content": "This is my latest tweet!",
+            "createdAt": "2025-01-27T15:30:00Z",
+            "updatedAt": "2025-01-27T15:30:00Z",
+            "isDeleted": false,
+            "deletedAt": null
+        },
+        {
+            "id": "222e4567-e89b-12d3-a456-426614174000",
+            "userId": "123e4567-e89b-12d3-a456-426614174000",
+            "content": "Another tweet from yesterday",
+            "createdAt": "2025-01-26T10:15:00Z",
+            "updatedAt": "2025-01-26T10:15:00Z",
+            "isDeleted": false,
+            "deletedAt": null
+        }
+    ],
+    "page": {
+        "size": 20,
+        "number": 0,
+        "totalElements": 150,
+        "totalPages": 8
     }
-  ],
-  "page": {
-    "size": 20,
-    "number": 0,
-    "totalElements": 150,
-    "totalPages": 8
-  }
 }
 ```
 
@@ -388,13 +388,13 @@ GET /api/v1/tweets/user/{userId}?page=0&size=20&sort=createdAt,DESC
 
 ```json
 {
-  "content": [],
-  "page": {
-    "size": 20,
-    "number": 0,
-    "totalElements": 0,
-    "totalPages": 0
-  }
+    "content": [],
+    "page": {
+        "size": 20,
+        "number": 0,
+        "totalElements": 0,
+        "totalPages": 0
+    }
 }
 ```
 
@@ -436,32 +436,32 @@ GET /api/v1/tweets/timeline/{userId}?page=0&size=20&sort=createdAt,DESC
 
 ```json
 {
-  "content": [
-    {
-      "id": "111e4567-e89b-12d3-a456-426614174000",
-      "userId": "123e4567-e89b-12d3-a456-426614174000",
-      "content": "This is my latest tweet!",
-      "createdAt": "2025-01-27T15:30:00Z",
-      "updatedAt": "2025-01-27T15:30:00Z",
-      "isDeleted": false,
-      "deletedAt": null
-    },
-    {
-      "id": "222e4567-e89b-12d3-a456-426614174000",
-      "userId": "123e4567-e89b-12d3-a456-426614174000",
-      "content": "Another tweet from yesterday",
-      "createdAt": "2025-01-26T10:15:00Z",
-      "updatedAt": "2025-01-26T10:15:00Z",
-      "isDeleted": false,
-      "deletedAt": null
+    "content": [
+        {
+            "id": "111e4567-e89b-12d3-a456-426614174000",
+            "userId": "123e4567-e89b-12d3-a456-426614174000",
+            "content": "This is my latest tweet!",
+            "createdAt": "2025-01-27T15:30:00Z",
+            "updatedAt": "2025-01-27T15:30:00Z",
+            "isDeleted": false,
+            "deletedAt": null
+        },
+        {
+            "id": "222e4567-e89b-12d3-a456-426614174000",
+            "userId": "123e4567-e89b-12d3-a456-426614174000",
+            "content": "Another tweet from yesterday",
+            "createdAt": "2025-01-26T10:15:00Z",
+            "updatedAt": "2025-01-26T10:15:00Z",
+            "isDeleted": false,
+            "deletedAt": null
+        }
+    ],
+    "page": {
+        "size": 20,
+        "number": 0,
+        "totalElements": 150,
+        "totalPages": 8
     }
-  ],
-  "page": {
-    "size": 20,
-    "number": 0,
-    "totalElements": 150,
-    "totalPages": 8
-  }
 }
 ```
 
@@ -469,13 +469,13 @@ GET /api/v1/tweets/timeline/{userId}?page=0&size=20&sort=createdAt,DESC
 
 ```json
 {
-  "content": [],
-  "page": {
-    "size": 20,
-    "number": 0,
-    "totalElements": 0,
-    "totalPages": 0
-  }
+    "content": [],
+    "page": {
+        "size": 20,
+        "number": 0,
+        "totalElements": 0,
+        "totalPages": 0
+    }
 }
 ```
 
@@ -516,34 +516,34 @@ GET /api/v1/tweets/timeline/{userId}?page=0&size=20&sort=createdAt,DESC
 
 ```json
 {
-  "content": [
-    {
-      "id": "111e4567-e89b-12d3-a456-426614174000",
-      "userId": "222e4567-e89b-12d3-a456-426614174111",
-      "content": "This is a tweet from a followed user!",
-      "createdAt": "2025-01-27T15:30:00Z",
-      "updatedAt": "2025-01-27T15:30:00Z",
-      "isDeleted": false,
-      "deletedAt": null
-    },
-    {
-      "id": "333e4567-e89b-12d3-a456-426614174222",
-      "userId": "444e4567-e89b-12d3-a456-426614174333",
-      "content": "Another tweet from another followed user",
-      "createdAt": "2025-01-27T14:20:00Z",
-      "updatedAt": "2025-01-27T14:20:00Z",
-      "isDeleted": false,
-      "deletedAt": null
+    "content": [
+        {
+            "id": "111e4567-e89b-12d3-a456-426614174000",
+            "userId": "222e4567-e89b-12d3-a456-426614174111",
+            "content": "This is a tweet from a followed user!",
+            "createdAt": "2025-01-27T15:30:00Z",
+            "updatedAt": "2025-01-27T15:30:00Z",
+            "isDeleted": false,
+            "deletedAt": null
+        },
+        {
+            "id": "333e4567-e89b-12d3-a456-426614174222",
+            "userId": "444e4567-e89b-12d3-a456-426614174333",
+            "content": "Another tweet from another followed user",
+            "createdAt": "2025-01-27T14:20:00Z",
+            "updatedAt": "2025-01-27T14:20:00Z",
+            "isDeleted": false,
+            "deletedAt": null
+        }
+    ],
+    "page": {
+        "size": 20,
+        "number": 0,
+        "totalElements": 150,
+        "totalPages": 8,
+        "first": true,
+        "last": false
     }
-  ],
-  "page": {
-    "size": 20,
-    "number": 0,
-    "totalElements": 150,
-    "totalPages": 8,
-    "first": true,
-    "last": false
-  }
 }
 ```
 
@@ -551,15 +551,15 @@ GET /api/v1/tweets/timeline/{userId}?page=0&size=20&sort=createdAt,DESC
 
 ```json
 {
-  "content": [],
-  "page": {
-    "size": 20,
-    "number": 0,
-    "totalElements": 0,
-    "totalPages": 0,
-    "first": true,
-    "last": true
-  }
+    "content": [],
+    "page": {
+        "size": 20,
+        "number": 0,
+        "totalElements": 0,
+        "totalPages": 0,
+        "first": true,
+        "last": true
+    }
 }
 ```
 
@@ -567,15 +567,15 @@ GET /api/v1/tweets/timeline/{userId}?page=0&size=20&sort=createdAt,DESC
 
 ```json
 {
-  "content": [],
-  "page": {
-    "size": 20,
-    "number": 0,
-    "totalElements": 0,
-    "totalPages": 0,
-    "first": true,
-    "last": true
-  }
+    "content": [],
+    "page": {
+        "size": 20,
+        "number": 0,
+        "totalElements": 0,
+        "totalPages": 0,
+        "first": true,
+        "last": true
+    }
 }
 ```
 
@@ -583,13 +583,13 @@ GET /api/v1/tweets/timeline/{userId}?page=0&size=20&sort=createdAt,DESC
 
 ```json
 {
-  "type": "https://example.com/errors/business-rule-validation",
-  "title": "Business Rule Validation Error",
-  "status": 400,
-  "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
-  "ruleName": "USER_NOT_EXISTS",
-  "context": "123e4567-e89b-12d3-a456-426614174000",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/business-rule-validation",
+    "title": "Business Rule Validation Error",
+    "status": 400,
+    "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+    "ruleName": "USER_NOT_EXISTS",
+    "context": "123e4567-e89b-12d3-a456-426614174000",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -597,11 +597,11 @@ GET /api/v1/tweets/timeline/{userId}?page=0&size=20&sort=createdAt,DESC
 
 ```json
 {
-  "type": "https://example.com/errors/validation-error",
-  "title": "Validation Error",
-  "status": 400,
-  "detail": "Invalid UUID format for userId parameter",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/validation-error",
+    "title": "Validation Error",
+    "status": 400,
+    "detail": "Invalid UUID format for userId parameter",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -620,7 +620,7 @@ Content-Type: application/json
 
 ```json
 {
-  "userId": "123e4567-e89b-12d3-a456-426614174000"
+    "userId": "123e4567-e89b-12d3-a456-426614174000"
 }
 ```
 
@@ -650,11 +650,11 @@ Content-Type: application/json
 
 ```json
 {
-  "type": "https://example.com/errors/validation-error",
-  "title": "Validation Error",
-  "status": 400,
-  "detail": "Validation failed: userId: User ID cannot be null",
-  "timestamp": "2025-01-27T15:45:00Z"
+    "type": "https://example.com/errors/validation-error",
+    "title": "Validation Error",
+    "status": 400,
+    "detail": "Validation failed: userId: User ID cannot be null",
+    "timestamp": "2025-01-27T15:45:00Z"
 }
 ```
 
@@ -662,13 +662,13 @@ Content-Type: application/json
 
 ```json
 {
-  "type": "https://example.com/errors/business-rule-validation",
-  "title": "Business Rule Validation Error",
-  "status": 404,
-  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 123e4567-e89b-12d3-a456-426614174000",
-  "ruleName": "TWEET_NOT_FOUND",
-  "context": "123e4567-e89b-12d3-a456-426614174000",
-  "timestamp": "2025-01-27T15:45:00Z"
+    "type": "https://example.com/errors/business-rule-validation",
+    "title": "Business Rule Validation Error",
+    "status": 404,
+    "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+    "ruleName": "TWEET_NOT_FOUND",
+    "context": "123e4567-e89b-12d3-a456-426614174000",
+    "timestamp": "2025-01-27T15:45:00Z"
 }
 ```
 
@@ -676,13 +676,13 @@ Content-Type: application/json
 
 ```json
 {
-  "type": "https://example.com/errors/business-rule-validation",
-  "title": "Business Rule Validation Error",
-  "status": 404,
-  "detail": "Business rule 'TWEET_ALREADY_DELETED' violated for context: 123e4567-e89b-12d3-a456-426614174000",
-  "ruleName": "TWEET_ALREADY_DELETED",
-  "context": "123e4567-e89b-12d3-a456-426614174000",
-  "timestamp": "2025-01-27T15:45:00Z"
+    "type": "https://example.com/errors/business-rule-validation",
+    "title": "Business Rule Validation Error",
+    "status": 404,
+    "detail": "Business rule 'TWEET_ALREADY_DELETED' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+    "ruleName": "TWEET_ALREADY_DELETED",
+    "context": "123e4567-e89b-12d3-a456-426614174000",
+    "timestamp": "2025-01-27T15:45:00Z"
 }
 ```
 
@@ -690,13 +690,13 @@ Content-Type: application/json
 
 ```json
 {
-  "type": "https://example.com/errors/business-rule-validation",
-  "title": "Business Rule Validation Error",
-  "status": 409,
-  "detail": "Business rule 'TWEET_ACCESS_DENIED' violated for context: Only the tweet author can delete their tweet",
-  "ruleName": "TWEET_ACCESS_DENIED",
-  "context": "Only the tweet author can delete their tweet",
-  "timestamp": "2025-01-27T15:45:00Z"
+    "type": "https://example.com/errors/business-rule-validation",
+    "title": "Business Rule Validation Error",
+    "status": 409,
+    "detail": "Business rule 'TWEET_ACCESS_DENIED' violated for context: Only the tweet author can delete their tweet",
+    "ruleName": "TWEET_ACCESS_DENIED",
+    "context": "Only the tweet author can delete their tweet",
+    "timestamp": "2025-01-27T15:45:00Z"
 }
 ```
 
@@ -715,7 +715,7 @@ Content-Type: application/json
 
 ```json
 {
-  "userId": "123e4567-e89b-12d3-a456-426614174000"
+    "userId": "123e4567-e89b-12d3-a456-426614174000"
 }
 ```
 
@@ -743,10 +743,10 @@ Content-Type: application/json
 
 ```json
 {
-  "id": "987e6543-e21b-43d2-b654-321987654321",
-  "tweetId": "223e4567-e89b-12d3-a456-426614174001",
-  "userId": "123e4567-e89b-12d3-a456-426614174000",
-  "createdAt": "2025-01-27T15:30:00Z"
+    "id": "987e6543-e21b-43d2-b654-321987654321",
+    "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+    "userId": "123e4567-e89b-12d3-a456-426614174000",
+    "createdAt": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -754,11 +754,11 @@ Content-Type: application/json
 
 ```json
 {
-  "type": "https://example.com/errors/validation-error",
-  "title": "Validation Error",
-  "status": 400,
-  "detail": "Validation failed: userId: User ID cannot be null",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/validation-error",
+    "title": "Validation Error",
+    "status": 400,
+    "detail": "Validation failed: userId: User ID cannot be null",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -766,13 +766,13 @@ Content-Type: application/json
 
 ```json
 {
-  "type": "https://example.com/errors/business-rule-validation",
-  "title": "Business Rule Validation Error",
-  "status": 409,
-  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
-  "ruleName": "TWEET_NOT_FOUND",
-  "context": "223e4567-e89b-12d3-a456-426614174001",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/business-rule-validation",
+    "title": "Business Rule Validation Error",
+    "status": 409,
+    "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
+    "ruleName": "TWEET_NOT_FOUND",
+    "context": "223e4567-e89b-12d3-a456-426614174001",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -780,13 +780,13 @@ Content-Type: application/json
 
 ```json
 {
-  "type": "https://example.com/errors/business-rule-validation",
-  "title": "Business Rule Validation Error",
-  "status": 409,
-  "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
-  "ruleName": "USER_NOT_EXISTS",
-  "context": "123e4567-e89b-12d3-a456-426614174000",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/business-rule-validation",
+    "title": "Business Rule Validation Error",
+    "status": 409,
+    "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+    "ruleName": "USER_NOT_EXISTS",
+    "context": "123e4567-e89b-12d3-a456-426614174000",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -794,13 +794,13 @@ Content-Type: application/json
 
 ```json
 {
-  "type": "https://example.com/errors/business-rule-validation",
-  "title": "Business Rule Validation Error",
-  "status": 409,
-  "detail": "Business rule 'SELF_LIKE_NOT_ALLOWED' violated for context: Users cannot like their own tweets",
-  "ruleName": "SELF_LIKE_NOT_ALLOWED",
-  "context": "Users cannot like their own tweets",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/business-rule-validation",
+    "title": "Business Rule Validation Error",
+    "status": 409,
+    "detail": "Business rule 'SELF_LIKE_NOT_ALLOWED' violated for context: Users cannot like their own tweets",
+    "ruleName": "SELF_LIKE_NOT_ALLOWED",
+    "context": "Users cannot like their own tweets",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -808,13 +808,13 @@ Content-Type: application/json
 
 ```json
 {
-  "type": "https://example.com/errors/uniqueness-validation",
-  "title": "Uniqueness Validation Error",
-  "status": 409,
-  "detail": "A like already exists for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
-  "fieldName": "like",
-  "fieldValue": "tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/uniqueness-validation",
+    "title": "Uniqueness Validation Error",
+    "status": 409,
+    "detail": "A like already exists for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+    "fieldName": "like",
+    "fieldValue": "tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -833,7 +833,7 @@ Content-Type: application/json
 
 ```json
 {
-  "userId": "123e4567-e89b-12d3-a456-426614174000"
+    "userId": "123e4567-e89b-12d3-a456-426614174000"
 }
 ```
 
@@ -863,11 +863,11 @@ Content-Type: application/json
 
 ```json
 {
-  "type": "https://example.com/errors/validation-error",
-  "title": "Validation Error",
-  "status": 400,
-  "detail": "Validation failed: userId: User ID cannot be null",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/validation-error",
+    "title": "Validation Error",
+    "status": 400,
+    "detail": "Validation failed: userId: User ID cannot be null",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -875,13 +875,13 @@ Content-Type: application/json
 
 ```json
 {
-  "type": "https://example.com/errors/business-rule-validation",
-  "title": "Business Rule Validation Error",
-  "status": 409,
-  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
-  "ruleName": "TWEET_NOT_FOUND",
-  "context": "223e4567-e89b-12d3-a456-426614174001",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/business-rule-validation",
+    "title": "Business Rule Validation Error",
+    "status": 409,
+    "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
+    "ruleName": "TWEET_NOT_FOUND",
+    "context": "223e4567-e89b-12d3-a456-426614174001",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -889,13 +889,13 @@ Content-Type: application/json
 
 ```json
 {
-  "type": "https://example.com/errors/business-rule-validation",
-  "title": "Business Rule Validation Error",
-  "status": 409,
-  "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
-  "ruleName": "USER_NOT_EXISTS",
-  "context": "123e4567-e89b-12d3-a456-426614174000",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/business-rule-validation",
+    "title": "Business Rule Validation Error",
+    "status": 409,
+    "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+    "ruleName": "USER_NOT_EXISTS",
+    "context": "123e4567-e89b-12d3-a456-426614174000",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -903,13 +903,13 @@ Content-Type: application/json
 
 ```json
 {
-  "type": "https://example.com/errors/business-rule-validation",
-  "title": "Business Rule Validation Error",
-  "status": 409,
-  "detail": "Business rule 'LIKE_NOT_FOUND' violated for context: Like not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
-  "ruleName": "LIKE_NOT_FOUND",
-  "context": "Like not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/business-rule-validation",
+    "title": "Business Rule Validation Error",
+    "status": 409,
+    "detail": "Business rule 'LIKE_NOT_FOUND' violated for context: Like not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+    "ruleName": "LIKE_NOT_FOUND",
+    "context": "Like not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -952,26 +952,26 @@ GET /api/v1/tweets/{tweetId}/likes
 
 ```json
 {
-  "content": [
-    {
-      "id": "987e6543-e21b-43d2-b654-321987654321",
-      "tweetId": "223e4567-e89b-12d3-a456-426614174001",
-      "userId": "123e4567-e89b-12d3-a456-426614174000",
-      "createdAt": "2025-01-27T15:30:00Z"
-    },
-    {
-      "id": "876e5432-e10a-32c1-a543-210876543210",
-      "tweetId": "223e4567-e89b-12d3-a456-426614174001",
-      "userId": "234e5678-f90c-23e4-b567-537725285112",
-      "createdAt": "2025-01-27T14:20:00Z"
+    "content": [
+        {
+            "id": "987e6543-e21b-43d2-b654-321987654321",
+            "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+            "userId": "123e4567-e89b-12d3-a456-426614174000",
+            "createdAt": "2025-01-27T15:30:00Z"
+        },
+        {
+            "id": "876e5432-e10a-32c1-a543-210876543210",
+            "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+            "userId": "234e5678-f90c-23e4-b567-537725285112",
+            "createdAt": "2025-01-27T14:20:00Z"
+        }
+    ],
+    "page": {
+        "size": 20,
+        "number": 0,
+        "totalElements": 45,
+        "totalPages": 3
     }
-  ],
-  "page": {
-    "size": 20,
-    "number": 0,
-    "totalElements": 45,
-    "totalPages": 3
-  }
 }
 ```
 
@@ -979,13 +979,13 @@ GET /api/v1/tweets/{tweetId}/likes
 
 ```json
 {
-  "content": [],
-  "page": {
-    "size": 20,
-    "number": 0,
-    "totalElements": 0,
-    "totalPages": 0
-  }
+    "content": [],
+    "page": {
+        "size": 20,
+        "number": 0,
+        "totalElements": 0,
+        "totalPages": 0
+    }
 }
 ```
 
@@ -1006,11 +1006,11 @@ curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-4266141
 
 ```json
 {
-  "type": "https://example.com/errors/validation-error",
-  "title": "Validation Error",
-  "status": 400,
-  "detail": "Invalid UUID format for tweetId parameter",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/validation-error",
+    "title": "Validation Error",
+    "status": 400,
+    "detail": "Invalid UUID format for tweetId parameter",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -1018,11 +1018,11 @@ curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-4266141
 
 ```json
 {
-  "type": "https://example.com/errors/validation-error",
-  "title": "Validation Error",
-  "status": 400,
-  "detail": "Invalid pagination parameters: page must be >= 0, size must be between 1 and 100",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/validation-error",
+    "title": "Validation Error",
+    "status": 400,
+    "detail": "Invalid pagination parameters: page must be >= 0, size must be between 1 and 100",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -1030,13 +1030,13 @@ curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-4266141
 
 ```json
 {
-  "type": "https://example.com/errors/business-rule-validation",
-  "title": "Business Rule Validation Error",
-  "status": 409,
-  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
-  "ruleName": "TWEET_NOT_FOUND",
-  "context": "223e4567-e89b-12d3-a456-426614174001",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/business-rule-validation",
+    "title": "Business Rule Validation Error",
+    "status": 409,
+    "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
+    "ruleName": "TWEET_NOT_FOUND",
+    "context": "223e4567-e89b-12d3-a456-426614174001",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -1079,28 +1079,28 @@ GET /api/v1/tweets/{tweetId}/retweets
 
 ```json
 {
-  "content": [
-    {
-      "id": "987e6543-e21b-43d2-b654-321987654321",
-      "tweetId": "223e4567-e89b-12d3-a456-426614174001",
-      "userId": "123e4567-e89b-12d3-a456-426614174000",
-      "comment": "Great tweet!",
-      "createdAt": "2025-01-27T15:30:00Z"
-    },
-    {
-      "id": "876e5432-e10a-32c1-a543-210876543210",
-      "tweetId": "223e4567-e89b-12d3-a456-426614174001",
-      "userId": "234e5678-f90c-23e4-b567-537725285112",
-      "comment": null,
-      "createdAt": "2025-01-27T14:20:00Z"
+    "content": [
+        {
+            "id": "987e6543-e21b-43d2-b654-321987654321",
+            "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+            "userId": "123e4567-e89b-12d3-a456-426614174000",
+            "comment": "Great tweet!",
+            "createdAt": "2025-01-27T15:30:00Z"
+        },
+        {
+            "id": "876e5432-e10a-32c1-a543-210876543210",
+            "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+            "userId": "234e5678-f90c-23e4-b567-537725285112",
+            "comment": null,
+            "createdAt": "2025-01-27T14:20:00Z"
+        }
+    ],
+    "page": {
+        "size": 20,
+        "number": 0,
+        "totalElements": 45,
+        "totalPages": 3
     }
-  ],
-  "page": {
-    "size": 20,
-    "number": 0,
-    "totalElements": 45,
-    "totalPages": 3
-  }
 }
 ```
 
@@ -1108,13 +1108,13 @@ GET /api/v1/tweets/{tweetId}/retweets
 
 ```json
 {
-  "content": [],
-  "page": {
-    "size": 20,
-    "number": 0,
-    "totalElements": 0,
-    "totalPages": 0
-  }
+    "content": [],
+    "page": {
+        "size": 20,
+        "number": 0,
+        "totalElements": 0,
+        "totalPages": 0
+    }
 }
 ```
 
@@ -1135,11 +1135,11 @@ curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-4266141
 
 ```json
 {
-  "type": "https://example.com/errors/validation-error",
-  "title": "Validation Error",
-  "status": 400,
-  "detail": "Invalid UUID format for tweetId parameter",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/validation-error",
+    "title": "Validation Error",
+    "status": 400,
+    "detail": "Invalid UUID format for tweetId parameter",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -1147,11 +1147,11 @@ curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-4266141
 
 ```json
 {
-  "type": "https://example.com/errors/validation-error",
-  "title": "Validation Error",
-  "status": 400,
-  "detail": "Invalid pagination parameters: page must be >= 0, size must be between 1 and 100",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/validation-error",
+    "title": "Validation Error",
+    "status": 400,
+    "detail": "Invalid pagination parameters: page must be >= 0, size must be between 1 and 100",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -1159,13 +1159,13 @@ curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-4266141
 
 ```json
 {
-  "type": "https://example.com/errors/business-rule-validation",
-  "title": "Business Rule Validation Error",
-  "status": 409,
-  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
-  "ruleName": "TWEET_NOT_FOUND",
-  "context": "223e4567-e89b-12d3-a456-426614174001",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/business-rule-validation",
+    "title": "Business Rule Validation Error",
+    "status": 409,
+    "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
+    "ruleName": "TWEET_NOT_FOUND",
+    "context": "223e4567-e89b-12d3-a456-426614174001",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -1417,7 +1417,8 @@ open http://localhost:8082/swagger-ui.html
     - Создает ретвит для твита с опциональным комментарием
     - Возвращает `RetweetResponseDto`
     - Логика:
-        - Валидация запроса (существование твита, пользователя, запрет self-retweet, уникальность, валидация комментария)
+        - Валидация запроса (существование твита, пользователя, запрет self-retweet, уникальность, валидация
+          комментария)
         - Маппинг DTO в сущность Retweet
         - Сохранение ретвита в БД
         - Обновление счетчика `retweetsCount` в твите (инкремент на 1)
@@ -1480,9 +1481,10 @@ open http://localhost:8082/swagger-ui.html
     - Операция выполняется атомарно в рамках транзакции
     - Счетчик не может стать отрицательным (защита на уровне Entity через метод `decrementRetweetsCount()`)
     - Используется денормализация для оптимизации операций чтения
-    - Ретвит должен существовать в системе перед удалением (проверка через `RetweetRepository.existsByTweetIdAndUserId()`)
+    - Ретвит должен существовать в системе перед удалением (проверка через
+      `RetweetRepository.existsByTweetIdAndUserId()`)
 
-7. **Временные метки:**
+8. **Временные метки:**
     - `createdAt` устанавливается автоматически при создании ретвита
     - Управление выполняется Hibernate через `@CreationTimestamp`
 
@@ -1515,13 +1517,13 @@ open http://localhost:8082/swagger-ui.html
 
 ```json
 {
-  "type": "https://example.com/errors/format-validation",
-  "title": "Format Validation Error",
-  "status": 400,
-  "detail": "Tweet content must be between 1 and 280 characters",
-  "fieldName": "content",
-  "constraintName": "CONTENT_VALIDATION",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/format-validation",
+    "title": "Format Validation Error",
+    "status": 400,
+    "detail": "Tweet content must be between 1 and 280 characters",
+    "fieldName": "content",
+    "constraintName": "CONTENT_VALIDATION",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -1536,12 +1538,12 @@ open http://localhost:8082/swagger-ui.html
 
 ```json
 {
-  "type": "https://example.com/errors/business-rule-validation",
-  "title": "Business Rule Validation Error",
-  "status": 400,
-  "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
-  "ruleName": "USER_NOT_EXISTS",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/business-rule-validation",
+    "title": "Business Rule Validation Error",
+    "status": 400,
+    "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+    "ruleName": "USER_NOT_EXISTS",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -1593,7 +1595,8 @@ open http://localhost:8082/swagger-ui.html
 
 3. **Проверка состояния твита:**
     - Проверка, что твит не был уже удален (`isDeleted = false`)
-    - При попытке удалить уже удаленный твит выбрасывается `BusinessRuleValidationException` с правилом `TWEET_ALREADY_DELETED`
+    - При попытке удалить уже удаленный твит выбрасывается `BusinessRuleValidationException` с правилом
+      `TWEET_ALREADY_DELETED`
 
 4. **Проверка прав автора:**
     - Сравнение `userId` из запроса с `userId` твита
@@ -1601,7 +1604,8 @@ open http://localhost:8082/swagger-ui.html
 
 ### LikeValidator
 
-Интерфейс `LikeValidator` определяет методы валидации для операций с лайками. Он включает методы для валидации создания лайка, проверки существования твита и пользователя, предотвращения самолайка и дублирования.
+Интерфейс `LikeValidator` определяет методы валидации для операций с лайками. Он включает методы для валидации создания
+лайка, проверки существования твита и пользователя, предотвращения самолайка и дублирования.
 
 #### Лайк твита (LIKE)
 
@@ -1665,7 +1669,9 @@ open http://localhost:8082/swagger-ui.html
 
 ### RetweetValidator
 
-Интерфейс `RetweetValidator` определяет методы валидации для операций с ретвитами. Он включает методы для валидации создания ретвита, проверки существования твита и пользователя, предотвращения self-retweet, дублирования и валидации комментария.
+Интерфейс `RetweetValidator` определяет методы валидации для операций с ретвитами. Он включает методы для валидации
+создания ретвита, проверки существования твита и пользователя, предотвращения self-retweet, дублирования и валидации
+комментария.
 
 #### Ретвитнуть твит (RETWEET)
 
@@ -1732,23 +1738,24 @@ open http://localhost:8082/swagger-ui.html
 
 6. **Проверка существования ретвита:**
     - Проверка существования ретвита через `RetweetRepository.existsByTweetIdAndUserId()`
-    - При отсутствии ретвита выбрасывается `BusinessRuleValidationException` с правилом `RETWEET_NOT_FOUND` (409 Conflict)
+    - При отсутствии ретвита выбрасывается `BusinessRuleValidationException` с правилом `RETWEET_NOT_FOUND` (409
+      Conflict)
 
 ## Работа с базой данных
 
 ### Таблица tweets
 
-| Поле         | Тип          | Ограничения           | Описание                              |
-|--------------|--------------|-----------------------|---------------------------------------|
-| `id`         | UUID         | PRIMARY KEY, NOT NULL | Уникальный идентификатор              |
-| `user_id`    | UUID         | NOT NULL              | ID пользователя (ссылка на users-api) |
-| `content`    | VARCHAR(280) | NOT NULL              | Содержимое твита                      |
-| `created_at` | TIMESTAMP    | NOT NULL              | Время создания                        |
-| `updated_at` | TIMESTAMP    | NOT NULL              | Время последнего обновления           |
-| `is_deleted` | BOOLEAN      | NOT NULL, DEFAULT false | Флаг мягкого удаления                |
-| `deleted_at` | TIMESTAMP    | NULL                  | Время мягкого удаления                |
-| `likes_count`| INTEGER      | NOT NULL, DEFAULT 0   | Счетчик лайков (денормализация)       |
-| `retweets_count`| INTEGER   | NOT NULL, DEFAULT 0   | Счетчик ретвитов (денормализация)     |
+| Поле             | Тип          | Ограничения             | Описание                              |
+|------------------|--------------|-------------------------|---------------------------------------|
+| `id`             | UUID         | PRIMARY KEY, NOT NULL   | Уникальный идентификатор              |
+| `user_id`        | UUID         | NOT NULL                | ID пользователя (ссылка на users-api) |
+| `content`        | VARCHAR(280) | NOT NULL                | Содержимое твита                      |
+| `created_at`     | TIMESTAMP    | NOT NULL                | Время создания                        |
+| `updated_at`     | TIMESTAMP    | NOT NULL                | Время последнего обновления           |
+| `is_deleted`     | BOOLEAN      | NOT NULL, DEFAULT false | Флаг мягкого удаления                 |
+| `deleted_at`     | TIMESTAMP    | NULL                    | Время мягкого удаления                |
+| `likes_count`    | INTEGER      | NOT NULL, DEFAULT 0     | Счетчик лайков (денормализация)       |
+| `retweets_count` | INTEGER      | NOT NULL, DEFAULT 0     | Счетчик ретвитов (денормализация)     |
 
 ### Ограничения базы данных
 
@@ -1767,12 +1774,12 @@ open http://localhost:8082/swagger-ui.html
 
 ### Таблица tweet_likes
 
-| Поле         | Тип          | Ограничения           | Описание                              |
-|--------------|--------------|-----------------------|---------------------------------------|
-| `id`         | UUID         | PRIMARY KEY, NOT NULL | Уникальный идентификатор              |
-| `tweet_id`   | UUID         | NOT NULL              | ID твита (ссылка на tweets)           |
-| `user_id`    | UUID         | NOT NULL              | ID пользователя (ссылка на users-api) |
-| `created_at` | TIMESTAMP    | NOT NULL              | Время создания лайка                  |
+| Поле         | Тип       | Ограничения           | Описание                              |
+|--------------|-----------|-----------------------|---------------------------------------|
+| `id`         | UUID      | PRIMARY KEY, NOT NULL | Уникальный идентификатор              |
+| `tweet_id`   | UUID      | NOT NULL              | ID твита (ссылка на tweets)           |
+| `user_id`    | UUID      | NOT NULL              | ID пользователя (ссылка на users-api) |
+| `created_at` | TIMESTAMP | NOT NULL              | Время создания лайка                  |
 
 ### Ограничения базы данных для лайков
 
@@ -1783,9 +1790,10 @@ open http://localhost:8082/swagger-ui.html
    Обеспечивает, что пользователь может лайкнуть твит только один раз.
 
 2. **Индексы для оптимизации:**
-    - `uk_tweet_likes_tweet_user` - уникальный индекс на паре (tweet_id, user_id) для быстрой проверки существования лайка
+    - `uk_tweet_likes_tweet_user` - уникальный индекс на паре (tweet_id, user_id) для быстрой проверки существования
+      лайка
 
-4. **Soft Delete (мягкое удаление):**
+3. **Soft Delete (мягкое удаление):**
     - Поле `is_deleted` используется для пометки удаленных твитов (по умолчанию `false`)
     - Поле `deleted_at` хранит временную метку удаления (NULL для активных твитов)
     - Удаленные твиты не возвращаются в обычных запросах (используется `findByIdAndIsDeletedFalse()`)
@@ -1799,7 +1807,7 @@ open http://localhost:8082/swagger-ui.html
 | `tweet_id`   | UUID         | NOT NULL              | ID твита (ссылка на tweets)           |
 | `user_id`    | UUID         | NOT NULL              | ID пользователя (ссылка на users-api) |
 | `comment`    | VARCHAR(280) | NULL                  | Опциональный комментарий ретвита      |
-| `created_at` | TIMESTAMP    | NOT NULL              | Время создания ретвита                 |
+| `created_at` | TIMESTAMP    | NOT NULL              | Время создания ретвита                |
 
 ### Ограничения базы данных для ретвитов
 
@@ -1810,18 +1818,19 @@ open http://localhost:8082/swagger-ui.html
    Обеспечивает, что пользователь может ретвитнуть твит только один раз.
 
 2. **Foreign keys:**
-   - `tweet_retweets_tweet_fk` - ссылка на `tweets(id)`
-   - `tweet_retweets_user_fk` - ссылка на `users(id)` (внешняя ссылка на users-api)
+    - `tweet_retweets_tweet_fk` - ссылка на `tweets(id)`
+    - `tweet_retweets_user_fk` - ссылка на `users(id)` (внешняя ссылка на users-api)
 
 3. **Комментарий:**
-   - Поле `comment` опционально (может быть `NULL`)
-   - Если комментарий указан, он должен быть валидным (1-280 символов, не пустая строка)
-   - Максимальная длина комментария: 280 символов
+    - Поле `comment` опционально (может быть `NULL`)
+    - Если комментарий указан, он должен быть валидным (1-280 символов, не пустая строка)
+    - Максимальная длина комментария: 280 символов
 
 4**Обновление счетчика retweetsCount:**
-   - При создании ретвита счетчик `retweets_count` в таблице `tweets` инкрементируется на 1
-   - Операция выполняется атомарно в рамках транзакции
-   - Используется денормализация для оптимизации операций чтения
+
+- При создании ретвита счетчик `retweets_count` в таблице `tweets` инкрементируется на 1
+- Операция выполняется атомарно в рамках транзакции
+- Используется денормализация для оптимизации операций чтения
 
 ## Интеграция с другими сервисами
 
@@ -1891,7 +1900,8 @@ Gateway компонент для абстракции работы с users-api
 
 #### Архитектура интеграции
 
-Tweet API интегрируется с Follower API через Feign Client для получения списка подписок пользователя при построении ленты новостей (timeline).
+Tweet API интегрируется с Follower API через Feign Client для получения списка подписок пользователя при построении
+ленты новостей (timeline).
 
 #### Компоненты интеграции
 
@@ -1907,7 +1917,8 @@ Tweet API интегрируется с Follower API через Feign Client д�
 
 **Метод:**
 
-- `PagedModel<FollowingResponseDto> getFollowing(UUID userId, Pageable pageable)` - получает пагинированный список подписок пользователя
+- `PagedModel<FollowingResponseDto> getFollowing(UUID userId, Pageable pageable)` - получает пагинированный список
+  подписок пользователя
 
 ##### 2. FollowerGateway
 
@@ -1922,7 +1933,8 @@ Gateway компонент для абстракции работы с follower-
 
 **Метод:**
 
-- `List<UUID> getFollowingUserIds(UUID userId)` - получает список идентификаторов пользователей, на которых подписан указанный пользователь
+- `List<UUID> getFollowingUserIds(UUID userId)` - получает список идентификаторов пользователей, на которых подписан
+  указанный пользователь
 
 #### Процесс получения ленты новостей
 
@@ -1938,7 +1950,8 @@ Gateway компонент для абстракции работы с follower-
     - Если список подписок пустой, возвращается пустая страница (не ошибка)
 
 3. **Получение твитов:**
-    - Используется Repository метод `findByUserIdInAndIsDeletedFalseOrderByCreatedAtDesc` для получения твитов по списку userIds
+    - Используется Repository метод `findByUserIdInAndIsDeletedFalseOrderByCreatedAtDesc` для получения твитов по списку
+      userIds
     - Применяется пагинация и сортировка по createdAt DESC
     - Маппинг сущностей в DTO ответа
     - Возврат Page с метаданными пагинации
@@ -1989,11 +2002,11 @@ curl -X POST http://localhost:8082/api/v1/tweets \
 
 ```json
 {
-  "id": "987e6543-e21b-43d2-b654-321987654321",
-  "userId": "123e4567-e89b-12d3-a456-426614174000",
-  "content": "This is my first tweet!",
-  "createdAt": "2025-01-27T15:30:00Z",
-  "updatedAt": "2025-01-27T15:30:00Z"
+    "id": "987e6543-e21b-43d2-b654-321987654321",
+    "userId": "123e4567-e89b-12d3-a456-426614174000",
+    "content": "This is my first tweet!",
+    "createdAt": "2025-01-27T15:30:00Z",
+    "updatedAt": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -2007,11 +2020,11 @@ curl -X GET http://localhost:8082/api/v1/tweets/123e4567-e89b-12d3-a456-42661417
 
 ```json
 {
-  "id": "123e4567-e89b-12d3-a456-426614174000",
-  "userId": "987e6543-e21b-43d2-b654-321987654321",
-  "content": "This is my first tweet!",
-  "createdAt": "2025-01-27T15:30:00Z",
-  "updatedAt": "2025-01-27T15:30:00Z"
+    "id": "123e4567-e89b-12d3-a456-426614174000",
+    "userId": "987e6543-e21b-43d2-b654-321987654321",
+    "content": "This is my first tweet!",
+    "createdAt": "2025-01-27T15:30:00Z",
+    "updatedAt": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -2019,11 +2032,11 @@ curl -X GET http://localhost:8082/api/v1/tweets/123e4567-e89b-12d3-a456-42661417
 
 ```json
 {
-  "type": "https://example.com/errors/not-found",
-  "title": "Tweet Not Found",
-  "status": 404,
-  "detail": "Tweet with ID '123e4567-e89b-12d3-a456-426614174000' not found",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/not-found",
+    "title": "Tweet Not Found",
+    "status": 404,
+    "detail": "Tweet with ID '123e4567-e89b-12d3-a456-426614174000' not found",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -2044,32 +2057,32 @@ curl -X GET "http://localhost:8082/api/v1/tweets/user/123e4567-e89b-12d3-a456-42
 
 ```json
 {
-  "content": [
-    {
-      "id": "111e4567-e89b-12d3-a456-426614174000",
-      "userId": "123e4567-e89b-12d3-a456-426614174000",
-      "content": "This is my latest tweet!",
-      "createdAt": "2025-01-27T15:30:00Z",
-      "updatedAt": "2025-01-27T15:30:00Z",
-      "isDeleted": false,
-      "deletedAt": null
-    },
-    {
-      "id": "222e4567-e89b-12d3-a456-426614174000",
-      "userId": "123e4567-e89b-12d3-a456-426614174000",
-      "content": "Another tweet from yesterday",
-      "createdAt": "2025-01-26T10:15:00Z",
-      "updatedAt": "2025-01-26T10:15:00Z",
-      "isDeleted": false,
-      "deletedAt": null
+    "content": [
+        {
+            "id": "111e4567-e89b-12d3-a456-426614174000",
+            "userId": "123e4567-e89b-12d3-a456-426614174000",
+            "content": "This is my latest tweet!",
+            "createdAt": "2025-01-27T15:30:00Z",
+            "updatedAt": "2025-01-27T15:30:00Z",
+            "isDeleted": false,
+            "deletedAt": null
+        },
+        {
+            "id": "222e4567-e89b-12d3-a456-426614174000",
+            "userId": "123e4567-e89b-12d3-a456-426614174000",
+            "content": "Another tweet from yesterday",
+            "createdAt": "2025-01-26T10:15:00Z",
+            "updatedAt": "2025-01-26T10:15:00Z",
+            "isDeleted": false,
+            "deletedAt": null
+        }
+    ],
+    "page": {
+        "size": 20,
+        "number": 0,
+        "totalElements": 150,
+        "totalPages": 8
     }
-  ],
-  "page": {
-    "size": 20,
-    "number": 0,
-    "totalElements": 150,
-    "totalPages": 8
-  }
 }
 ```
 
@@ -2077,13 +2090,13 @@ curl -X GET "http://localhost:8082/api/v1/tweets/user/123e4567-e89b-12d3-a456-42
 
 ```json
 {
-  "content": [],
-  "page": {
-    "size": 20,
-    "number": 0,
-    "totalElements": 0,
-    "totalPages": 0
-  }
+    "content": [],
+    "page": {
+        "size": 20,
+        "number": 0,
+        "totalElements": 0,
+        "totalPages": 0
+    }
 }
 ```
 
@@ -2104,34 +2117,34 @@ curl -X GET "http://localhost:8082/api/v1/tweets/timeline/123e4567-e89b-12d3-a45
 
 ```json
 {
-  "content": [
-    {
-      "id": "111e4567-e89b-12d3-a456-426614174000",
-      "userId": "222e4567-e89b-12d3-a456-426614174111",
-      "content": "This is a tweet from a followed user!",
-      "createdAt": "2025-01-27T15:30:00Z",
-      "updatedAt": "2025-01-27T15:30:00Z",
-      "isDeleted": false,
-      "deletedAt": null
-    },
-    {
-      "id": "333e4567-e89b-12d3-a456-426614174222",
-      "userId": "444e4567-e89b-12d3-a456-426614174333",
-      "content": "Another tweet from another followed user",
-      "createdAt": "2025-01-27T14:20:00Z",
-      "updatedAt": "2025-01-27T14:20:00Z",
-      "isDeleted": false,
-      "deletedAt": null
+    "content": [
+        {
+            "id": "111e4567-e89b-12d3-a456-426614174000",
+            "userId": "222e4567-e89b-12d3-a456-426614174111",
+            "content": "This is a tweet from a followed user!",
+            "createdAt": "2025-01-27T15:30:00Z",
+            "updatedAt": "2025-01-27T15:30:00Z",
+            "isDeleted": false,
+            "deletedAt": null
+        },
+        {
+            "id": "333e4567-e89b-12d3-a456-426614174222",
+            "userId": "444e4567-e89b-12d3-a456-426614174333",
+            "content": "Another tweet from another followed user",
+            "createdAt": "2025-01-27T14:20:00Z",
+            "updatedAt": "2025-01-27T14:20:00Z",
+            "isDeleted": false,
+            "deletedAt": null
+        }
+    ],
+    "page": {
+        "size": 20,
+        "number": 0,
+        "totalElements": 150,
+        "totalPages": 8,
+        "first": true,
+        "last": false
     }
-  ],
-  "page": {
-    "size": 20,
-    "number": 0,
-    "totalElements": 150,
-    "totalPages": 8,
-    "first": true,
-    "last": false
-  }
 }
 ```
 
@@ -2139,15 +2152,15 @@ curl -X GET "http://localhost:8082/api/v1/tweets/timeline/123e4567-e89b-12d3-a45
 
 ```json
 {
-  "content": [],
-  "page": {
-    "size": 20,
-    "number": 0,
-    "totalElements": 0,
-    "totalPages": 0,
-    "first": true,
-    "last": true
-  }
+    "content": [],
+    "page": {
+        "size": 20,
+        "number": 0,
+        "totalElements": 0,
+        "totalPages": 0,
+        "first": true,
+        "last": true
+    }
 }
 ```
 
@@ -2155,15 +2168,15 @@ curl -X GET "http://localhost:8082/api/v1/tweets/timeline/123e4567-e89b-12d3-a45
 
 ```json
 {
-  "content": [],
-  "page": {
-    "size": 20,
-    "number": 0,
-    "totalElements": 0,
-    "totalPages": 0,
-    "first": true,
-    "last": true
-  }
+    "content": [],
+    "page": {
+        "size": 20,
+        "number": 0,
+        "totalElements": 0,
+        "totalPages": 0,
+        "first": true,
+        "last": true
+    }
 }
 ```
 
@@ -2171,13 +2184,13 @@ curl -X GET "http://localhost:8082/api/v1/tweets/timeline/123e4567-e89b-12d3-a45
 
 ```json
 {
-  "type": "https://example.com/errors/business-rule-validation",
-  "title": "Business Rule Validation Error",
-  "status": 400,
-  "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
-  "ruleName": "USER_NOT_EXISTS",
-  "context": "123e4567-e89b-12d3-a456-426614174000",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/business-rule-validation",
+    "title": "Business Rule Validation Error",
+    "status": 400,
+    "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+    "ruleName": "USER_NOT_EXISTS",
+    "context": "123e4567-e89b-12d3-a456-426614174000",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -2196,11 +2209,11 @@ curl -X PUT http://localhost:8082/api/v1/tweets/123e4567-e89b-12d3-a456-42661417
 
 ```json
 {
-  "id": "123e4567-e89b-12d3-a456-426614174000",
-  "userId": "987e6543-e21b-43d2-b654-321987654321",
-  "content": "This is updated tweet content",
-  "createdAt": "2025-01-27T15:30:00Z",
-  "updatedAt": "2025-01-27T16:45:00Z"
+    "id": "123e4567-e89b-12d3-a456-426614174000",
+    "userId": "987e6543-e21b-43d2-b654-321987654321",
+    "content": "This is updated tweet content",
+    "createdAt": "2025-01-27T15:30:00Z",
+    "updatedAt": "2025-01-27T16:45:00Z"
 }
 ```
 
@@ -2208,13 +2221,13 @@ curl -X PUT http://localhost:8082/api/v1/tweets/123e4567-e89b-12d3-a456-42661417
 
 ```json
 {
-  "type": "https://example.com/errors/business-rule-validation",
-  "title": "Business Rule Validation Error",
-  "status": 409,
-  "detail": "Business rule 'TWEET_ACCESS_DENIED' violated for context: Only the tweet author can update their tweet",
-  "ruleName": "TWEET_ACCESS_DENIED",
-  "context": "Only the tweet author can update their tweet",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/business-rule-validation",
+    "title": "Business Rule Validation Error",
+    "status": 409,
+    "detail": "Business rule 'TWEET_ACCESS_DENIED' violated for context: Only the tweet author can update their tweet",
+    "ruleName": "TWEET_ACCESS_DENIED",
+    "context": "Only the tweet author can update their tweet",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -2236,13 +2249,13 @@ curl -X DELETE http://localhost:8082/api/v1/tweets/123e4567-e89b-12d3-a456-42661
 
 ```json
 {
-  "type": "https://example.com/errors/business-rule-validation",
-  "title": "Business Rule Validation Error",
-  "status": 409,
-  "detail": "Business rule 'TWEET_ACCESS_DENIED' violated for context: Only the tweet author can delete their tweet",
-  "ruleName": "TWEET_ACCESS_DENIED",
-  "context": "Only the tweet author can delete their tweet",
-  "timestamp": "2025-01-27T15:45:00Z"
+    "type": "https://example.com/errors/business-rule-validation",
+    "title": "Business Rule Validation Error",
+    "status": 409,
+    "detail": "Business rule 'TWEET_ACCESS_DENIED' violated for context: Only the tweet author can delete their tweet",
+    "ruleName": "TWEET_ACCESS_DENIED",
+    "context": "Only the tweet author can delete their tweet",
+    "timestamp": "2025-01-27T15:45:00Z"
 }
 ```
 
@@ -2250,13 +2263,13 @@ curl -X DELETE http://localhost:8082/api/v1/tweets/123e4567-e89b-12d3-a456-42661
 
 ```json
 {
-  "type": "https://example.com/errors/business-rule-validation",
-  "title": "Business Rule Validation Error",
-  "status": 404,
-  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 123e4567-e89b-12d3-a456-426614174000",
-  "ruleName": "TWEET_NOT_FOUND",
-  "context": "123e4567-e89b-12d3-a456-426614174000",
-  "timestamp": "2025-01-27T15:45:00Z"
+    "type": "https://example.com/errors/business-rule-validation",
+    "title": "Business Rule Validation Error",
+    "status": 404,
+    "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+    "ruleName": "TWEET_NOT_FOUND",
+    "context": "123e4567-e89b-12d3-a456-426614174000",
+    "timestamp": "2025-01-27T15:45:00Z"
 }
 ```
 
@@ -2274,10 +2287,10 @@ curl -X POST http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-4266141
 
 ```json
 {
-  "id": "987e6543-e21b-43d2-b654-321987654321",
-  "tweetId": "223e4567-e89b-12d3-a456-426614174001",
-  "userId": "123e4567-e89b-12d3-a456-426614174000",
-  "createdAt": "2025-01-27T15:30:00Z"
+    "id": "987e6543-e21b-43d2-b654-321987654321",
+    "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+    "userId": "123e4567-e89b-12d3-a456-426614174000",
+    "createdAt": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -2285,13 +2298,13 @@ curl -X POST http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-4266141
 
 ```json
 {
-  "type": "https://example.com/errors/uniqueness-validation",
-  "title": "Uniqueness Validation Error",
-  "status": 409,
-  "detail": "A like already exists for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
-  "fieldName": "like",
-  "fieldValue": "tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/uniqueness-validation",
+    "title": "Uniqueness Validation Error",
+    "status": 409,
+    "detail": "A like already exists for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+    "fieldName": "like",
+    "fieldValue": "tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -2299,13 +2312,13 @@ curl -X POST http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-4266141
 
 ```json
 {
-  "type": "https://example.com/errors/business-rule-validation",
-  "title": "Business Rule Validation Error",
-  "status": 409,
-  "detail": "Business rule 'SELF_LIKE_NOT_ALLOWED' violated for context: Users cannot like their own tweets",
-  "ruleName": "SELF_LIKE_NOT_ALLOWED",
-  "context": "Users cannot like their own tweets",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/business-rule-validation",
+    "title": "Business Rule Validation Error",
+    "status": 409,
+    "detail": "Business rule 'SELF_LIKE_NOT_ALLOWED' violated for context: Users cannot like their own tweets",
+    "ruleName": "SELF_LIKE_NOT_ALLOWED",
+    "context": "Users cannot like their own tweets",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -2313,13 +2326,13 @@ curl -X POST http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-4266141
 
 ```json
 {
-  "type": "https://example.com/errors/business-rule-validation",
-  "title": "Business Rule Validation Error",
-  "status": 409,
-  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
-  "ruleName": "TWEET_NOT_FOUND",
-  "context": "223e4567-e89b-12d3-a456-426614174001",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/business-rule-validation",
+    "title": "Business Rule Validation Error",
+    "status": 409,
+    "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
+    "ruleName": "TWEET_NOT_FOUND",
+    "context": "223e4567-e89b-12d3-a456-426614174001",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -2341,13 +2354,13 @@ curl -X DELETE http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-42661
 
 ```json
 {
-  "type": "https://example.com/errors/business-rule-validation",
-  "title": "Business Rule Validation Error",
-  "status": 409,
-  "detail": "Business rule 'LIKE_NOT_FOUND' violated for context: Like not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
-  "ruleName": "LIKE_NOT_FOUND",
-  "context": "Like not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/business-rule-validation",
+    "title": "Business Rule Validation Error",
+    "status": 409,
+    "detail": "Business rule 'LIKE_NOT_FOUND' violated for context: Like not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+    "ruleName": "LIKE_NOT_FOUND",
+    "context": "Like not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -2355,13 +2368,13 @@ curl -X DELETE http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-42661
 
 ```json
 {
-  "type": "https://example.com/errors/business-rule-validation",
-  "title": "Business Rule Validation Error",
-  "status": 409,
-  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
-  "ruleName": "TWEET_NOT_FOUND",
-  "context": "223e4567-e89b-12d3-a456-426614174001",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/business-rule-validation",
+    "title": "Business Rule Validation Error",
+    "status": 409,
+    "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
+    "ruleName": "TWEET_NOT_FOUND",
+    "context": "223e4567-e89b-12d3-a456-426614174001",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -2369,13 +2382,13 @@ curl -X DELETE http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-42661
 
 ```json
 {
-  "type": "https://example.com/errors/business-rule-validation",
-  "title": "Business Rule Validation Error",
-  "status": 409,
-  "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
-  "ruleName": "USER_NOT_EXISTS",
-  "context": "123e4567-e89b-12d3-a456-426614174000",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/business-rule-validation",
+    "title": "Business Rule Validation Error",
+    "status": 409,
+    "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+    "ruleName": "USER_NOT_EXISTS",
+    "context": "123e4567-e89b-12d3-a456-426614174000",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -2396,26 +2409,26 @@ curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-4266141
 
 ```json
 {
-  "content": [
-    {
-      "id": "987e6543-e21b-43d2-b654-321987654321",
-      "tweetId": "223e4567-e89b-12d3-a456-426614174001",
-      "userId": "123e4567-e89b-12d3-a456-426614174000",
-      "createdAt": "2025-01-27T15:30:00Z"
-    },
-    {
-      "id": "876e5432-e10a-32c1-a543-210876543210",
-      "tweetId": "223e4567-e89b-12d3-a456-426614174001",
-      "userId": "234e5678-f90c-23e4-b567-537725285112",
-      "createdAt": "2025-01-27T14:20:00Z"
+    "content": [
+        {
+            "id": "987e6543-e21b-43d2-b654-321987654321",
+            "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+            "userId": "123e4567-e89b-12d3-a456-426614174000",
+            "createdAt": "2025-01-27T15:30:00Z"
+        },
+        {
+            "id": "876e5432-e10a-32c1-a543-210876543210",
+            "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+            "userId": "234e5678-f90c-23e4-b567-537725285112",
+            "createdAt": "2025-01-27T14:20:00Z"
+        }
+    ],
+    "page": {
+        "size": 20,
+        "number": 0,
+        "totalElements": 45,
+        "totalPages": 3
     }
-  ],
-  "page": {
-    "size": 20,
-    "number": 0,
-    "totalElements": 45,
-    "totalPages": 3
-  }
 }
 ```
 
@@ -2423,13 +2436,13 @@ curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-4266141
 
 ```json
 {
-  "content": [],
-  "page": {
-    "size": 20,
-    "number": 0,
-    "totalElements": 0,
-    "totalPages": 0
-  }
+    "content": [],
+    "page": {
+        "size": 20,
+        "number": 0,
+        "totalElements": 0,
+        "totalPages": 0
+    }
 }
 ```
 
@@ -2437,13 +2450,13 @@ curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-4266141
 
 ```json
 {
-  "type": "https://example.com/errors/business-rule-validation",
-  "title": "Business Rule Validation Error",
-  "status": 409,
-  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
-  "ruleName": "TWEET_NOT_FOUND",
-  "context": "223e4567-e89b-12d3-a456-426614174001",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/business-rule-validation",
+    "title": "Business Rule Validation Error",
+    "status": 409,
+    "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
+    "ruleName": "TWEET_NOT_FOUND",
+    "context": "223e4567-e89b-12d3-a456-426614174001",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -2451,11 +2464,11 @@ curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-4266141
 
 ```json
 {
-  "type": "https://example.com/errors/validation-error",
-  "title": "Validation Error",
-  "status": 400,
-  "detail": "Invalid UUID format for tweetId parameter",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/validation-error",
+    "title": "Validation Error",
+    "status": 400,
+    "detail": "Invalid UUID format for tweetId parameter",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -2476,28 +2489,28 @@ curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-4266141
 
 ```json
 {
-  "content": [
-    {
-      "id": "987e6543-e21b-43d2-b654-321987654321",
-      "tweetId": "223e4567-e89b-12d3-a456-426614174001",
-      "userId": "123e4567-e89b-12d3-a456-426614174000",
-      "comment": "Great tweet!",
-      "createdAt": "2025-01-27T15:30:00Z"
-    },
-    {
-      "id": "876e5432-e10a-32c1-a543-210876543210",
-      "tweetId": "223e4567-e89b-12d3-a456-426614174001",
-      "userId": "234e5678-f90c-23e4-b567-537725285112",
-      "comment": null,
-      "createdAt": "2025-01-27T14:20:00Z"
+    "content": [
+        {
+            "id": "987e6543-e21b-43d2-b654-321987654321",
+            "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+            "userId": "123e4567-e89b-12d3-a456-426614174000",
+            "comment": "Great tweet!",
+            "createdAt": "2025-01-27T15:30:00Z"
+        },
+        {
+            "id": "876e5432-e10a-32c1-a543-210876543210",
+            "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+            "userId": "234e5678-f90c-23e4-b567-537725285112",
+            "comment": null,
+            "createdAt": "2025-01-27T14:20:00Z"
+        }
+    ],
+    "page": {
+        "size": 20,
+        "number": 0,
+        "totalElements": 45,
+        "totalPages": 3
     }
-  ],
-  "page": {
-    "size": 20,
-    "number": 0,
-    "totalElements": 45,
-    "totalPages": 3
-  }
 }
 ```
 
@@ -2505,13 +2518,13 @@ curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-4266141
 
 ```json
 {
-  "content": [],
-  "page": {
-    "size": 20,
-    "number": 0,
-    "totalElements": 0,
-    "totalPages": 0
-  }
+    "content": [],
+    "page": {
+        "size": 20,
+        "number": 0,
+        "totalElements": 0,
+        "totalPages": 0
+    }
 }
 ```
 
@@ -2519,13 +2532,13 @@ curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-4266141
 
 ```json
 {
-  "type": "https://example.com/errors/business-rule-validation",
-  "title": "Business Rule Validation Error",
-  "status": 409,
-  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
-  "ruleName": "TWEET_NOT_FOUND",
-  "context": "223e4567-e89b-12d3-a456-426614174001",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/business-rule-validation",
+    "title": "Business Rule Validation Error",
+    "status": 409,
+    "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
+    "ruleName": "TWEET_NOT_FOUND",
+    "context": "223e4567-e89b-12d3-a456-426614174001",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -2533,11 +2546,11 @@ curl -X GET "http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-4266141
 
 ```json
 {
-  "type": "https://example.com/errors/validation-error",
-  "title": "Validation Error",
-  "status": 400,
-  "detail": "Invalid UUID format for tweetId parameter",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/validation-error",
+    "title": "Validation Error",
+    "status": 400,
+    "detail": "Invalid UUID format for tweetId parameter",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -2565,11 +2578,11 @@ curl -X POST http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-4266141
 
 ```json
 {
-  "id": "987e6543-e21b-43d2-b654-321987654321",
-  "tweetId": "223e4567-e89b-12d3-a456-426614174001",
-  "userId": "123e4567-e89b-12d3-a456-426614174000",
-  "comment": "Great tweet!",
-  "createdAt": "2025-01-27T15:30:00Z"
+    "id": "987e6543-e21b-43d2-b654-321987654321",
+    "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+    "userId": "123e4567-e89b-12d3-a456-426614174000",
+    "comment": "Great tweet!",
+    "createdAt": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -2577,11 +2590,11 @@ curl -X POST http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-4266141
 
 ```json
 {
-  "id": "987e6543-e21b-43d2-b654-321987654321",
-  "tweetId": "223e4567-e89b-12d3-a456-426614174001",
-  "userId": "123e4567-e89b-12d3-a456-426614174000",
-  "comment": null,
-  "createdAt": "2025-01-27T15:30:00Z"
+    "id": "987e6543-e21b-43d2-b654-321987654321",
+    "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+    "userId": "123e4567-e89b-12d3-a456-426614174000",
+    "comment": null,
+    "createdAt": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -2589,13 +2602,13 @@ curl -X POST http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-4266141
 
 ```json
 {
-  "type": "https://example.com/errors/uniqueness-validation",
-  "title": "Uniqueness Validation Error",
-  "status": 409,
-  "detail": "A retweet already exists for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
-  "fieldName": "retweet",
-  "fieldValue": "tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/uniqueness-validation",
+    "title": "Uniqueness Validation Error",
+    "status": 409,
+    "detail": "A retweet already exists for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+    "fieldName": "retweet",
+    "fieldValue": "tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -2603,13 +2616,13 @@ curl -X POST http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-4266141
 
 ```json
 {
-  "type": "https://example.com/errors/business-rule-validation",
-  "title": "Business Rule Validation Error",
-  "status": 409,
-  "detail": "Business rule 'SELF_RETWEET_NOT_ALLOWED' violated for context: Users cannot retweet their own tweets",
-  "ruleName": "SELF_RETWEET_NOT_ALLOWED",
-  "context": "Users cannot retweet their own tweets",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/business-rule-validation",
+    "title": "Business Rule Validation Error",
+    "status": 409,
+    "detail": "Business rule 'SELF_RETWEET_NOT_ALLOWED' violated for context: Users cannot retweet their own tweets",
+    "ruleName": "SELF_RETWEET_NOT_ALLOWED",
+    "context": "Users cannot retweet their own tweets",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -2617,13 +2630,13 @@ curl -X POST http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-4266141
 
 ```json
 {
-  "type": "https://example.com/errors/business-rule-validation",
-  "title": "Business Rule Validation Error",
-  "status": 409,
-  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
-  "ruleName": "TWEET_NOT_FOUND",
-  "context": "223e4567-e89b-12d3-a456-426614174001",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/business-rule-validation",
+    "title": "Business Rule Validation Error",
+    "status": 409,
+    "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
+    "ruleName": "TWEET_NOT_FOUND",
+    "context": "223e4567-e89b-12d3-a456-426614174001",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -2631,13 +2644,13 @@ curl -X POST http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-4266141
 
 ```json
 {
-  "type": "https://example.com/errors/business-rule-validation",
-  "title": "Business Rule Validation Error",
-  "status": 409,
-  "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
-  "ruleName": "USER_NOT_EXISTS",
-  "context": "123e4567-e89b-12d3-a456-426614174000",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/business-rule-validation",
+    "title": "Business Rule Validation Error",
+    "status": 409,
+    "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+    "ruleName": "USER_NOT_EXISTS",
+    "context": "123e4567-e89b-12d3-a456-426614174000",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -2656,8 +2669,8 @@ Content-Type: application/json
 
 ```json
 {
-  "userId": "123e4567-e89b-12d3-a456-426614174000",
-  "comment": "Great tweet!"
+    "userId": "123e4567-e89b-12d3-a456-426614174000",
+    "comment": "Great tweet!"
 }
 ```
 
@@ -2687,11 +2700,11 @@ Content-Type: application/json
 
 ```json
 {
-  "id": "987e6543-e21b-43d2-b654-321987654321",
-  "tweetId": "223e4567-e89b-12d3-a456-426614174001",
-  "userId": "123e4567-e89b-12d3-a456-426614174000",
-  "comment": "Great tweet!",
-  "createdAt": "2025-01-27T15:30:00Z"
+    "id": "987e6543-e21b-43d2-b654-321987654321",
+    "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+    "userId": "123e4567-e89b-12d3-a456-426614174000",
+    "comment": "Great tweet!",
+    "createdAt": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -2699,11 +2712,11 @@ Content-Type: application/json
 
 ```json
 {
-  "id": "987e6543-e21b-43d2-b654-321987654321",
-  "tweetId": "223e4567-e89b-12d3-a456-426614174001",
-  "userId": "123e4567-e89b-12d3-a456-426614174000",
-  "comment": null,
-  "createdAt": "2025-01-27T15:30:00Z"
+    "id": "987e6543-e21b-43d2-b654-321987654321",
+    "tweetId": "223e4567-e89b-12d3-a456-426614174001",
+    "userId": "123e4567-e89b-12d3-a456-426614174000",
+    "comment": null,
+    "createdAt": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -2711,11 +2724,11 @@ Content-Type: application/json
 
 ```json
 {
-  "type": "https://example.com/errors/validation-error",
-  "title": "Validation Error",
-  "status": 400,
-  "detail": "Validation failed: userId: User ID cannot be null",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/validation-error",
+    "title": "Validation Error",
+    "status": 400,
+    "detail": "Validation failed: userId: User ID cannot be null",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -2723,13 +2736,13 @@ Content-Type: application/json
 
 ```json
 {
-  "type": "https://example.com/errors/format-validation",
-  "title": "Format Validation Error",
-  "status": 400,
-  "detail": "Comment cannot be empty string. Use null if no comment is provided.",
-  "fieldName": "comment",
-  "constraintName": "NOT_EMPTY",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/format-validation",
+    "title": "Format Validation Error",
+    "status": 400,
+    "detail": "Comment cannot be empty string. Use null if no comment is provided.",
+    "fieldName": "comment",
+    "constraintName": "NOT_EMPTY",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -2737,13 +2750,13 @@ Content-Type: application/json
 
 ```json
 {
-  "type": "https://example.com/errors/business-rule-validation",
-  "title": "Business Rule Validation Error",
-  "status": 409,
-  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
-  "ruleName": "TWEET_NOT_FOUND",
-  "context": "223e4567-e89b-12d3-a456-426614174001",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/business-rule-validation",
+    "title": "Business Rule Validation Error",
+    "status": 409,
+    "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
+    "ruleName": "TWEET_NOT_FOUND",
+    "context": "223e4567-e89b-12d3-a456-426614174001",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -2751,13 +2764,13 @@ Content-Type: application/json
 
 ```json
 {
-  "type": "https://example.com/errors/business-rule-validation",
-  "title": "Business Rule Validation Error",
-  "status": 409,
-  "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
-  "ruleName": "USER_NOT_EXISTS",
-  "context": "123e4567-e89b-12d3-a456-426614174000",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/business-rule-validation",
+    "title": "Business Rule Validation Error",
+    "status": 409,
+    "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+    "ruleName": "USER_NOT_EXISTS",
+    "context": "123e4567-e89b-12d3-a456-426614174000",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -2765,13 +2778,13 @@ Content-Type: application/json
 
 ```json
 {
-  "type": "https://example.com/errors/business-rule-validation",
-  "title": "Business Rule Validation Error",
-  "status": 409,
-  "detail": "Business rule 'SELF_RETWEET_NOT_ALLOWED' violated for context: Users cannot retweet their own tweets",
-  "ruleName": "SELF_RETWEET_NOT_ALLOWED",
-  "context": "Users cannot retweet their own tweets",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/business-rule-validation",
+    "title": "Business Rule Validation Error",
+    "status": 409,
+    "detail": "Business rule 'SELF_RETWEET_NOT_ALLOWED' violated for context: Users cannot retweet their own tweets",
+    "ruleName": "SELF_RETWEET_NOT_ALLOWED",
+    "context": "Users cannot retweet their own tweets",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -2779,13 +2792,13 @@ Content-Type: application/json
 
 ```json
 {
-  "type": "https://example.com/errors/uniqueness-validation",
-  "title": "Uniqueness Validation Error",
-  "status": 409,
-  "detail": "A retweet already exists for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
-  "fieldName": "retweet",
-  "fieldValue": "tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/uniqueness-validation",
+    "title": "Uniqueness Validation Error",
+    "status": 409,
+    "detail": "A retweet already exists for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+    "fieldName": "retweet",
+    "fieldValue": "tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -2804,7 +2817,7 @@ Content-Type: application/json
 
 ```json
 {
-  "userId": "123e4567-e89b-12d3-a456-426614174000"
+    "userId": "123e4567-e89b-12d3-a456-426614174000"
 }
 ```
 
@@ -2834,11 +2847,11 @@ Content-Type: application/json
 
 ```json
 {
-  "type": "https://example.com/errors/validation-error",
-  "title": "Validation Error",
-  "status": 400,
-  "detail": "Validation failed: userId: User ID cannot be null",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/validation-error",
+    "title": "Validation Error",
+    "status": 400,
+    "detail": "Validation failed: userId: User ID cannot be null",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -2846,13 +2859,13 @@ Content-Type: application/json
 
 ```json
 {
-  "type": "https://example.com/errors/business-rule-validation",
-  "title": "Business Rule Validation Error",
-  "status": 409,
-  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
-  "ruleName": "TWEET_NOT_FOUND",
-  "context": "223e4567-e89b-12d3-a456-426614174001",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/business-rule-validation",
+    "title": "Business Rule Validation Error",
+    "status": 409,
+    "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
+    "ruleName": "TWEET_NOT_FOUND",
+    "context": "223e4567-e89b-12d3-a456-426614174001",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -2860,13 +2873,13 @@ Content-Type: application/json
 
 ```json
 {
-  "type": "https://example.com/errors/business-rule-validation",
-  "title": "Business Rule Validation Error",
-  "status": 409,
-  "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
-  "ruleName": "USER_NOT_EXISTS",
-  "context": "123e4567-e89b-12d3-a456-426614174000",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/business-rule-validation",
+    "title": "Business Rule Validation Error",
+    "status": 409,
+    "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+    "ruleName": "USER_NOT_EXISTS",
+    "context": "123e4567-e89b-12d3-a456-426614174000",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -2874,13 +2887,13 @@ Content-Type: application/json
 
 ```json
 {
-  "type": "https://example.com/errors/business-rule-validation",
-  "title": "Business Rule Validation Error",
-  "status": 409,
-  "detail": "Business rule 'RETWEET_NOT_FOUND' violated for context: Retweet not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
-  "ruleName": "RETWEET_NOT_FOUND",
-  "context": "Retweet not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/business-rule-validation",
+    "title": "Business Rule Validation Error",
+    "status": 409,
+    "detail": "Business rule 'RETWEET_NOT_FOUND' violated for context: Retweet not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+    "ruleName": "RETWEET_NOT_FOUND",
+    "context": "Retweet not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -2902,13 +2915,13 @@ curl -X DELETE http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-42661
 
 ```json
 {
-  "type": "https://example.com/errors/business-rule-validation",
-  "title": "Business Rule Validation Error",
-  "status": 409,
-  "detail": "Business rule 'RETWEET_NOT_FOUND' violated for context: Retweet not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
-  "ruleName": "RETWEET_NOT_FOUND",
-  "context": "Retweet not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/business-rule-validation",
+    "title": "Business Rule Validation Error",
+    "status": 409,
+    "detail": "Business rule 'RETWEET_NOT_FOUND' violated for context: Retweet not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+    "ruleName": "RETWEET_NOT_FOUND",
+    "context": "Retweet not found for tweet 223e4567-e89b-12d3-a456-426614174001 and user 123e4567-e89b-12d3-a456-426614174000",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -2916,13 +2929,13 @@ curl -X DELETE http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-42661
 
 ```json
 {
-  "type": "https://example.com/errors/business-rule-validation",
-  "title": "Business Rule Validation Error",
-  "status": 409,
-  "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
-  "ruleName": "TWEET_NOT_FOUND",
-  "context": "223e4567-e89b-12d3-a456-426614174001",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/business-rule-validation",
+    "title": "Business Rule Validation Error",
+    "status": 409,
+    "detail": "Business rule 'TWEET_NOT_FOUND' violated for context: 223e4567-e89b-12d3-a456-426614174001",
+    "ruleName": "TWEET_NOT_FOUND",
+    "context": "223e4567-e89b-12d3-a456-426614174001",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -2930,13 +2943,13 @@ curl -X DELETE http://localhost:8082/api/v1/tweets/223e4567-e89b-12d3-a456-42661
 
 ```json
 {
-  "type": "https://example.com/errors/business-rule-validation",
-  "title": "Business Rule Validation Error",
-  "status": 409,
-  "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
-  "ruleName": "USER_NOT_EXISTS",
-  "context": "123e4567-e89b-12d3-a456-426614174000",
-  "timestamp": "2025-01-27T15:30:00Z"
+    "type": "https://example.com/errors/business-rule-validation",
+    "title": "Business Rule Validation Error",
+    "status": 409,
+    "detail": "Business rule 'USER_NOT_EXISTS' violated for context: 123e4567-e89b-12d3-a456-426614174000",
+    "ruleName": "USER_NOT_EXISTS",
+    "context": "123e4567-e89b-12d3-a456-426614174000",
+    "timestamp": "2025-01-27T15:30:00Z"
 }
 ```
 
@@ -2983,7 +2996,8 @@ docker run -p 8082:8082 tweet-api
 - **Java 24** - версия Java для сборки и запуска
 - **PostgreSQL** - база данных (порт 5432)
 - **Users API** - должен быть запущен на порту 8081 для проверки существования пользователей
-- **Follower API** - должен быть запущен на порту 8084 для получения списка подписок (опционально, при недоступности возвращается пустая лента)
+- **Follower API** - должен быть запущен на порту 8084 для получения списка подписок (опционально, при недоступности
+  возвращается пустая лента)
 
 ## Безопасность
 

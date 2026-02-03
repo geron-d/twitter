@@ -1,7 +1,7 @@
 package com.twitter.validation;
 
-import com.twitter.common.dto.request.CreateTweetRequestDto;
-import com.twitter.common.dto.request.DeleteTweetRequestDto;
+import com.twitter.common.dto.request.tweet.CreateTweetRequestDto;
+import com.twitter.common.dto.request.tweet.DeleteTweetRequestDto;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.FormatValidationException;
 import com.twitter.dto.request.UpdateTweetRequestDto;
@@ -165,9 +165,6 @@ public class TweetValidatorImpl implements TweetValidator {
 
     /**
      * Validates tweet content string using custom rules.
-     * <p>
-     * This method is reused for both CreateTweetRequestDto and UpdateTweetRequestDto
-     * to ensure consistent content validation logic.
      *
      * @param content the tweet content to validate
      * @throws FormatValidationException if content is empty or contains only whitespace

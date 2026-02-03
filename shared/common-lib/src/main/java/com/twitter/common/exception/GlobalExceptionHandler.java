@@ -23,18 +23,6 @@ import java.time.Instant;
  * consistent error responses across all Twitter services by converting exceptions
  * into standardized HTTP error responses with detailed problem information.
  *
- * <p>The handler processes the following exception types:</p>
- * <ul>
- *   <li>ResponseStatusException - HTTP status exceptions</li>
- *   <li>RuntimeException - General runtime errors</li>
- *   <li>ConstraintViolationException - Bean validation errors</li>
- *   <li>MethodArgumentTypeMismatchException - Invalid path variable format (e.g., invalid UUID)</li>
- *   <li>UniquenessValidationException - Duplicate data errors</li>
- *   <li>BusinessRuleValidationException - Business logic violations</li>
- *   <li>FormatValidationException - Data format errors</li>
- *   <li>ValidationException - General validation errors</li>
- * </ul>
- *
  * <p>All responses follow RFC 7807 Problem Details for HTTP APIs standard.</p>
  *
  * @author geron
@@ -43,14 +31,6 @@ import java.time.Instant;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    /**
-     * Default constructor for GlobalExceptionHandler.
-     * <p>
-     * This constructor creates a new instance of GlobalExceptionHandler.
-     * The handler is automatically registered with Spring's exception handling
-     * mechanism through the @RestControllerAdvice annotation.
-     * </p>
-     */
     public GlobalExceptionHandler() {
         // Default constructor - Spring will handle initialization
     }

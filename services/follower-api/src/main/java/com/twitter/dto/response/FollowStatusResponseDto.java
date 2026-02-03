@@ -8,12 +8,7 @@ import java.time.LocalDateTime;
 
 /**
  * Response DTO for follow relationship status.
- * <p>
- * This record contains the status of a follow relationship including whether
- * the relationship exists and when it was created (if it exists).
  *
- * @param isFollowing flag indicating whether the follow relationship exists
- * @param createdAt   timestamp when the follow relationship was created (null if relationship does not exist)
  * @author geron
  * @version 1.0
  */

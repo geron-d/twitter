@@ -19,10 +19,8 @@ import java.util.UUID;
  * where one user (follower) follows another user (following).
  * <p>
  * The entity enforces business rules through database constraints:
- * <ul>
- *   <li>Unique constraint on (follower_id, following_id) prevents duplicate follows</li>
- *   <li>Check constraint ensures follower_id != following_id (users cannot follow themselves)</li>
- * </ul>
+ * - Unique constraint on (follower_id, following_id) prevents duplicate follows
+ * - Check constraint ensures follower_id != following_id (users cannot follow themselves)
  *
  * @author geron
  * @version 1.0

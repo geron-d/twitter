@@ -1,4 +1,4 @@
-package com.twitter.common.dto.request;
+package com.twitter.common.dto.request.retweet;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
@@ -9,20 +9,13 @@ import java.util.UUID;
 
 /**
  * Data Transfer Object for retweeting a tweet.
- * <p>
- * The comment field is optional and can be null, but if provided,
- * it must be between 1 and 280 characters and cannot be an empty string.
  *
- * @param userId  the ID of the user who retweets the tweet
- * @param comment optional comment for the retweet (1-280 characters, can be null)
  * @author geron
  * @version 1.0
  */
 @Schema(
     name = "RetweetRequest",
-    description = "Data structure for retweeting a tweet in the system. " +
-        "The comment field is optional and can be null, but if provided, " +
-        "it must be between 1 and 280 characters and cannot be an empty string.",
+    description = "Data structure for retweeting a tweet in the system. ",
     example = """
         {
           "userId": "123e4567-e89b-12d3-a456-426614174000",

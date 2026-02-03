@@ -1,7 +1,7 @@
 package com.twitter.entity;
 
-import com.twitter.common.enums.UserRole;
-import com.twitter.common.enums.UserStatus;
+import com.twitter.common.enums.user.UserRole;
+import com.twitter.common.enums.user.UserStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,10 +14,6 @@ import java.util.UUID;
 
 /**
  * User entity representing a user account in the Twitter system.
- * <p>
- * This entity maps to the 'users' table in the database and contains all
- * user-related data including authentication credentials, personal information,
- * and system status.
  *
  * @author geron
  * @version 1.0
@@ -117,4 +113,4 @@ public class User {
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
-}
+}

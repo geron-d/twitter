@@ -150,9 +150,7 @@ class PasswordUtilTest {
             String password = null;
             byte[] salt = new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
 
-            assertThrows(NullPointerException.class, () -> {
-                PasswordUtil.hashPassword(password, salt);
-            });
+            assertThrows(NullPointerException.class, () -> PasswordUtil.hashPassword(password, salt));
         }
 
         @Test
@@ -160,9 +158,7 @@ class PasswordUtilTest {
             String password = "testPassword123";
             byte[] salt = new byte[0];
 
-            assertThrows(IllegalArgumentException.class, () -> {
-                PasswordUtil.hashPassword(password, salt);
-            });
+            assertThrows(IllegalArgumentException.class, () -> PasswordUtil.hashPassword(password, salt));
         }
 
         @Test
@@ -170,9 +166,7 @@ class PasswordUtilTest {
             String password = "testPassword123";
             byte[] salt = null;
 
-            assertThrows(NullPointerException.class, () -> {
-                PasswordUtil.hashPassword(password, salt);
-            });
+            assertThrows(NullPointerException.class, () -> PasswordUtil.hashPassword(password, salt));
         }
 
         @Test
@@ -210,4 +204,4 @@ class PasswordUtilTest {
             assertEquals(hash1.length(), hash2.length());
         }
     }
-}
+}

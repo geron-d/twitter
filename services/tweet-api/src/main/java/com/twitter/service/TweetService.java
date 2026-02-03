@@ -1,8 +1,8 @@
 package com.twitter.service;
 
-import com.twitter.common.dto.request.CreateTweetRequestDto;
-import com.twitter.common.dto.request.DeleteTweetRequestDto;
-import com.twitter.common.dto.response.TweetResponseDto;
+import com.twitter.common.dto.request.tweet.CreateTweetRequestDto;
+import com.twitter.common.dto.request.tweet.DeleteTweetRequestDto;
+import com.twitter.common.dto.response.tweet.TweetResponseDto;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.FormatValidationException;
 import com.twitter.dto.request.UpdateTweetRequestDto;
@@ -35,7 +35,7 @@ public interface TweetService {
      * 5. Converts the saved entity to response DTO
      * 6. Returns the response DTO
      *
-     * @param requestDto the tweet creation request containing content and userId
+     * @param requestDto the tweet creation request
      * @return TweetResponseDto containing the created tweet data
      * @throws FormatValidationException       if content validation fails
      * @throws BusinessRuleValidationException if user doesn't exist
@@ -64,12 +64,11 @@ public interface TweetService {
      * 5. Converts the saved entity to response DTO
      * 6. Returns the response DTO
      * <p>
-     * The method is transactional, ensuring data consistency. Only the tweet author
-     * can update their tweet. The tweet content must be between 1 and 280 characters.
+     * Only the tweet author can update their tweet. The tweet content must be between 1 and 280 characters.
      *
      * @param tweetId    the unique identifier of the tweet to update
-     * @param requestDto the tweet update request containing new content and userId
-     * @return TweetResponseDto containing the updated tweet data with updated timestamp
+     * @param requestDto the tweet update request
+     * @return TweetResponseDto containing the updated tweet data
      * @throws FormatValidationException       if content validation fails (empty, whitespace-only, or constraint violations)
      * @throws BusinessRuleValidationException if tweetId is null, tweet doesn't exist, or access denied (user is not the tweet author)
      */
@@ -84,12 +83,10 @@ public interface TweetService {
      * 3. Performs soft delete by setting isDeleted flag and deletedAt timestamp
      * 4. Saves the updated tweet to the database
      * <p>
-     * The method is transactional, ensuring data consistency. Only the tweet author
-     * can delete their tweet. The tweet data is preserved in the database for analytics
-     * and recovery purposes. Returns void as the response is 204 No Content.
+     * Only the tweet author can delete their tweet.
      *
      * @param tweetId    the unique identifier of the tweet to delete
-     * @param requestDto the tweet deletion request containing userId for authorization check
+     * @param requestDto the tweet deletion request
      * @throws BusinessRuleValidationException if tweetId is null, tweet doesn't exist, is already deleted, or access denied
      */
     void deleteTweet(UUID tweetId, DeleteTweetRequestDto requestDto);
@@ -97,11 +94,8 @@ public interface TweetService {
     /**
      * Retrieves a paginated list of tweets for a specific user.
      * <p>
-     * The method is read-only and transactional, ensuring data consistency. Tweets are
-     * sorted by creation date in descending order (newest first). Deleted tweets are
-     * automatically excluded from the results. The Page object contains pagination
-     * metadata (totalElements, totalPages, number, size) that can be used by the controller
-     * to create HATEOAS links.
+     * Tweets are sorted by creation date in descending order (newest first). Deleted tweets are
+     * automatically excluded from the results.
      *
      * @param userId   the unique identifier of the user whose tweets to retrieve
      * @param pageable pagination parameters (page, size, sorting)
@@ -119,11 +113,6 @@ public interface TweetService {
      * descending order (newest first). Deleted tweets (soft delete) are automatically
      * excluded from the results. Supports pagination with page, size, and sort parameters.
      * If the user has no following relationships, an empty page is returned (not an error).
-     * Integration with follower-api is used to retrieve the list of followed users.
-     * <p>
-     * The method is read-only and transactional, ensuring data consistency. The Page object
-     * contains pagination metadata (totalElements, totalPages, number, size) that can be
-     * used by the controller to create HATEOAS links.
      *
      * @param userId   the unique identifier of the user whose timeline to retrieve
      * @param pageable pagination parameters (page, size, sorting)

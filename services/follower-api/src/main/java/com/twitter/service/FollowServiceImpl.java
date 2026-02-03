@@ -2,12 +2,12 @@ package com.twitter.service;
 
 import com.twitter.dto.filter.FollowerFilter;
 import com.twitter.dto.filter.FollowingFilter;
-import com.twitter.common.dto.request.FollowRequestDto;
-import com.twitter.common.dto.response.FollowResponseDto;
+import com.twitter.common.dto.request.follow.FollowRequestDto;
+import com.twitter.common.dto.response.follow.FollowResponseDto;
 import com.twitter.dto.response.FollowStatsResponseDto;
 import com.twitter.dto.response.FollowStatusResponseDto;
 import com.twitter.dto.response.FollowerResponseDto;
-import com.twitter.common.dto.response.FollowingResponseDto;
+import com.twitter.common.dto.response.follow.FollowingResponseDto;
 import com.twitter.entity.Follow;
 import com.twitter.gateway.UserGateway;
 import com.twitter.mapper.FollowMapper;
@@ -33,10 +33,6 @@ import java.util.stream.Collectors;
 
 /**
  * Implementation of the follow relationship management service.
- * <p>
- * This service provides business logic for follow relationship operations, including
- * creation, validation, and data transformation. It handles data validation, user
- * existence checks via users-api integration, and business rule enforcement.
  *
  * @author geron
  * @version 1.0
@@ -204,8 +200,6 @@ public class FollowServiceImpl implements FollowService {
         long followersCount = followRepository.countByFollowingId(userId);
         long followingCount = followRepository.countByFollowerId(userId);
 
-        FollowStatsResponseDto stats = followMapper.toFollowStatsResponseDto(followersCount, followingCount);
-
-        return stats;
+        return followMapper.toFollowStatsResponseDto(followersCount, followingCount);
     }
 }

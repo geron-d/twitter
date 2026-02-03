@@ -5,15 +5,13 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
@@ -22,17 +20,15 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
  * Provides shared configuration for test containers and WireMock server.
  * <p>
  * This class ensures that:
- * <ul>
- *   <li>PostgreSQL container is started once and shared across all tests</li>
- *   <li>WireMock server is started once and shared across all tests</li>
- *   <li>Spring properties are configured dynamically</li>
- *   <li>WireMock stubs can be set up in subclasses</li>
- * </ul>
+ * - PostgreSQL container is started once and shared across all tests
+ * - WireMock server is started once and shared across all tests
+ * - Spring properties are configured dynamically
+ * - WireMock stubs can be set up in subclasses
  */
 @Testcontainers
 public abstract class BaseIntegrationTest {
-    
-    protected static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine")
+
+    protected static final PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15-alpine")
         .withDatabaseName("twitter_test")
         .withUsername("test")
         .withPassword("test");
@@ -54,7 +50,7 @@ public abstract class BaseIntegrationTest {
                     if (wireMockServer != null && wireMockServer.isRunning()) {
                         wireMockServer.stop();
                     }
-                    if (postgres != null && postgres.isRunning()) {
+                    if (postgres.isRunning()) {
                         postgres.stop();
                     }
                 }));
@@ -125,10 +121,10 @@ public abstract class BaseIntegrationTest {
     /**
      * Sets up WireMock stub for follower-api getFollowing endpoint.
      *
-     * @param userId          the user ID whose following list to retrieve
+     * @param userId           the user ID whose following list to retrieve
      * @param followingUserIds list of following user IDs to return
-     * @param page            page number (default: 0)
-     * @param size            page size (default: 100)
+     * @param page             page number (default: 0)
+     * @param size             page size (default: 100)
      */
     protected void setupFollowingStub(UUID userId, List<UUID> followingUserIds, int page, int size) {
         if (wireMockServer == null) {
@@ -141,7 +137,7 @@ public abstract class BaseIntegrationTest {
                 "login", "user_" + followingId.toString().substring(0, 8),
                 "createdAt", "2025-01-20T15:30:00Z"
             ))
-            .collect(Collectors.toList());
+            .toList();
 
         Map<String, Object> responseBody = Map.of(
             "content", content,
@@ -198,7 +194,7 @@ public abstract class BaseIntegrationTest {
                     .withHeader("Content-Type", "application/json")
                     .withBody("{\"error\":\"Internal Server Error\"}"))
         );
-        
+
         wireMockServer.stubFor(
             get(urlPathEqualTo("/api/v1/follows/" + userId + "/following"))
                 .willReturn(aResponse()
@@ -208,4 +204,3 @@ public abstract class BaseIntegrationTest {
         );
     }
 }
-

@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation for automatic HTTP request/response logging in Twitter microservices.
+ * Annotation for automatic HTTP request/response logging.
  * <p>
  * This annotation enables automatic logging of HTTP requests and responses
  * for methods annotated with it. It provides configuration options for
@@ -14,19 +14,6 @@ import java.lang.annotation.Target;
  * for security purposes. The logging is performed by the LoggableRequestAspect
  * which intercepts method calls and logs request details including headers,
  * body content, and response information.
- *
- * <p>Example usage:</p>
- * <pre>{@code
- * @LoggableRequest
- * public ResponseEntity<User> createUser(@RequestBody User user) {
- *     return userService.createUser(user);
- * }
- *
- * @LoggableRequest(printRequestBody = false, hideFields = {"password", "ssn"})
- * public ResponseEntity<User> updateUser(@RequestBody User user) {
- *     return userService.updateUser(user);
- * }
- * }</pre>
  *
  * @author geron
  * @version 1.0
@@ -43,11 +30,9 @@ public @interface LoggableRequest {
      * method and URI will be logged without the body content.
      *
      * <p>Use {@code false} for:</p>
-     * <ul>
-     *   <li>Large request bodies that would clutter logs</li>
-     *   <li>Sensitive endpoints where body content should not be logged</li>
-     *   <li>Performance-critical endpoints where logging overhead should be minimized</li>
-     * </ul>
+     * - Large request bodies that would clutter logs
+     * - Sensitive endpoints where body content should not be logged
+     * - Performance-critical endpoints where logging overhead should be minimized
      *
      * @return {@code true} if request body should be logged, {@code false} otherwise
      */
@@ -60,23 +45,6 @@ public @interface LoggableRequest {
      * replaced with "***" in the logged output. The hiding is performed
      * recursively on nested objects and arrays. Field names are case-sensitive
      * and should match exactly with the JSON property names.
-     *
-     * <p>Common fields to hide:</p>
-     * <ul>
-     *   <li>{@code "password"} - User passwords</li>
-     *   <li>{@code "ssn"} - Social Security Numbers</li>
-     *   <li>{@code "creditCard"} - Credit card information</li>
-     *   <li>{@code "token"} - Authentication tokens</li>
-     *   <li>{@code "secret"} - API secrets</li>
-     * </ul>
-     *
-     * <p>Example:</p>
-     * <pre>{@code
-     * @LoggableRequest(hideFields = {"password", "ssn", "creditCard"})
-     * public ResponseEntity<User> createUser(@RequestBody User user) {
-     *     // password, ssn, and creditCard fields will be hidden in logs
-     * }
-     * }</pre>
      *
      * @return array of field names to hide in the logged output
      */

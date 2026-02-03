@@ -2,9 +2,12 @@
 
 ## Введение
 
-**Users API** — это микросервис для управления пользователями в системе Twitter, построенный на Java 24 и Spring Boot 3. Сервис предоставляет REST API для создания, чтения, обновления и деактивации пользователей с поддержкой ролевой модели доступа.
+**Users API** — это микросервис для управления пользователями в системе Twitter, построенный на Java 24 и Spring Boot 3.
+Сервис предоставляет REST API для создания, чтения, обновления и деактивации пользователей с поддержкой ролевой модели
+доступа.
 
 ### Основные возможности:
+
 - ✅ CRUD операции для пользователей
 - ✅ Ролевая модель (USER, ADMIN, MODERATOR)
 - ✅ Безопасное хеширование паролей
@@ -92,88 +95,101 @@ com.twitter/
 ## REST API
 
 ### Базовый URL
+
 ```
 http://localhost:8081/api/v1/users
 ```
 
 ### Эндпоинты
 
-| Метод | Путь | Описание | Параметры | Тело запроса | Ответ |
-|-------|------|----------|-----------|--------------|-------|
-| `GET` | `/{id}` | Получить пользователя по ID | `id` (UUID) | - | `UserResponseDto` |
-| `GET` | `/{userId}/exists` | Проверить существование пользователя | `userId` (UUID) | - | `UserExistsResponseDto` |
-| `GET` | `/` | Получить список пользователей | `UserFilter`, `Pageable` | - | `PagedModel<UserResponseDto>` |
-| `POST` | `/` | Создать нового пользователя | - | `UserRequestDto` | `UserResponseDto` |
-| `PUT` | `/{id}` | Полное обновление пользователя | `id` (UUID) | `UserUpdateDto` | `UserResponseDto` |
-| `PATCH` | `/{id}` | Частичное обновление пользователя | `id` (UUID) | `JsonNode` | `UserResponseDto` |
-| `PATCH` | `/{id}/inactivate` | Деактивировать пользователя | `id` (UUID) | - | `UserResponseDto` |
-| `PATCH` | `/{id}/role` | Обновить роль пользователя | `id` (UUID) | `UserRoleUpdateDto` | `UserResponseDto` |
+| Метод   | Путь               | Описание                             | Параметры                | Тело запроса        | Ответ                         |
+|---------|--------------------|--------------------------------------|--------------------------|---------------------|-------------------------------|
+| `GET`   | `/{id}`            | Получить пользователя по ID          | `id` (UUID)              | -                   | `UserResponseDto`             |
+| `GET`   | `/{userId}/exists` | Проверить существование пользователя | `userId` (UUID)          | -                   | `UserExistsResponseDto`       |
+| `GET`   | `/`                | Получить список пользователей        | `UserFilter`, `Pageable` | -                   | `PagedModel<UserResponseDto>` |
+| `POST`  | `/`                | Создать нового пользователя          | -                        | `UserRequestDto`    | `UserResponseDto`             |
+| `PUT`   | `/{id}`            | Полное обновление пользователя       | `id` (UUID)              | `UserUpdateDto`     | `UserResponseDto`             |
+| `PATCH` | `/{id}`            | Частичное обновление пользователя    | `id` (UUID)              | `JsonNode`          | `UserResponseDto`             |
+| `PATCH` | `/{id}/inactivate` | Деактивировать пользователя          | `id` (UUID)              | -                   | `UserResponseDto`             |
+| `PATCH` | `/{id}/role`       | Обновить роль пользователя           | `id` (UUID)              | `UserRoleUpdateDto` | `UserResponseDto`             |
 
 ### Детальное описание эндпоинтов
 
 #### 1. Получить пользователя по ID
+
 ```http
 GET /api/v1/users/{id}
 ```
 
 **Параметры:**
+
 - `id` (UUID) - идентификатор пользователя
 
 **Ответы:**
+
 - `200 OK` - пользователь найден
 - `404 Not Found` - пользователь не найден
 
 **Пример ответа:**
+
 ```json
 {
-  "id": "123e4567-e89b-12d3-a456-426614174000",
-  "login": "john_doe",
-  "firstName": "John",
-  "lastName": "Doe",
-  "email": "john.doe@example.com",
-  "status": "ACTIVE",
-  "role": "USER",
-  "createdAt": "2025-01-21T20:30:00"
+    "id": "123e4567-e89b-12d3-a456-426614174000",
+    "login": "john_doe",
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john.doe@example.com",
+    "status": "ACTIVE",
+    "role": "USER",
+    "createdAt": "2025-01-21T20:30:00"
 }
 ```
 
 #### 2. Проверить существование пользователя
+
 ```http
 GET /api/v1/users/{userId}/exists
 ```
 
 **Параметры:**
+
 - `userId` (UUID) - идентификатор пользователя для проверки
 
 **Ответы:**
+
 - `200 OK` - проверка выполнена успешно
 
 **Пример ответа (пользователь существует):**
+
 ```json
 {
-  "exists": true
+    "exists": true
 }
 ```
 
 **Пример ответа (пользователь не существует):**
+
 ```json
 {
-  "exists": false
+    "exists": false
 }
 ```
 
 **Особенности:**
+
 - Эндпоинт всегда возвращает HTTP 200 OK, независимо от результата проверки
 - Поле `exists` содержит `true`, если пользователь найден в системе, и `false` в противном случае
 - Если `userId` равен `null`, метод возвращает `false` без обращения к базе данных
 - Это легковесный эндпоинт, оптимизированный для проверки существования без загрузки полных данных пользователя
 
 #### 3. Получить список пользователей
+
 ```http
 GET /api/v1/users?firstNameContains=John&role=USER&page=0&size=10&sort=login,asc
 ```
 
 **Параметры запроса:**
+
 - `firstNameContains` (String, optional) - фильтр по имени
 - `lastNameContains` (String, optional) - фильтр по фамилии
 - `email` (String, optional) - фильтр по email
@@ -184,136 +200,154 @@ GET /api/v1/users?firstNameContains=John&role=USER&page=0&size=10&sort=login,asc
 - `sort` (String, optional) - сортировка
 
 **Ограничения пагинации:**
+
 - Дефолтный размер страницы: 10 элементов
 - Максимальный размер страницы: 100 элементов
 - При превышении максимального размера автоматически применяется лимит
 
 **Структура ответа PagedModel:**
+
 - `content` - массив объектов `UserResponseDto`
 - `page` - метаданные пагинации:
-  - `size` - размер страницы
-  - `number` - номер страницы (начиная с 0)
-  - `totalElements` - общее количество элементов
-  - `totalPages` - общее количество страниц
+    - `size` - размер страницы
+    - `number` - номер страницы (начиная с 0)
+    - `totalElements` - общее количество элементов
+    - `totalPages` - общее количество страниц
 
 **Пример ответа:**
+
 ```json
 {
-  "content": [
-    {
-      "id": "123e4567-e89b-12d3-a456-426614174000",
-      "login": "john_doe",
-      "firstName": "John",
-      "lastName": "Doe",
-      "email": "john.doe@example.com",
-      "status": "ACTIVE",
-      "role": "USER",
-      "createdAt": "2025-01-21T20:30:00"
+    "content": [
+        {
+            "id": "123e4567-e89b-12d3-a456-426614174000",
+            "login": "john_doe",
+            "firstName": "John",
+            "lastName": "Doe",
+            "email": "john.doe@example.com",
+            "status": "ACTIVE",
+            "role": "USER",
+            "createdAt": "2025-01-21T20:30:00"
+        }
+    ],
+    "page": {
+        "size": 10,
+        "number": 0,
+        "totalElements": 1,
+        "totalPages": 1
     }
-  ],
-  "page": {
-    "size": 10,
-    "number": 0,
-    "totalElements": 1,
-    "totalPages": 1
-  }
 }
 ```
 
 #### 4. Создать пользователя
+
 ```http
 POST /api/v1/users
 Content-Type: application/json
 ```
 
 **Тело запроса:**
+
 ```json
 {
-  "login": "jane_smith",
-  "firstName": "Jane",
-  "lastName": "Smith",
-  "email": "jane.smith@example.com",
-  "password": "securePassword123"
+    "login": "jane_smith",
+    "firstName": "Jane",
+    "lastName": "Smith",
+    "email": "jane.smith@example.com",
+    "password": "securePassword123"
 }
 ```
 
 **Валидация:**
+
 - `login` - обязательное, 3-50 символов
 - `email` - обязательное, валидный email
 - `password` - обязательное, минимум 8 символов
 
 **Ответы:**
+
 - `200 OK` - пользователь создан
 - `400 Bad Request` - ошибка валидации
 - `409 Conflict` - пользователь с таким логином/email уже существует
 
 #### 5. Обновить пользователя (PUT)
+
 ```http
 PUT /api/v1/users/{id}
 Content-Type: application/json
 ```
 
 **Тело запроса:**
+
 ```json
 {
-  "login": "jane_smith_updated",
-  "firstName": "Jane",
-  "lastName": "Smith-Wilson",
-  "email": "jane.wilson@example.com",
-  "password": "newSecurePassword123"
+    "login": "jane_smith_updated",
+    "firstName": "Jane",
+    "lastName": "Smith-Wilson",
+    "email": "jane.wilson@example.com",
+    "password": "newSecurePassword123"
 }
 ```
 
 **Ответы:**
+
 - `200 OK` - пользователь обновлен
 - `404 Not Found` - пользователь не найден
 - `400 Bad Request` - ошибка валидации
 - `409 Conflict` - конфликт уникальности
 
 #### 6. Частичное обновление пользователя (PATCH)
+
 ```http
 PATCH /api/v1/users/{id}
 Content-Type: application/json
 ```
 
 **Тело запроса:**
+
 ```json
 {
-  "firstName": "Jane",
-  "lastName": "Smith-Wilson"
+    "firstName": "Jane",
+    "lastName": "Smith-Wilson"
 }
 ```
 
 **Ответы:**
+
 - `200 OK` - пользователь обновлен
 - `404 Not Found` - пользователь не найден
 - `400 Bad Request` - ошибка валидации или некорректный JSON Patch
 - `409 Conflict` - конфликт уникальности логина/email
 
 #### 7. Деактивировать пользователя
+
 ```http
 PATCH /api/v1/users/{id}/inactivate
 ```
 
 **Ответы:**
+
 - `200 OK` - пользователь деактивирован
 - `404 Not Found` - пользователь не найден
 - `400 Bad Request` - попытка деактивировать последнего администратора
 
 #### 8. Обновить роль пользователя
+
 ```http
 PATCH /api/v1/users/{id}/role
 Content-Type: application/json
 ```
 
 **Тело запроса:**
+
 ```json
 {
-  "role": "ADMIN"
+    "role": "ADMIN"
 }
 ```
 
 **Ответы:**
+
 - `200 OK` - роль обновлена
 - `404 Not Found` - пользователь не найден
 - `400 Bad Request` - попытка изменить роль последнего администратора
@@ -322,42 +356,48 @@ Content-Type: application/json
 
 ### Обзор
 
-Сервис включает полную OpenAPI 3.0 документацию, предоставляемую через SpringDoc OpenAPI. Документация содержит интерактивные возможности для тестирования API, детальные схемы данных и примеры запросов/ответов.
+Сервис включает полную OpenAPI 3.0 документацию, предоставляемую через SpringDoc OpenAPI. Документация содержит
+интерактивные возможности для тестирования API, детальные схемы данных и примеры запросов/ответов.
 
 ### Доступ к документации
 
 #### Swagger UI
+
 - **URL**: `http://localhost:8081/swagger-ui.html`
 - **Описание**: Интерактивный интерфейс для изучения и тестирования API
 - **Возможности**:
-  - Просмотр всех эндпоинтов с детальным описанием
-  - Интерактивное тестирование API (Try it out)
-  - Просмотр схем данных и валидации
-  - Примеры запросов и ответов
-  - Автогенерация клиентского кода
+    - Просмотр всех эндпоинтов с детальным описанием
+    - Интерактивное тестирование API (Try it out)
+    - Просмотр схем данных и валидации
+    - Примеры запросов и ответов
+    - Автогенерация клиентского кода
 
 #### OpenAPI Спецификация
+
 - **URL**: `http://localhost:8081/v3/api-docs`
 - **Описание**: JSON спецификация OpenAPI 3.0
 - **Использование**:
-  - Генерация клиентских SDK
-  - Импорт в инструменты тестирования API (Postman, Insomnia)
-  - Интеграция с CI/CD пайплайнами
-  - Валидация API контрактов
+    - Генерация клиентских SDK
+    - Импорт в инструменты тестирования API (Postman, Insomnia)
+    - Интеграция с CI/CD пайплайнами
+    - Валидация API контрактов
 
 #### Конфигурация Swagger
+
 - **URL**: `http://localhost:8081/v3/api-docs/swagger-config`
 - **Описание**: Конфигурация Swagger UI
 
 ### Особенности документации
 
 #### Интерактивные возможности
+
 - **Try it out**: Тестирование всех эндпоинтов прямо в браузере
 - **Request Builder**: Визуальный интерфейс для создания запросов
 - **Response Viewer**: Отображение ответов с форматированием
 - **Schema Explorer**: Просмотр и понимание моделей данных
 
 #### Полное покрытие API
+
 - **Все эндпоинты**: Документация всех 7 API эндпоинтов
 - **Модели данных**: Детальные схемы для всех DTO и сущностей
 - **Обработка ошибок**: Документация всех сценариев ошибок и ответов
@@ -365,6 +405,7 @@ Content-Type: application/json
 - **Бизнес-правила**: Документация системных ограничений и правил
 
 #### Удобство для разработчиков
+
 - **Генерация кода**: Создание клиентских SDK для различных языков
 - **Интеграция с Postman**: Экспорт коллекций API для тестирования
 - **Тестирование API**: Встроенные возможности тестирования
@@ -381,6 +422,7 @@ Content-Type: application/json
 ### Примеры использования
 
 #### Доступ к Swagger UI
+
 ```bash
 # Запуск приложения
 ./gradlew bootRun
@@ -390,6 +432,7 @@ open http://localhost:8081/swagger-ui.html
 ```
 
 #### Генерация клиентского кода
+
 ```bash
 # Использование OpenAPI Generator
 openapi-generator-cli generate \
@@ -405,6 +448,7 @@ openapi-generator-cli generate \
 ```
 
 #### Тестирование API через Swagger UI
+
 1. Откройте Swagger UI в браузере
 2. Выберите нужный эндпоинт
 3. Нажмите "Try it out"
@@ -415,6 +459,7 @@ openapi-generator-cli generate \
 ### Безопасность документации
 
 #### Защита чувствительных данных
+
 - **Пароли**: Поля паролей помечены как чувствительные и скрыты в примерах
 - **Аутентификация**: Будущие версии будут включать JWT аутентификацию
 - **Rate Limiting**: Ограничения API документированы в заголовках ответов
@@ -425,26 +470,28 @@ openapi-generator-cli generate \
 #### Частые проблемы
 
 1. **Swagger UI не загружается**
-   - Проверьте, что зависимость SpringDoc правильно добавлена
-   - Убедитесь, что приложение запущено на правильном порту
-   - Проверьте консоль браузера на ошибки JavaScript
+    - Проверьте, что зависимость SpringDoc правильно добавлена
+    - Убедитесь, что приложение запущено на правильном порту
+    - Проверьте консоль браузера на ошибки JavaScript
 
 2. **Эндпоинты API не отображаются**
-   - Убедитесь, что контроллеры правильно аннотированы
-   - Проверьте конфигурацию сканирования пакетов
-   - Убедитесь в правильной автоконфигурации Spring Boot
+    - Убедитесь, что контроллеры правильно аннотированы
+    - Проверьте конфигурацию сканирования пакетов
+    - Убедитесь в правильной автоконфигурации Spring Boot
 
 3. **Ошибки валидации схем**
-   - Проверьте аннотации DTO и правила валидации
-   - Убедитесь в правильной конфигурации Jackson
-   - Проверьте генерацию схем OpenAPI
+    - Проверьте аннотации DTO и правила валидации
+    - Убедитесь в правильной конфигурации Jackson
+    - Проверьте генерацию схем OpenAPI
 
 #### Режим отладки
+
 Включите отладочное логирование для SpringDoc:
+
 ```yaml
 logging:
-  level:
-    org.springdoc: DEBUG
+    level:
+        org.springdoc: DEBUG
 ```
 
 ### Будущие улучшения
@@ -458,6 +505,7 @@ logging:
 ### Поддержка
 
 При проблемах с документацией API:
+
 - Проверьте логи приложения на ошибки
 - Просмотрите спецификацию OpenAPI на `/v3/api-docs`
 - Обратитесь к команде разработки за помощью
@@ -471,88 +519,88 @@ logging:
 #### Методы сервиса:
 
 1. **`getUserById(UUID id)`**
-   - Получает пользователя по идентификатору
-   - Возвращает `Optional<UserResponseDto>`
-   - Логика: поиск в репозитории и маппинг в DTO
+    - Получает пользователя по идентификатору
+    - Возвращает `Optional<UserResponseDto>`
+    - Логика: поиск в репозитории и маппинг в DTO
 
 2. **`existsById(UUID id)`**
-   - Проверяет существование пользователя по идентификатору
-   - Возвращает `boolean`
-   - Логика:
-     - Если `id` равен `null`, возвращает `false` без обращения к базе данных
-     - Иначе вызывает `userRepository.existsById(id)`
+    - Проверяет существование пользователя по идентификатору
+    - Возвращает `boolean`
+    - Логика:
+        - Если `id` равен `null`, возвращает `false` без обращения к базе данных
+        - Иначе вызывает `userRepository.existsById(id)`
 
 3. **`findAll(UserFilter userFilter, Pageable pageable)`**
-   - Получает список пользователей с фильтрацией и пагинацией
-   - Возвращает `Page<UserResponseDto>`
-   - Логика: построение спецификации из фильтра и маппинг результатов
+    - Получает список пользователей с фильтрацией и пагинацией
+    - Возвращает `Page<UserResponseDto>`
+    - Логика: построение спецификации из фильтра и маппинг результатов
 
 4. **`createUser(UserRequestDto userRequest)`**
-   - Создает нового пользователя
-   - Возвращает `UserResponseDto`
-   - Логика:
-     - Валидация уникальности логина и email
-     - Маппинг DTO в сущность
-     - Установка статуса ACTIVE и роли USER
-     - Хеширование пароля
-     - Сохранение в БД
+    - Создает нового пользователя
+    - Возвращает `UserResponseDto`
+    - Логика:
+        - Валидация уникальности логина и email
+        - Маппинг DTO в сущность
+        - Установка статуса ACTIVE и роли USER
+        - Хеширование пароля
+        - Сохранение в БД
 
 5. **`updateUser(UUID id, UserUpdateDto userDetails)`**
-   - Полное обновление пользователя
-   - Возвращает `Optional<UserResponseDto>`
-   - Логика:
-     - Поиск пользователя по ID
-     - Валидация уникальности (исключая текущего пользователя)
-     - Обновление полей через маппер
-     - Хеширование нового пароля (если указан)
-     - Сохранение изменений
+    - Полное обновление пользователя
+    - Возвращает `Optional<UserResponseDto>`
+    - Логика:
+        - Поиск пользователя по ID
+        - Валидация уникальности (исключая текущего пользователя)
+        - Обновление полей через маппер
+        - Хеширование нового пароля (если указан)
+        - Сохранение изменений
 
 6. **`patchUser(UUID id, JsonNode patchNode)`**
-   - Частичное обновление пользователя
-   - Возвращает `Optional<UserResponseDto>`
-   - Логика:
-     - Поиск пользователя по ID
-     - Применение JSON Patch к DTO
-     - Валидация результата
-     - Проверка уникальности
-     - Обновление сущности
+    - Частичное обновление пользователя
+    - Возвращает `Optional<UserResponseDto>`
+    - Логика:
+        - Поиск пользователя по ID
+        - Применение JSON Patch к DTO
+        - Валидация результата
+        - Проверка уникальности
+        - Обновление сущности
 
 7. **`inactivateUser(UUID id)`**
-   - Деактивация пользователя
-   - Возвращает `Optional<UserResponseDto>`
-   - Логика:
-     - Проверка, что это не последний активный администратор
-     - Установка статуса INACTIVE
-     - Логирование операции
+    - Деактивация пользователя
+    - Возвращает `Optional<UserResponseDto>`
+    - Логика:
+        - Проверка, что это не последний активный администратор
+        - Установка статуса INACTIVE
+        - Логирование операции
 
 8. **`updateUserRole(UUID id, UserRoleUpdateDto roleUpdate)`**
-   - Обновление роли пользователя
-   - Возвращает `Optional<UserResponseDto>`
-   - Логика:
-     - Проверка, что нельзя изменить роль последнего администратора
-     - Обновление роли
-     - Логирование изменения
+    - Обновление роли пользователя
+    - Возвращает `Optional<UserResponseDto>`
+    - Логика:
+        - Проверка, что нельзя изменить роль последнего администратора
+        - Обновление роли
+        - Логирование изменения
 
 ### Ключевые бизнес-правила:
 
 1. **Уникальность данных:**
-   - Логин должен быть уникальным
-   - Email должен быть уникальным
-   - При обновлении исключается текущий пользователь
+    - Логин должен быть уникальным
+    - Email должен быть уникальным
+    - При обновлении исключается текущий пользователь
 
 2. **Защита администраторов:**
-   - Нельзя деактивировать последнего активного администратора
-   - Нельзя изменить роль последнего активного администратора
+    - Нельзя деактивировать последнего активного администратора
+    - Нельзя изменить роль последнего активного администратора
 
 3. **Безопасность паролей:**
-   - Пароли хешируются с использованием PBKDF2
-   - Используется криптографически безопасная соль
-   - Пароли никогда не возвращаются в ответах
+    - Пароли хешируются с использованием PBKDF2
+    - Используется криптографически безопасная соль
+    - Пароли никогда не возвращаются в ответах
 
 4. **Валидация данных:**
-   - Все входящие данные валидируются
-   - Используется Jakarta Validation
-   - Кастомная валидация для бизнес-правил
+    - Все входящие данные валидируются
+    - Используется Jakarta Validation
+    - Кастомная валидация для бизнес-правил
 
 ## Слой валидации
 
@@ -567,84 +615,106 @@ logging:
 
 ### UserValidator
 
-Интерфейс `UserValidator` определяет методы валидации для всех операций с пользователями. Он включает методы для валидации создания, обновления, частичного обновления, проверки уникальности, деактивации администраторов и смены ролей.
+Интерфейс `UserValidator` определяет методы валидации для всех операций с пользователями. Он включает методы для
+валидации создания, обновления, частичного обновления, проверки уникальности, деактивации администраторов и смены ролей.
 
 ### Типы исключений валидации
 
 #### 1. ValidationException (базовое исключение)
+
 Базовое абстрактное исключение для всех типов ошибок валидации. Содержит информацию о типе валидации и контексте ошибки.
 
 #### 2. UniquenessValidationException
-Используется для ошибок уникальности логина и email. Содержит информацию о поле, которое нарушает уникальность, и его значении.
+
+Используется для ошибок уникальности логина и email. Содержит информацию о поле, которое нарушает уникальность, и его
+значении.
 
 **HTTP статус:** `409 Conflict`  
 **Content-Type:** `application/problem+json`
 
 **Пример ответа:**
+
 ```json
 {
-  "title": "Uniqueness Validation Error",
-  "detail": "User with login 'testuser' already exists",
-  "fieldName": "login",
-  "fieldValue": "testuser",
-  "validationType": "UNIQUENESS",
-  "timestamp": "2025-01-21T19:30:00Z"
+    "title": "Uniqueness Validation Error",
+    "detail": "User with login 'testuser' already exists",
+    "fieldName": "login",
+    "fieldValue": "testuser",
+    "validationType": "UNIQUENESS",
+    "timestamp": "2025-01-21T19:30:00Z"
 }
 ```
 
 #### 3. BusinessRuleValidationException
-Используется для нарушений бизнес-правил, таких как попытка деактивировать последнего администратора или изменить его роль. Содержит название нарушенного правила.
+
+Используется для нарушений бизнес-правил, таких как попытка деактивировать последнего администратора или изменить его
+роль. Содержит название нарушенного правила.
 
 **HTTP статус:** `409 Conflict`  
 **Content-Type:** `application/problem+json`
 
 **Пример ответа:**
+
 ```json
 {
-  "title": "Business Rule Validation Error",
-  "detail": "Business rule 'LAST_ADMIN_DEACTIVATION' violated for context: userId=123e4567-e89b-12d3-a456-426614174000",
-  "ruleName": "LAST_ADMIN_DEACTIVATION",
-  "validationType": "BUSINESS_RULE",
-  "timestamp": "2025-01-21T19:30:00Z"
+    "title": "Business Rule Validation Error",
+    "detail": "Business rule 'LAST_ADMIN_DEACTIVATION' violated for context: userId=123e4567-e89b-12d3-a456-426614174000",
+    "ruleName": "LAST_ADMIN_DEACTIVATION",
+    "validationType": "BUSINESS_RULE",
+    "timestamp": "2025-01-21T19:30:00Z"
 }
 ```
 
 #### 4. FormatValidationException
-Используется для ошибок формата данных, таких как некорректная длина логина, невалидный email или другие нарушения ограничений Jakarta Validation.
+
+Используется для ошибок формата данных, таких как некорректная длина логина, невалидный email или другие нарушения
+ограничений Jakarta Validation.
 
 **HTTP статус:** `400 Bad Request`  
 **Content-Type:** `application/problem+json`
 
 **Пример ответа:**
+
 ```json
 {
-  "title": "Format Validation Error",
-  "detail": "Validation failed for field 'login': size must be between 3 and 50",
-  "validationType": "FORMAT",
-  "timestamp": "2025-01-21T19:30:00Z"
+    "title": "Format Validation Error",
+    "detail": "Validation failed for field 'login': size must be between 3 and 50",
+    "validationType": "FORMAT",
+    "timestamp": "2025-01-21T19:30:00Z"
 }
 ```
 
 ### Валидация по операциям
 
 #### Создание пользователя (CREATE)
-Проверяется уникальность логина и email среди всех существующих пользователей. При обнаружении дублирования выбрасывается `UniquenessValidationException`.
+
+Проверяется уникальность логина и email среди всех существующих пользователей. При обнаружении дублирования
+выбрасывается `UniquenessValidationException`.
 
 #### Обновление пользователя (UPDATE)
-Проверяется уникальность логина и email среди всех пользователей, исключая текущего обновляемого пользователя. Это позволяет пользователю сохранить свои текущие данные при обновлении других полей.
+
+Проверяется уникальность логина и email среди всех пользователей, исключая текущего обновляемого пользователя. Это
+позволяет пользователю сохранить свои текущие данные при обновлении других полей.
 
 #### Частичное обновление (PATCH)
-Выполняется двухэтапная валидация: сначала проверяется структура JSON Patch, затем применяется Bean Validation к результирующему DTO. Дополнительно проверяется уникальность только тех полей, которые изменяются.
+
+Выполняется двухэтапная валидация: сначала проверяется структура JSON Patch, затем применяется Bean Validation к
+результирующему DTO. Дополнительно проверяется уникальность только тех полей, которые изменяются.
 
 #### Деактивация пользователя (INACTIVATE)
-Проверяется бизнес-правило: нельзя деактивировать последнего активного администратора в системе. При попытке деактивации последнего админа выбрасывается `BusinessRuleValidationException`.
+
+Проверяется бизнес-правило: нельзя деактивировать последнего активного администратора в системе. При попытке деактивации
+последнего админа выбрасывается `BusinessRuleValidationException`.
 
 #### Смена роли (ROLE_CHANGE)
-Проверяется бизнес-правило: нельзя изменить роль последнего активного администратора на любую другую роль. Это гарантирует наличие хотя бы одного администратора в системе.
+
+Проверяется бизнес-правило: нельзя изменить роль последнего активного администратора на любую другую роль. Это
+гарантирует наличие хотя бы одного администратора в системе.
 
 ### Примеры использования
 
 #### Создание пользователя с дублирующимся логином
+
 ```bash
 curl -X POST http://localhost:8081/api/v1/users \
   -H "Content-Type: application/json" \
@@ -656,34 +726,38 @@ curl -X POST http://localhost:8081/api/v1/users \
 ```
 
 **Ответ (409 Conflict):**
+
 ```json
 {
-  "title": "Uniqueness Validation Error",
-  "detail": "User with login 'existinguser' already exists",
-  "fieldName": "login",
-  "fieldValue": "existinguser",
-  "validationType": "UNIQUENESS",
-  "timestamp": "2025-01-21T19:30:00Z"
+    "title": "Uniqueness Validation Error",
+    "detail": "User with login 'existinguser' already exists",
+    "fieldName": "login",
+    "fieldValue": "existinguser",
+    "validationType": "UNIQUENESS",
+    "timestamp": "2025-01-21T19:30:00Z"
 }
 ```
 
 #### Попытка деактивировать последнего админа
+
 ```bash
 curl -X PATCH http://localhost:8081/api/v1/users/123e4567-e89b-12d3-a456-426614174000/inactivate
 ```
 
 **Ответ (409 Conflict):**
+
 ```json
 {
-  "title": "Business Rule Validation Error",
-  "detail": "Business rule 'LAST_ADMIN_DEACTIVATION' violated for context: userId=123e4567-e89b-12d3-a456-426614174000",
-  "ruleName": "LAST_ADMIN_DEACTIVATION",
-  "validationType": "BUSINESS_RULE",
-  "timestamp": "2025-01-21T19:30:00Z"
+    "title": "Business Rule Validation Error",
+    "detail": "Business rule 'LAST_ADMIN_DEACTIVATION' violated for context: userId=123e4567-e89b-12d3-a456-426614174000",
+    "ruleName": "LAST_ADMIN_DEACTIVATION",
+    "validationType": "BUSINESS_RULE",
+    "timestamp": "2025-01-21T19:30:00Z"
 }
 ```
 
 #### PATCH с некорректным форматом данных
+
 ```bash
 curl -X PATCH http://localhost:8081/api/v1/users/123e4567-e89b-12d3-a456-426614174000 \
   -H "Content-Type: application/json" \
@@ -691,12 +765,13 @@ curl -X PATCH http://localhost:8081/api/v1/users/123e4567-e89b-12d3-a456-4266141
 ```
 
 **Ответ (400 Bad Request):**
+
 ```json
 {
-  "title": "Format Validation Error",
-  "detail": "Validation failed for field 'login': size must be between 3 and 50",
-  "validationType": "FORMAT",
-  "timestamp": "2025-01-21T19:30:00Z"
+    "title": "Format Validation Error",
+    "detail": "Validation failed for field 'login': size must be between 3 and 50",
+    "validationType": "FORMAT",
+    "timestamp": "2025-01-21T19:30:00Z"
 }
 ```
 
@@ -705,32 +780,33 @@ curl -X PATCH http://localhost:8081/api/v1/users/123e4567-e89b-12d3-a456-4266141
 ### Сущность User
 
 ```java
+
 @Entity
 @Table(name = "users")
 public class User {
     @Id
     @GeneratedValue(generator = "UUID")
     private UUID id;
-    
+
     @Column(unique = true, nullable = false)
     private String login;
-    
+
     private String firstName;
     private String lastName;
-    
+
     @Column(unique = true, nullable = false)
     private String email;
-    
+
     @Column(nullable = false)
     private String passwordHash;
-    
+
     @Column(nullable = false)
     private String passwordSalt;
-    
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserStatus status;
-    
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserRole role;
@@ -739,17 +815,17 @@ public class User {
 
 ### Таблица users
 
-| Поле | Тип | Ограничения | Описание |
-|------|-----|-------------|----------|
-| `id` | UUID | PRIMARY KEY, NOT NULL | Уникальный идентификатор |
-| `login` | VARCHAR | UNIQUE, NOT NULL | Логин пользователя |
-| `first_name` | VARCHAR | NULL | Имя |
-| `last_name` | VARCHAR | NULL | Фамилия |
-| `email` | VARCHAR | UNIQUE, NOT NULL | Email адрес |
-| `password_hash` | VARCHAR | NOT NULL | Хеш пароля |
-| `password_salt` | VARCHAR | NOT NULL | Соль для хеширования |
-| `status` | VARCHAR | NOT NULL | Статус (ACTIVE/INACTIVE) |
-| `role` | VARCHAR | NOT NULL | Роль (USER/ADMIN/MODERATOR) |
+| Поле            | Тип     | Ограничения           | Описание                    |
+|-----------------|---------|-----------------------|-----------------------------|
+| `id`            | UUID    | PRIMARY KEY, NOT NULL | Уникальный идентификатор    |
+| `login`         | VARCHAR | UNIQUE, NOT NULL      | Логин пользователя          |
+| `first_name`    | VARCHAR | NULL                  | Имя                         |
+| `last_name`     | VARCHAR | NULL                  | Фамилия                     |
+| `email`         | VARCHAR | UNIQUE, NOT NULL      | Email адрес                 |
+| `password_hash` | VARCHAR | NOT NULL              | Хеш пароля                  |
+| `password_salt` | VARCHAR | NOT NULL              | Соль для хеширования        |
+| `status`        | VARCHAR | NOT NULL              | Статус (ACTIVE/INACTIVE)    |
+| `role`          | VARCHAR | NOT NULL              | Роль (USER/ADMIN/MODERATOR) |
 
 ### UserRepository
 
@@ -758,9 +834,13 @@ public class User {
 ```java
 public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificationExecutor<User> {
     long countByRoleAndStatus(UserRole role, UserStatus status);
+
     boolean existsByLogin(String login);
+
     boolean existsByEmail(String email);
+
     boolean existsByLoginAndIdNot(String login, UUID id);
+
     boolean existsByEmailAndIdNot(String email, UUID id);
 }
 ```
@@ -770,8 +850,8 @@ public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificat
 Фильтрация реализована через Spring Data JPA Specifications:
 
 ```java
-public record UserFilter(String firstNameContains, String lastNameContains, 
-                        String email, String login, UserRole role) {
+public record UserFilter(String firstNameContains, String lastNameContains,
+                         String email, String login, UserRole role) {
     public Specification<User> toSpecification() {
         return firstNameContainsSpec()
             .and(lastNameContainsSpec())
@@ -811,16 +891,18 @@ curl http://localhost:8081/api/v1/users/123e4567-e89b-12d3-a456-426614174000/exi
 ```
 
 **Ответ (пользователь существует):**
+
 ```json
 {
-  "exists": true
+    "exists": true
 }
 ```
 
 **Ответ (пользователь не существует):**
+
 ```json
 {
-  "exists": false
+    "exists": false
 }
 ```
 
@@ -989,7 +1071,8 @@ curl -X PATCH http://localhost:8081/api/v1/users/123e4567-e89b-12d3-a456-4266141
 
 Сервис использует **централизованное управление версиями** через `dependencyManagement` в корневом `build.gradle`.
 
-**Важно**: При добавлении новых зависимостей в `build.gradle` сервиса **НЕ указывайте версии** - они автоматически резолвятся через `dependencyManagement`.
+**Важно**: При добавлении новых зависимостей в `build.gradle` сервиса **НЕ указывайте версии** - они автоматически
+резолвятся через `dependencyManagement`.
 
 ## Запуск и развертывание
 

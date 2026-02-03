@@ -1,6 +1,6 @@
 package com.twitter.client;
 
-import com.twitter.common.dto.response.FollowingResponseDto;
+import com.twitter.common.dto.response.follow.FollowingResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.data.domain.Page;

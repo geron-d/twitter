@@ -1,4 +1,4 @@
-package com.twitter.common.exception.validation;
+package com.twitter.common.enums.validation;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -13,11 +13,9 @@ import lombok.RequiredArgsConstructor;
  * based on the validation type.
  *
  * <p>The validation types cover the main categories of validation failures:</p>
- * <ul>
- *   <li><strong>Data Integrity</strong> - Ensuring data uniqueness and consistency</li>
- *   <li><strong>Business Logic</strong> - Enforcing domain-specific rules and constraints</li>
- *   <li><strong>Technical Format</strong> - Validating data structure and syntax</li>
- * </ul>
+ * - <strong>Data Integrity</strong> - Ensuring data uniqueness and consistency
+ * - <strong>Business Logic</strong> - Enforcing domain-specific rules and constraints
+ * - <strong>Technical Format</strong> - Validating data structure and syntax
  *
  * @author geron
  * @version 1.0
@@ -57,12 +55,6 @@ public enum ValidationType {
 
     /**
      * Human-readable description of the validation type.
-     * <p>
-     * This field provides a descriptive string that explains what type
-     * of validation this enum value represents. It is useful for logging,
-     * debugging, and generating user-friendly error messages.
-     *
-     * @return the description of this validation type
      */
     private final String description;
 }

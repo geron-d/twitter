@@ -1,8 +1,8 @@
 package com.twitter.validation;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.twitter.common.dto.request.UserRequestDto;
-import com.twitter.common.enums.UserRole;
+import com.twitter.common.dto.request.user.UserRequestDto;
+import com.twitter.common.enums.user.UserRole;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.FormatValidationException;
 import com.twitter.common.exception.validation.UniquenessValidationException;
@@ -92,8 +92,7 @@ public interface UserValidator {
      * Validates the possibility of user deactivation.
      * <p>
      * This method enforces business rules to prevent deactivation of the last
-     * active administrator in the system. It ensures system maintainability
-     * by keeping at least one active administrator available.
+     * active administrator in the system.
      *
      * @param userId the ID of the user to be deactivated
      * @throws BusinessRuleValidationException if business rules are violated
@@ -104,8 +103,7 @@ public interface UserValidator {
      * Validates the possibility of user role change.
      * <p>
      * This method enforces business rules to prevent role changes for the last
-     * active administrator. It ensures system maintainability by preventing
-     * scenarios where no active administrators remain in the system.
+     * active administrator.
      *
      * @param userId  the ID of the user
      * @param newRole the new role for the user
@@ -136,4 +134,4 @@ public interface UserValidator {
      * @throws FormatValidationException if validation constraints are violated
      */
     void validatePatchConstraints(UserPatchDto patchDto);
-}
+}

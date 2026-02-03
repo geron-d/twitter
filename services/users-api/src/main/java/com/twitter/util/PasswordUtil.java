@@ -23,7 +23,6 @@ public class PasswordUtil {
 
     /**
      * PBKDF2 algorithm with HMAC-SHA256 for password hashing.
-     * This algorithm provides strong cryptographic security for password storage.
      */
     private static final String ALGORITHM = "PBKDF2WithHmacSHA256";
 
@@ -76,4 +75,4 @@ public class PasswordUtil {
         byte[] hash = factory.generateSecret(spec).getEncoded();
         return Base64.getEncoder().encodeToString(hash);
     }
-}
+}

@@ -35,7 +35,7 @@ This document defines the JavaDoc documentation standards for the Twitter micros
 - Start with a brief description of the element (first sentence)
 - Follow with detailed information using `<p>` tags
 - Use standard JavaDoc tags consistently
-- Use lists (`<ul>`, `<ol>`) for multiple items or steps
+- Use dashes (`-`) for unordered lists and numbering (`1.`, `2.`, `3.`) for ordered lists
 
 ### Required Tags
 
@@ -47,10 +47,11 @@ All public classes, interfaces, and methods must include:
 ### Formatting Guidelines
 
 - Use `<p>` tags to separate paragraphs
-- Use `<pre>{@code ... }</pre>` for multi-line code examples
-- Use `{@code code}` for inline code references
-- Use `<ul>` and `<li>` for unordered lists
-- Use `<ol>` and `<li>` for ordered lists
+- **Do not insert source code snippets in JavaDoc.** Do not use `<pre>{@code ... }</pre>` for Java or other code examples. Put usage examples in README, tests, or external documentation; in JavaDoc use `@see` and `{@link}`.
+- Use `{@code ...}` for inline references to identifiers, literals (`true`, `false`), annotation names, field names, etc.
+- Use `<pre>...</pre>` **without** `{@code}` only for short **data format** examples (JSON, log lines, RFC 7807, etc.), not for source code.
+- Use dashes (`-`) for unordered lists (each item on a new line starting with `-`)
+- Use numbering (`1.`, `2.`, `3.`, etc.) for ordered lists (each item on a new line with number and dot)
 - Use `{@link ClassName}` or `{@link ClassName#method}` for cross-references
 
 ---
@@ -255,7 +256,10 @@ private void setPassword(User user, String password) {
 }
 ```
 
-**Method with Code Example:**
+**Method with output/format example (allowed):**
+
+`<pre>` without `{@code}` may be used for short **output or data format** examples (log lines, JSON), not for source code:
+
 ```java
 /**
  * Logs detailed information about the HTTP request.
@@ -300,11 +304,39 @@ public Optional<UserResponseDto> getUserById(UUID id) {
 ### 3. Records (DTOs)
 
 #### Required Tags
-- `@param` - For each record component parameter
+- `@param` - For each record component parameter that is not documented via `@Schema(description = "...")` annotation
 - `@author geron`
 - `@version 1.0`
 
 #### Template
+
+**When fields have `@Schema(description = "...")` annotations, do not use `@param` in record-level JavaDoc:**
+
+```java
+/**
+ * Data Transfer Object for [specific purpose].
+ * <p>
+ * This record represents the data structure used for [specific purpose]
+ * in the system. It includes validation constraints to ensure data
+ * integrity and security requirements are met.
+ *
+ * @author geron
+ * @version 1.0
+ */
+@Schema(name = "ExampleRequest", description = "Data structure for...")
+public record ExampleDto(
+    @Schema(description = "Description of what this field represents", example = "...")
+    @NotBlank(message = "...")
+    String fieldName,
+    
+    @Schema(description = "Description of another field", example = "...")
+    String anotherField
+) {
+}
+```
+
+**When fields do not have `@Schema(description = "...")` annotations, use `@param` in record-level JavaDoc:**
+
 ```java
 /**
  * Data Transfer Object for [specific purpose].
@@ -320,23 +352,17 @@ public Optional<UserResponseDto> getUserById(UUID id) {
  */
 @Schema(name = "ExampleRequest", description = "Data structure for...")
 public record ExampleDto(
-    /**
-     * Description of what this field represents.
-     * <p>
-     * Additional details about constraints, format, or usage.
-     */
-    @Schema(description = "...", example = "...")
     @NotBlank(message = "...")
     String fieldName,
     
-    // other fields
+    String anotherField
 ) {
 }
 ```
 
 #### Examples from Project
 
-**Request DTO:**
+**Request DTO with @Schema annotations (no @param needed):**
 ```java
 /**
  * Data Transfer Object for user creation requests.
@@ -345,11 +371,6 @@ public record ExampleDto(
  * in the system. It includes validation constraints to ensure data
  * integrity and security requirements are met.
  *
- * @param login     unique login name for user authentication
- * @param firstName user's first name
- * @param lastName  user's last name
- * @param email     user's email address
- * @param password  user's password (will be hashed)
  * @author geron
  * @version 1.0
  */
@@ -367,12 +388,6 @@ public record ExampleDto(
         """
 )
 public record UserRequestDto(
-    /**
-     * Unique login name for user authentication.
-     * <p>
-     * This field must be unique across all users and is required for
-     * authentication purposes. Must be between 3 and 50 characters.
-     */
     @Schema(
         description = "Unique login name for user authentication",
         example = "jane_smith",
@@ -384,9 +399,6 @@ public record UserRequestDto(
     @Size(min = 3, max = 50, message = "Login must be between 3 and 50 characters")
     String login,
     
-    /**
-     * User's first name.
-     */
     @Schema(
         description = "User's first name (optional)",
         example = "Jane",
@@ -399,7 +411,7 @@ public record UserRequestDto(
 }
 ```
 
-**Simpler DTO:**
+**Simpler DTO with @Schema annotations (no @param needed):**
 ```java
 /**
  * Data Transfer Object for creating a new tweet.
@@ -444,8 +456,29 @@ public record CreateTweetRequestDto(
 }
 ```
 
+**DTO without @Schema annotations (use @param instead):**
+```java
+/**
+ * Data Transfer Object for internal processing.
+ * <p>
+ * This record is used for internal data transfer and does not require
+ * OpenAPI documentation. Field descriptions are provided via @param tags.
+ *
+ * @param internalId   internal identifier for processing
+ * @param metadata    additional metadata information
+ * @author geron
+ * @version 1.0
+ */
+public record InternalProcessingDto(
+    UUID internalId,
+    Map<String, String> metadata
+) {
+}
+```
+
 **Key Points for DTOs:**
-- Document the record itself with `@param` tags for all components
+- If a field has `@Schema(description = "...")`, do not include `@param` for that field in the record-level JavaDoc to avoid duplication
+- Document the record itself with `@param` tags only for components that are not documented via `@Schema(description = "...")` annotations
 - Optionally document individual fields with JavaDoc comments
 - Use `@Schema` annotations for OpenAPI documentation
 - Include validation constraints in JavaDoc when relevant
@@ -623,18 +656,9 @@ public @interface ExampleAnnotation {
  * which intercepts method calls and logs request details including headers,
  * body content, and response information.
  *
- * <p>Example usage:</p>
- * <pre>{@code
- * @LoggableRequest
- * public ResponseEntity<User> createUser(@RequestBody User user) {
- *     return userService.createUser(user);
- * }
- *
- * @LoggableRequest(printRequestBody = false, hideFields = {"password", "ssn"})
- * public ResponseEntity<User> updateUser(@RequestBody User user) {
- *     return userService.updateUser(user);
- * }
- * }</pre>
+ * <p>Annotate controller methods with {@code @LoggableRequest}. Use
+ * {@code printRequestBody} and {@code hideFields} to control logging. See
+ * project README or integration tests for usage examples.</p>
  *
  * @author geron
  * @version 1.0
@@ -651,11 +675,9 @@ public @interface LoggableRequest {
      * method and URI will be logged without the body content.
      *
      * <p>Use {@code false} for:</p>
-     * <ul>
-     *   <li>Large request bodies that would clutter logs</li>
-     *   <li>Sensitive endpoints where body content should not be logged</li>
-     *   <li>Performance-critical endpoints where logging overhead should be minimized</li>
-     * </ul>
+     * - Large request bodies that would clutter logs
+     * - Sensitive endpoints where body content should not be logged
+     * - Performance-critical endpoints where logging overhead should be minimized
      *
      * @return {@code true} if request body should be logged, {@code false} otherwise
      */
@@ -670,21 +692,14 @@ public @interface LoggableRequest {
      * and should match exactly with the JSON property names.
      *
      * <p>Common fields to hide:</p>
-     * <ul>
-     *   <li>{@code "password"} - User passwords</li>
-     *   <li>{@code "ssn"} - Social Security Numbers</li>
-     *   <li>{@code "creditCard"} - Credit card information</li>
-     *   <li>{@code "token"} - Authentication tokens</li>
-     *   <li>{@code "secret"} - API secrets</li>
-     * </ul>
+     * - {@code "password"} - User passwords
+     * - {@code "ssn"} - Social Security Numbers
+     * - {@code "creditCard"} - Credit card information
+     * - {@code "token"} - Authentication tokens
+     * - {@code "secret"} - API secrets
      *
-     * <p>Example:</p>
-     * <pre>{@code
-     * @LoggableRequest(hideFields = {"password", "ssn", "creditCard"})
-     * public ResponseEntity<User> createUser(@RequestBody User user) {
-     *     // password, ssn, and creditCard fields will be hidden in logs
-     * }
-     * }</pre>
+     * <p>Specify field names as in {@code hideFields = {"password", "ssn"}}.
+     * For full usage examples, see README or tests.</p>
      *
      * @return array of field names to hide in the logged output
      */
@@ -822,54 +837,39 @@ Use `<p>` tags to separate paragraphs:
 
 ### Code Examples
 
-Use `<pre>{@code ... }</pre>` for multi-line code examples:
+Do not use `<pre>{@code ... }</pre>` for source code examples. Prefer `@see`, README, or external documentation for usage.
 
-```java
-/**
- * Method description.
- * <p>
- * Example usage:
- * <pre>{@code
- * ExampleClass example = new ExampleClass();
- * ReturnType result = example.methodName(paramValue);
- * }</pre>
- */
-```
-
-Use `{@code code}` for inline code references:
+Use `{@code ...}` for inline references to identifiers, literals, annotation names:
 
 ```java
 /**
  * When set to {@code true}, the feature is enabled.
  * Use {@code false} to disable the feature.
+ * Annotate with {@code @LoggableRequest} for request logging.
  */
 ```
 
 ### Lists
 
-Use `<ul>` and `<li>` for unordered lists:
+Use dashes (`-`) for unordered lists:
 
 ```java
 /**
  * <p>The handler processes the following exception types:</p>
- * <ul>
- *   <li>ResponseStatusException - HTTP status exceptions</li>
- *   <li>RuntimeException - General runtime errors</li>
- *   <li>ConstraintViolationException - Bean validation errors</li>
- * </ul>
+ * - ResponseStatusException - HTTP status exceptions
+ * - RuntimeException - General runtime errors
+ * - ConstraintViolationException - Bean validation errors
  */
 ```
 
-Use `<ol>` and `<li>` for ordered lists:
+Use numbering (`1.`, `2.`, `3.`, etc.) for ordered lists:
 
 ```java
 /**
  * <p>This method performs the following operations:</p>
- * <ol>
- *   <li>Validates the request data</li>
- *   <li>Checks if the user exists</li>
- *   <li>Saves the entity to the database</li>
- * </ol>
+ * 1. Validates the request data
+ * 2. Checks if the user exists
+ * 3. Saves the entity to the database
  */
 ```
 
@@ -927,10 +927,8 @@ Use `{@link ClassName#method}` for method references:
 
 ### 5. Examples
 
-- Include code examples for complex methods
-- Ensure examples are syntactically correct
-- Use realistic examples from the project context
-- Update examples when API changes
+- Do not include source code snippets (code examples) in JavaDoc. For complex usage, use `@see`, README, integration tests, or separate documentation.
+- Use inline `{@code}` for identifiers and literals where helpful.
 
 ### 6. Implementation Methods
 
@@ -945,6 +943,10 @@ Use `{@link ClassName#method}` for method references:
 - **DO** document complex business logic methods
 - Use clear, descriptive method names
 
+### 8. Don'ts
+
+- Do not put source code snippets in JavaDoc. Do not use `<pre>{@code ... }</pre>` for Java or other code. Use `@see`, README, or tests for usage examples.
+
 ---
 
 ## Quality Checklist
@@ -958,7 +960,7 @@ Before submitting code, ensure:
 - [ ] All public fields have field-level JavaDoc (if any)
 - [ ] All constructors have JavaDoc (if custom)
 - [ ] All enum constants have JavaDoc
-- [ ] All DTO records have record-level JavaDoc with `@param` tags
+- [ ] All DTO records have record-level JavaDoc with `@param` tags only for fields without `@Schema(description = "...")` annotations
 - [ ] All annotation elements have JavaDoc
 
 ### Accuracy
@@ -966,7 +968,7 @@ Before submitting code, ensure:
 - [ ] Parameter descriptions are accurate
 - [ ] Return value descriptions are correct
 - [ ] Exception descriptions are accurate
-- [ ] Examples work as described
+- [ ] Any `<pre>` data or format examples (JSON, log output, etc.) are accurate
 - [ ] Cross-references point to existing classes/methods
 
 ### Clarity
@@ -984,6 +986,7 @@ Before submitting code, ensure:
 - [ ] Includes `@author geron` and `@version 1.0` where required
 - [ ] Uses `<p>` tags for paragraph separation
 - [ ] Uses proper code formatting tags
+- [ ] No source code snippets in JavaDoc (no `<pre>{@code ... }</pre>` with code); only inline `{@code}` and `<pre>` for data/format examples where appropriate
 
 ### Repository-Specific
 - [ ] Repository interface is documented
@@ -992,7 +995,8 @@ Before submitting code, ensure:
 - [ ] Complex business logic methods are documented
 
 ### DTO-Specific
-- [ ] Record has class-level JavaDoc with `@param` tags
+- [ ] Record has class-level JavaDoc with `@param` tags only for fields without `@Schema(description = "...")` annotations
+- [ ] Fields with `@Schema(description = "...")` do not have duplicate `@param` tags in record-level JavaDoc
 - [ ] Important fields have individual JavaDoc comments
 - [ ] Validation constraints are mentioned when relevant
 
@@ -1055,7 +1059,7 @@ public class UserServiceImpl implements UserService {
 }
 ```
 
-### Pattern 2: DTO Record with Field Documentation
+### Pattern 2: DTO Record with @Schema Annotations
 
 ```java
 /**
@@ -1065,26 +1069,28 @@ public class UserServiceImpl implements UserService {
  * in the system. It includes validation constraints to ensure data
  * integrity and security requirements are met.
  *
- * @param login     unique login name for user authentication
- * @param firstName user's first name
- * @param lastName  user's last name
- * @param email     user's email address
- * @param password  user's password (will be hashed)
  * @author geron
  * @version 1.0
  */
 @Schema(name = "UserRequest", description = "Data structure for creating new users")
 public record UserRequestDto(
-    /**
-     * Unique login name for user authentication.
-     * <p>
-     * This field must be unique across all users and is required for
-     * authentication purposes. Must be between 3 and 50 characters.
-     */
-    @Schema(description = "Unique login name for user authentication", example = "jane_smith")
+    @Schema(
+        description = "Unique login name for user authentication",
+        example = "jane_smith",
+        minLength = 3,
+        maxLength = 50,
+        requiredMode = Schema.RequiredMode.REQUIRED
+    )
     @NotBlank(message = "Login cannot be blank")
     @Size(min = 3, max = 50, message = "Login must be between 3 and 50 characters")
     String login,
+    
+    @Schema(
+        description = "User's first name (optional)",
+        example = "Jane",
+        maxLength = 100
+    )
+    String firstName,
     
     // other fields...
 ) {
@@ -1163,4 +1169,4 @@ Most modern IDEs (IntelliJ IDEA, Eclipse) can:
 - [Oracle JavaDoc Guide](https://www.oracle.com/technical-resources/articles/java/javadoc-tool.html)
 - [JavaDoc Tags Reference](https://docs.oracle.com/javase/8/docs/technotes/tools/windows/javadoc.html#CHDJGIED)
 - [Spring Boot Documentation](https://spring.io/projects/spring-boot)
-- [Project Code Standards](./STANDART_CODE.md)
+- [Project Code Standards](./STANDART_CODE.md)

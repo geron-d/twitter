@@ -7,10 +7,6 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * Data Transfer Object for user PATCH operations.
- * <p>
- * This class represents the data structure used for partial user updates
- * via JSON Patch operations. It includes validation constraints to ensure
- * data integrity while allowing selective field updates.
  *
  * @author geron
  * @version 1.0
@@ -46,4 +42,4 @@ public class UserPatchDto {
      */
     @Email(message = "Invalid email format")
     private String email;
-}
+}

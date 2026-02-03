@@ -1,8 +1,8 @@
 package com.twitter.validation;
 
+import com.twitter.common.dto.request.follow.FollowRequestDto;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.UniquenessValidationException;
-import com.twitter.common.dto.request.FollowRequestDto;
 import com.twitter.gateway.UserGateway;
 import com.twitter.repository.FollowRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,10 +13,6 @@ import java.util.UUID;
 
 /**
  * Implementation of the follow relationship validator for Twitter system.
- * <p>
- * This validator centralizes all validation logic for follow relationships,
- * ensuring business rules are enforced before creating follow relationships.
- * It validates self-follow prevention, uniqueness, and user existence.
  *
  * @author geron
  * @version 1.0
@@ -98,9 +94,6 @@ public class FollowValidatorImpl implements FollowValidator {
 
     /**
      * Validates that the follow relationship does not already exist.
-     * <p>
-     * This method checks if a follow relationship already exists between
-     * the follower and following users using the repository.
      *
      * @param followerId  the ID of the user who is following
      * @param followingId the ID of the user being followed
@@ -114,4 +107,3 @@ public class FollowValidatorImpl implements FollowValidator {
         }
     }
 }
-

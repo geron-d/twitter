@@ -1,11 +1,11 @@
 package com.twitter.mapper;
 
-import com.twitter.common.dto.request.FollowRequestDto;
-import com.twitter.common.dto.response.FollowResponseDto;
+import com.twitter.common.dto.request.follow.FollowRequestDto;
+import com.twitter.common.dto.response.follow.FollowResponseDto;
+import com.twitter.common.dto.response.follow.FollowingResponseDto;
 import com.twitter.dto.response.FollowStatsResponseDto;
 import com.twitter.dto.response.FollowStatusResponseDto;
 import com.twitter.dto.response.FollowerResponseDto;
-import com.twitter.common.dto.response.FollowingResponseDto;
 import com.twitter.entity.Follow;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

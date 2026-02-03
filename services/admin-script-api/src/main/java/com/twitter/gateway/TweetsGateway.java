@@ -1,13 +1,13 @@
 package com.twitter.gateway;
 
 import com.twitter.client.TweetsApiClient;
-import com.twitter.common.dto.request.CreateTweetRequestDto;
-import com.twitter.common.dto.request.DeleteTweetRequestDto;
-import com.twitter.common.dto.request.LikeTweetRequestDto;
-import com.twitter.common.dto.request.RetweetRequestDto;
-import com.twitter.common.dto.response.LikeResponseDto;
-import com.twitter.common.dto.response.RetweetResponseDto;
-import com.twitter.common.dto.response.TweetResponseDto;
+import com.twitter.common.dto.request.like.LikeTweetRequestDto;
+import com.twitter.common.dto.request.retweet.RetweetRequestDto;
+import com.twitter.common.dto.request.tweet.CreateTweetRequestDto;
+import com.twitter.common.dto.request.tweet.DeleteTweetRequestDto;
+import com.twitter.common.dto.response.like.LikeResponseDto;
+import com.twitter.common.dto.response.retweet.RetweetResponseDto;
+import com.twitter.common.dto.response.tweet.TweetResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -33,7 +33,7 @@ public class TweetsGateway {
      * Creates a new tweet in the tweet-api service.
      *
      * @param createTweetRequest DTO containing tweet data for creation (content and userId)
-     * @return TweetResponseDto containing the created tweet information including ID
+     * @return TweetResponseDto containing the created tweet information
      * @throws RuntimeException if the tweet creation fails (e.g., invalid content, user not found, service unavailable)
      */
     public TweetResponseDto createTweet(CreateTweetRequestDto createTweetRequest) {
@@ -83,7 +83,7 @@ public class TweetsGateway {
      * Retrieves a paginated list of tweets for a specific user.
      *
      * @param userId   the unique identifier of the user whose tweets to retrieve
-     * @param pageable pagination parameters (page, size, sorting). Use large page size to get all tweets
+     * @param pageable pagination parameters (page, size, sorting).
      * @return Page containing paginated list of tweets with metadata
      * @throws RuntimeException if the tweet retrieval fails (e.g., user not found, service unavailable)
      */
@@ -112,9 +112,9 @@ public class TweetsGateway {
      *
      * @param tweetId          the unique identifier of the tweet to like
      * @param likeTweetRequest DTO containing userId for the like operation
-     * @return LikeResponseDto containing the created like information including ID, tweetId, userId, and createdAt
+     * @return LikeResponseDto containing the created like information
      * @throws IllegalArgumentException if tweetId or likeTweetRequest is null
-     * @throws RuntimeException if the like operation fails (e.g., service unavailable, network error)
+     * @throws RuntimeException         if the like operation fails (e.g., service unavailable, network error)
      */
     public LikeResponseDto likeTweet(UUID tweetId, LikeTweetRequestDto likeTweetRequest) {
         if (tweetId == null) {
@@ -140,11 +140,11 @@ public class TweetsGateway {
     /**
      * Retweets a tweet in the tweet-api service.
      *
-     * @param tweetId         the unique identifier of the tweet to retweet
-     * @param retweetRequest  DTO containing userId and optional comment for the retweet operation
-     * @return RetweetResponseDto containing the created retweet information including ID, tweetId, userId, comment, and createdAt
+     * @param tweetId        the unique identifier of the tweet to retweet
+     * @param retweetRequest DTO containing userId and optional comment for the retweet operation
+     * @return RetweetResponseDto containing the created retweet information
      * @throws IllegalArgumentException if tweetId or retweetRequest is null
-     * @throws RuntimeException if the retweet operation fails (e.g., service unavailable, network error)
+     * @throws RuntimeException         if the retweet operation fails (e.g., service unavailable, network error)
      */
     public RetweetResponseDto retweetTweet(UUID tweetId, RetweetRequestDto retweetRequest) {
         if (tweetId == null) {
@@ -167,4 +167,3 @@ public class TweetsGateway {
         }
     }
 }
-

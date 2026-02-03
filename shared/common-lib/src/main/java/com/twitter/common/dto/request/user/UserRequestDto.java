@@ -1,4 +1,4 @@
-package com.twitter.common.dto.request;
+package com.twitter.common.dto.request.user;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
@@ -8,16 +8,7 @@ import lombok.Builder;
 
 /**
  * Data Transfer Object for user creation requests.
- * <p>
- * This record represents the data structure used for creating new users
- * in the system. It includes validation constraints to ensure data
- * integrity and security requirements are met.
  *
- * @param login     unique login name for user authentication
- * @param firstName user's first name
- * @param lastName  user's last name
- * @param email     user's email address
- * @param password  user's password (will be hashed)
  * @author geron
  * @version 1.0
  */
@@ -37,12 +28,6 @@ import lombok.Builder;
 @Builder
 public record UserRequestDto(
 
-    /**
-     * Unique login name for user authentication.
-     * <p>
-     * This field must be unique across all users and is required for
-     * authentication purposes. Must be between 3 and 50 characters.
-     */
     @Schema(
         description = "Unique login name for user authentication",
         example = "jane_smith",
@@ -54,9 +39,6 @@ public record UserRequestDto(
     @Size(min = 3, max = 50, message = "Login must be between 3 and 50 characters")
     String login,
 
-    /**
-     * User's first name.
-     */
     @Schema(
         description = "User's first name (optional)",
         example = "Jane",
@@ -64,9 +46,6 @@ public record UserRequestDto(
     )
     String firstName,
 
-    /**
-     * User's last name.
-     */
     @Schema(
         description = "User's last name (optional)",
         example = "Smith",
@@ -74,12 +53,6 @@ public record UserRequestDto(
     )
     String lastName,
 
-    /**
-     * Unique email address for the user.
-     * <p>
-     * This field must be unique across all users and is required.
-     * Must be a valid email format.
-     */
     @Schema(
         description = "Unique email address for the user",
         example = "jane.smith@example.com",
@@ -90,13 +63,6 @@ public record UserRequestDto(
     @Email(message = "Invalid email format")
     String email,
 
-    /**
-     * Password for user authentication.
-     * <p>
-     * This field contains the plain text password that will be hashed
-     * and stored securely. Must be at least 8 characters long for
-     * security requirements.
-     */
     @Schema(
         description = "Password for user authentication (will be securely hashed)",
         example = "securePassword123",

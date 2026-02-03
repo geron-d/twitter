@@ -7,9 +7,6 @@ import jakarta.validation.constraints.Size;
 
 /**
  * Data Transfer Object for user update requests.
- * <p>
- * It includes validation constraints to ensure data
- * integrity and security requirements are met during updates.
  *
  * @param login     unique login name for user authentication
  * @param firstName user's first name
@@ -33,12 +30,6 @@ import jakarta.validation.constraints.Size;
         """
 )
 public record UserUpdateDto(
-    /**
-     * Unique login name for user authentication.
-     * <p>
-     * This field must be unique across all users and is required for
-     * authentication purposes. Must be between 3 and 50 characters.
-     */
     @Schema(
         description = "Unique login name for user authentication",
         example = "jane_smith_updated",
@@ -50,11 +41,6 @@ public record UserUpdateDto(
     @Size(min = 3, max = 50, message = "Login must be between 3 and 50 characters")
     String login,
 
-    /**
-     * User's first name.
-     * <p>
-     * This field stores the user's given name and is optional.
-     */
     @Schema(
         description = "User's first name (optional)",
         example = "Jane",
@@ -63,11 +49,6 @@ public record UserUpdateDto(
     )
     String firstName,
 
-    /**
-     * User's last name.
-     * <p>
-     * This field stores the user's family name and is optional.
-     */
     @Schema(
         description = "User's last name (optional)",
         example = "Smith-Wilson",
@@ -76,12 +57,6 @@ public record UserUpdateDto(
     )
     String lastName,
 
-    /**
-     * Unique email address for the user.
-     * <p>
-     * This field must be unique across all users and is required.
-     * Must be a valid email format.
-     */
     @Schema(
         description = "Unique email address for the user",
         example = "jane.wilson@example.com",
@@ -91,13 +66,6 @@ public record UserUpdateDto(
     @Email(message = "Invalid email format")
     String email,
 
-    /**
-     * Password for user authentication.
-     * <p>
-     * This field contains the plain text password that will be hashed
-     * and stored securely. Must be at least 8 characters long for
-     * security requirements. Optional for updates.
-     */
     @Schema(
         description = "Password for user authentication (will be securely hashed, optional for updates)",
         example = "newSecurePassword123",
@@ -108,4 +76,4 @@ public record UserUpdateDto(
     @Size(min = 8, message = "Password must be at least 8 characters long")
     String password
 ) {
-}
+}

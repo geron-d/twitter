@@ -2,9 +2,9 @@ package com.twitter.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.twitter.common.aspect.LoggableRequest;
-import com.twitter.common.dto.UserExistsResponseDto;
-import com.twitter.common.dto.request.UserRequestDto;
-import com.twitter.common.dto.response.UserResponseDto;
+import com.twitter.common.dto.request.user.UserRequestDto;
+import com.twitter.common.dto.response.user.UserExistsResponseDto;
+import com.twitter.common.dto.response.user.UserResponseDto;
 import com.twitter.dto.UserRoleUpdateDto;
 import com.twitter.dto.UserUpdateDto;
 import com.twitter.dto.filter.UserFilter;
@@ -65,7 +65,7 @@ public class UserController implements UserApi {
     @GetMapping
     @Override
     public PagedModel<UserResponseDto> findAll(@ModelAttribute UserFilter userFilter,
-                                               @PageableDefault(size = 10) Pageable pageable) {
+                                               @PageableDefault Pageable pageable) {
         Page<UserResponseDto> users = userService.findAll(userFilter, pageable);
         return new PagedModel<>(users);
     }
@@ -128,4 +128,4 @@ public class UserController implements UserApi {
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
     }
-}
+}

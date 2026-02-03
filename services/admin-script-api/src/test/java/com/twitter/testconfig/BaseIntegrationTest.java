@@ -1,35 +1,29 @@
 package com.twitter.testconfig;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.WireMock;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
-import java.util.UUID;
-
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 
 /**
  * Base abstract class for integration tests that require PostgreSQL and WireMock.
  * Provides shared configuration for test containers and WireMock server.
  * <p>
  * This class ensures that:
- * <ul>
- *   <li>PostgreSQL container is started once and shared across all tests</li>
- *   <li>WireMock server is started once and shared across all tests</li>
- *   <li>Spring properties are configured dynamically</li>
- *   <li>WireMock stubs can be set up in subclasses</li>
- * </ul>
+ * - PostgreSQL container is started once and shared across all tests
+ * - WireMock server is started once and shared across all tests
+ * - Spring properties are configured dynamically
+ * - WireMock stubs can be set up in subclasses
  */
 @Testcontainers
 public abstract class BaseIntegrationTest {
 
     @Container
-    @SuppressWarnings("resource")
-    protected static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine")
+    protected static final PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15-alpine")
         .withDatabaseName("twitter_test")
         .withUsername("test")
         .withPassword("test");
@@ -85,8 +79,7 @@ public abstract class BaseIntegrationTest {
                 }
             }
             wireMockServer.resetAll();
-            // Configure static WireMock context to use our server
-            com.github.tomakehurst.wiremock.client.WireMock.configureFor("localhost", wireMockServer.port());
+            WireMock.configureFor("localhost", wireMockServer.port());
         }
     }
 
@@ -100,45 +93,4 @@ public abstract class BaseIntegrationTest {
             return wireMockServer;
         }
     }
-
-    /**
-     * Sets up WireMock stub for user existence check.
-     *
-     * @param userId the user ID to check
-     * @param exists whether the user exists
-     */
-    protected void setupUserExistsStub(UUID userId, boolean exists) {
-        if (wireMockServer == null) {
-            return;
-        }
-
-        wireMockServer.stubFor(
-            get(urlEqualTo("/api/v1/users/" + userId + "/exists"))
-                .willReturn(aResponse()
-                    .withStatus(200)
-                    .withHeader("Content-Type", "application/json")
-                    .withBody("{\"exists\":" + exists + "}"))
-        );
-    }
-
-    /**
-     * Sets up WireMock stub for user existence check with error response.
-     *
-     * @param userId     the user ID to check
-     * @param statusCode HTTP status code to return
-     */
-    protected void setupUserExistsStubWithError(UUID userId, int statusCode) {
-        if (wireMockServer == null) {
-            return;
-        }
-
-        wireMockServer.stubFor(
-            get(urlEqualTo("/api/v1/users/" + userId + "/exists"))
-                .willReturn(aResponse()
-                    .withStatus(statusCode)
-                    .withHeader("Content-Type", "application/json")
-                    .withBody("{\"error\":\"Internal Server Error\"}"))
-        );
-    }
 }
-

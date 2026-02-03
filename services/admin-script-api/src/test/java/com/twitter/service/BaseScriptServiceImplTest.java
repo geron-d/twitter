@@ -1,18 +1,18 @@
 package com.twitter.service;
 
-import com.twitter.common.dto.request.CreateTweetRequestDto;
-import com.twitter.common.dto.request.DeleteTweetRequestDto;
-import com.twitter.common.dto.request.FollowRequestDto;
-import com.twitter.common.dto.request.LikeTweetRequestDto;
-import com.twitter.common.dto.request.RetweetRequestDto;
-import com.twitter.common.dto.request.UserRequestDto;
-import com.twitter.common.dto.response.FollowResponseDto;
-import com.twitter.common.dto.response.LikeResponseDto;
-import com.twitter.common.dto.response.RetweetResponseDto;
-import com.twitter.common.dto.response.TweetResponseDto;
-import com.twitter.common.dto.response.UserResponseDto;
-import com.twitter.common.enums.UserRole;
-import com.twitter.common.enums.UserStatus;
+import com.twitter.common.dto.request.follow.FollowRequestDto;
+import com.twitter.common.dto.request.like.LikeTweetRequestDto;
+import com.twitter.common.dto.request.retweet.RetweetRequestDto;
+import com.twitter.common.dto.request.tweet.CreateTweetRequestDto;
+import com.twitter.common.dto.request.tweet.DeleteTweetRequestDto;
+import com.twitter.common.dto.request.user.UserRequestDto;
+import com.twitter.common.dto.response.follow.FollowResponseDto;
+import com.twitter.common.dto.response.like.LikeResponseDto;
+import com.twitter.common.dto.response.retweet.RetweetResponseDto;
+import com.twitter.common.dto.response.tweet.TweetResponseDto;
+import com.twitter.common.dto.response.user.UserResponseDto;
+import com.twitter.common.enums.user.UserRole;
+import com.twitter.common.enums.user.UserStatus;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.dto.request.BaseScriptRequestDto;
 import com.twitter.dto.response.BaseScriptResponseDto;
@@ -303,7 +303,7 @@ class BaseScriptServiceImplTest {
             assertThat(result).isNotNull();
             assertThat(result.deletedTweets()).isEmpty();
             assertThat(result.statistics().errors()).isNotEmpty();
-            assertThat(result.statistics().errors().get(0)).contains("Validation failed");
+            assertThat(result.statistics().errors().getFirst()).contains("Validation failed");
 
             verify(validator, times(1)).validateDeletionCount(any(), eq(1));
             verify(tweetsGateway, never()).deleteTweet(any(UUID.class), any(DeleteTweetRequestDto.class));
@@ -406,22 +406,16 @@ class BaseScriptServiceImplTest {
         private UUID userId1;
         private UUID userId2;
         private UUID userId3;
-        private UUID userId4;
         private UUID followId1;
         private UUID followId2;
-        private UUID followId3;
-        private UUID followId4;
 
         @BeforeEach
         void setUp() {
             userId1 = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
             userId2 = UUID.fromString("223e4567-e89b-12d3-a456-426614174001");
             userId3 = UUID.fromString("323e4567-e89b-12d3-a456-426614174002");
-            userId4 = UUID.fromString("423e4567-e89b-12d3-a456-426614174003");
             followId1 = UUID.fromString("523e4567-e89b-12d3-a456-426614174004");
             followId2 = UUID.fromString("623e4567-e89b-12d3-a456-426614174005");
-            followId3 = UUID.fromString("723e4567-e89b-12d3-a456-426614174006");
-            followId4 = UUID.fromString("823e4567-e89b-12d3-a456-426614174007");
         }
 
         @Test

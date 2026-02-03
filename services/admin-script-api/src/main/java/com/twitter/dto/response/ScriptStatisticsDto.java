@@ -6,21 +6,7 @@ import java.util.List;
 
 /**
  * Data Transfer Object for script execution statistics.
- * <p>
- * This record represents detailed statistics about the execution of an administrative
- * script, including counts of created and deleted entities, execution time, and any
- * errors that occurred during execution.
  *
- * @param totalUsersCreated     total number of successfully created users
- * @param totalTweetsCreated    total number of successfully created tweets
- * @param totalFollowsCreated   total number of successfully created follow relationships
- * @param totalTweetsDeleted    total number of successfully deleted tweets
- * @param usersWithTweets       number of users who have tweets
- * @param usersWithoutTweets    number of users who do not have tweets
- * @param totalLikesCreated     total number of successfully created likes
- * @param totalRetweetsCreated  total number of successfully created retweets
- * @param executionTimeMs       script execution time in milliseconds
- * @param errors                list of error messages if any errors occurred during execution
  * @author geron
  * @version 1.0
  */
@@ -44,9 +30,6 @@ import java.util.List;
 )
 public record ScriptStatisticsDto(
 
-    /**
-     * Total number of successfully created users.
-     */
     @Schema(
         description = "Total number of successfully created users",
         example = "10",
@@ -54,9 +37,6 @@ public record ScriptStatisticsDto(
     )
     Integer totalUsersCreated,
 
-    /**
-     * Total number of successfully created tweets.
-     */
     @Schema(
         description = "Total number of successfully created tweets",
         example = "50",
@@ -64,9 +44,6 @@ public record ScriptStatisticsDto(
     )
     Integer totalTweetsCreated,
 
-    /**
-     * Total number of successfully created follow relationships.
-     */
     @Schema(
         description = "Total number of successfully created follow relationships",
         example = "5",
@@ -74,9 +51,6 @@ public record ScriptStatisticsDto(
     )
     Integer totalFollowsCreated,
 
-    /**
-     * Total number of successfully deleted tweets.
-     */
     @Schema(
         description = "Total number of successfully deleted tweets",
         example = "3",
@@ -84,9 +58,6 @@ public record ScriptStatisticsDto(
     )
     Integer totalTweetsDeleted,
 
-    /**
-     * Number of users who have at least one tweet.
-     */
     @Schema(
         description = "Number of users who have at least one tweet",
         example = "10",
@@ -94,9 +65,6 @@ public record ScriptStatisticsDto(
     )
     Integer usersWithTweets,
 
-    /**
-     * Number of users who do not have any tweets.
-     */
     @Schema(
         description = "Number of users who do not have any tweets",
         example = "0",
@@ -104,9 +72,6 @@ public record ScriptStatisticsDto(
     )
     Integer usersWithoutTweets,
 
-    /**
-     * Total number of successfully created likes.
-     */
     @Schema(
         description = "Total number of successfully created likes",
         example = "15",
@@ -114,9 +79,6 @@ public record ScriptStatisticsDto(
     )
     Integer totalLikesCreated,
 
-    /**
-     * Total number of successfully created retweets.
-     */
     @Schema(
         description = "Total number of successfully created retweets",
         example = "12",
@@ -124,9 +86,6 @@ public record ScriptStatisticsDto(
     )
     Integer totalRetweetsCreated,
 
-    /**
-     * Script execution time in milliseconds.
-     */
     @Schema(
         description = "Script execution time in milliseconds",
         example = "1234",
@@ -134,13 +93,6 @@ public record ScriptStatisticsDto(
     )
     Long executionTimeMs,
 
-    /**
-     * List of error messages if any errors occurred during execution.
-     * <p>
-     * This list contains error messages for partial failures (e.g., when some
-     * users or tweets failed to be created). If the list is empty, it means
-     * all operations completed successfully.
-     */
     @Schema(
         description = "List of error messages if any errors occurred during execution (empty if no errors)",
         example = "[]",
@@ -149,4 +101,4 @@ public record ScriptStatisticsDto(
     List<String> errors
 ) {
 }
-
+

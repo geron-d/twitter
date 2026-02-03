@@ -1,7 +1,7 @@
 package com.twitter.service;
 
-import com.twitter.common.dto.request.LikeTweetRequestDto;
-import com.twitter.common.dto.response.LikeResponseDto;
+import com.twitter.common.dto.request.like.LikeTweetRequestDto;
+import com.twitter.common.dto.response.like.LikeResponseDto;
 import com.twitter.entity.Like;
 import com.twitter.entity.Tweet;
 import com.twitter.mapper.LikeMapper;
@@ -54,7 +54,6 @@ class LikeServiceImplTest {
 
         private UUID testTweetId;
         private UUID testUserId;
-        private UUID testAuthorId;
         private LikeTweetRequestDto requestDto;
         private Like mappedLike;
         private Like savedLike;
@@ -65,7 +64,7 @@ class LikeServiceImplTest {
         void setUp() {
             testTweetId = UUID.fromString("223e4567-e89b-12d3-a456-426614174001");
             testUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
-            testAuthorId = UUID.fromString("333e4567-e89b-12d3-a456-426614174002");
+            UUID testAuthorId = UUID.fromString("333e4567-e89b-12d3-a456-426614174002");
 
             requestDto = LikeTweetRequestDto.builder()
                 .userId(testUserId)
@@ -126,10 +125,7 @@ class LikeServiceImplTest {
             when(likeMapper.toLike(requestDto, testTweetId)).thenReturn(mappedLike);
             when(likeRepository.saveAndFlush(mappedLike)).thenReturn(savedLike);
             when(tweetRepository.findByIdAndIsDeletedFalse(testTweetId)).thenReturn(Optional.of(existingTweet));
-            when(tweetRepository.saveAndFlush(any(Tweet.class))).thenAnswer(invocation -> {
-                Tweet tweet = invocation.getArgument(0);
-                return tweet;
-            });
+            when(tweetRepository.saveAndFlush(any(Tweet.class))).thenAnswer(invocation -> invocation.<Tweet>getArgument(0));
             when(likeMapper.toLikeResponseDto(savedLike)).thenReturn(responseDto);
 
             likeService.likeTweet(testTweetId, requestDto);
@@ -220,7 +216,6 @@ class LikeServiceImplTest {
 
         private UUID testTweetId;
         private UUID testUserId;
-        private UUID testAuthorId;
         private LikeTweetRequestDto requestDto;
         private Like existingLike;
         private Tweet existingTweet;
@@ -229,7 +224,7 @@ class LikeServiceImplTest {
         void setUp() {
             testTweetId = UUID.fromString("223e4567-e89b-12d3-a456-426614174001");
             testUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
-            testAuthorId = UUID.fromString("333e4567-e89b-12d3-a456-426614174002");
+            UUID testAuthorId = UUID.fromString("333e4567-e89b-12d3-a456-426614174002");
 
             requestDto = LikeTweetRequestDto.builder()
                 .userId(testUserId)
@@ -367,8 +362,6 @@ class LikeServiceImplTest {
     class GetLikesByTweetIdTests {
 
         private UUID testTweetId;
-        private UUID testUserId1;
-        private UUID testUserId2;
         private Pageable pageable;
         private Like like1;
         private Like like2;
@@ -378,8 +371,8 @@ class LikeServiceImplTest {
         @BeforeEach
         void setUp() {
             testTweetId = UUID.fromString("223e4567-e89b-12d3-a456-426614174001");
-            testUserId1 = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
-            testUserId2 = UUID.fromString("234e5678-f90c-23e4-b567-537725285112");
+            UUID testUserId1 = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+            UUID testUserId2 = UUID.fromString("234e5678-f90c-23e4-b567-537725285112");
 
             UUID likeId1 = UUID.fromString("987e6543-e21b-43d2-b654-321987654321");
             UUID likeId2 = UUID.fromString("876e5432-e10a-32c1-a543-210876543210");

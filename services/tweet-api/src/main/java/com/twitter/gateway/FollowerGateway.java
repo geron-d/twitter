@@ -1,7 +1,7 @@
 package com.twitter.gateway;
 
 import com.twitter.client.FollowerApiClient;
-import com.twitter.common.dto.response.FollowingResponseDto;
+import com.twitter.common.dto.response.follow.FollowingResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -28,19 +28,11 @@ public class FollowerGateway {
 
     /**
      * Retrieves a list of user identifiers that the specified user is following.
-     * <p>
-     * This method retrieves all following relationships for the given user by
-     * making paginated requests to the follower-api until all following users
-     * are retrieved. If the follower-api is unavailable or returns an error,
-     * an empty list is returned (graceful degradation).
-     * <p>
-     * The method uses pagination with a page size of 100 to minimize the number
-     * of requests needed to retrieve all following relationships.
      *
      * @param userId the unique identifier of the user whose following list to retrieve
      * @return list of user identifiers (followingIds) that the user is following.
-     *         Returns an empty list if the user has no following relationships,
-     *         if the user ID is null, or if an error occurs while communicating with follower-api
+     * Returns an empty list if the user has no following relationships,
+     * if the user ID is null, or if an error occurs while communicating with follower-api
      */
     public List<UUID> getFollowingUserIds(UUID userId) {
         if (userId == null) {
@@ -52,7 +44,7 @@ public class FollowerGateway {
             log.debug("Retrieving following list for user: userId={}", userId);
             List<UUID> allFollowingIds = new ArrayList<>();
             int page = 0;
-            int size = 100; // Maximum page size to minimize requests
+            int size = 100;
             int pageFollowingIdsSize;
 
             do {
@@ -80,4 +72,3 @@ public class FollowerGateway {
         }
     }
 }
-

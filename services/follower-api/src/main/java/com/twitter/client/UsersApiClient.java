@@ -1,7 +1,7 @@
 package com.twitter.client;
 
-import com.twitter.common.dto.UserExistsResponseDto;
-import com.twitter.common.dto.response.UserResponseDto;
+import com.twitter.common.dto.response.user.UserExistsResponseDto;
+import com.twitter.common.dto.response.user.UserResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,4 +40,3 @@ public interface UsersApiClient {
     @GetMapping("/{id}")
     ResponseEntity<UserResponseDto> getUserById(@PathVariable("id") UUID id);
 }
-

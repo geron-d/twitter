@@ -1,7 +1,7 @@
 package com.twitter.client;
 
-import com.twitter.common.dto.request.UserRequestDto;
-import com.twitter.common.dto.response.UserResponseDto;
+import com.twitter.common.dto.request.user.UserRequestDto;
+import com.twitter.common.dto.response.user.UserResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,9 +23,9 @@ public interface UsersApiClient {
      * Creates a new user in the users-api service.
      *
      * @param userRequest DTO containing user data for creation
-     * @return UserResponseDto containing the created user information including ID
+     * @return UserResponseDto containing the created user information
      */
     @PostMapping
     UserResponseDto createUser(@RequestBody UserRequestDto userRequest);
 }
-
+

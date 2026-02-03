@@ -1,8 +1,8 @@
 package com.twitter.gateway;
 
 import com.twitter.client.UsersApiClient;
-import com.twitter.common.dto.request.UserRequestDto;
-import com.twitter.common.dto.response.UserResponseDto;
+import com.twitter.common.dto.request.user.UserRequestDto;
+import com.twitter.common.dto.response.user.UserResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -23,8 +23,8 @@ public class UsersGateway {
     /**
      * Creates a new user in the users-api service.
      *
-     * @param userRequest DTO containing user data for creation (login, email, password, etc.)
-     * @return UserResponseDto containing the created user information including ID
+     * @param userRequest DTO containing user data for creation
+     * @return UserResponseDto containing the created user information
      * @throws RuntimeException if the user creation fails (e.g., duplicate login/email, service unavailable)
      */
     public UserResponseDto createUser(UserRequestDto userRequest) {

@@ -1,4 +1,4 @@
-package com.twitter.common.dto.response;
+package com.twitter.common.dto.response.tweet;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -9,18 +9,7 @@ import java.util.UUID;
 
 /**
  * Response DTO for Tweet data.
- * <p>
- * This record contains all relevant tweet data including identifier, user reference,
- * content, timestamps for creation and updates, and soft delete information.
- * It is used to return tweet data from the API endpoints.
  *
- * @param id        unique identifier for the tweet
- * @param userId    ID of the user who created this tweet
- * @param content   content of the tweet
- * @param createdAt timestamp when the tweet was created
- * @param updatedAt timestamp when the tweet was last updated
- * @param isDeleted flag indicating whether the tweet has been soft deleted (nullable, typically false for active tweets)
- * @param deletedAt timestamp when the tweet was soft deleted (nullable, null for active tweets)
  * @author geron
  * @version 1.0
  */

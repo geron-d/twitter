@@ -1,8 +1,8 @@
 package com.twitter.gateway;
 
 import com.twitter.client.FollowApiClient;
-import com.twitter.common.dto.request.FollowRequestDto;
-import com.twitter.common.dto.response.FollowResponseDto;
+import com.twitter.common.dto.request.follow.FollowRequestDto;
+import com.twitter.common.dto.response.follow.FollowResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -22,15 +22,11 @@ public class FollowGateway {
 
     /**
      * Creates a new follow relationship in the follower-api service.
-     * <p>
-     * This method creates a follow relationship between two users through the
-     * follower-api service. It handles validation, error handling, and logging.
-     * If the creation fails, a RuntimeException is thrown with a descriptive message.
      *
      * @param request DTO containing followerId and followingId for the relationship
-     * @return FollowResponseDto containing the created follow relationship information including ID
+     * @return FollowResponseDto containing the created follow relationship information
      * @throws IllegalArgumentException if the request is null or contains null fields
-     * @throws RuntimeException if the follow relationship creation fails (e.g., service unavailable, validation error)
+     * @throws RuntimeException         if the follow relationship creation fails (e.g., service unavailable, validation error)
      */
     public FollowResponseDto createFollow(FollowRequestDto request) {
         if (request == null) {
@@ -46,11 +42,11 @@ public class FollowGateway {
         try {
             FollowResponseDto response = followApiClient.createFollow(request);
             log.info("Successfully created follow relationship: {} -> {} (ID: {})",
-                    request.followerId(), request.followingId(), response.id());
+                request.followerId(), request.followingId(), response.id());
             return response;
         } catch (Exception ex) {
             log.error("Failed to create follow relationship {} -> {}. Error: {}",
-                    request.followerId(), request.followingId(), ex.getMessage(), ex);
+                request.followerId(), request.followingId(), ex.getMessage(), ex);
             throw new RuntimeException("Failed to create follow relationship: " + ex.getMessage(), ex);
         }
     }

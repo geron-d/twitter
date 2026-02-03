@@ -1,5 +1,6 @@
 package com.twitter.common.exception.validation;
 
+import com.twitter.common.enums.validation.ValidationType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
@@ -12,13 +13,11 @@ import lombok.Getter;
  * JSON parsing errors.
  *
  * <p>The exception provides the following functionality:</p>
- * <ul>
- *   <li>Identifies the specific field that failed format validation</li>
- *   <li>Specifies the constraint that was violated</li>
- *   <li>Supports custom error messages for specific scenarios</li>
- *   <li>Provides factory methods for common validation errors</li>
- *   <li>Enables cause chaining for debugging complex validation failures</li>
- * </ul>
+ * - Identifies the specific field that failed format validation
+ * - Specifies the constraint that was violated
+ * - Supports custom error messages for specific scenarios
+ * - Provides factory methods for common validation errors
+ * - Enables cause chaining for debugging complex validation failures
  *
  * @author geron
  * @version 1.0
@@ -41,13 +40,6 @@ import lombok.Getter;
 @Getter
 public class FormatValidationException extends ValidationException {
 
-    /**
-     * The name of the field that failed format validation.
-     * <p>
-     * This field identifies which specific field (e.g., "email", "phone", "date")
-     * contains the invalid format. It is used by the GlobalExceptionHandler to
-     * provide detailed error information in the ProblemDetail response.
-     */
     @Schema(
         description = "The name of the field that failed format validation",
         example = "email",
@@ -55,13 +47,6 @@ public class FormatValidationException extends ValidationException {
     )
     private final String fieldName;
 
-    /**
-     * The name of the constraint that was violated.
-     * <p>
-     * This field specifies which validation constraint was violated
-     * (e.g., "EMAIL_FORMAT", "PHONE_FORMAT", "DATE_FORMAT"). It helps
-     * with debugging and provides context for the validation failure.
-     */
     @Schema(
         description = "The name of the constraint that was violated",
         example = "EMAIL_FORMAT",
@@ -69,48 +54,18 @@ public class FormatValidationException extends ValidationException {
     )
     private final String constraintName;
 
-    /**
-     * Constructs a new format validation exception with field and constraint details.
-     * <p>
-     * This constructor creates an exception with specific information about
-     * which field failed format validation and what constraint was violated.
-     * It provides the most detailed information for error handling and debugging.
-     *
-     * @param fieldName      the name of the field that failed validation
-     * @param constraintName the name of the constraint that was violated
-     * @param message        the error message describing the format violation
-     */
     public FormatValidationException(String fieldName, String constraintName, String message) {
         super(message);
         this.fieldName = fieldName;
         this.constraintName = constraintName;
     }
 
-    /**
-     * Constructs a new format validation exception with a custom message.
-     * <p>
-     * This constructor allows specifying a custom error message for specific
-     * format validation scenarios. The fieldName and constraintName will be
-     * set to null, indicating that specific field information is not available.
-     *
-     * @param message the custom error message describing the format violation
-     */
     public FormatValidationException(String message) {
         super(message);
         this.fieldName = null;
         this.constraintName = null;
     }
 
-    /**
-     * Constructs a new format validation exception with a custom message and cause.
-     * <p>
-     * This constructor allows wrapping another exception while providing context
-     * about the format validation failure. This is useful when format validation
-     * errors occur as a result of other exceptions (e.g., JSON parsing errors).
-     *
-     * @param message the custom error message describing the format violation
-     * @param cause   the underlying cause that led to this exception
-     */
     public FormatValidationException(String message, Throwable cause) {
         super(message, cause);
         this.fieldName = null;
@@ -118,13 +73,7 @@ public class FormatValidationException extends ValidationException {
     }
 
     /**
-     * Returns the validation type for this exception.
-     * <p>
-     * This method identifies this exception as a format validation error,
-     * enabling the GlobalExceptionHandler to provide appropriate error handling
-     * and response formatting.
-     *
-     * @return ValidationType.FORMAT indicating this is a format validation error
+     * @see ValidationException#getValidationType
      */
     @Override
     public ValidationType getValidationType() {
@@ -160,4 +109,4 @@ public class FormatValidationException extends ValidationException {
     public static FormatValidationException beanValidationError(String fieldName, String constraintName, String message) {
         return new FormatValidationException(fieldName, constraintName, message);
     }
-}
+}

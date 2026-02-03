@@ -1,7 +1,7 @@
 package com.twitter.mapper;
 
-import com.twitter.common.dto.request.LikeTweetRequestDto;
-import com.twitter.common.dto.response.LikeResponseDto;
+import com.twitter.common.dto.request.like.LikeTweetRequestDto;
+import com.twitter.common.dto.response.like.LikeResponseDto;
 import com.twitter.entity.Like;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

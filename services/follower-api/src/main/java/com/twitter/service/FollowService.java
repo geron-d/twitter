@@ -1,15 +1,15 @@
 package com.twitter.service;
 
+import com.twitter.common.dto.request.follow.FollowRequestDto;
+import com.twitter.common.dto.response.follow.FollowResponseDto;
+import com.twitter.common.dto.response.follow.FollowingResponseDto;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.UniquenessValidationException;
 import com.twitter.dto.filter.FollowerFilter;
 import com.twitter.dto.filter.FollowingFilter;
-import com.twitter.common.dto.request.FollowRequestDto;
-import com.twitter.common.dto.response.FollowResponseDto;
 import com.twitter.dto.response.FollowStatsResponseDto;
 import com.twitter.dto.response.FollowStatusResponseDto;
 import com.twitter.dto.response.FollowerResponseDto;
-import com.twitter.common.dto.response.FollowingResponseDto;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
 import org.springframework.web.server.ResponseStatusException;
@@ -19,9 +19,7 @@ import java.util.UUID;
 /**
  * Service interface for follow relationship management in Twitter microservices.
  * <p>
- * This interface defines the contract for follow relationship management services,
- * providing business logic for follow operations, including creation, validation,
- * and data transformation.
+ * This interface defines the contract for follow relationship management services.
  *
  * @author geron
  * @version 1.0
@@ -30,12 +28,8 @@ public interface FollowService {
 
     /**
      * Creates a new follow relationship from the provided request data.
-     * <p>
-     * The method is transactional, ensuring data consistency. Business rules are enforced:
-     * users cannot follow themselves, follow relationships must be unique, and both users
-     * must exist in the system.
      *
-     * @param request the follow relationship creation request containing followerId and followingId
+     * @param request the follow relationship creation request
      * @return FollowResponseDto containing the created follow relationship data
      * @throws BusinessRuleValidationException if users cannot follow themselves or users don't exist
      * @throws UniquenessValidationException   if follow relationship already exists
@@ -44,10 +38,6 @@ public interface FollowService {
 
     /**
      * Removes a follow relationship between two users.
-     * <p>
-     * The method is transactional, ensuring data consistency. It checks if the follow
-     * relationship exists before attempting to delete it. If the relationship does not
-     * exist, a ResponseStatusException with HTTP 404 status is thrown.
      *
      * @param followerId  the ID of the user who is following (the follower)
      * @param followingId the ID of the user being followed (the following)
@@ -60,13 +50,12 @@ public interface FollowService {
      * <p>
      * The method retrieves all users who follow the specified user, with optional
      * filtering by login name. The results are paginated and sorted by creation date
-     * in descending order (newest first). User login information is retrieved from
-     * the users-api service.
+     * in descending order (newest first).
      *
      * @param userId   the ID of the user whose followers should be retrieved
      * @param filter   optional filter criteria for filtering followers by login (partial match)
      * @param pageable pagination parameters (page, size, sorting)
-     * @return PagedModel containing paginated list of followers with metadata and HATEOAS links
+     * @return PagedModel containing paginated list of followers
      */
     PagedModel<FollowerResponseDto> getFollowers(UUID userId, FollowerFilter filter, Pageable pageable);
 
@@ -75,23 +64,17 @@ public interface FollowService {
      * <p>
      * The method retrieves all users that the specified user is following, with optional
      * filtering by login name. The results are paginated and sorted by creation date
-     * in descending order (newest first). User login information is retrieved from
-     * the users-api service.
+     * in descending order (newest first).
      *
      * @param userId   the ID of the user whose following should be retrieved
      * @param filter   optional filter criteria for filtering following by login (partial match)
      * @param pageable pagination parameters (page, size, sorting)
-     * @return PagedModel containing paginated list of following with metadata and HATEOAS links
+     * @return PagedModel containing paginated list of following
      */
     PagedModel<FollowingResponseDto> getFollowing(UUID userId, FollowingFilter filter, Pageable pageable);
 
     /**
      * Retrieves the status of a follow relationship between two users.
-     * <p>
-     * The method checks if a follow relationship exists between the specified follower
-     * and following users. If the relationship exists, it returns isFollowing=true and
-     * the creation timestamp. If the relationship does not exist, it returns
-     * isFollowing=false and createdAt=null.
      *
      * @param followerId  the ID of the user who is following (the follower)
      * @param followingId the ID of the user being followed (the following)

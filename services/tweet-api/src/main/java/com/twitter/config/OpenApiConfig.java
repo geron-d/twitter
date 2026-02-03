@@ -35,19 +35,6 @@ public class OpenApiConfig {
                     - User existence verification via users-api integration
                     - Content length validation (1-280 characters)
                     - Business rule enforcement
-                    
-                    ## Authentication
-                    Currently, the API does not require authentication for basic operations.
-                    Future versions will implement JWT-based authentication.
-                    
-                    ## Rate Limiting
-                    API requests are subject to rate limiting to ensure system stability.
-                    Please refer to response headers for current rate limit information.
-                    
-                    ## Error Handling
-                    The API uses standard HTTP status codes and follows RFC 7807 Problem Details
-                    for error responses, providing detailed information about validation failures
-                    and business rule violations.
                     """)
                 .version("1.0.0"))
             .servers(List.of(
@@ -61,4 +48,4 @@ public class OpenApiConfig {
 
 
 
-
+

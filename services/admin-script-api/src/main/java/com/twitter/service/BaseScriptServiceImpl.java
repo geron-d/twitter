@@ -1,13 +1,13 @@
 package com.twitter.service;
 
-import com.twitter.common.dto.request.CreateTweetRequestDto;
-import com.twitter.common.dto.request.DeleteTweetRequestDto;
-import com.twitter.common.dto.request.FollowRequestDto;
-import com.twitter.common.dto.request.LikeTweetRequestDto;
-import com.twitter.common.dto.request.RetweetRequestDto;
-import com.twitter.common.dto.request.UserRequestDto;
-import com.twitter.common.dto.response.TweetResponseDto;
-import com.twitter.common.dto.response.UserResponseDto;
+import com.twitter.common.dto.request.follow.FollowRequestDto;
+import com.twitter.common.dto.request.like.LikeTweetRequestDto;
+import com.twitter.common.dto.request.retweet.RetweetRequestDto;
+import com.twitter.common.dto.request.tweet.CreateTweetRequestDto;
+import com.twitter.common.dto.request.tweet.DeleteTweetRequestDto;
+import com.twitter.common.dto.request.user.UserRequestDto;
+import com.twitter.common.dto.response.tweet.TweetResponseDto;
+import com.twitter.common.dto.response.user.UserResponseDto;
 import com.twitter.dto.request.BaseScriptRequestDto;
 import com.twitter.dto.response.BaseScriptResponseDto;
 import com.twitter.dto.response.ScriptStatisticsDto;
@@ -23,91 +23,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Implementation of the service for executing the base administrative script.
- * <p>
- * This service executes a comprehensive administrative script that performs the following steps:
- * <ol>
- *   <li>Step 1: Create users - Generates the specified number of users with random data</li>
- *   <li>Step 1.5: Create follow relationships - Creates follow relationships between users:
- *     <ul>
- *       <li>Selects the first created user as the central user</li>
- *       <li>The central user follows half of the remaining users</li>
- *       <li>Half of the remaining users follow the central user</li>
- *       <li>Uses integer division (rounding down) to calculate half count</li>
- *       <li>Requires at least 2 users to create follow relationships</li>
- *     </ul>
- *   </li>
- *   <li>Step 2: Create tweets - Creates tweets for each successfully created user (caches TweetResponseDto for later use)</li>
- *   <li>Step 3: Calculate users with tweets - Determines which users have tweets</li>
- *   <li>Step 4: Validate deletion count - Validates business rules for tweet deletion</li>
- *   <li>Step 5: Delete tweets - Deletes one tweet from random users (if validation passes)</li>
- *   <li>Step 6: Create likes (half of users) - Creates likes for a random tweet:
- *     <ul>
- *       <li>Selects a random tweet from created tweets (using Collections.shuffle())</li>
- *       <li>Gets the tweet author from cached TweetResponseDto</li>
- *       <li>Selects half of available users, excluding the tweet author</li>
- *       <li>Creates likes for each selected user</li>
- *       <li>Handles errors gracefully (self-like, duplicates): logs and adds to errors, continues execution</li>
- *     </ul>
- *   </li>
- *   <li>Step 7: Create likes (third of users) - Creates likes for a different random tweet:
- *     <ul>
- *       <li>Selects a different random tweet (not used in step 6)</li>
- *       <li>Gets the tweet author from cached TweetResponseDto</li>
- *       <li>Selects third of available users, excluding the tweet author</li>
- *       <li>Creates likes for each selected user</li>
- *       <li>Handles errors gracefully: logs and adds to errors, continues execution</li>
- *     </ul>
- *   </li>
- *   <li>Step 8: Create likes (1 user) - Creates one like for a different random tweet:
- *     <ul>
- *       <li>Selects a different random tweet (not used in steps 6-7)</li>
- *       <li>Gets the tweet author from cached TweetResponseDto</li>
- *       <li>Selects 1 available user, excluding the tweet author</li>
- *       <li>Creates one like for the selected user</li>
- *       <li>Handles errors gracefully: logs and adds to errors, continues execution</li>
- *     </ul>
- *   </li>
- *   <li>Step 9: Create retweets (half of users) - Creates retweets for a different random tweet:
- *     <ul>
- *       <li>Selects a different random tweet (not used in steps 6-8)</li>
- *       <li>Gets the tweet author from cached TweetResponseDto</li>
- *       <li>Selects half of available users, excluding the tweet author</li>
- *       <li>Creates retweets for each selected user (with comment = null)</li>
- *       <li>Handles errors gracefully (self-retweet, duplicates): logs and adds to errors, continues execution</li>
- *     </ul>
- *   </li>
- *   <li>Step 10: Create retweets (third of users) - Creates retweets for a different random tweet:
- *     <ul>
- *       <li>Selects a different random tweet (not used in steps 6-9)</li>
- *       <li>Gets the tweet author from cached TweetResponseDto</li>
- *       <li>Selects third of available users, excluding the tweet author</li>
- *       <li>Creates retweets for each selected user (with comment = null)</li>
- *       <li>Handles errors gracefully: logs and adds to errors, continues execution</li>
- *     </ul>
- *   </li>
- *   <li>Step 11: Create retweets (1 user) - Creates one retweet for a different random tweet:
- *     <ul>
- *       <li>Selects a different random tweet (not used in steps 6-10)</li>
- *       <li>Gets the tweet author from cached TweetResponseDto</li>
- *       <li>Selects 1 available user, excluding the tweet author</li>
- *       <li>Creates one retweet for the selected user (with comment = null)</li>
- *       <li>Handles errors gracefully: logs and adds to errors, continues execution</li>
- *     </ul>
- *   </li>
- *   <li>Step 12: Build response - Collects statistics and builds the response DTO</li>
- * </ol>
- * <p>
- * The service handles partial failures gracefully: errors are logged and added to the
- * statistics.errors list, but execution continues to maximize successful operations.
  *
  * @author geron
  * @version 1.0
@@ -166,7 +85,7 @@ public class BaseScriptServiceImpl implements BaseScriptService {
         log.info("Step 1.5: Creating follow relationships");
         int totalFollowsCreated = 0;
         if (createdUsers.size() >= 2) {
-            UUID centralUser = createdUsers.get(0);
+            UUID centralUser = createdUsers.getFirst();
             List<UUID> otherUsers = new ArrayList<>(createdUsers.subList(1, createdUsers.size()));
             int halfCount = (createdUsers.size() - 1) / 2;
 
@@ -305,7 +224,7 @@ public class BaseScriptServiceImpl implements BaseScriptService {
                     if (!tweetsList.isEmpty()) {
                         // Select random tweet
                         Collections.shuffle(tweetsList);
-                        TweetResponseDto tweetToDelete = tweetsList.get(0);
+                        TweetResponseDto tweetToDelete = tweetsList.getFirst();
 
                         DeleteTweetRequestDto deleteRequest = DeleteTweetRequestDto.builder()
                             .userId(userId)
@@ -335,24 +254,24 @@ public class BaseScriptServiceImpl implements BaseScriptService {
         int totalLikesCreated = 0;
         int totalRetweetsCreated = 0;
         List<UUID> usedTweets = new ArrayList<>();
-        
-        if (createdTweets.size() >= 1 && createdUsers.size() >= 2) {
+
+        if (!createdTweets.isEmpty() && createdUsers.size() >= 2) {
             List<UUID> availableTweets = new ArrayList<>(createdTweets);
             Collections.shuffle(availableTweets);
             UUID selectedTweetId = availableTweets.getFirst();
             usedTweets.add(selectedTweetId);
-            
+
             TweetResponseDto selectedTweet = tweetsCache.get(selectedTweetId);
             if (selectedTweet != null) {
                 UUID tweetAuthorId = selectedTweet.userId();
                 List<UUID> availableUsers = new ArrayList<>(createdUsers);
                 availableUsers.remove(tweetAuthorId);
-                
+
                 if (!availableUsers.isEmpty()) {
                     Collections.shuffle(availableUsers);
                     int halfCount = availableUsers.size() / 2;
                     List<UUID> usersToLike = availableUsers.subList(0, Math.min(halfCount, availableUsers.size()));
-                    
+
                     for (UUID userId : usersToLike) {
                         try {
                             LikeTweetRequestDto likeRequest = LikeTweetRequestDto.builder()
@@ -380,20 +299,20 @@ public class BaseScriptServiceImpl implements BaseScriptService {
             availableTweets.removeAll(usedTweets);
             if (!availableTweets.isEmpty()) {
                 Collections.shuffle(availableTweets);
-                UUID selectedTweetId = availableTweets.get(0);
+                UUID selectedTweetId = availableTweets.getFirst();
                 usedTweets.add(selectedTweetId);
-                
+
                 TweetResponseDto selectedTweet = tweetsCache.get(selectedTweetId);
                 if (selectedTweet != null) {
                     UUID tweetAuthorId = selectedTweet.userId();
                     List<UUID> availableUsers = new ArrayList<>(createdUsers);
                     availableUsers.remove(tweetAuthorId);
-                    
+
                     if (!availableUsers.isEmpty()) {
                         Collections.shuffle(availableUsers);
                         int thirdCount = availableUsers.size() / 3;
                         List<UUID> usersToLike = availableUsers.subList(0, Math.min(thirdCount, availableUsers.size()));
-                        
+
                         for (UUID userId : usersToLike) {
                             try {
                                 LikeTweetRequestDto likeRequest = LikeTweetRequestDto.builder()
@@ -422,19 +341,19 @@ public class BaseScriptServiceImpl implements BaseScriptService {
             availableTweets.removeAll(usedTweets);
             if (!availableTweets.isEmpty()) {
                 Collections.shuffle(availableTweets);
-                UUID selectedTweetId = availableTweets.get(0);
+                UUID selectedTweetId = availableTweets.getFirst();
                 usedTweets.add(selectedTweetId);
-                
+
                 TweetResponseDto selectedTweet = tweetsCache.get(selectedTweetId);
                 if (selectedTweet != null) {
                     UUID tweetAuthorId = selectedTweet.userId();
                     List<UUID> availableUsers = new ArrayList<>(createdUsers);
                     availableUsers.remove(tweetAuthorId);
-                    
+
                     if (!availableUsers.isEmpty()) {
                         Collections.shuffle(availableUsers);
-                        UUID userId = availableUsers.get(0);
-                        
+                        UUID userId = availableUsers.getFirst();
+
                         try {
                             LikeTweetRequestDto likeRequest = LikeTweetRequestDto.builder()
                                 .userId(userId)
@@ -461,20 +380,20 @@ public class BaseScriptServiceImpl implements BaseScriptService {
             availableTweets.removeAll(usedTweets);
             if (!availableTweets.isEmpty()) {
                 Collections.shuffle(availableTweets);
-                UUID selectedTweetId = availableTweets.get(0);
+                UUID selectedTweetId = availableTweets.getFirst();
                 usedTweets.add(selectedTweetId);
-                
+
                 TweetResponseDto selectedTweet = tweetsCache.get(selectedTweetId);
                 if (selectedTweet != null) {
                     UUID tweetAuthorId = selectedTweet.userId();
                     List<UUID> availableUsers = new ArrayList<>(createdUsers);
                     availableUsers.remove(tweetAuthorId);
-                    
+
                     if (!availableUsers.isEmpty()) {
                         Collections.shuffle(availableUsers);
                         int halfCount = availableUsers.size() / 2;
                         List<UUID> usersToRetweet = availableUsers.subList(0, Math.min(halfCount, availableUsers.size()));
-                        
+
                         for (UUID userId : usersToRetweet) {
                             try {
                                 RetweetRequestDto retweetRequest = RetweetRequestDto.builder()
@@ -504,20 +423,20 @@ public class BaseScriptServiceImpl implements BaseScriptService {
             availableTweets.removeAll(usedTweets);
             if (!availableTweets.isEmpty()) {
                 Collections.shuffle(availableTweets);
-                UUID selectedTweetId = availableTweets.get(0);
+                UUID selectedTweetId = availableTweets.getFirst();
                 usedTweets.add(selectedTweetId);
-                
+
                 TweetResponseDto selectedTweet = tweetsCache.get(selectedTweetId);
                 if (selectedTweet != null) {
                     UUID tweetAuthorId = selectedTweet.userId();
                     List<UUID> availableUsers = new ArrayList<>(createdUsers);
                     availableUsers.remove(tweetAuthorId);
-                    
+
                     if (!availableUsers.isEmpty()) {
                         Collections.shuffle(availableUsers);
                         int thirdCount = availableUsers.size() / 3;
                         List<UUID> usersToRetweet = availableUsers.subList(0, Math.min(thirdCount, availableUsers.size()));
-                        
+
                         for (UUID userId : usersToRetweet) {
                             try {
                                 RetweetRequestDto retweetRequest = RetweetRequestDto.builder()
@@ -547,19 +466,19 @@ public class BaseScriptServiceImpl implements BaseScriptService {
             availableTweets.removeAll(usedTweets);
             if (!availableTweets.isEmpty()) {
                 Collections.shuffle(availableTweets);
-                UUID selectedTweetId = availableTweets.get(0);
+                UUID selectedTweetId = availableTweets.getFirst();
                 usedTweets.add(selectedTweetId);
-                
+
                 TweetResponseDto selectedTweet = tweetsCache.get(selectedTweetId);
                 if (selectedTweet != null) {
                     UUID tweetAuthorId = selectedTweet.userId();
                     List<UUID> availableUsers = new ArrayList<>(createdUsers);
                     availableUsers.remove(tweetAuthorId);
-                    
+
                     if (!availableUsers.isEmpty()) {
                         Collections.shuffle(availableUsers);
-                        UUID userId = availableUsers.get(0);
-                        
+                        UUID userId = availableUsers.getFirst();
+
                         try {
                             RetweetRequestDto retweetRequest = RetweetRequestDto.builder()
                                 .userId(userId)
@@ -601,4 +520,3 @@ public class BaseScriptServiceImpl implements BaseScriptService {
         return response;
     }
 }
-

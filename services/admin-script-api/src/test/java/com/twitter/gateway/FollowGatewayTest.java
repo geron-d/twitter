@@ -1,8 +1,8 @@
 package com.twitter.gateway;
 
 import com.twitter.client.FollowApiClient;
-import com.twitter.common.dto.request.FollowRequestDto;
-import com.twitter.common.dto.response.FollowResponseDto;
+import com.twitter.common.dto.request.follow.FollowRequestDto;
+import com.twitter.common.dto.response.follow.FollowResponseDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -38,7 +38,7 @@ class FollowGatewayTest {
     void setUp() {
         followerId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
         followingId = UUID.fromString("223e4567-e89b-12d3-a456-426614174001");
-        
+
         validRequest = FollowRequestDto.builder()
             .followerId(followerId)
             .followingId(followingId)
@@ -172,4 +172,3 @@ class FollowGatewayTest {
         }
     }
 }
-

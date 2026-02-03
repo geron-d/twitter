@@ -1,4 +1,4 @@
-package com.twitter.common.enums;
+package com.twitter.common.enums.user;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -12,10 +12,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * controlled by business rules and administrative actions.
  *
  * <p>The available statuses:</p>
- * <ul>
- *   <li><strong>ACTIVE</strong> - User account is active and fully functional</li>
- *   <li><strong>INACTIVE</strong> - User account is deactivated and restricted</li>
- * </ul>
+ * - <strong>ACTIVE</strong> - User account is active and fully functional
+ * - <strong>INACTIVE</strong> - User account is deactivated and restricted
  *
  * @author geron
  * @version 1.0
@@ -35,14 +33,6 @@ public enum UserStatus {
      * and can perform all operations allowed by their role. This is the
      * default status for newly registered users and represents the normal
      * operational state of a user account.
-     *
-     * <p>Capabilities include:</p>
-     * <ul>
-     *   <li>Full access to all system features</li>
-     *   <li>Ability to create and manage content</li>
-     *   <li>Participation in social interactions</li>
-     *   <li>Access to user profile and settings</li>
-     * </ul>
      */
     ACTIVE,
 
@@ -54,14 +44,6 @@ public enum UserStatus {
      * This status is typically set by administrators for account deactivation
      * or by the system for temporary restrictions. Inactive users cannot
      * perform most operations until their status is changed back to ACTIVE.
-     *
-     * <p>Restrictions include:</p>
-     * <ul>
-     *   <li>Limited or no access to system features</li>
-     *   <li>Cannot create or modify content</li>
-     *   <li>Cannot participate in social interactions</li>
-     *   <li>May have limited profile access</li>
-     * </ul>
      */
     INACTIVE
 }

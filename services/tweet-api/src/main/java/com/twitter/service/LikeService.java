@@ -1,9 +1,9 @@
 package com.twitter.service;
 
+import com.twitter.common.dto.request.like.LikeTweetRequestDto;
+import com.twitter.common.dto.response.like.LikeResponseDto;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.UniquenessValidationException;
-import com.twitter.common.dto.request.LikeTweetRequestDto;
-import com.twitter.common.dto.response.LikeResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -30,11 +30,11 @@ public interface LikeService {
      * 4. Converts the saved entity to response DTO
      * 5. Returns the response DTO
      * <p>
-     * A user cannot like their own tweet, and duplicate likes are prevented by a unique constraint in the database. 
+     * A user cannot like their own tweet, and duplicate likes are prevented by a unique constraint in the database.
      * The tweet must exist and not be deleted for the like operation to succeed.
      *
      * @param tweetId    the unique identifier of the tweet to like
-     * @param requestDto the like request containing userId
+     * @param requestDto the like request
      * @return LikeResponseDto containing the created like data
      * @throws BusinessRuleValidationException if tweetId is null, tweet doesn't exist, user doesn't exist, or self-like attempt
      * @throws UniquenessValidationException   if duplicate like attempt
@@ -50,12 +50,9 @@ public interface LikeService {
      * 3. Deletes the like record
      * 4. Decrements the tweet's likes count
      * 5. Saves the updated tweet
-     * <p>
-     * The operation is atomic and executed within a transaction. If any step fails,
-     * the entire operation is rolled back.
      *
      * @param tweetId    the unique identifier of the tweet to unlike
-     * @param requestDto the unlike request containing userId
+     * @param requestDto the unlike request
      * @throws BusinessRuleValidationException if tweetId is null, tweet doesn't exist, user doesn't exist, or like doesn't exist
      */
     void removeLike(UUID tweetId, LikeTweetRequestDto requestDto);
@@ -69,8 +66,7 @@ public interface LikeService {
      * 3. Converts Like entities to LikeResponseDto
      * 4. Returns a Page containing paginated likes with metadata
      * <p>
-     * The method is read-only and transactional, ensuring data consistency. Likes are
-     * sorted by creation date in descending order (newest first). If the tweet doesn't
+     * Likes are sorted by creation date in descending order (newest first). If the tweet doesn't
      * exist or is deleted, a BusinessRuleValidationException is thrown. If there are no
      * likes for the tweet, an empty page is returned (not an error).
      *

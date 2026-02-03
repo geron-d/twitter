@@ -1,8 +1,8 @@
 package com.twitter.gateway;
 
 import com.twitter.client.UsersApiClient;
-import com.twitter.common.dto.UserExistsResponseDto;
-import com.twitter.common.dto.response.UserResponseDto;
+import com.twitter.common.dto.response.user.UserExistsResponseDto;
+import com.twitter.common.dto.response.user.UserResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -26,13 +26,6 @@ public class UserGateway {
 
     /**
      * Checks if a user exists by their identifier.
-     * <p>
-     * This method calls the Users API to verify user existence. If the user
-     * exists, it returns true. If the user does not exist or if an error
-     * occurs (e.g., service unavailable), it returns false and logs the error.
-     * <p>
-     * Null userId values are handled gracefully by returning false and logging
-     * a warning message.
      *
      * @param userId the user identifier to check
      * @return true if the user exists, false otherwise (including when userId is null or service is unavailable)
@@ -56,11 +49,6 @@ public class UserGateway {
 
     /**
      * Retrieves user login by user identifier.
-     * <p>
-     * If the user does not exist or if an error occurs, it returns an empty Optional and logs the error.
-     * <p>
-     * Null userId values are handled gracefully by returning an empty Optional
-     * and logging a warning message.
      *
      * @param userId the user identifier
      * @return Optional containing user login if user exists, empty otherwise
@@ -87,4 +75,3 @@ public class UserGateway {
         }
     }
 }
-

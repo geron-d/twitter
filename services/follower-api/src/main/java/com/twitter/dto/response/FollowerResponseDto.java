@@ -9,13 +9,7 @@ import java.util.UUID;
 
 /**
  * Response DTO for follower information in follower lists.
- * <p>
- * This record contains follower information including identifier, login,
- * and creation timestamp.
  *
- * @param id        unique identifier of the follower user
- * @param login     login name of the follower user
- * @param createdAt timestamp when the follow relationship was created
  * @author geron
  * @version 1.0
  */

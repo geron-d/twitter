@@ -1,4 +1,4 @@
-package com.twitter.common.enums;
+package com.twitter.common.enums.user;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -12,11 +12,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * permissions from lower roles.
  *
  * <p>The role hierarchy (from lowest to highest):</p>
- * <ul>
- *   <li><strong>USER</strong> - Basic user with standard permissions</li>
- *   <li><strong>MODERATOR</strong> - Content moderation capabilities</li>
- *   <li><strong>ADMIN</strong> - Full system administration access</li>
- * </ul>
+ * - <strong>USER</strong> - Basic user with standard permissions
+ * - <strong>MODERATOR</strong> - Content moderation capabilities
+ * - <strong>ADMIN</strong> - Full system administration access
  *
  * @author geron
  * @version 1.0
@@ -36,15 +34,6 @@ public enum UserRole {
      * including user management, system configuration, and administrative
      * operations. This role is typically reserved for system administrators
      * and requires special protection against accidental deactivation.
-     *
-     * <p>Permissions include:</p>
-     * <ul>
-     *   <li>All USER and MODERATOR permissions</li>
-     *   <li>User account management (create, update, deactivate)</li>
-     *   <li>System configuration and settings</li>
-     *   <li>Access to administrative dashboards</li>
-     *   <li>Role assignment and permission management</li>
-     * </ul>
      */
     ADMIN,
 
@@ -56,15 +45,6 @@ public enum UserRole {
      * moderation and user management. They can perform moderation tasks
      * while maintaining some administrative capabilities, but with
      * restrictions compared to full administrators.
-     *
-     * <p>Permissions include:</p>
-     * <ul>
-     *   <li>All USER permissions</li>
-     *   <li>Content moderation (flag, hide, delete inappropriate content)</li>
-     *   <li>User account management (limited scope)</li>
-     *   <li>Access to moderation tools and reports</li>
-     *   <li>User support and assistance</li>
-     * </ul>
      */
     MODERATOR,
 
@@ -75,14 +55,6 @@ public enum UserRole {
      * Users with the USER role have access to standard Twitter functionality
      * including posting tweets, following other users, and basic profile
      * management. This is the default role assigned to new users.
-     *
-     * <p>Permissions include:</p>
-     * <ul>
-     *   <li>Create and manage personal tweets</li>
-     *   <li>Follow and unfollow other users</li>
-     *   <li>Update personal profile information</li>
-     *   <li>Access public content and feeds</li>
-     * </ul>
      */
     USER
 }

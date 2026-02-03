@@ -1,9 +1,9 @@
 package com.twitter.validation;
 
+import com.twitter.common.dto.request.retweet.RetweetRequestDto;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.FormatValidationException;
 import com.twitter.common.exception.validation.UniquenessValidationException;
-import com.twitter.common.dto.request.RetweetRequestDto;
 import com.twitter.entity.Tweet;
 import com.twitter.gateway.UserGateway;
 import com.twitter.repository.RetweetRepository;
@@ -20,9 +20,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -331,7 +329,6 @@ class RetweetValidatorImplTest {
 
         private UUID testTweetId;
         private UUID testUserId;
-        private UUID testAuthorId;
         private RetweetRequestDto requestDto;
         private Tweet existingTweet;
 
@@ -339,7 +336,7 @@ class RetweetValidatorImplTest {
         void setUp() {
             testTweetId = UUID.fromString("223e4567-e89b-12d3-a456-426614174001");
             testUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
-            testAuthorId = UUID.fromString("333e4567-e89b-12d3-a456-426614174002");
+            UUID testAuthorId = UUID.fromString("333e4567-e89b-12d3-a456-426614174002");
 
             requestDto = RetweetRequestDto.builder()
                 .userId(testUserId)

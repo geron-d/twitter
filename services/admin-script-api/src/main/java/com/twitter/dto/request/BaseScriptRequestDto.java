@@ -8,14 +8,7 @@ import lombok.Builder;
 
 /**
  * Data Transfer Object for base administrative script request.
- * <p>
- * This record represents the data structure used for executing the base administrative
- * script that creates multiple users with random data, adds tweets for each user,
- * and deletes one tweet from a specified number of random users.
  *
- * @param nUsers            number of users to create
- * @param nTweetsPerUser    number of tweets to create for each user
- * @param lUsersForDeletion number of users from which to delete one tweet each
  * @author geron
  * @version 1.0
  */
@@ -33,12 +26,6 @@ import lombok.Builder;
 @Builder
 public record BaseScriptRequestDto(
 
-    /**
-     * Number of users to create.
-     * <p>
-     * This field specifies how many users should be created with random data.
-     * Must be between 1 and 1000 to prevent excessive load on the system.
-     */
     @Schema(
         description = "Number of users to create with random data",
         example = "10",
@@ -51,12 +38,6 @@ public record BaseScriptRequestDto(
     @Max(value = 1000, message = "Number of users cannot exceed 1000")
     Integer nUsers,
 
-    /**
-     * Number of tweets to create for each user.
-     * <p>
-     * This field specifies how many tweets should be created for each successfully
-     * created user. Must be between 1 and 100 to prevent excessive load.
-     */
     @Schema(
         description = "Number of tweets to create for each user",
         example = "5",
@@ -69,14 +50,6 @@ public record BaseScriptRequestDto(
     @Max(value = 100, message = "Number of tweets per user cannot exceed 100")
     Integer nTweetsPerUser,
 
-    /**
-     * Number of users from which to delete one tweet each.
-     * <p>
-     * This field specifies how many random users should be selected for tweet deletion.
-     * Must be at least 0 (0 means no deletions). The actual number of deletions may be
-     * less if there are not enough users with tweets. Business validation ensures that
-     * this value does not exceed the number of users with tweets.
-     */
     @Schema(
         description = "Number of users from which to delete one tweet each (0 means no deletions)",
         example = "3",

@@ -1,10 +1,10 @@
 package com.twitter.gateway;
 
 import com.twitter.client.UsersApiClient;
-import com.twitter.common.dto.UserExistsResponseDto;
-import com.twitter.common.dto.response.UserResponseDto;
-import com.twitter.common.enums.UserRole;
-import com.twitter.common.enums.UserStatus;
+import com.twitter.common.dto.response.user.UserExistsResponseDto;
+import com.twitter.common.dto.response.user.UserResponseDto;
+import com.twitter.common.enums.user.UserRole;
+import com.twitter.common.enums.user.UserStatus;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -63,9 +63,7 @@ class UserGatewayTest {
 
         @Test
         void existsUser_WhenUserIdIsNull_ShouldReturnFalseWithoutCallingClient() {
-            UUID nullUserId = null;
-
-            boolean result = userGateway.existsUser(nullUserId);
+            boolean result = userGateway.existsUser(null);
 
             assertThat(result).isFalse();
             verify(usersApiClient, never()).existsUser(any());
@@ -141,9 +139,7 @@ class UserGatewayTest {
 
         @Test
         void getUserLogin_WhenUserIdIsNull_ShouldReturnEmptyOptionalWithoutCallingClient() {
-            UUID nullUserId = null;
-
-            Optional<String> result = userGateway.getUserLogin(nullUserId);
+            Optional<String> result = userGateway.getUserLogin(null);
 
             assertThat(result).isEmpty();
             verify(usersApiClient, never()).getUserById(any());
@@ -163,4 +159,3 @@ class UserGatewayTest {
         }
     }
 }
-

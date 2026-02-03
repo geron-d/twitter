@@ -1,8 +1,8 @@
 package com.twitter.service;
 
-import com.twitter.common.dto.request.CreateTweetRequestDto;
-import com.twitter.common.dto.request.DeleteTweetRequestDto;
-import com.twitter.common.dto.response.TweetResponseDto;
+import com.twitter.common.dto.request.tweet.CreateTweetRequestDto;
+import com.twitter.common.dto.request.tweet.DeleteTweetRequestDto;
+import com.twitter.common.dto.response.tweet.TweetResponseDto;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.FormatValidationException;
 import com.twitter.dto.request.UpdateTweetRequestDto;
@@ -341,14 +341,13 @@ class TweetServiceImplTest {
     class DeleteTweetTests {
 
         private UUID testTweetId;
-        private UUID testUserId;
         private DeleteTweetRequestDto deleteRequestDto;
         private Tweet existingTweet;
 
         @BeforeEach
         void setUp() {
             testTweetId = UUID.fromString("223e4567-e89b-12d3-a456-426614174001");
-            testUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+            UUID testUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
 
             deleteRequestDto = DeleteTweetRequestDto.builder()
                 .userId(testUserId)
@@ -368,10 +367,7 @@ class TweetServiceImplTest {
         void deleteTweet_WithValidData_ShouldPerformSoftDelete() {
             doNothing().when(tweetValidator).validateForDelete(testTweetId, deleteRequestDto);
             when(tweetRepository.findById(testTweetId)).thenReturn(Optional.of(existingTweet));
-            when(tweetRepository.saveAndFlush(any(Tweet.class))).thenAnswer(invocation -> {
-                Tweet tweet = invocation.getArgument(0);
-                return tweet;
-            });
+            when(tweetRepository.saveAndFlush(any(Tweet.class))).thenAnswer(invocation -> invocation.<Tweet>getArgument(0));
 
             tweetService.deleteTweet(testTweetId, deleteRequestDto);
 
@@ -746,4 +742,3 @@ class TweetServiceImplTest {
         }
     }
 }
-

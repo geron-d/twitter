@@ -1,14 +1,14 @@
 package com.twitter.controller;
 
 import com.twitter.common.aspect.LoggableRequest;
+import com.twitter.common.dto.request.follow.FollowRequestDto;
+import com.twitter.common.dto.response.follow.FollowResponseDto;
+import com.twitter.common.dto.response.follow.FollowingResponseDto;
 import com.twitter.dto.filter.FollowerFilter;
 import com.twitter.dto.filter.FollowingFilter;
-import com.twitter.common.dto.request.FollowRequestDto;
-import com.twitter.common.dto.response.FollowResponseDto;
 import com.twitter.dto.response.FollowStatsResponseDto;
 import com.twitter.dto.response.FollowStatusResponseDto;
 import com.twitter.dto.response.FollowerResponseDto;
-import com.twitter.common.dto.response.FollowingResponseDto;
 import com.twitter.service.FollowService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -70,7 +70,7 @@ public class FollowController implements FollowApi {
     public PagedModel<FollowerResponseDto> getFollowers(
         @PathVariable("userId") UUID userId,
         @ModelAttribute FollowerFilter filter,
-        @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         return followService.getFollowers(userId, filter, pageable);
     }
 
@@ -83,7 +83,7 @@ public class FollowController implements FollowApi {
     public PagedModel<FollowingResponseDto> getFollowing(
         @PathVariable("userId") UUID userId,
         @ModelAttribute FollowingFilter filter,
-        @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         return followService.getFollowing(userId, filter, pageable);
     }
 

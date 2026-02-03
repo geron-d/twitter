@@ -1,7 +1,7 @@
 package com.twitter.mapper;
 
-import com.twitter.common.dto.request.LikeTweetRequestDto;
-import com.twitter.common.dto.response.LikeResponseDto;
+import com.twitter.common.dto.request.like.LikeTweetRequestDto;
+import com.twitter.common.dto.response.like.LikeResponseDto;
 import com.twitter.entity.Like;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -20,7 +20,7 @@ public interface LikeMapper {
     /**
      * Converts LikeTweetRequestDto and tweetId to Like entity.
      *
-     * @param requestDto DTO containing userId for the like
+     * @param requestDto DTO for the like
      * @param tweetId    the unique identifier of the tweet being liked
      * @return Like entity without service-managed fields (id, createdAt)
      */
@@ -33,7 +33,7 @@ public interface LikeMapper {
     /**
      * Converts Like entity to LikeResponseDto.
      *
-     * @param like Like entity from database
+     * @param like Like entity
      * @return DTO containing like data for client response
      */
     LikeResponseDto toLikeResponseDto(Like like);
