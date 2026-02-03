@@ -14,10 +14,6 @@ import java.util.UUID;
 
 /**
  * User entity representing a user account in the Twitter system.
- * <p>
- * This entity maps to the 'users' table in the database and contains all
- * user-related data including authentication credentials, personal information,
- * and system status.
  *
  * @author geron
  * @version 1.0

@@ -22,11 +22,10 @@ public interface UserMapper {
      * Converts UserRequestDto to User entity.
      * <p>
      * This method transforms request DTO data into a User entity, ignoring
-     * the passwordHash field as password processing is handled separately
-     * with hashing and salt generation.
+     * the passwordHash field.
      *
      * @param userRequestDto DTO containing user data for creation
-     * @return User entity without password hash
+     * @return User entity
      */
     @Mapping(target = "passwordHash", ignore = true)
     User toUser(UserRequestDto userRequestDto);
@@ -62,8 +61,7 @@ public interface UserMapper {
      * Updates User entity with data from UserUpdateDto.
      * <p>
      * This method performs complete entity updates while ignoring service fields:
-     * id, passwordHash, passwordSalt, status, role. These fields are managed
-     * separately through service business logic.
+     * id, passwordHash, passwordSalt, status, role.
      *
      * @param userUpdateDto DTO containing data for complete update
      * @param user          target User entity to update

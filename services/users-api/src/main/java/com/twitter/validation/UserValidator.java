@@ -92,8 +92,7 @@ public interface UserValidator {
      * Validates the possibility of user deactivation.
      * <p>
      * This method enforces business rules to prevent deactivation of the last
-     * active administrator in the system. It ensures system maintainability
-     * by keeping at least one active administrator available.
+     * active administrator in the system.
      *
      * @param userId the ID of the user to be deactivated
      * @throws BusinessRuleValidationException if business rules are violated
@@ -104,8 +103,7 @@ public interface UserValidator {
      * Validates the possibility of user role change.
      * <p>
      * This method enforces business rules to prevent role changes for the last
-     * active administrator. It ensures system maintainability by preventing
-     * scenarios where no active administrators remain in the system.
+     * active administrator.
      *
      * @param userId  the ID of the user
      * @param newRole the new role for the user

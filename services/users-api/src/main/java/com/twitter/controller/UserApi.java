@@ -1,8 +1,8 @@
 package com.twitter.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.twitter.common.dto.response.user.UserExistsResponseDto;
 import com.twitter.common.dto.request.user.UserRequestDto;
+import com.twitter.common.dto.response.user.UserExistsResponseDto;
 import com.twitter.common.dto.response.user.UserResponseDto;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.ValidationException;
@@ -24,8 +24,6 @@ import java.util.UUID;
 
 /**
  * OpenAPI interface for User Management API.
- * <p>
- * This interface contains all OpenAPI annotations for the User Management API endpoints.
  *
  * @author geron
  * @version 1.0
@@ -37,7 +35,7 @@ public interface UserApi {
      * Checks whether a user exists by their unique identifier.
      *
      * @param userId the unique identifier of the user to check
-     * @return ResponseEntity containing UserExistsResponseDto with boolean exists field
+     * @return ResponseEntity containing UserExistsResponseDto
      */
     @Operation(
         summary = "Check user existence",
@@ -76,7 +74,7 @@ public interface UserApi {
      * Returns HTTP 404 if the user does not exist or has been deactivated.
      *
      * @param id the unique identifier of the user
-     * @return ResponseEntity containing user data or 404 if not found
+     * @return ResponseEntity containing user data
      */
     @Operation(
         summary = "Get user by ID",
@@ -148,30 +146,14 @@ public interface UserApi {
         summary = "Create new user",
         description = "Creates a new user in the system. Password is securely hashed. Status is set to ACTIVE and role to USER by default."
     )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "User created successfully",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = UserResponseDto.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Validation error",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        ),
-        @ApiResponse(
-            responseCode = "409",
-            description = "Uniqueness conflict",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
+    @ApiResponse(
+        responseCode = "200",
+        description = "User created successfully",
+        content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = UserResponseDto.class)
         )
-    })
+    )
     UserResponseDto createUser(
         @Parameter(description = "User data for creation", required = true)
         UserRequestDto userRequest);
@@ -185,44 +167,21 @@ public interface UserApi {
      *
      * @param id          the unique identifier of the user to update
      * @param userDetails new user data for the update
-     * @return ResponseEntity containing updated user data or 404 if user not found
+     * @return ResponseEntity containing updated user data
      * @throws ValidationException if validation fails or uniqueness conflict occurs
      */
     @Operation(
         summary = "Update user completely",
         description = "Performs a complete update of an existing user. Replaces all user fields with new values. Validates uniqueness and business rules."
     )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "User updated successfully",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = UserResponseDto.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "404",
-            description = "User not found",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Validation error",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        ),
-        @ApiResponse(
-            responseCode = "409",
-            description = "Uniqueness conflict",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
+    @ApiResponse(
+        responseCode = "200",
+        description = "User updated successfully",
+        content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = UserResponseDto.class)
         )
-    })
+    )
     ResponseEntity<UserResponseDto> updateUser(
         @Parameter(description = "Unique identifier of the user to update", required = true, example = "123e4567-e89b-12d3-a456-426614174000")
         UUID id,
@@ -238,44 +197,21 @@ public interface UserApi {
      *
      * @param id        the unique identifier of the user to update
      * @param patchNode JSON patch data for partial update
-     * @return ResponseEntity containing updated user data or 404 if user not found
+     * @return ResponseEntity containing updated user data
      * @throws ValidationException if validation fails or JSON format is invalid
      */
     @Operation(
         summary = "Partially update user",
         description = "Performs a partial update of user data using JSON Patch. Allows updating only specified fields without modifying other data."
     )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "User updated successfully",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = UserResponseDto.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "404",
-            description = "User not found",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Validation error or invalid JSON Patch",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        ),
-        @ApiResponse(
-            responseCode = "409",
-            description = "Uniqueness conflict",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
+    @ApiResponse(
+        responseCode = "200",
+        description = "User updated successfully",
+        content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = UserResponseDto.class)
         )
-    })
+    )
     ResponseEntity<UserResponseDto> patchUser(
         @Parameter(description = "Unique identifier of the user to update", required = true, example = "123e4567-e89b-12d3-a456-426614174000")
         UUID id,
@@ -289,37 +225,21 @@ public interface UserApi {
      * prevent deactivation of the last active administrator.
      *
      * @param id the unique identifier of the user to deactivate
-     * @return ResponseEntity containing updated user data or 404 if user not found
+     * @return ResponseEntity containing updated user data
      * @throws BusinessRuleValidationException if attempting to deactivate the last administrator
      */
     @Operation(
         summary = "Deactivate user",
         description = "Deactivates a user by setting their status to INACTIVE. Includes business rule validation to prevent deactivation of the last active administrator."
     )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "User deactivated successfully",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = UserResponseDto.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "404",
-            description = "User not found",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Business rule violation",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
+    @ApiResponse(
+        responseCode = "200",
+        description = "User deactivated successfully",
+        content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = UserResponseDto.class)
         )
-    })
+    )
     ResponseEntity<UserResponseDto> inactivateUser(
         @Parameter(description = "Unique identifier of the user to deactivate", required = true, example = "123e4567-e89b-12d3-a456-426614174000")
         UUID id);
@@ -332,37 +252,21 @@ public interface UserApi {
      *
      * @param id         the unique identifier of the user
      * @param roleUpdate data containing the new role information
-     * @return ResponseEntity containing updated user data or 404 if user not found
+     * @return ResponseEntity containing updated user data
      * @throws BusinessRuleValidationException if attempting to change the last administrator's role
      */
     @Operation(
         summary = "Update user role",
         description = "Updates the role of a user while enforcing business rules to prevent modification of the last active administrator's role."
     )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "User role updated successfully",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = UserResponseDto.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "404",
-            description = "User not found",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Business rule violation or validation error",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
+    @ApiResponse(
+        responseCode = "200",
+        description = "User role updated successfully",
+        content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = UserResponseDto.class)
         )
-    })
+    )
     ResponseEntity<UserResponseDto> updateUserRole(
         @Parameter(description = "Unique identifier of the user", required = true, example = "123e4567-e89b-12d3-a456-426614174000")
         UUID id,

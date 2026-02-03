@@ -13,13 +13,13 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    
+
     // OpenAPI/Swagger документация
     implementation 'io.swagger.core.v3:swagger-annotations'
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui") {
         exclude group: "io.swagger.core.v3", module: "swagger-annotations"
     }
-    
+
     // Трейсинг и мониторинг
     implementation 'io.micrometer:micrometer-tracing-bridge-otel'
 
@@ -42,8 +42,8 @@ dependencies {
 compileJava {
     options.annotationProcessorPath = configurations.annotationProcessor
     options.compilerArgs += [
-            '-Amapstruct.defaultComponentModel=spring',
-            '-Amapstruct.unmappedTargetPolicy=IGNORE'
+        '-Amapstruct.defaultComponentModel=spring',
+        '-Amapstruct.unmappedTargetPolicy=IGNORE'
     ]
 }
 

@@ -66,7 +66,6 @@ public interface UserService {
     /**
      * Performs a complete update of an existing user.
      * <p>
-     * This method replaces all user fields with new values from the provided DTO.
      * It includes validation for uniqueness and business rules to ensure
      * data integrity throughout the update process.
      *
@@ -96,7 +95,6 @@ public interface UserService {
      * <p>
      * This method deactivates a user account while enforcing business rules
      * to prevent deactivation of the last active administrator in the system.
-     * It ensures system maintainability by keeping at least one active administrator.
      *
      * @param id the unique identifier of the user to deactivate
      * @return Optional containing updated user data or empty if user not found
@@ -109,7 +107,6 @@ public interface UserService {
      * <p>
      * This method changes the user's role while enforcing business rules
      * to prevent modification of the last active administrator's role.
-     * It supports various roles including USER, ADMIN, and MODERATOR.
      *
      * @param id         the unique identifier of the user
      * @param roleUpdate data containing the new user role

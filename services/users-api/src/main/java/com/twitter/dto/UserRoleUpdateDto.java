@@ -6,9 +6,6 @@ import jakarta.validation.constraints.NotNull;
 
 /**
  * Data Transfer Object for user role update requests.
- * <p>
- * It includes validation constraints to ensure data
- * integrity and business rule compliance during role changes.
  *
  * @param role new role to assign to the user
  * @author geron
@@ -24,12 +21,6 @@ import jakarta.validation.constraints.NotNull;
         """
 )
 public record UserRoleUpdateDto(
-    /**
-     * New role to assign to the user.
-     * <p>
-     * Must be a valid UserRole enum value and cannot be null.
-     * Business rules may prevent certain role changes.
-     */
     @Schema(
         description = "New role to assign to the user",
         example = "ADMIN",
