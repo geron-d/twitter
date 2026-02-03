@@ -158,7 +158,6 @@ class TweetValidatorImplTest {
 
         @Test
         void validateForCreate_WhenMultipleValidationViolations_ShouldThrowFormatValidationExceptionWithAllViolations() {
-            UUID validUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
             CreateTweetRequestDto requestDto = CreateTweetRequestDto.builder()
                 .content(null)
                 .userId(null)

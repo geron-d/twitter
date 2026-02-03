@@ -56,9 +56,7 @@ class UserGatewayTest {
 
         @Test
         void existsUser_WhenUserIdIsNull_ShouldReturnFalseWithoutCallingClient() {
-            UUID nullUserId = null;
-
-            boolean result = userGateway.existsUser(nullUserId);
+            boolean result = userGateway.existsUser(null);
 
             assertThat(result).isFalse();
             verify(usersApiClient, never()).existsUser(any());

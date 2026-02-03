@@ -1,9 +1,9 @@
 package com.twitter.validation;
 
+import com.twitter.common.dto.request.retweet.RetweetRequestDto;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.FormatValidationException;
 import com.twitter.common.exception.validation.UniquenessValidationException;
-import com.twitter.common.dto.request.retweet.RetweetRequestDto;
 
 import java.util.UUID;
 
@@ -26,7 +26,7 @@ public interface RetweetValidator {
      * - Comment validation (if comment is not null, it must not be empty string and must not exceed 280 characters)
      *
      * @param tweetId    the unique identifier of the tweet to retweet
-     * @param requestDto DTO containing userId and optional comment for the retweet
+     * @param requestDto DTO for the retweet
      * @throws BusinessRuleValidationException if tweetId is null, tweet doesn't exist, user doesn't exist, or self-retweet attempt
      * @throws UniquenessValidationException   if duplicate retweet attempt
      * @throws FormatValidationException       if comment validation fails (empty string or exceeds 280 characters)
@@ -42,7 +42,7 @@ public interface RetweetValidator {
      * - Existence of the retweet (retweet must exist for the given tweet and user)
      *
      * @param tweetId    the unique identifier of the tweet to remove retweet from
-     * @param requestDto DTO containing userId for the retweet removal
+     * @param requestDto DTO for the retweet removal
      * @throws BusinessRuleValidationException if tweetId is null, tweet doesn't exist, user doesn't exist, or retweet doesn't exist
      */
     void validateForRemoveRetweet(UUID tweetId, RetweetRequestDto requestDto);

@@ -165,9 +165,6 @@ public class TweetValidatorImpl implements TweetValidator {
 
     /**
      * Validates tweet content string using custom rules.
-     * <p>
-     * This method is reused for both CreateTweetRequestDto and UpdateTweetRequestDto
-     * to ensure consistent content validation logic.
      *
      * @param content the tweet content to validate
      * @throws FormatValidationException if content is empty or contains only whitespace

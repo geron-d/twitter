@@ -54,7 +54,6 @@ class RetweetServiceImplTest {
 
         private UUID testTweetId;
         private UUID testUserId;
-        private UUID testAuthorId;
         private RetweetRequestDto requestDto;
         private RetweetRequestDto requestDtoWithComment;
         private Retweet mappedRetweet;
@@ -67,7 +66,7 @@ class RetweetServiceImplTest {
         void setUp() {
             testTweetId = UUID.fromString("223e4567-e89b-12d3-a456-426614174001");
             testUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
-            testAuthorId = UUID.fromString("333e4567-e89b-12d3-a456-426614174002");
+            UUID testAuthorId = UUID.fromString("333e4567-e89b-12d3-a456-426614174002");
 
             requestDto = RetweetRequestDto.builder()
                 .userId(testUserId)
@@ -272,7 +271,6 @@ class RetweetServiceImplTest {
 
         private UUID testTweetId;
         private UUID testUserId;
-        private UUID testAuthorId;
         private RetweetRequestDto requestDto;
         private Retweet existingRetweet;
         private Tweet existingTweet;
@@ -281,7 +279,7 @@ class RetweetServiceImplTest {
         void setUp() {
             testTweetId = UUID.fromString("223e4567-e89b-12d3-a456-426614174001");
             testUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
-            testAuthorId = UUID.fromString("333e4567-e89b-12d3-a456-426614174002");
+            UUID testAuthorId = UUID.fromString("333e4567-e89b-12d3-a456-426614174002");
 
             requestDto = RetweetRequestDto.builder()
                 .userId(testUserId)
@@ -421,8 +419,6 @@ class RetweetServiceImplTest {
     class GetRetweetsByTweetIdTests {
 
         private UUID testTweetId;
-        private UUID testUserId1;
-        private UUID testUserId2;
         private Retweet retweet1;
         private Retweet retweet2;
         private RetweetResponseDto responseDto1;
@@ -432,8 +428,8 @@ class RetweetServiceImplTest {
         @BeforeEach
         void setUp() {
             testTweetId = UUID.fromString("223e4567-e89b-12d3-a456-426614174001");
-            testUserId1 = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
-            testUserId2 = UUID.fromString("234e5678-f90c-23e4-b567-537725285112");
+            UUID testUserId1 = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+            UUID testUserId2 = UUID.fromString("234e5678-f90c-23e4-b567-537725285112");
 
             UUID retweetId1 = UUID.fromString("987e6543-e21b-43d2-b654-321987654321");
             retweet1 = Retweet.builder()

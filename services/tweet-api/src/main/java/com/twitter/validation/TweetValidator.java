@@ -45,7 +45,6 @@ public interface TweetValidator {
      * Validates that the user exists in the system.
      * <p>
      * This method checks if the provided user ID corresponds to an existing user.
-     * It will be integrated with users-api service for actual user validation.
      *
      * @param userId the user ID to validate
      * @throws BusinessRuleValidationException if user doesn't exist or userId is null
@@ -76,7 +75,7 @@ public interface TweetValidator {
      * - Authorization check (only tweet author can delete their tweet)
      *
      * @param tweetId    the unique identifier of the tweet to delete
-     * @param requestDto DTO containing userId for authorization check
+     * @param requestDto DTO for authorization check
      * @throws BusinessRuleValidationException if tweetId is null, tweet doesn't exist, is already deleted, or access denied
      */
     void validateForDelete(UUID tweetId, DeleteTweetRequestDto requestDto);

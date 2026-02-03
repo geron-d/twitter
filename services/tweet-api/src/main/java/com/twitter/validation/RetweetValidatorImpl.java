@@ -1,9 +1,9 @@
 package com.twitter.validation;
 
+import com.twitter.common.dto.request.retweet.RetweetRequestDto;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.FormatValidationException;
 import com.twitter.common.exception.validation.UniquenessValidationException;
-import com.twitter.common.dto.request.retweet.RetweetRequestDto;
 import com.twitter.entity.Tweet;
 import com.twitter.gateway.UserGateway;
 import com.twitter.repository.RetweetRepository;
@@ -77,9 +77,6 @@ public class RetweetValidatorImpl implements RetweetValidator {
 
     /**
      * Validates that a user cannot retweet their own tweet.
-     * <p>
-     * This method checks if the user attempting to retweet the tweet is the same
-     * as the tweet author, which is not allowed by business rules.
      *
      * @param tweet  the tweet being retweeted
      * @param userId the ID of the user attempting to retweet the tweet
@@ -94,9 +91,6 @@ public class RetweetValidatorImpl implements RetweetValidator {
 
     /**
      * Validates that the retweet does not already exist.
-     * <p>
-     * This method checks if a retweet already exists for the given tweet and user
-     * using the repository.
      *
      * @param tweetId the ID of the tweet being retweeted
      * @param userId  the ID of the user attempting to retweet the tweet
@@ -170,9 +164,6 @@ public class RetweetValidatorImpl implements RetweetValidator {
 
     /**
      * Validates that the retweet exists for the given tweet and user.
-     * <p>
-     * This method checks if a retweet exists for the given tweet and user
-     * using the repository. This validation is required before removing a retweet.
      *
      * @param tweetId the ID of the tweet being unretweeted
      * @param userId  the ID of the user attempting to remove the retweet

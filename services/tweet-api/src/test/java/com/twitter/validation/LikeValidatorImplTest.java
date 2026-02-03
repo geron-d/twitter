@@ -1,8 +1,8 @@
 package com.twitter.validation;
 
+import com.twitter.common.dto.request.like.LikeTweetRequestDto;
 import com.twitter.common.exception.validation.BusinessRuleValidationException;
 import com.twitter.common.exception.validation.UniquenessValidationException;
-import com.twitter.common.dto.request.like.LikeTweetRequestDto;
 import com.twitter.entity.Tweet;
 import com.twitter.gateway.UserGateway;
 import com.twitter.repository.LikeRepository;
@@ -19,9 +19,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -214,7 +212,6 @@ class LikeValidatorImplTest {
 
         private UUID testTweetId;
         private UUID testUserId;
-        private UUID testAuthorId;
         private LikeTweetRequestDto requestDto;
         private Tweet existingTweet;
 
@@ -222,7 +219,7 @@ class LikeValidatorImplTest {
         void setUp() {
             testTweetId = UUID.fromString("223e4567-e89b-12d3-a456-426614174001");
             testUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
-            testAuthorId = UUID.fromString("333e4567-e89b-12d3-a456-426614174002");
+            UUID testAuthorId = UUID.fromString("333e4567-e89b-12d3-a456-426614174002");
 
             requestDto = LikeTweetRequestDto.builder()
                 .userId(testUserId)
