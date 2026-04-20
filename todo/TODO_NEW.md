@@ -1,1 +1,1 @@
-- нужны ли defaultValueComputed="CURRENT_TIMESTAMP" если уже есть @CreationTimestamp
+сделать инфру как в https://www.youtube.com/watch?v=V4oFJ3LbW9s
