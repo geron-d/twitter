@@ -1,8 +1,8 @@
-# JavaDoc Documentation Standards for Twitter Microservices Project
+# JavaDoc Documentation Standards
 
 ## Overview
 
-This document defines the JavaDoc documentation standards for the Twitter microservices project.
+This document defines the JavaDoc documentation standards
 
 **Scope:**
 - All public classes, interfaces, and methods
@@ -16,7 +16,9 @@ This document defines the JavaDoc documentation standards for the Twitter micros
 **Technology Stack:**
 - Java 24
 - Spring Boot 3.5.5
-- Gradle (Multi-module project)
+- Gradle
+- By default, use a regular single-module Gradle project.
+- Use a multi-module Gradle structure only when it is justified by scale, clear separation of responsibilities, or module reuse.
 
 ---
 
@@ -819,77 +821,15 @@ public class BusinessRuleValidationException extends ValidationException {
 
 ---
 
-## Formatting Guidelines
+## Formatting Quick Reference
 
-### Paragraphs
-
-Use `<p>` tags to separate paragraphs:
-
-```java
-/**
- * Brief description.
- * <p>
- * First detailed paragraph with additional information.
- * <p>
- * Second detailed paragraph with more context.
- */
-```
-
-### Code Examples
-
-Do not use `<pre>{@code ... }</pre>` for source code examples. Prefer `@see`, README, or external documentation for usage.
-
-Use `{@code ...}` for inline references to identifiers, literals, annotation names:
-
-```java
-/**
- * When set to {@code true}, the feature is enabled.
- * Use {@code false} to disable the feature.
- * Annotate with {@code @LoggableRequest} for request logging.
- */
-```
-
-### Lists
-
-Use dashes (`-`) for unordered lists:
-
-```java
-/**
- * <p>The handler processes the following exception types:</p>
- * - ResponseStatusException - HTTP status exceptions
- * - RuntimeException - General runtime errors
- * - ConstraintViolationException - Bean validation errors
- */
-```
-
-Use numbering (`1.`, `2.`, `3.`, etc.) for ordered lists:
-
-```java
-/**
- * <p>This method performs the following operations:</p>
- * 1. Validates the request data
- * 2. Checks if the user exists
- * 3. Saves the entity to the database
- */
-```
-
-### Cross-References
-
-Use `{@link ClassName}` for class references:
-
-```java
-/**
- * Uses {@link UserService} to retrieve user information.
- */
-```
-
-Use `{@link ClassName#method}` for method references:
-
-```java
-/**
- * @see UserService#getUserById
- */
-```
+Formatting rules are defined in `General Principles -> Formatting Guidelines`:
+- Use `<p>` tags for paragraph separation
+- Use `{@code ...}` for inline references
+- Do not use source code snippets in JavaDoc
+- Use `<pre>...</pre>` only for short data/format examples
+- Use `{@link ...}` and `@see` for cross-references
+- Use dashes for unordered lists and numbering for ordered lists
 
 ---
 
@@ -927,8 +867,8 @@ Use `{@link ClassName#method}` for method references:
 
 ### 5. Examples
 
-- Do not include source code snippets (code examples) in JavaDoc. For complex usage, use `@see`, README, integration tests, or separate documentation.
-- Use inline `{@code}` for identifiers and literals where helpful.
+- Put source code usage examples in README/tests/external docs and use `@see`/`{@link}` in JavaDoc.
+- Keep only short data/format examples in `<pre>...</pre>` where needed.
 
 ### 6. Implementation Methods
 
@@ -1004,122 +944,13 @@ Before submitting code, ensure:
 
 ## Common Patterns and Examples
 
-### Pattern 1: Service Interface and Implementation
+Examples are already provided in:
+- `Documentation Standards by Element Type -> Classes and Interfaces`
+- `Documentation Standards by Element Type -> Methods`
+- `Documentation Standards by Element Type -> Records (DTOs)`
+- `Documentation Standards by Element Type -> Repository Interfaces`
 
-**Interface:**
-```java
-/**
- * Service interface for user management in Twitter microservices.
- * <p>
- * This interface defines the contract for user management services, providing
- * business logic for CRUD operations with users, including validation,
- * password hashing, and business rule enforcement.
- *
- * @author geron
- * @version 1.0
- */
-public interface UserService {
-    
-    /**
-     * Retrieves a user by their unique identifier.
-     * <p>
-     * Returns an empty Optional if the user does not exist
-     * or has been deactivated.
-     *
-     * @param id the unique identifier of the user
-     * @return Optional containing user data or empty if not found
-     */
-    Optional<UserResponseDto> getUserById(UUID id);
-}
-```
-
-**Implementation:**
-```java
-/**
- * Implementation of the user management service.
- * <p>
- * This service provides business logic for CRUD operations with users,
- * including creation, updating, deactivation, and role management. It handles
- * data validation, password hashing, and business rule enforcement.
- *
- * @author geron
- * @version 1.0
- */
-@Service
-@RequiredArgsConstructor
-public class UserServiceImpl implements UserService {
-    
-    /**
-     * @see UserService#getUserById
-     */
-    @Override
-    public Optional<UserResponseDto> getUserById(UUID id) {
-        return userRepository.findById(id).map(userMapper::toUserResponseDto);
-    }
-}
-```
-
-### Pattern 2: DTO Record with @Schema Annotations
-
-```java
-/**
- * Data Transfer Object for user creation requests.
- * <p>
- * This record represents the data structure used for creating new users
- * in the system. It includes validation constraints to ensure data
- * integrity and security requirements are met.
- *
- * @author geron
- * @version 1.0
- */
-@Schema(name = "UserRequest", description = "Data structure for creating new users")
-public record UserRequestDto(
-    @Schema(
-        description = "Unique login name for user authentication",
-        example = "jane_smith",
-        minLength = 3,
-        maxLength = 50,
-        requiredMode = Schema.RequiredMode.REQUIRED
-    )
-    @NotBlank(message = "Login cannot be blank")
-    @Size(min = 3, max = 50, message = "Login must be between 3 and 50 characters")
-    String login,
-    
-    @Schema(
-        description = "User's first name (optional)",
-        example = "Jane",
-        maxLength = 100
-    )
-    String firstName,
-    
-    // other fields...
-) {
-}
-```
-
-### Pattern 3: Repository with Derived Query Methods
-
-```java
-/**
- * Repository interface for user data access operations.
- * <p>
- * This repository provides data access methods for User entities.
- * It extends JpaRepository and JpaSpecificationExecutor for standard
- * CRUD operations and dynamic query capabilities.
- *
- * @author geron
- * @version 1.0
- */
-public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificationExecutor<User> {
-
-    // Derived Query Methods - NO JavaDoc required
-    long countByRoleAndStatus(UserRole role, UserStatus status);
-    boolean existsByLogin(String login);
-    boolean existsByEmail(String email);
-    boolean existsByLoginAndIdNot(String login, UUID id);
-    boolean existsByEmailAndIdNot(String email, UUID id);
-}
-```
+Use those sections as the single source of truth to avoid duplication.
 
 ---
 
@@ -1128,24 +959,30 @@ public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificat
 ### JavaDoc Generation
 
 ```bash
-# Generate JavaDoc for a specific module
-./gradlew :shared:common-lib:javadoc
-
-# Generate JavaDoc for all modules
+# Default (single-module project): generate JavaDoc
 ./gradlew javadoc
 
-# Generate JavaDoc JAR
+# Default (single-module project): generate JavaDoc JAR
+./gradlew javadocJar
+
+# Optional (multi-module project): generate JavaDoc for a specific module
+./gradlew :shared:common-lib:javadoc
+
+# Optional (multi-module project): generate JavaDoc JAR for a specific module
 ./gradlew :shared:common-lib:javadocJar
 ```
 
 ### Validation Commands
 
 ```bash
-# Check JavaDoc syntax (without compilation)
-./gradlew :shared:common-lib:javadoc -x compileJava
+# Default (single-module project): check JavaDoc syntax (without compilation)
+./gradlew javadoc -x compileJava
 
-# Generate HTML documentation
-./gradlew :shared:common-lib:javadocJar
+# Default (single-module project): generate HTML documentation JAR
+./gradlew javadocJar
+
+# Optional (multi-module project): check JavaDoc syntax for a specific module
+./gradlew :shared:common-lib:javadoc -x compileJava
 ```
 
 ### IDE Integration
@@ -1161,6 +998,7 @@ Most modern IDEs (IntelliJ IDEA, Eclipse) can:
 ## Version History
 
 - **v1.0** (2025-01-27): Initial version based on comprehensive analysis of `shared` and `services` modules
+- **v1.1** (2026-03-31): Removed duplicated sections, consolidated formatting/pattern guidance, and added explicit Gradle default (single-module by default, multi-module when needed)
 
 ---
 
@@ -1169,4 +1007,4 @@ Most modern IDEs (IntelliJ IDEA, Eclipse) can:
 - [Oracle JavaDoc Guide](https://www.oracle.com/technical-resources/articles/java/javadoc-tool.html)
 - [JavaDoc Tags Reference](https://docs.oracle.com/javase/8/docs/technotes/tools/windows/javadoc.html#CHDJGIED)
 - [Spring Boot Documentation](https://spring.io/projects/spring-boot)
-- [Project Code Standards](./STANDART_CODE.md)
+- [Project Code Standards](./STANDART_CODE.md)
