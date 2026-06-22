@@ -25,7 +25,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,tracing
+        include: health,info,metrics,tracing,prometheus
   endpoint:
     health:
       show-details: always
@@ -76,4 +76,4 @@ logging:
     org.springframework.boot.actuate: WARN
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${spring.application.name:} [%thread] %-5level [%X{traceId:-},%X{spanId:-}] %logger{36} - %msg%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${spring.application.name:} [%thread] %-5level [%X{traceId:-},%X{spanId:-}] %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${spring.application.name:} [%thread] %-5level [%X{traceId:-},%X{spanId:-}] %logger{36} - %msg%n"
