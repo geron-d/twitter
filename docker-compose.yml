@@ -137,7 +137,7 @@ services:
     build:
       context: .
       dockerfile: services/users-api/Dockerfile
-    container_name: twitter-users-api
+    container_name: users-api
     ports:
       - "8081:8081"
     environment:
@@ -171,7 +171,7 @@ services:
     build:
       context: .
       dockerfile: services/tweet-api/Dockerfile
-    container_name: twitter-tweet-api
+    container_name: tweet-api
     ports:
       - "8082:8082"
     environment:
@@ -207,7 +207,7 @@ services:
     build:
       context: .
       dockerfile: services/admin-script-api/Dockerfile
-    container_name: twitter-admin-script-api
+    container_name: admin-script-api
     ports:
       - "8083:8083"
     environment:
@@ -241,7 +241,7 @@ services:
     build:
       context: .
       dockerfile: services/follower-api/Dockerfile
-    container_name: twitter-follower-api
+    container_name: follower-api
     ports:
       - "8084:8084"
     environment:

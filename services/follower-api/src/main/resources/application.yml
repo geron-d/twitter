@@ -29,7 +29,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,tracing
+        include: health,info,metrics,tracing,prometheus
   endpoint:
     health:
       show-details: always
@@ -95,4 +95,4 @@ springdoc:
     urls:
       - name: Follower API
         url: /v3/api-docs
-        display-name: Twitter Follower API v1.0.0
+        display-name: Twitter Follower API v1.0.0
