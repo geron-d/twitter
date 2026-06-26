@@ -1,7 +1,26 @@
 plugins {
-    id 'java-library'
+    id 'java'
     id 'org.springframework.boot' version '3.5.5' apply false
     id 'io.spring.dependency-management' version '1.1.7' apply false
+}
+
+ext {
+    versions = [
+        springBootVersion: '3.5.5',
+        springCloudVersion: '2025.0.0',
+        openTelemetryVersion: '2.29.0',
+        openTelemetrySdkVersion: '1.63.0',
+        testcontainersVersion: '2.0.2',
+        swaggerAnnotationsVersion: '2.2.38',
+        springdocOpenapiVersion: '2.8.13',
+        lombokVersion: '1.18.38',
+        lombokMapstructBindingVersion: '0.2.0',
+        mapstructVersion: '1.6.3',
+        postgresqlVersion: '42.7.7',
+        liquibaseVersion: '5.0.1',
+        wiremockVersion: '3.13.1',
+        datafakerVersion: '2.5.3'
+    ]
 }
 
 group = 'com.twitter'
@@ -36,37 +55,40 @@ allprojects {
 subprojects {
     apply plugin: 'io.spring.dependency-management'
 
-    ext['testcontainers.version'] = '2.0.2'
+    ext['opentelemetry.version'] = rootProject.ext.versions.openTelemetrySdkVersion
+
+    configurations.configureEach { resolutionStrategy.cacheChangingModulesFor(0, "seconds") }
 
     dependencyManagement {
         imports {
-            mavenBom "org.springframework.boot:spring-boot-dependencies:3.5.5"
-            mavenBom "org.springframework.cloud:spring-cloud-dependencies:2025.0.0"
-            mavenBom "org.testcontainers:testcontainers-bom:2.0.2"
+            mavenBom "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom:${rootProject.ext.versions.openTelemetryVersion}"
+            mavenBom "org.springframework.boot:spring-boot-dependencies:${rootProject.ext.versions.springBootVersion}"
+            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${rootProject.ext.versions.springCloudVersion}"
+            mavenBom "org.testcontainers:testcontainers-bom:${rootProject.ext.versions.testcontainersVersion}"
         }
         
         dependencies {
             // Swagger/OpenAPI dependencies
-            dependency 'io.swagger.core.v3:swagger-annotations:2.2.38'
-            dependency 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13'
+            dependency "io.swagger.core.v3:swagger-annotations:${rootProject.ext.versions.swaggerAnnotationsVersion}"
+            dependency "org.springdoc:springdoc-openapi-starter-webmvc-ui:${rootProject.ext.versions.springdocOpenapiVersion}"
             
             // Lombok dependencies
-            dependency 'org.projectlombok:lombok:1.18.38'
-            dependency 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+            dependency "org.projectlombok:lombok:${rootProject.ext.versions.lombokVersion}"
+            dependency "org.projectlombok:lombok-mapstruct-binding:${rootProject.ext.versions.lombokMapstructBindingVersion}"
             
             // MapStruct dependencies
-            dependency 'org.mapstruct:mapstruct:1.6.3'
-            dependency 'org.mapstruct:mapstruct-processor:1.6.3'
+            dependency "org.mapstruct:mapstruct:${rootProject.ext.versions.mapstructVersion}"
+            dependency "org.mapstruct:mapstruct-processor:${rootProject.ext.versions.mapstructVersion}"
             
             // Database dependencies
-            dependency 'org.postgresql:postgresql:42.7.7'
+            dependency "org.postgresql:postgresql:${rootProject.ext.versions.postgresqlVersion}"
 
-            dependency 'org.liquibase:liquibase-core:5.0.1'
+            dependency "org.liquibase:liquibase-core:${rootProject.ext.versions.liquibaseVersion}"
 
-            dependency 'org.wiremock:wiremock-standalone:3.13.1'
+            dependency "org.wiremock:wiremock-standalone:${rootProject.ext.versions.wiremockVersion}"
             
             // Datafaker for generating fake data
-            dependency 'net.datafaker:datafaker:2.5.3'
+            dependency "net.datafaker:datafaker:${rootProject.ext.versions.datafakerVersion}"
         }
     }
 }

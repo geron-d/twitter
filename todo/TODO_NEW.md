@@ -1,1 +1,2 @@
 сделать инфру как в https://www.youtube.com/watch?v=V4oFJ3LbW9s
+не забыть настроить сервисы в prometeus
