@@ -12,7 +12,7 @@ scrape_configs:
   - job_name: users-api
     metrics_path: /actuator/prometheus
     static_configs:
-      - targets: [ 'localhost:8081' ]
+      - targets: [ 'users-api:8081' ]
 
   - job_name: tweet-api
     metrics_path: /actuator/prometheus
@@ -51,4 +51,4 @@ scrape_configs:
 
   - job_name: postgres
     static_configs:
-      - targets: [ 'postgres-exporter:9187' ]
+      - targets: [ 'postgres-exporter:9187' ]

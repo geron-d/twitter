@@ -45,6 +45,8 @@ services:
       DATA_SOURCE_NAME: postgresql://user:password@postgres:5432/postgres?sslmode=disable
     ports:
       - "9188:9187"
+    networks:
+      - twitter-network
   
   prometheus:
     image: prom/prometheus:latest
@@ -58,6 +60,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - twitter-network
 
   loki:
     image: grafana/loki:2.9.2
@@ -71,6 +75,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - twitter-network
 
   tempo:
     image: grafana/tempo:2.4.1
@@ -81,6 +87,8 @@ services:
       - tempo_data:/var/tempo
     ports:
       - "3200:3200"
+    networks:
+      - twitter-network
 
   alloy:
     image: grafana/alloy:latest
@@ -97,6 +105,8 @@ services:
       - /var/log:/var/log:ro
     environment:
       GRAFANA_LOKI_URL: http://loki:3100/loki/api/v1/push
+    networks:
+      - twitter-network
     command:
       - run
       - --server.http.listen-addr=0.0.0.0:9080
@@ -122,6 +132,8 @@ services:
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: admin
       GF_METRICS_ENABLED: "true"
+    networks:
+      - twitter-network
     volumes:
       - ./infrastructure/grafana/provisioning:/etc/grafana/provisioning
       - ./infrastructure/grafana/dashboards:/var/lib/grafana/dashboards
