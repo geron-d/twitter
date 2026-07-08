@@ -10,6 +10,9 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        default_schema: twitter
+        hbm2ddl:
+          create_namespaces: true
 
 # Настройка users-api для интеграционных тестов (будет переопределено через WireMock)
 app:

@@ -5,7 +5,7 @@ spring:
   application:
     name: tweet-api
   datasource:
-    url: jdbc:postgresql://localhost:5432/twitter
+    url: jdbc:postgresql://localhost:5432/twitter?currentSchema=twitter
     username: user
     password: password
     driver-class-name: org.postgresql.Driver
@@ -13,6 +13,9 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: twitter
   jackson:
     serialization:
       write-dates-as-timestamps: false
