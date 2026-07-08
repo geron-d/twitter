@@ -21,9 +21,6 @@ dependencies {
         exclude group: "io.swagger.core.v3", module: "swagger-annotations"
     }
 
-//    // Трейсинг и мониторинг
-//    implementation 'io.micrometer:micrometer-tracing-bridge-otel'
-
     // OBSERVABILITY
     implementation("io.micrometer:micrometer-registry-prometheus")
     implementation("io.github.openfeign:feign-micrometer")
