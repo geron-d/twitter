@@ -40,6 +40,16 @@ management:
     sampling:
       probability: 1.0
 
+otel:
+  exporter:
+    otlp:
+      endpoint: ${OTLP_EXPORTER_ENDPOINT:http://localhost:4318}
+      protocol: http/protobuf
+  logs:
+    exporter: none
+  metrics:
+    exporter: none
+
 logging:
   level:
     com.twitter: DEBUG
