@@ -2,9 +2,12 @@
 
 ## Overview
 
-This document defines the standards and best practices for writing Swagger/OpenAPI documentation in the Twitter microservices project.
+This document defines standards and best practices for Swagger/OpenAPI documentation in this project’s Java
+microservices (Spring Boot, SpringDoc). Wording may reference sample domains (users, tweets) for illustration; apply
+the same rules to any service (for example Music API / Yandex integration).
 
 **Technology Stack:**
+
 - SpringDoc OpenAPI 3.x
 - OpenAPI 3.0 Specification
 - Java 24
@@ -26,13 +29,13 @@ This document defines the standards and best practices for writing Swagger/OpenA
 - Use semantic versioning for API versions (e.g., `1.0.0`)
 - Version should be specified in `OpenApiConfig` class
 - Version changes should follow semantic versioning rules:
-  - **MAJOR**: Breaking changes
-  - **MINOR**: New features (backward compatible)
-  - **PATCH**: Bug fixes (backward compatible)
+    - **MAJOR**: Breaking changes
+    - **MINOR**: New features (backward compatible)
+    - **PATCH**: Bug fixes (backward compatible)
 
 ### 1.3 Documentation Structure
 
-- Create separate OpenAPI interface (`*Api.java`) for API documentation
+- Create separate OpenAPI interface (`*Api.java` or `*OpenApi.java`) for API documentation
 - Implement the interface in the controller class
 - Keep documentation annotations separate from business logic
 - Document all endpoints, including error responses
@@ -46,7 +49,7 @@ This document defines the standards and best practices for writing Swagger/OpenA
 Every service must have an `OpenApiConfig` class in the `config` package:
 
 ```java
-package com.twitter.config;
+package com.example.config;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -58,8 +61,6 @@ import java.util.List;
 
 /**
  * Configuration class for OpenAPI/Swagger documentation.
- * <p>
- * This configuration class sets up the OpenAPI documentation for the [Service Name] API service.
  *
  * @author [author]
  * @version 1.0
@@ -68,35 +69,17 @@ import java.util.List;
 public class OpenApiConfig {
 
     /**
-     * Creates and configures the OpenAPI specification for the [Service Name] API.
+     * Creates and configures the OpenAPI specification for this service.
      *
      * @return configured OpenAPI instance
      */
     @Bean
-    public OpenAPI [serviceName]ApiOpenAPI() {
+    public OpenAPI openApi() {
         return new OpenAPI()
             .info(new Info()
                 .title("[Service Name] API")
                 .description("""
-                    REST API for [service description] in the Twitter microservices system.
-                    
-                    This API provides comprehensive [capability description] including:
-                    - [Feature 1]
-                    - [Feature 2]
-                    - [Feature 3]
-                    
-                    ## Authentication
-                    Currently, the API does not require authentication for basic operations.
-                    Future versions will implement JWT-based authentication.
-                    
-                    ## Rate Limiting
-                    API requests are subject to rate limiting to ensure system stability.
-                    Please refer to response headers for current rate limit information.
-                    
-                    ## Error Handling
-                    The API uses standard HTTP status codes and follows RFC 7807 Problem Details
-                    for error responses, providing detailed information about validation failures
-                    and business rule violations.
+                    REST API for [service description].
                     """)
                 .version("1.0.0"))
             .servers(List.of(
@@ -111,20 +94,19 @@ public class OpenApiConfig {
 ### 2.2 Info Configuration Requirements
 
 **Title:**
+
 - Format: `"[Service Name] API"`
-- Example: `"Twitter Users API"`, `"Twitter Tweet API"`
 
 **Description:**
+
 - Must include:
-  - Brief overview of the API purpose
-  - List of main capabilities (bullet points)
-  - Authentication section (current state and future plans)
-  - Rate limiting information
-  - Error handling approach (RFC 7807 Problem Details)
+    - Brief overview of the API purpose
+    - List of main capabilities (bullet points)
 - Use triple-quoted strings (`"""`) for multi-line descriptions
 - Keep descriptions concise but informative
 
 **Version:**
+
 - Use semantic versioning: `"1.0.0"`
 - Update version when making API changes
 
@@ -133,14 +115,15 @@ public class OpenApiConfig {
 - Configure at least one server for local development
 - Server URL should match the service port from `application.yml`
 - Include description for each server environment
-- Example:
-  ```java
-  .servers(List.of(
-      new Server()
-          .url("http://localhost:8081")
-          .description("Local development server")
-  ))
-  ```
+- Example fragment (continuation of the bean builder):
+
+```java
+            .servers(List.of(
+                new Server()
+                    .url("http://localhost:8081")
+                    .description("Local development server")
+            ));
+```
 
 ---
 
@@ -151,39 +134,27 @@ public class OpenApiConfig {
 Create a separate interface for OpenAPI annotations:
 
 ```java
-package com.twitter.controller;
+package com.example.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
-// ... other imports
 
 /**
  * OpenAPI interface for [Entity] Management API.
- * <p>
- * This interface contains all OpenAPI annotations for the [Entity] Management API endpoints.
  *
  * @author [author]
  * @version 1.0
  */
-@Tag(name = "[Entity] Management", description = "API for managing [entities] in the Twitter system")
-public interface [Entity]Api {
+@Tag(name = "[Entity] Management", description = "API for managing [entities]")
+public interface EntityApi {
     // Method signatures with OpenAPI annotations
 }
 ```
 
 ### 3.2 Tag Annotation
 
-**Usage:**
-- Apply `@Tag` annotation at the interface level
-- Use singular form for entity name: `"User Management"`, `"Tweet Management"`
-- Description should be concise: `"API for managing [entities] in the Twitter system"`
-
-**Example:**
-```java
-@Tag(name = "User Management", description = "API for managing users in the Twitter system")
-public interface UserApi {
-    // ...
-}
-```
+- Apply `@Tag` at the interface level
+- Use clear tag names (e.g., `"User Management"`, `"Tweet Management"`)
+- Description should be concise
 
 ### 3.3 Controller Implementation
 
@@ -193,12 +164,12 @@ The controller should implement the API interface:
 @RestController
 @RequestMapping("/api/v1/[entities]")
 @RequiredArgsConstructor
-public class [Entity]Controller implements [Entity]Api {
-    
-    private final [Entity]Service service;
-    
+public class EntityController implements EntityApi {
+
+    private final EntityService service;
+
     @Override
-    public ResponseEntity<[Entity]ResponseDto> [methodName](...) {
+    public ResponseEntity<EntityResponseDto> methodName(...) {
         // Implementation
     }
 }
@@ -206,16 +177,16 @@ public class [Entity]Controller implements [Entity]Api {
 
 ---
 
-## 4. Operations (Operations)
+## 4. Operations
 
 ### 4.1 Operation Annotation
 
-Every endpoint method must have `@Operation` annotation:
+Every endpoint method must have `@Operation`:
 
 ```java
 @Operation(
     summary = "[Brief summary of the operation]",
-    description = "[Detailed description of what the operation does. " +
+    description = "[Detailed description. " +
         "Include validation rules, business logic, and important notes.]"
 )
 ```
@@ -223,41 +194,21 @@ Every endpoint method must have `@Operation` annotation:
 ### 4.2 Summary Requirements
 
 - **Format:** Short, action-oriented phrase (3-7 words)
-- **Examples:**
-  - `"Create new user"`
-  - `"Get user by ID"`
-  - `"Update user role"`
-  - `"Deactivate user"`
-- Use present tense
-- Be specific about the action
+- **Examples:** `"Create new user"`, `"Get user by ID"`, `"Update user role"`
+- Use present tense; be specific about the action
 
 ### 4.3 Description Requirements
 
 - **Format:** Detailed explanation (2-4 sentences)
-- **Must include:**
-  - What the operation does
-  - Key validation rules or constraints
-  - Business logic or rules that apply
-  - Integration with other services (if applicable)
-- Use concatenation for multi-line descriptions:
-  ```java
-  description = "Creates a new tweet with the provided content and user ID. " +
-      "It performs validation on the request data, checks if the user exists via " +
-      "users-api integration, and saves the tweet to the database. " +
-      "The tweet content must be between 1 and 280 characters and cannot be empty or only whitespace."
-  ```
-
-### 4.4 Complete Example
+- **Must include:** what the operation does; key validation or constraints; business rules; integrations (if any)
+- Use string concatenation for multi-line descriptions:
 
 ```java
-@Operation(
-    summary = "Create new tweet",
-    description = "Creates a new tweet with the provided content and user ID. " +
-        "It performs validation on the request data, checks if the user exists via " +
-        "users-api integration, and saves the tweet to the database. " +
-        "The tweet content must be between 1 and 280 characters and cannot be empty or only whitespace."
-)
+description = "First sentence explaining behavior. " +
+    "Second sentence with validation or integration details."
 ```
+
+- **Canonical end-to-end example** (`@Operation`, `@ApiResponses`, `@Parameter`): see **§8.1**.
 
 ---
 
@@ -265,7 +216,7 @@ Every endpoint method must have `@Operation` annotation:
 
 ### 5.1 ApiResponses Annotation
 
-Every operation must document all possible response codes using `@ApiResponses`:
+Every operation must document possible response codes using `@ApiResponses`:
 
 ```java
 @ApiResponses(value = {
@@ -278,27 +229,20 @@ Every operation must document all possible response codes using `@ApiResponses`:
         responseCode = "400",
         description = "[Error description]",
         content = @Content(...)
-    ),
-    // ... more responses
+    )
 })
 ```
 
 ### 5.2 Success Responses
 
-**200 OK:**
-- Use for successful GET, PUT, PATCH, DELETE operations
-- Must include:
-  - `schema = @Schema(implementation = [ResponseDto].class)`
+**200 OK:** GET, PUT, PATCH, DELETE — include `schema = @Schema(implementation = [ResponseDto].class)` where applicable.
 
-**201 Created:**
-- Use for successful POST operations that create resources
-- Must include response schema
+**201 Created:** POST that creates a resource — include response schema.
 
-**Example:**
 ```java
 @ApiResponse(
     responseCode = "201",
-    description = "Tweet created successfully",
+    description = "Resource created successfully",
     content = @Content(
         mediaType = "application/json",
         schema = @Schema(implementation = TweetResponseDto.class)
@@ -306,57 +250,56 @@ Every operation must document all possible response codes using `@ApiResponses`:
 )
 ```
 
-### 5.3 Error Responses
+### 5.3 Error Responses (RFC 7807)
 
-**400 Bad Request:**
-- Use for validation errors, constraint violations, business rule violations
-- Must follow RFC 7807 Problem Details format
-- Document different error types separately if they return different structures
+**400 / 404 / 409** (and other errors): use `mediaType = "application/problem+json"` and document Problem Details.
 
-**404 Not Found:**
-- Use when resource is not found
-- Must follow RFC 7807 Problem Details format
+Minimal shape:
 
-**409 Conflict:**
-- Use for uniqueness violations
-- Must follow RFC 7807 Problem Details format
-
-**Example Error Response:**
 ```java
 @ApiResponse(
     responseCode = "400",
     description = "Validation error",
     content = @Content(
-        mediaType = "application/problem+json"
+        mediaType = "application/problem+json",
+        schema = @Schema(implementation = ProblemDetail.class)
     )
 )
 ```
 
-### 5.4 ExampleObject Requirements
-
-**Note:** `@ExampleObject` is not used in `@ApiResponse` annotations for controller endpoints. Examples should be defined in DTO classes using `@Schema(example = "...")` annotation at the class or field level. This ensures examples are automatically included in the OpenAPI documentation through the schema definition.
-
-### 5.5 Multiple Error Types
-
-If an endpoint can return multiple types of 400 errors, document each separately:
+When several error codes need **distinct example payloads** (different `type`, `title`, or custom properties), you may
+add **`@ExampleObject`** on that `@ApiResponse` content. This is especially useful when the body is not fully captured
+by a single shared DTO schema:
 
 ```java
 @ApiResponse(
-    responseCode = "400",
-    description = "Validation error",
-    content = @Content(...)
-),
-@ApiResponse(
-    responseCode = "400",
-    description = "Business rule violation",
-    content = @Content(...)
-),
-@ApiResponse(
-    responseCode = "400",
-    description = "Constraint violation error",
-    content = @Content(...)
+    responseCode = "401",
+    description = "Unauthorized",
+    content = @Content(
+        mediaType = "application/problem+json",
+        schema = @Schema(implementation = ProblemDetail.class),
+        examples = @ExampleObject(
+            name = "unauthorized",
+            value = """
+                {
+                  "type": "https://example.com/problem/unauthorized",
+                  "title": "Unauthorized",
+                  "status": 401
+                }
+                """
+        )
+    )
 )
 ```
+
+### 5.4 Examples Policy (success vs errors)
+
+- **`application/json` success bodies:** Prefer **`@Schema(implementation = YourResponseDto.class)`**. Put sample JSON
+  in DTOs using class-level or field-level **`@Schema(example = "...")`** or text-block `example` on the record so the
+  spec stays aligned with schemas.
+- **`application/problem+json`:** Use **`@Schema(implementation = ProblemDetail.class)`** (or a dedicated problem DTO
+  if you introduce one). Optionally add **`@ExampleObject`** per response to show realistic RFC 7807 payloads (see §5.3).
+- **Do not** duplicate the same narrative in §9; for day-to-day rules, this subsection is authoritative.
 
 ---
 
@@ -364,24 +307,22 @@ If an endpoint can return multiple types of 400 errors, document each separately
 
 ### 6.1 Parameter Annotation
 
-All method parameters must be documented with `@Parameter`:
+All method parameters should be documented with `@Parameter`:
 
 ```java
 @Parameter(
     description = "[Clear description of the parameter]",
-    required = true,  // or false
-    example = "[example value]"  // for path/query parameters
+    required = true,
+    example = "[example value]"
 )
 ```
 
 ### 6.2 Path Parameters
 
-**Requirements:**
 - Always `required = true`
-- Include `example` with realistic UUID or ID value
-- Description should explain what the parameter identifies
+- Include realistic `example` (UUID or ID)
+- Description explains what the parameter identifies
 
-**Example:**
 ```java
 ResponseEntity<UserResponseDto> getUserById(
     @Parameter(
@@ -395,12 +336,9 @@ ResponseEntity<UserResponseDto> getUserById(
 
 ### 6.3 Request Body Parameters
 
-**Requirements:**
-- Use `@Parameter` for DTO parameters
-- `required = true` for POST/PUT operations
-- Description should explain what data the body contains
+- `required = true` for POST/PUT when the body is mandatory
+- Description explains what the body contains
 
-**Example:**
 ```java
 ResponseEntity<TweetResponseDto> createTweet(
     @Parameter(description = "Tweet data for creation", required = true)
@@ -410,12 +348,9 @@ ResponseEntity<TweetResponseDto> createTweet(
 
 ### 6.4 Query Parameters
 
-**Requirements:**
-- Include `example` value
-- Set `required` appropriately (usually `false` for optional filters)
-- Description should explain filtering behavior
+- Include `example` where helpful
+- Set `required` appropriately for filters
 
-**Example:**
 ```java
 PagedModel<UserResponseDto> findAll(
     @Parameter(description = "Filter criteria for user search")
@@ -431,99 +366,38 @@ PagedModel<UserResponseDto> findAll(
 
 ### 7.1 Class-Level Schema Annotation
 
-Every DTO must have `@Schema` annotation at the class level:
+Every DTO must have `@Schema` at class level with `name`, `description`, and a realistic JSON `example` (text block).
 
-```java
-@Schema(
-    name = "[DTO Name]",
-    description = "[Clear description of what this DTO represents]",
-    example = """
-        {
-          "field1": "value1",
-          "field2": "value2"
-        }
-        """
-)
-public record [DtoName](...) {
-}
-```
+**Field-level rules, enums, and sensitive data:** see §7.2–§7.5.
 
-**Requirements:**
-- **Name:** Use descriptive name (e.g., `"UserRequest"`, `"TweetResponse"`)
-- **Description:** Explain the purpose and when it's used
-- **Example:** Complete JSON example with realistic values
-
-**Example:**
-```java
-@Schema(
-    name = "CreateTweetRequest",
-    description = "Data structure for creating new tweets in the system",
-    example = """
-        {
-          "content": "This is a sample tweet content",
-          "userId": "123e4567-e89b-12d3-a456-426614174000"
-        }
-        """
-)
-public record CreateTweetRequestDto(...) {
-}
-```
+**Full record examples (request and response):** see **§7.6** (canonical).
 
 ### 7.2 Field-Level Schema Annotation
 
-Every field in a DTO must have `@Schema` annotation:
+Every field in a DTO must have `@Schema` where it contributes to the public API contract:
 
 ```java
 @Schema(
     description = "[Clear description of the field]",
     example = "[example value]",
-    requiredMode = Schema.RequiredMode.REQUIRED,  // or NOT_REQUIRED
-    format = "[format]",  // e.g., "uuid", "email", "date-time"
-    minLength = [number],  // for strings
-    maxLength = [number],  // for strings
-    nullable = true  // if field can be null
+    requiredMode = Schema.RequiredMode.REQUIRED,
+    format = "uuid",
+    minLength = 1,
+    maxLength = 100,
+    nullable = false
 )
 ```
+
+Use `Schema.RequiredMode.NOT_REQUIRED`, `nullable = true`, and omit optional attributes when not applicable.
 
 ### 7.3 Field Documentation Requirements
 
-**Description:**
-- Explain what the field represents
-- Include constraints or special behavior
-- For optional fields, mention "(optional)" in description
-
-**Example:**
-```java
-@Schema(
-    description = "User's first name (optional)",
-    example = "Jane",
-    maxLength = 100,
-    nullable = true
-)
-String firstName;
-```
-
-**Required Fields:**
-- Use `requiredMode = Schema.RequiredMode.REQUIRED` for mandatory fields
-- Use `requiredMode = Schema.RequiredMode.NOT_REQUIRED` for optional fields
-
-**Format:**
-- Use appropriate formats:
-  - `format = "uuid"` for UUID fields
-  - `format = "email"` for email fields
-  - `format = "date-time"` for LocalDateTime fields
-
-**Length Constraints:**
-- Use `minLength` and `maxLength` for string fields
-- Match validation constraints from `@Size` annotations
-
-**Nullable Fields:**
-- Set `nullable = true` for fields that can be null
-- Omit or set `nullable = false` for required fields
+- **Description:** what the field represents; for optional fields, note “(optional)”
+- **Required:** `requiredMode = Schema.RequiredMode.REQUIRED` vs `NOT_REQUIRED`
+- **Format:** `uuid`, `email`, `date-time`, etc.
+- **Length:** `minLength` / `maxLength` aligned with Bean Validation (`@Size`, etc.)
 
 ### 7.4 Sensitive Data Handling
-
-For sensitive fields (passwords, tokens), use `accessMode`:
 
 ```java
 @Schema(
@@ -536,14 +410,10 @@ For sensitive fields (passwords, tokens), use `accessMode`:
 String password;
 ```
 
-**Access Modes:**
-- `Schema.AccessMode.WRITE_ONLY`: Field appears only in request schemas
-- `Schema.AccessMode.READ_ONLY`: Field appears only in response schemas
-- Default: Field appears in both request and response schemas
+- `WRITE_ONLY`: request schemas only
+- `READ_ONLY`: response schemas only
 
 ### 7.5 Enum Fields
-
-For enum fields, use `implementation`:
 
 ```java
 @Schema(
@@ -557,6 +427,7 @@ UserStatus status;
 ### 7.6 Complete DTO Example
 
 **Request DTO:**
+
 ```java
 @Schema(
     name = "UserRequest",
@@ -615,6 +486,7 @@ public record UserRequestDto(
 ```
 
 **Response DTO:**
+
 ```java
 @Schema(
     name = "UserResponse",
@@ -628,7 +500,7 @@ public record UserRequestDto(
           "email": "jane.smith@example.com",
           "status": "ACTIVE",
           "role": "USER",
-          "createdAt": "2025-01-21T20:30:00"
+          "createdAt": "2026-01-21T20:30:00"
         }
         """
 )
@@ -678,7 +550,7 @@ public record UserResponseDto(
 
     @Schema(
         description = "Date and time when the user account was created",
-        example = "2025-01-21T20:30:00",
+        example = "2026-01-21T20:30:00",
         format = "date-time"
     )
     LocalDateTime createdAt
@@ -689,6 +561,9 @@ public record UserResponseDto(
 ---
 
 ## 8. Code Examples
+
+**§8.1 is the canonical end-to-end reference** for `@Operation`, `@ApiResponses`, and `@Parameter` together. Sections
+4–6 define the same rules without repeating the full listing.
 
 ### 8.1 Complete API Interface Example
 
@@ -717,11 +592,6 @@ public interface TweetApi {
 
     /**
      * Creates a new tweet in the system.
-     * <p>
-     * This method creates a new tweet with the provided content and user ID.
-     * It performs validation on the request data, checks if the user exists via
-     * users-api integration, and saves the tweet to the database. The tweet content
-     * must be between 1 and 280 characters and cannot be empty or only whitespace.
      *
      * @param createTweetRequest DTO containing tweet data for creation (content and userId)
      * @return ResponseEntity containing the created tweet data with HTTP 201 status
@@ -740,20 +610,6 @@ public interface TweetApi {
             content = @Content(
                 mediaType = "application/json",
                 schema = @Schema(implementation = TweetResponseDto.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Validation error",
-            content = @Content(
-                mediaType = "application/problem+json"
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Business rule violation",
-            content = @Content(
-                mediaType = "application/problem+json"
             )
         )
     })
@@ -784,7 +640,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * REST controller for tweet management in Twitter microservices.
+ * REST controller for tweet management.
  *
  * @author geron
  * @version 1.0
@@ -817,52 +673,30 @@ public class TweetController implements TweetApi {
 
 ### 9.1 Consistency
 
-- **Use consistent naming:** Follow the same naming patterns across all APIs
-- **Consistent descriptions:** Use similar structure and tone for similar operations
-- **Consistent examples:** Use similar UUIDs and data formats across examples
-- **Consistent error formats:** All error responses should follow RFC 7807 Problem Details
+- Same naming patterns, description tone, and UUID/date style across endpoints
+- Error responses follow RFC 7807 Problem Details
 
 ### 9.2 Completeness
 
-- **Document all endpoints:** Every public endpoint must have OpenAPI documentation
-- **Document all responses:** Include all possible HTTP status codes
-- **Document all parameters:** Every parameter must have `@Parameter` annotation
-- **Document all DTOs:** Every DTO must have `@Schema` annotation at class and field levels
+- Every public endpoint, parameter, and DTO used in the API surface has OpenAPI coverage
 
 ### 9.3 Examples
 
-- **Define examples in DTOs:** Examples should be defined in DTO classes using `@Schema(example = "...")` annotation at the class or field level
-- **Provide examples for all DTOs:** Both request and response DTOs should have examples
-- **Use realistic data:** Examples should use realistic UUIDs, dates, and values
-- **Match actual structure:** Examples must match the actual response structure exactly
-- **Examples in @ApiResponse:** Do not use `@ExampleObject` in `@ApiResponse` annotations; examples are automatically included from DTO schema definitions
+- Follow **§5.4** for where examples live (`@Schema` on DTOs vs `@ExampleObject` on problem responses)
+- Keep examples realistic and aligned with runtime behavior
 
-### 9.4 Error Documentation
+### 9.4 Validation Alignment
 
-- **Document all error scenarios:** Include validation errors, business rule violations, not found errors
-- **Use Problem Details format:** All error responses should follow RFC 7807
-- **Include error context:** Error examples should include relevant field names, constraint names, rule names
-- **Separate error types:** Document different error types as separate `@ApiResponse` entries
+- `@Schema` constraints mirror Bean Validation; document formats and nullability explicitly
 
-### 9.5 Validation Alignment
+### 9.5 Security
 
-- **Match validation constraints:** `@Schema` annotations should match `@Size`, `@Min`, `@Max` validation constraints
-- **Document required fields:** Use `requiredMode` to indicate required vs optional fields
-- **Document formats:** Use `format` for UUIDs, emails, dates, etc.
-- **Document nullable fields:** Use `nullable = true` for optional fields
+- `WRITE_ONLY` for secrets; descriptions stay API-centric, not implementation dumps
+- Mention authentication expectations in service-level OpenAPI description when relevant
 
-### 9.6 Security
+### 9.6 Maintainability
 
-- **Hide sensitive data:** Use `accessMode = Schema.AccessMode.WRITE_ONLY` for passwords
-- **Don't expose internal details:** Keep descriptions focused on API behavior, not implementation
-- **Document authentication:** Include authentication information in API description (even if not yet implemented)
-
-### 9.7 Maintainability
-
-- **Keep documentation up to date:** Update documentation when API changes
-- **Review documentation:** Include Swagger documentation in code reviews
-- **Test examples:** Verify that examples in documentation match actual API behavior
-- **Version documentation:** Update API version when making breaking changes
+- Update docs with API changes; verify examples in reviews; bump API version on breaking changes
 
 ---
 
@@ -870,126 +704,76 @@ public class TweetController implements TweetApi {
 
 ### 10.1 CRUD Operations
 
-**Create (POST):**
-- Summary: `"Create new [entity]"`
-- Response: `201 Created` with created entity
-- Errors: `400` (validation), `409` (conflict if applicable)
+**Create (POST):** summary `"Create new [entity]"` — `201 Created` with body.
 
-**Read (GET):**
-- Summary: `"Get [entity] by ID"` or `"Get [entities] with filtering"`
-- Response: `200 OK` with entity or list
-- Errors: `404` (not found)
+**Read (GET):** `"Get [entity] by ID"` or list with filters — `200 OK`.
 
-**Update (PUT):**
-- Summary: `"Update [entity] completely"`
-- Response: `200 OK` with updated entity
-- Errors: `400` (validation), `404` (not found), `409` (conflict if applicable)
+**Update (PUT):** `"Update [entity] completely"` — `200 OK`.
 
-**Partial Update (PATCH):**
-- Summary: `"Partially update [entity]"`
-- Response: `200 OK` with updated entity
-- Errors: `400` (validation), `404` (not found), `409` (conflict if applicable)
+**Partial update (PATCH):** `"Partially update [entity]"` — `200 OK`.
 
-**Delete/Deactivate:**
-- Summary: `"Deactivate [entity]"` or `"Delete [entity]"`
-- Response: `200 OK` with updated entity (if soft delete) or `204 No Content`
-- Errors: `400` (business rule violation), `404` (not found)
+**Delete / deactivate:** `"Deactivate [entity]"` / `"Delete [entity]"` — `200 OK` or `204 No Content`.
 
 ### 10.2 Pagination
 
-For paginated endpoints:
-- Use `PagedModel<[Entity]ResponseDto>` as return type
-- Document `Pageable` parameter with description: `"Pagination parameters (page, size, sorting)"`
-- Include pagination metadata in response example:
-  ```json
-  {
-    "content": [...],
-    "page": {
-      "size": 10,
-      "number": 0,
-      "totalElements": 100,
-      "totalPages": 10
-    }
+- Return type `PagedModel<[Entity]ResponseDto>` where applicable
+- Document `Pageable` (see §6.4)
+- Response example shape:
+
+```json
+{
+  "content": [],
+  "page": {
+    "size": 10,
+    "number": 0,
+    "totalElements": 100,
+    "totalPages": 10
   }
-  ```
+}
+```
 
 ### 10.3 Filtering
 
-For filtered endpoints:
-- Create a separate Filter DTO with `@Schema` annotation
-- Document filter DTO with example showing all filter fields
-- Use `@Parameter` for filter parameter with description: `"Filter criteria for [entity] search"`
+- Filter DTO with `@Schema` and example
+- `@Parameter` description: `"Filter criteria for [entity] search"`
 
 ---
 
 ## 11. Checklist
 
-Use this checklist when documenting a new API endpoint:
+Use when adding or changing an endpoint:
 
-### OpenAPI Configuration
-- [ ] `OpenApiConfig` class exists with proper `Info` configuration
-- [ ] API title follows naming convention
-- [ ] Description includes capabilities, authentication, rate limiting, error handling
-- [ ] Version is set correctly
-- [ ] Server configuration matches service port
-
-### API Interface
-- [ ] Separate `*Api` interface created with `@Tag` annotation
-- [ ] Tag name follows convention (e.g., "User Management")
-- [ ] Controller implements the interface
-
-### Operation Documentation
-- [ ] `@Operation` annotation with `summary` and `description`
-- [ ] Summary is concise and action-oriented
-- [ ] Description includes validation rules and business logic
-
-### Response Documentation
-- [ ] `@ApiResponses` annotation with all possible status codes
-- [ ] Success response (200/201) with `@Schema` implementation
-- [ ] Error responses (400, 404, 409, etc.) with Problem Details format
-- [ ] Examples defined in DTO classes using `@Schema(example = "...")`
-
-### Parameter Documentation
-- [ ] All parameters have `@Parameter` annotation
-- [ ] Path parameters include `example` value
-- [ ] Request body parameters have clear descriptions
-- [ ] Query parameters documented appropriately
-
-### DTO Documentation
-- [ ] Class-level `@Schema` with `name`, `description`, and `example`
-- [ ] All fields have field-level `@Schema` annotations
-- [ ] Required fields use `requiredMode = Schema.RequiredMode.REQUIRED`
-- [ ] Optional fields use `nullable = true` or `requiredMode = Schema.RequiredMode.NOT_REQUIRED`
-- [ ] Format specified for UUIDs, emails, dates
-- [ ] Length constraints match validation annotations
-- [ ] Sensitive fields use `accessMode = Schema.AccessMode.WRITE_ONLY`
-- [ ] Enum fields use `implementation` attribute
+- [ ] **§2** — `OpenApiConfig`: title, description, version, servers match deployment
+- [ ] **§3** — `*Api` / `*OpenApi` interface with `@Tag`; controller implements it
+- [ ] **§4** — `@Operation` with summary and full description
+- [ ] **§5** — `@ApiResponses` for all status codes; success uses DTO schema; errors use `problem+json` per §5.3–§5.4
+- [ ] **§6** — `@Parameter` on path, query, and documented body parameters
+- [ ] **§7** — DTO class- and field-level `@Schema`; enums and sensitive fields handled per §7.4–§7.5
 
 ---
 
 ## 12. References
 
 ### Official Documentation
+
 - [SpringDoc OpenAPI Documentation](https://springdoc.org/)
 - [OpenAPI 3.0 Specification](https://swagger.io/specification/)
 - [RFC 7807 Problem Details for HTTP APIs](https://tools.ietf.org/html/rfc7807)
 
 ### Project Examples
-- `services/users-api/src/main/java/com/twitter/config/OpenApiConfig.java`
-- `services/tweet-api/src/main/java/com/twitter/config/OpenApiConfig.java`
-- `services/users-api/src/main/java/com/twitter/controller/UserApi.java`
-- `services/tweet-api/src/main/java/com/twitter/controller/TweetApi.java`
-- `services/users-api/src/main/java/com/twitter/dto/UserRequestDto.java`
-- `services/users-api/src/main/java/com/twitter/dto/UserResponseDto.java`
-- `services/tweet-api/src/main/java/com/twitter/dto/request/CreateTweetRequestDto.java`
-- `services/tweet-api/src/main/java/com/twitter/dto/response/TweetResponseDto.java`
+
+**This repository (Music API):**
+
+- `src/main/java/com/music/controller/YandexUserOpenApi.java` — OpenAPI interface with success schema and multiple
+  `problem+json` responses with `@ExampleObject`
+- `src/main/java/com/music/dto/YandexUserInfo.java` — response DTO with `@Schema`
+
+**Illustrative multi-service layout (other codebases):**
+
+- `services/users-api/.../OpenApiConfig.java`, `UserApi.java`, `UserRequestDto.java`, `UserResponseDto.java`
+- `services/tweet-api/.../OpenApiConfig.java`, `TweetApi.java`, `CreateTweetRequestDto.java`, `TweetResponseDto.java`
 
 ---
 
-*Last updated: 2025-01-27*
-*Version: 1.0*
-
-
-
-
-
+*Last updated: 2026-04-04*
+*Version: 1.1*

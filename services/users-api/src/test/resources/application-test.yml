@@ -8,6 +8,9 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        default_schema: twitter
+        hbm2ddl:
+          create_namespaces: true
 
 # Настройки логирования для тестов
 logging:

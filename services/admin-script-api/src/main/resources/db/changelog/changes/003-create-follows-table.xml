@@ -6,7 +6,7 @@
     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
 
     <changeSet id="003-create-follows-table" author="geron">
-        <createTable tableName="follows">
+        <createTable schemaName="twitter" tableName="follows">
             <column name="id" type="uuid">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -22,27 +22,32 @@
         </createTable>
 
         <addForeignKeyConstraint
+            baseTableSchemaName="twitter"
             baseTableName="follows"
             baseColumnNames="follower_id"
             constraintName="follows_follower_fk"
+            referencedTableSchemaName="twitter"
             referencedTableName="users"
             referencedColumnNames="id"/>
 
         <addForeignKeyConstraint
+            baseTableSchemaName="twitter"
             baseTableName="follows"
             baseColumnNames="following_id"
             constraintName="follows_following_fk"
+            referencedTableSchemaName="twitter"
             referencedTableName="users"
             referencedColumnNames="id"/>
 
         <addUniqueConstraint
+            schemaName="twitter"
             tableName="follows"
             columnNames="follower_id, following_id"
             constraintName="follows_unique_follower_following"/>
 
         <sql>
-            ALTER TABLE follows ADD CONSTRAINT follows_check_no_self_follow CHECK (follower_id != following_id);
+            ALTER TABLE twitter.follows ADD CONSTRAINT follows_check_no_self_follow CHECK (follower_id != following_id);
         </sql>
     </changeSet>
 
-</databaseChangeLog>
+</databaseChangeLog>

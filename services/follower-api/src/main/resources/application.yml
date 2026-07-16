@@ -5,7 +5,7 @@ spring:
   application:
     name: follower-api
   datasource:
-    url: jdbc:postgresql://localhost:5432/twitter
+    url: jdbc:postgresql://localhost:5432/twitter?currentSchema=twitter
     username: user
     password: password
     driver-class-name: org.postgresql.Driver
@@ -13,6 +13,9 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: twitter
   jackson:
     serialization:
       write-dates-as-timestamps: false
@@ -29,13 +32,23 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,tracing
+        include: health,info,metrics,tracing,prometheus
   endpoint:
     health:
       show-details: always
   tracing:
     sampling:
       probability: 1.0
+
+otel:
+  exporter:
+    otlp:
+      endpoint: ${OTLP_EXPORTER_ENDPOINT:http://localhost:4318}
+      protocol: http/protobuf
+  logs:
+    exporter: none
+  metrics:
+    exporter: none
 
 logging:
   level:
@@ -95,4 +108,4 @@ springdoc:
     urls:
       - name: Follower API
         url: /v3/api-docs
-        display-name: Twitter Follower API v1.0.0
+        display-name: Twitter Follower API v1.0.0

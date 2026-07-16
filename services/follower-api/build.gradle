@@ -1,7 +1,7 @@
 plugins {
+    id 'java'
     id 'org.springframework.boot'
     id 'io.spring.dependency-management'
-    id 'java'
 }
 
 dependencies {
@@ -21,8 +21,14 @@ dependencies {
         exclude group: "io.swagger.core.v3", module: "swagger-annotations"
     }
 
-    // Трейсинг и мониторинг
-    implementation 'io.micrometer:micrometer-tracing-bridge-otel'
+    // OBSERVABILITY
+    implementation("io.micrometer:micrometer-registry-prometheus")
+    implementation("io.github.openfeign:feign-micrometer")
+    implementation("io.micrometer:micrometer-observation")
+    implementation("io.micrometer:micrometer-tracing")
+    implementation("io.micrometer:micrometer-tracing-bridge-otel")
+    runtimeOnly("io.micrometer:micrometer-registry-prometheus")
+    implementation("io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter")
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
@@ -52,4 +58,3 @@ compileJava {
 springBoot {
     mainClass = 'com.twitter.Application'
 }
-

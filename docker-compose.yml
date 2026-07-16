@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # PostgreSQL Database
   postgres:
@@ -23,7 +21,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # Optional: pgAdmin for database management
   pgadmin:
     image: dpage/pgadmin4
     container_name: twitter-pgadmin
@@ -37,18 +34,127 @@ services:
       - postgres
     networks:
       - twitter-network
+  
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:latest
+    container_name: postgres-exporter
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATA_SOURCE_NAME: postgresql://user:password@postgres:5432/postgres?sslmode=disable
+    ports:
+      - "9188:9187"
+    networks:
+      - twitter-network
+  
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infrastructure/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "http://localhost:9090/-/healthy" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - twitter-network
 
+  loki:
+    image: grafana/loki:2.9.2
+    container_name: loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./infrastructure/loki/loki-config.yaml:/etc/loki/loki-config.yaml:ro
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:3100/ready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - twitter-network
+
+  tempo:
+    image: grafana/tempo:2.4.1
+    container_name: tempo
+    command: [ "-config.file=/etc/tempo/tempo.yaml" ]
+    volumes:
+      - ./infrastructure/tempo/tempo.yaml:/etc/tempo/tempo.yaml
+      - tempo_data:/var/tempo
+    ports:
+      - "3200:3200"
+    networks:
+      - twitter-network
+
+  alloy:
+    image: grafana/alloy:latest
+    container_name: alloy
+    user: root
+    ports:
+      - "9080:9080" # HTTP interface
+      - "4317:4317" # OTLP gRPC
+      - "4318:4318" # OTLP http
+    volumes:
+      - ./infrastructure/alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/log:/var/log:ro
+    environment:
+      GRAFANA_LOKI_URL: http://loki:3100/loki/api/v1/push
+    networks:
+      - twitter-network
+    command:
+      - run
+      - --server.http.listen-addr=0.0.0.0:9080
+      - --storage.path=/var/lib/alloy/data
+      - /etc/alloy/config.alloy
+
+  grafana:
+    image: grafana/grafana:10.3.1
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      prometheus:
+        condition: service_healthy
+      loki:
+        condition: service_healthy
+      tempo:
+        condition: service_started
+      alloy:
+        condition: service_started
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: true
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_METRICS_ENABLED: "true"
+    networks:
+      - twitter-network
+    volumes:
+      - ./infrastructure/grafana/provisioning:/etc/grafana/provisioning
+      - ./infrastructure/grafana/dashboards:/var/lib/grafana/dashboards
+      - nexus-data:/nexus-data
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "http://localhost:3000/api/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+  
   # Users API Service
   users-api:
     build:
       context: .
       dockerfile: services/users-api/Dockerfile
-    container_name: twitter-users-api
+    container_name: users-api
     ports:
       - "8081:8081"
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/twitter
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/twitter?currentSchema=twitter
       SPRING_DATASOURCE_USERNAME: user
       SPRING_DATASOURCE_PASSWORD: password
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
@@ -56,8 +162,11 @@ services:
       SPRING_JPA_SHOW_SQL: false
       LOGGING_LEVEL_COM_TWITTER: DEBUG
       LOGGING_LEVEL_ORG_HIBERNATE_SQL: DEBUG
+      OTLP_EXPORTER_ENDPOINT: http://tempo:4318
     depends_on:
       postgres:
+        condition: service_healthy
+      admin-script-api:
         condition: service_healthy
     networks:
       - twitter-network
@@ -76,12 +185,12 @@ services:
     build:
       context: .
       dockerfile: services/tweet-api/Dockerfile
-    container_name: twitter-tweet-api
+    container_name: tweet-api
     ports:
       - "8082:8082"
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/twitter
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/twitter?currentSchema=twitter
       SPRING_DATASOURCE_USERNAME: user
       SPRING_DATASOURCE_PASSWORD: password
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
@@ -91,8 +200,11 @@ services:
       LOGGING_LEVEL_ORG_HIBERNATE_SQL: DEBUG
       USERS_API_URL: http://users-api:8081
       FOLLOWER_API_URL: http://follower-api:8084
+      OTLP_EXPORTER_ENDPOINT: http://tempo:4318
     depends_on:
       postgres:
+        condition: service_healthy
+      admin-script-api:
         condition: service_healthy
     networks:
       - twitter-network
@@ -111,7 +223,7 @@ services:
     build:
       context: .
       dockerfile: services/admin-script-api/Dockerfile
-    container_name: twitter-admin-script-api
+    container_name: admin-script-api
     ports:
       - "8083:8083"
     environment:
@@ -124,6 +236,7 @@ services:
       SPRING_JPA_SHOW_SQL: false
       LOGGING_LEVEL_COM_TWITTER: DEBUG
       LOGGING_LEVEL_ORG_HIBERNATE_SQL: DEBUG
+      OTLP_EXPORTER_ENDPOINT: http://tempo:4318
     depends_on:
       postgres:
         condition: service_healthy
@@ -144,12 +257,12 @@ services:
     build:
       context: .
       dockerfile: services/follower-api/Dockerfile
-    container_name: twitter-follower-api
+    container_name: follower-api
     ports:
       - "8084:8084"
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/twitter
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/twitter?currentSchema=twitter
       SPRING_DATASOURCE_USERNAME: user
       SPRING_DATASOURCE_PASSWORD: password
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
@@ -157,8 +270,11 @@ services:
       SPRING_JPA_SHOW_SQL: false
       LOGGING_LEVEL_COM_TWITTER: DEBUG
       LOGGING_LEVEL_ORG_HIBERNATE_SQL: DEBUG
+      OTLP_EXPORTER_ENDPOINT: http://tempo:4318
     depends_on:
       postgres:
+        condition: service_healthy
+      admin-script-api:
         condition: service_healthy
     networks:
       - twitter-network
@@ -175,6 +291,13 @@ services:
 volumes:
   postgres_data:
     driver: local
+  artifacts:
+  tempo_data:
+  nexus-data:
+  loki_data:
+  loki_chunks:
+  loki_index:
+  loki_rules:
 
 networks:
   twitter-network:

@@ -2,6 +2,9 @@
 
 
 ## Future
+- подключить кейклок, можно посмотреть в https://www.youtube.com/watch?v=V4oFJ3LbW9s
+- сделать ветку с open-api, можно посмотреть в https://www.youtube.com/watch?v=V4oFJ3LbW9s
+- сделать api-gateway
 - подключить линтер
 - подключить статический анализатор
 - найти вариант на проверку использования новых фич java
@@ -59,5 +62,5 @@
 - использовать AOT для Spring Boot 4
 - использовать AOT для Java 25
 - использовать GraalVM
-- сделать инфру как в https://www.youtube.com/watch?v=V4oFJ3LbW9s
 - сделать безопасность контейнеров как в https://habr.com/ru/companies/spring_aio/articles/992696/
+- настроить open-telemetry для spring boot 4 https://habr.com/ru/companies/spring_aio/articles/1017016/ 

@@ -6,7 +6,7 @@
     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
 
     <changeSet id="004-create-tweet-likes-table" author="geron">
-        <createTable tableName="tweet_likes">
+        <createTable schemaName="twitter" tableName="tweet_likes">
             <column name="id" type="uuid">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -22,23 +22,28 @@
         </createTable>
 
         <addForeignKeyConstraint
+            baseTableSchemaName="twitter"
             baseTableName="tweet_likes"
             baseColumnNames="tweet_id"
             constraintName="tweet_likes_tweet_fk"
+            referencedTableSchemaName="twitter"
             referencedTableName="tweets"
             referencedColumnNames="id"/>
 
         <addForeignKeyConstraint
+            baseTableSchemaName="twitter"
             baseTableName="tweet_likes"
             baseColumnNames="user_id"
             constraintName="tweet_likes_user_fk"
+            referencedTableSchemaName="twitter"
             referencedTableName="users"
             referencedColumnNames="id"/>
 
         <addUniqueConstraint
+            schemaName="twitter"
             tableName="tweet_likes"
             columnNames="tweet_id, user_id"
             constraintName="uk_tweet_likes_tweet_user"/>
     </changeSet>
 
-</databaseChangeLog>
+</databaseChangeLog>

@@ -2,16 +2,26 @@
 
 ## Overview
 
-This document defines the coding standards and best practices for the Twitter microservices project. These standards are based on the analysis of existing services (users-api, tweet-api, common-lib) and should be followed when writing new code or modifying existing code.
+This document defines the coding standards and best practices for the Twitter microservices project. These standards are
+based on the analysis of existing services (users-api, tweet-api, common-lib) and should be followed when writing new
+code or modifying existing code.
 
 **Technology Stack:**
+
 - Java 24
 - Spring Boot 3.5.5
-- Gradle (Multi-module project)
-- PostgreSQL
+- Gradle
+- PostgreSQL / MongoDB (choose per service needs)
 - MapStruct
 - Lombok
 - OpenAPI/Swagger
+
+**Canonical code examples (avoid duplicating these snippets elsewhere in this document):**
+
+- **DTO Records (request, response, validation usage)** — §3.1 and §6.5 (`@Valid` on controllers only).
+- **OpenAPI `OpenApiConfig` bean** — §4.3.
+- **API interface vs controller (layering)** — §5.2 (minimal); **full OpenAPI on interfaces** — §9.1.
+- **Request logging (`@LoggableRequest`)** — §10.2.
 
 ---
 
@@ -27,14 +37,15 @@ This document defines the coding standards and best practices for the Twitter mi
 ### 1.2 Code Style
 
 - Follow Java naming conventions:
-  - Classes: `PascalCase` (e.g., `UserController`)
-  - Methods: `camelCase` (e.g., `getUserById`)
-  - Constants: `UPPER_SNAKE_CASE` (e.g., `MAX_RETRY_COUNT`)
-  - Packages: `lowercase` (e.g., `com.twitter.service`)
+    - Classes: `PascalCase` (e.g., `UserController`)
+    - Methods: `camelCase` (e.g., `getUserById`)
+    - Constants: `UPPER_SNAKE_CASE` (e.g., `MAX_RETRY_COUNT`)
+    - Packages: `lowercase` (e.g., `com.twitter.service`)
 
 ### 1.3 Package Structure
 
 Standard package structure for services:
+
 ```
 com.twitter
 ├── Application.java              # Main application class
@@ -42,13 +53,17 @@ com.twitter
 ├── controller/                   # REST controllers
 │   ├── [Entity]Api.java         # OpenAPI interface
 │   └── [Entity]Controller.java  # Controller implementation
+├── client/                       # External HTTP clients (Feign/REST)
 ├── dto/                          # Data Transfer Objects
 │   ├── request/                  # Request DTOs
 │   ├── response/                 # Response DTOs
 │   └── filter/                   # Filter DTOs
-├── entity/                        # JPA entities
+├── entity/                        # JPA entities/MongoDB documets
+├── exception/                    # Custom exceptions
+│   └── handler/                  # Global exception handlers
+├── gateway/                      # Gateway wrappers for external integrations
 ├── mapper/                        # MapStruct mappers
-├── repository/                    # JPA repositories
+├── repository/                    # Spring Data repositories (JPA or MongoDB)
 ├── service/                       # Business logic
 │   ├── [Entity]Service.java     # Service interface
 │   └── [Entity]ServiceImpl.java # Service implementation
@@ -62,98 +77,72 @@ com.twitter
 
 ## 2. Gradle Configuration
 
-### 2.1 Multi-Module Project Structure
+### 2.1 Single-Module Project Structure (Default)
 
-The project uses a Gradle multi-module structure:
+By default, use a simple Gradle single-module project.
 
 ```
-twitter/
-├── build.gradle                  # Root build file
-├── settings.gradle               # Module definitions
-├── services/
-│   ├── users-api/
-│   └── tweet-api/
-└── shared/
-    ├── common-lib/
-    └── database/
+music-api/
+├── build.gradle
+├── settings.gradle
+└── src/
+    ├── main/
+    └── test/
 ```
 
-### 2.2 Root build.gradle
+### 2.2 Example build.gradle for a regular project
 
 ```gradle
 plugins {
-    id 'java-library'
-    id 'org.springframework.boot' version '3.5.5' apply false
-    id 'io.spring.dependency-management' version '1.1.7' apply false
-}
-
-group = 'com.twitter'
-version = '0.0.1-SNAPSHOT'
-
-allprojects {
-    apply plugin: 'java'
-    
-    group = rootProject.group
-    version = rootProject.version
-    
-    java {
-        sourceCompatibility = '24'
-        targetCompatibility = '24'
-        toolchain {
-            languageVersion = JavaLanguageVersion.of(24)
-        }
-    }
-    
-    repositories {
-        mavenCentral()
-        maven { url 'https://repo.spring.io/milestone' }
-        maven { url 'https://repo.spring.io/snapshot' }
-    }
-}
-
-subprojects {
-    apply plugin: 'io.spring.dependency-management'
-    
-    dependencyManagement {
-        imports {
-            mavenBom "org.springframework.boot:spring-boot-dependencies:3.5.5"
-            mavenBom "org.springframework.cloud:spring-cloud-dependencies:2025.0.0"
-            mavenBom "org.testcontainers:testcontainers-bom:1.21.3"
-        }
-        
-        dependencies {
-            // Common dependencies managed here
-        }
-    }
-}
-```
-
-### 2.3 Service Module build.gradle
-
-```gradle
-plugins {
-    id 'org.springframework.boot'
-    id 'io.spring.dependency-management'
     id 'java'
+    id 'org.springframework.boot' version '3.5.5'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.music'
+version = '0.0.1-SNAPSHOT'
+description = 'Music application'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(24)
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven { url 'https://repo.spring.io/milestone' }
+    maven { url 'https://repo.spring.io/snapshot' }
 }
 
 dependencies {
-    // Shared modules
-    implementation project(':shared:common-lib')
-    implementation project(':shared:database')
-    
-    // Spring Boot starters
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    
-    // Annotation processors
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
-    implementation 'org.mapstruct:mapstruct'
-    annotationProcessor 'org.mapstruct:mapstruct-processor'
-    annotationProcessor 'org.projectlombok:lombok-mapstruct-binding'
+
+    implementation 'io.swagger.core.v3:swagger-annotations:2.2.38'
+    implementation('org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13') {
+        exclude group: 'io.swagger.core.v3', module: 'swagger-annotations'
+    }
+
+    implementation 'io.micrometer:micrometer-tracing-bridge-otel'
+
+    compileOnly 'org.projectlombok:lombok:1.18.38'
+    annotationProcessor 'org.projectlombok:lombok:1.18.38'
+    implementation 'org.mapstruct:mapstruct:1.6.3'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
+    annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+
+    runtimeOnly 'org.postgresql:postgresql:42.7.7'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
+    testImplementation 'org.junit.jupiter:junit-jupiter-engine'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'org.testcontainers:testcontainers:1.20.4'
+    testImplementation 'org.testcontainers:junit-jupiter:1.20.4'
+    testImplementation 'org.testcontainers:postgresql:1.20.4'
+    testImplementation 'org.wiremock:wiremock-standalone:3.9.2'
 }
 
 compileJava {
@@ -164,17 +153,43 @@ compileJava {
     ]
 }
 
-springBoot {
-    mainClass = 'com.twitter.Application'
+tasks.named('test') {
+    useJUnitPlatform()
 }
 ```
 
-### 2.4 Key Gradle Practices
+### 2.3 Multi-Module Project Structure (When Needed)
+
+Use Gradle multi-module only when a service boundary or shared library cannot be maintained effectively in a single
+module.
+
+```
+twitter/
+├── build.gradle
+├── settings.gradle
+├── services/
+│   ├── users-api/
+│   └── tweet-api/
+└── shared/
+    ├── common-lib/
+    └── database/
+```
+
+### 2.4 When to switch to multi-module
+
+Switch from single-module to multi-module when one or more criteria are met:
+
+- Multiple deployable services must be built from one repository
+- Shared code (DTOs, clients, utility libraries) needs independent versioning boundaries
+- Build performance and ownership improve from module isolation
+- Team structure requires explicit module contracts and dependency control
+
+### 2.5 Key Gradle Practices
 
 - **Use BOM (Bill of Materials)** for dependency version management
 - **Configure annotation processors** explicitly for Lombok and MapStruct
 - **Use Java toolchain** for consistent Java version across modules
-- **Apply dependency management** at subproject level
+- **Apply dependency management** at project level (single-module) or subproject level (multi-module)
 
 ---
 
@@ -198,26 +213,43 @@ springBoot {
  */
 @Schema(name = "UserRequest", description = "Data structure for creating new users")
 public record UserRequestDto(
-    @NotBlank(message = "Login cannot be blank")
-    @Size(min = 3, max = 50, message = "Login must be between 3 and 50 characters")
+        @NotBlank(message = "Login cannot be blank")
+        @Size(min = 3, max = 50, message = "Login must be between 3 and 50 characters")
+        String login,
+
+        String firstName,
+
+        String lastName,
+
+        @NotBlank(message = "Email cannot be blank")
+        @Email(message = "Invalid email format")
+        String email,
+
+        @NotBlank(message = "Password cannot be blank")
+        @Size(min = 8, message = "Password must be at least 8 characters long")
+        String password
+    ) {
+}
+```
+
+**Response DTO example:**
+
+```java
+public record UserResponseDto(
+    UUID id,
     String login,
-    
     String firstName,
-    
     String lastName,
-    
-    @NotBlank(message = "Email cannot be blank")
-    @Email(message = "Invalid email format")
     String email,
-    
-    @NotBlank(message = "Password cannot be blank")
-    @Size(min = 8, message = "Password must be at least 8 characters long")
-    String password
+    UserStatus status,
+    UserRole role,
+    LocalDateTime createdAt
 ) {
 }
 ```
 
 **Benefits:**
+
 - Immutability by default
 - Concise syntax
 - Automatic equals/hashCode/toString
@@ -253,9 +285,10 @@ Use pattern matching where appropriate (Java 21+):
 
 ```java
 // Pattern matching for instanceof
-if (response instanceof ResponseEntity<?> responseEntity) {
+if(response instanceof
+ResponseEntity<?> responseEntity){
     // Use responseEntity directly
-}
+    }
 ```
 
 ### 3.4 Sealed Classes (if applicable)
@@ -263,10 +296,10 @@ if (response instanceof ResponseEntity<?> responseEntity) {
 Use sealed classes for restricted inheritance hierarchies:
 
 ```java
-public sealed class ValidationException 
-    permits UniquenessValidationException, 
-            BusinessRuleValidationException, 
-            FormatValidationException {
+public sealed class ValidationException
+    permits UniquenessValidationException,
+    BusinessRuleValidationException,
+    FormatValidationException {
     // ...
 }
 ```
@@ -280,6 +313,7 @@ public sealed class ValidationException
 **Main Application Class:**
 
 ```java
+
 @SpringBootApplication
 public class Application {
     public static void main(String[] args) {
@@ -293,20 +327,22 @@ public class Application {
 **Always use constructor injection with Lombok:**
 
 ```java
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-    
+
     private final UserMapper userMapper;
     private final UserRepository userRepository;
     private final UserValidator userValidator;
-    
+
     // Methods...
 }
 ```
 
 **Benefits:**
+
 - Immutable dependencies
 - No need for @Autowired
 - Clear dependencies
@@ -325,7 +361,7 @@ public class UserServiceImpl implements UserService {
  */
 @Configuration
 public class OpenApiConfig {
-    
+
     @Bean
     public OpenAPI usersApiOpenAPI() {
         return new OpenAPI()
@@ -369,11 +405,10 @@ public class OpenApiConfig {
 // UserApi.java - OpenAPI interface with annotations
 @Tag(name = "User Management", description = "API for managing users")
 public interface UserApi {
-    
+
     @Operation(summary = "Get user by ID", description = "...")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "User found"),
-        @ApiResponse(responseCode = "404", description = "User not found")
+        @ApiResponse(responseCode = "200", description = "User found")
     })
     ResponseEntity<UserResponseDto> getUserById(
         @Parameter(description = "Unique identifier of the user", required = true)
@@ -387,10 +422,9 @@ public interface UserApi {
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
 public class UserController implements UserApi {
-    
+
     private final UserService userService;
-    
-    @LoggableRequest
+
     @GetMapping("/{id}")
     @Override
     public ResponseEntity<UserResponseDto> getUserById(@PathVariable("id") UUID id) {
@@ -401,7 +435,10 @@ public class UserController implements UserApi {
 }
 ```
 
+Add **`@LoggableRequest`** on controller methods when you need request logging (see **§10.2**); keep OpenAPI details on the interface (**§9.1**) or on DTOs (**§9.2**).
+
 **Benefits:**
+
 - Clean separation of concerns
 - OpenAPI annotations don't clutter controller
 - Easy to maintain API documentation
@@ -414,7 +451,9 @@ public class UserController implements UserApi {
 // UserService.java - Interface
 public interface UserService {
     Optional<UserResponseDto> getUserById(UUID id);
+
     Page<UserResponseDto> findAll(UserFilter userFilter, Pageable pageable);
+
     UserResponseDto createUser(UserRequestDto userRequest);
     // ...
 }
@@ -449,15 +488,15 @@ public interface UsersApiClient {
 @RequiredArgsConstructor
 @Slf4j
 public class UserGateway {
-    
+
     private final UsersApiClient usersApiClient;
-    
+
     public boolean existsUser(UUID userId) {
         if (userId == null) {
             log.warn("Attempted to check existence of null user ID");
             return false;
         }
-        
+
         try {
             UserExistsResponseDto response = usersApiClient.existsUser(userId);
             return response.exists();
@@ -470,6 +509,7 @@ public class UserGateway {
 ```
 
 **Benefits:**
+
 - Abstraction over HTTP client
 - Error handling in one place
 - Easy to mock in tests
@@ -480,39 +520,45 @@ public class UserGateway {
 **Enable Feign Clients:**
 
 ```java
+
 @Configuration
 @EnableFeignClients(basePackages = "com.twitter.client")
 public class FeignConfig {
 }
 ```
 
+### 5.6 Data Storage Strategy
+
+**Select one primary data storage per service based on business requirements:**
+
+- Use **PostgreSQL** when service needs ACID transactions, relational modeling, joins, and strict consistency
+- Use **MongoDB** when service needs flexible schema, document aggregation, and rapid model evolution
+- Avoid mixing PostgreSQL and MongoDB in the same service unless there is a clear architectural justification
+- Document storage choice in service README and keep only relevant dependencies/repositories
+
+**Storage decision matrix:**
+
+| Criterion              | PostgreSQL               | MongoDB                                |
+|------------------------|--------------------------|----------------------------------------|
+| Data model             | Relational               | Document-oriented                      |
+| Schema evolution       | Controlled migrations    | Flexible schema                        |
+| Transaction complexity | Strong                   | Moderate to strong (depends on design) |
+| Typical fit            | Core transactional flows | Content, feed, event-like data         |
+
 ---
 
-## 6. DTO and Entity
+## 6. DTO and Persistence Models
 
 ### 6.1 DTOs as Records
 
-**Always use Records for DTOs:**
+Use Java Records for all DTOs. Full request and response examples are in **§3.1 Records for DTOs**; Bean Validation on DTO fields and `@Valid` on controllers are covered in **§6.5 Bean Validation**.
 
-```java
-public record UserResponseDto(
-    UUID id,
-    String login,
-    String firstName,
-    String lastName,
-    String email,
-    UserStatus status,
-    UserRole role,
-    LocalDateTime createdAt
-) {
-}
-```
-
-### 6.2 JPA Entities
+### 6.2 JPA Entities (PostgreSQL option)
 
 **Use Lombok annotations for entities:**
 
 ```java
+
 @Entity
 @Table(name = "users")
 @Data
@@ -520,15 +566,15 @@ public record UserResponseDto(
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
-    
+
     @Id
     @GeneratedValue(generator = "UUID")
     @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
-    
+
     @Column(name = "login", unique = true, nullable = false)
     private String login;
-    
+
     // Use @CreationTimestamp for audit fields
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -537,6 +583,7 @@ public class User {
 ```
 
 **Key practices:**
+
 - Use `@Data` for getters/setters
 - Use `@Accessors(chain = true)` for fluent API
 - Use `@CreationTimestamp` and `@UpdateTimestamp` for audit fields
@@ -547,14 +594,15 @@ public class User {
 **Use MapStruct for entity-DTO conversion:**
 
 ```java
+
 @Mapper
 public interface UserMapper {
-    
+
     @Mapping(target = "passwordHash", ignore = true)
     User toUser(UserRequestDto userRequestDto);
-    
+
     UserResponseDto toUserResponseDto(User user);
-    
+
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "passwordHash", ignore = true)
     @Mapping(target = "passwordSalt", ignore = true)
@@ -565,39 +613,48 @@ public interface UserMapper {
 ```
 
 **Key practices:**
+
 - Use `@Mapper` interface (not abstract class)
 - Ignore service-managed fields (id, timestamps, etc.)
 - Use `@MappingTarget` for update operations
-- Configure in `build.gradle`:
-  ```gradle
-  options.compilerArgs += [
-      '-Amapstruct.defaultComponentModel=spring',
-      '-Amapstruct.unmappedTargetPolicy=IGNORE'
-  ]
-  ```
+- Configure MapStruct annotation processor options in `build.gradle` as shown in **§2.2** (`compileJava` / `options.compilerArgs`).
 
-### 6.4 Bean Validation
+### 6.4 MongoDB Documents (MongoDB option)
 
-**Use Bean Validation annotations on DTOs:**
+**Use @Document for MongoDB persistence models:**
 
 ```java
-public record UserRequestDto(
-    @NotBlank(message = "Login cannot be blank")
-    @Size(min = 3, max = 50, message = "Login must be between 3 and 50 characters")
-    String login,
-    
-    @NotBlank(message = "Email cannot be blank")
-    @Email(message = "Invalid email format")
-    String email,
-    
-    @NotBlank(message = "Password cannot be blank")
-    @Size(min = 8, message = "Password must be at least 8 characters long")
-    String password
-) {
+
+@Document(collection = "users")
+@Data
+@Accessors(chain = true)
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserDocument {
+
+    @Id
+    private String id;
+
+    @Indexed(unique = true)
+    private String login;
+
+    @Indexed(unique = true)
+    private String email;
+
+    @CreatedDate
+    private Instant createdAt;
 }
 ```
 
-**In controllers, use @Valid:**
+**Key practices:**
+
+- Use `@Document(collection = "...")` explicitly
+- Define indexes with `@Indexed` and use compound indexes when required by query patterns
+- Use TTL indexes only for truly expiring data (sessions, temporary tokens, etc.)
+
+### 6.5 Bean Validation
+
+**Use Bean Validation annotations on DTO fields** (see **§3.1** for a full example). **In controllers, use `@Valid`** to trigger validation:
 
 ```java
 @PostMapping
@@ -615,9 +672,10 @@ public UserResponseDto createUser(@RequestBody @Valid UserRequestDto userRequest
 **Use @RestControllerAdvice for centralized exception handling:**
 
 ```java
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    
+
     @ExceptionHandler(ResponseStatusException.class)
     public ProblemDetail handleResponseStatusException(ResponseStatusException ex) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
@@ -629,7 +687,7 @@ public class GlobalExceptionHandler {
         problemDetail.setProperty("timestamp", Instant.now());
         return problemDetail;
     }
-    
+
     @ExceptionHandler(UniquenessValidationException.class)
     public ProblemDetail handleUniquenessValidationException(UniquenessValidationException ex) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
@@ -643,7 +701,7 @@ public class GlobalExceptionHandler {
         problemDetail.setProperty("fieldValue", ex.getFieldValue());
         return problemDetail;
     }
-    
+
     // Other exception handlers...
 }
 ```
@@ -718,8 +776,11 @@ public class FormatValidationException extends ValidationException {
 // UserValidator.java - Interface
 public interface UserValidator {
     void validateForCreate(UserRequestDto userRequest);
+
     void validateForUpdate(UUID userId, UserUpdateDto userUpdate);
+
     void validateUniqueness(String login, String email, UUID excludeUserId);
+
     void validateAdminDeactivation(UUID userId);
     // ...
 }
@@ -729,22 +790,22 @@ public interface UserValidator {
 @Component
 @RequiredArgsConstructor
 public class UserValidatorImpl implements UserValidator {
-    
+
     private final UserRepository userRepository;
     private final Validator validator; // Bean Validation validator
-    
+
     @Override
     public void validateForCreate(UserRequestDto userRequest) {
         validateUniqueness(userRequest.login(), userRequest.email(), null);
     }
-    
+
     @Override
     public void validateUniqueness(String login, String email, UUID excludeUserId) {
         if (!ObjectUtils.isEmpty(login)) {
             boolean loginExists = excludeUserId != null
                 ? userRepository.existsByLoginAndIdNot(login, excludeUserId)
                 : userRepository.existsByLogin(login);
-            
+
             if (loginExists) {
                 log.warn("Uniqueness validation failed: login '{}' already exists", login);
                 throw new UniquenessValidationException("login", login);
@@ -760,10 +821,11 @@ public class UserValidatorImpl implements UserValidator {
 **Call validators in service methods:**
 
 ```java
+
 @Override
 public UserResponseDto createUser(UserRequestDto userRequest) {
     userValidator.validateForCreate(userRequest);
-    
+
     User user = userMapper.toUser(userRequest);
     // ... rest of logic
 }
@@ -775,12 +837,13 @@ public UserResponseDto createUser(UserRequestDto userRequest) {
 
 ### 9.1 API Interface Documentation
 
-**Document API interfaces with OpenAPI annotations:**
+**Document API interfaces with OpenAPI annotations. Use `@ApiResponse` only for the valid `200` case and do not provide examples for other status codes:**
 
 ```java
+
 @Tag(name = "User Management", description = "API for managing users")
 public interface UserApi {
-    
+
     @Operation(
         summary = "Get user by ID",
         description = "Retrieves a specific user by their unique identifier. Returns 404 if user not found."
@@ -807,11 +870,6 @@ public interface UserApi {
                         """
                 )
             )
-        ),
-        @ApiResponse(
-            responseCode = "404",
-            description = "User not found",
-            content = @Content(mediaType = "application/problem+json")
         )
     })
     ResponseEntity<UserResponseDto> getUserById(
@@ -823,7 +881,7 @@ public interface UserApi {
 
 ### 9.2 DTO Documentation
 
-**Document DTOs with @Schema:**
+**Document DTOs with `@Schema`** at class and field level. The Record shape and validation constraints are defined in **§3.1**; add `@Schema` for OpenAPI titles, descriptions, examples, and required mode:
 
 ```java
 @Schema(
@@ -841,35 +899,15 @@ public interface UserApi {
 )
 public record UserRequestDto(
     @Schema(description = "Unique login name", example = "jane_smith", requiredMode = Schema.RequiredMode.REQUIRED)
-    String login,
-    // ...
+    String login
+    // ... remaining components per §3.1
 ) {
 }
 ```
 
 ### 9.3 OpenAPI Configuration
 
-**Configure OpenAPI in @Configuration class:**
-
-```java
-@Configuration
-public class OpenApiConfig {
-    
-    @Bean
-    public OpenAPI usersApiOpenAPI() {
-        return new OpenAPI()
-            .info(new Info()
-                .title("Twitter Users API")
-                .description("REST API for user management")
-                .version("1.0.0"))
-            .servers(List.of(
-                new Server()
-                    .url("http://localhost:8081")
-                    .description("Local development server")
-            ));
-    }
-}
-```
+Define the `OpenAPI` bean in a `@Configuration` class as shown in **§4.3 Configuration Classes** (`OpenApiConfig`). Do not duplicate that snippet here.
 
 ---
 
@@ -880,11 +918,12 @@ public class OpenApiConfig {
 **Use @Slf4j annotation:**
 
 ```java
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-    
+
     @Override
     public Optional<UserResponseDto> inactivateUser(UUID id) {
         return userRepository.findById(id).map(user -> {
@@ -900,25 +939,17 @@ public class UserServiceImpl implements UserService {
 
 ### 10.2 AOP for Request Logging
 
-**Use @LoggableRequest annotation for automatic logging:**
+**Use `@LoggableRequest` on controller methods** for automatic request logging. Method signatures and mappings match **§5.2** (API interface separation) and **§9.1** (OpenAPI on the interface); only the logging aspect is shown here:
 
 ```java
 @LoggableRequest
-@GetMapping("/{id}")
 @Override
 public ResponseEntity<UserResponseDto> getUserById(@PathVariable("id") UUID id) {
-    return userService.getUserById(id)
-        .map(ResponseEntity::ok)
-        .orElse(ResponseEntity.notFound().build());
-}
-
-// Hide sensitive fields
-@LoggableRequest(hideFields = {"password"})
-@PostMapping
-public UserResponseDto createUser(@RequestBody @Valid UserRequestDto userRequest) {
-    return userService.createUser(userRequest);
+    // Same implementation as in §5.2
 }
 ```
+
+For **`createUser`**, add **`@LoggableRequest(hideFields = {"password"})`** above the same **`@PostMapping`** method that uses **`@Valid`** as in **§6.5** (hides sensitive fields from logs).
 
 ### 10.3 Log Levels
 
@@ -950,34 +981,35 @@ src/
 **Use JUnit 5 for all tests:**
 
 ```java
+
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
-    
+
     @Mock
     private UserRepository userRepository;
-    
+
     @Mock
     private UserMapper userMapper;
-    
+
     @Mock
     private UserValidator userValidator;
-    
+
     @InjectMocks
     private UserServiceImpl userService;
-    
+
     @Test
     void shouldGetUserById() {
         // Given
         UUID userId = UUID.randomUUID();
         User user = new User();
         UserResponseDto dto = new UserResponseDto(...);
-        
+
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(userMapper.toUserResponseDto(user)).thenReturn(dto);
-        
+
         // When
         Optional<UserResponseDto> result = userService.getUserById(userId);
-        
+
         // Then
         assertTrue(result.isPresent());
         assertEquals(dto, result.get());
@@ -987,24 +1019,44 @@ class UserServiceImplTest {
 
 ### 11.3 Testcontainers for Integration Tests
 
-**Use Testcontainers for database integration tests:**
+**Use Testcontainers for integration tests with selected storage:**
 
 ```java
+
 @SpringBootTest
 @Testcontainers
 class UserRepositoryIntegrationTest {
-    
+
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15")
-            .withDatabaseName("testdb")
-            .withUsername("test")
-            .withPassword("test");
-    
+        .withDatabaseName("testdb")
+        .withUsername("test")
+        .withPassword("test");
+
     @Autowired
     private UserRepository userRepository;
-    
+
     @Test
     void shouldSaveAndFindUser() {
+        // Test implementation
+    }
+}
+```
+
+```java
+
+@SpringBootTest
+@Testcontainers
+class UserDocumentRepositoryIntegrationTest {
+
+    @Container
+    static MongoDBContainer mongo = new MongoDBContainer("mongo:7.0");
+
+    @Autowired
+    private UserDocumentRepository userDocumentRepository;
+
+    @Test
+    void shouldSaveAndFindDocument() {
         // Test implementation
     }
 }
@@ -1021,6 +1073,7 @@ testImplementation 'org.junit.jupiter:junit-jupiter-engine'
 testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 testImplementation 'org.testcontainers:junit-jupiter'
 testImplementation 'org.testcontainers:postgresql'
+testImplementation 'org.testcontainers:mongodb'
 ```
 
 ---
@@ -1039,17 +1092,36 @@ testImplementation 'org.testcontainers:postgresql'
  * @version 1.0
  */
 public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificationExecutor<User> {
-    
+
     // Derived Query Methods - NO JavaDoc required
     long countByRoleAndStatus(UserRole role, UserStatus status);
+
     boolean existsByLogin(String login);
+
     boolean existsByEmail(String email);
+
     boolean existsByLoginAndIdNot(String login, UUID id);
+
     boolean existsByEmailAndIdNot(String email, UUID id);
 }
 ```
 
-### 12.2 Derived Query Methods
+### 12.2 Spring Data MongoDB
+
+**Extend MongoRepository for document persistence:**
+
+```java
+public interface UserDocumentRepository extends MongoRepository<UserDocument, String> {
+
+    boolean existsByLogin(String login);
+
+    boolean existsByEmail(String email);
+
+    Optional<UserDocument> findByLogin(String login);
+}
+```
+
+### 12.3 Derived Query Methods
 
 **Key points:**
 
@@ -1057,20 +1129,20 @@ public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificat
 - Use clear, descriptive method names following Spring Data conventions
 - Methods like `findBy*`, `existsBy*`, `countBy*` are obvious from naming
 
-### 12.3 JPA Specifications
+### 12.4 JPA Specifications
 
 **Use Specifications for dynamic queries:**
 
 ```java
 // Filter DTO
 public record UserFilter(String firstNameContains, String lastNameContains, UserRole role) {
-    
+
     public Specification<User> toSpecification() {
         return firstNameContainsSpec()
             .and(lastNameContainsSpec())
             .and(roleSpec());
     }
-    
+
     private Specification<User> firstNameContainsSpec() {
         return ((root, _, cb) -> StringUtils.hasText(firstNameContains)
             ? cb.like(root.get("firstName"), "%" + firstNameContains + "%")
@@ -1086,11 +1158,12 @@ Page<UserResponseDto> findAll(UserFilter userFilter, Pageable pageable) {
 }
 ```
 
-### 12.4 Custom Query Methods
+### 12.5 Custom Query Methods
 
 **Document custom methods with @Query:**
 
 ```java
+
 @Query("SELECT u FROM User u WHERE u.role = :role AND u.status = :status")
 List<User> findActiveUsersByRole(@Param("role") UserRole role, @Param("status") UserStatus status);
 ```
@@ -1104,7 +1177,6 @@ List<User> findActiveUsersByRole(@Param("role") UserRole role, @Param("status") 
 **Follow the established JavaDoc standards:**
 
 - See `standards/STANDART_JAVADOC.md` for detailed standards
-- See `standards/STANDART_JAVADOC.md` for templates
 
 ### 13.2 Required Tags
 
@@ -1160,6 +1232,7 @@ public ResponseEntity<UserResponseDto> getUserById(@PathVariable("id") UUID id) 
 **Use @Transactional for service methods that modify data:**
 
 ```java
+
 @Override
 @Transactional
 public TweetResponseDto createTweet(CreateTweetRequestDto requestDto) {
@@ -1175,6 +1248,7 @@ public TweetResponseDto createTweet(CreateTweetRequestDto requestDto) {
 **Use Optional for methods that may return null:**
 
 ```java
+
 @Override
 public Optional<UserResponseDto> getUserById(UUID id) {
     return userRepository.findById(id)
@@ -1187,6 +1261,7 @@ public Optional<UserResponseDto> getUserById(UUID id) {
 **Use Spring Data Pageable for pagination:**
 
 ```java
+
 @GetMapping
 public PagedModel<UserResponseDto> findAll(
     @ModelAttribute UserFilter userFilter,
@@ -1202,6 +1277,7 @@ public PagedModel<UserResponseDto> findAll(
 **Always use UUID for entity IDs:**
 
 ```java
+
 @Id
 @GeneratedValue(generator = "UUID")
 @Column(name = "id", updatable = false, nullable = false)
@@ -1241,6 +1317,8 @@ Before submitting code, ensure:
 - [ ] OpenAPI annotations are complete
 - [ ] Logging is appropriate
 - [ ] Tests are written for new functionality
+- [ ] Selected storage (PostgreSQL or MongoDB) is explicitly documented for the service
+- [ ] Only storage-relevant dependencies, repositories, and tests are included
 - [ ] No hardcoded values (use constants or properties)
 - [ ] Error messages are clear and helpful
 
@@ -1254,8 +1332,7 @@ Before submitting code, ensure:
 
 ## References
 
-- [JavaDoc Standards](./STANDART_JAVADOC.md)
-- [JavaDoc Templates](./STANDART_JAVADOC.md)
+- [JavaDoc Standards](./STANDART_JAVADOC.md) (templates and tag rules)
 - [Spring Boot Documentation](https://spring.io/projects/spring-boot)
 - [MapStruct Documentation](https://mapstruct.org/)
 - [Lombok Documentation](https://projectlombok.org/)
