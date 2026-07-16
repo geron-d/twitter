@@ -24,8 +24,6 @@ soft delete 3.56
 
 мапперы 3.57
 
-настроить сущности через open-api в отдельной ветке
-
 dockerfile 4.20
 
 docker compose service 4.25

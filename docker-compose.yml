@@ -154,7 +154,7 @@ services:
       - "8081:8081"
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/twitter
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/twitter?currentSchema=twitter
       SPRING_DATASOURCE_USERNAME: user
       SPRING_DATASOURCE_PASSWORD: password
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
@@ -165,6 +165,8 @@ services:
       OTLP_EXPORTER_ENDPOINT: http://tempo:4318
     depends_on:
       postgres:
+        condition: service_healthy
+      admin-script-api:
         condition: service_healthy
     networks:
       - twitter-network
@@ -188,7 +190,7 @@ services:
       - "8082:8082"
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/twitter
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/twitter?currentSchema=twitter
       SPRING_DATASOURCE_USERNAME: user
       SPRING_DATASOURCE_PASSWORD: password
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
@@ -201,6 +203,8 @@ services:
       OTLP_EXPORTER_ENDPOINT: http://tempo:4318
     depends_on:
       postgres:
+        condition: service_healthy
+      admin-script-api:
         condition: service_healthy
     networks:
       - twitter-network
@@ -258,7 +262,7 @@ services:
       - "8084:8084"
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/twitter
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/twitter?currentSchema=twitter
       SPRING_DATASOURCE_USERNAME: user
       SPRING_DATASOURCE_PASSWORD: password
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
@@ -269,6 +273,8 @@ services:
       OTLP_EXPORTER_ENDPOINT: http://tempo:4318
     depends_on:
       postgres:
+        condition: service_healthy
+      admin-script-api:
         condition: service_healthy
     networks:
       - twitter-network

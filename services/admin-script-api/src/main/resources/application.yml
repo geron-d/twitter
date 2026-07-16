@@ -5,7 +5,7 @@ spring:
   application:
     name: admin-script-api
   datasource:
-    url: jdbc:postgresql://localhost:5432/twitter?currentSchema=twitter
+    url: jdbc:postgresql://localhost:5432/twitter
     username: user
     password: password
     driver-class-name: org.postgresql.Driver
@@ -20,8 +20,6 @@ spring:
     change-log: classpath:db/changelog/db.changelog-master.xml
     enabled: true
     drop-first: false
-    default-schema: twitter
-    liquibase-schema: twitter
   jackson:
     serialization:
       write-dates-as-timestamps: false

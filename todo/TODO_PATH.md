@@ -3,6 +3,7 @@
 
 ## Future
 - подключить кейклок, можно посмотреть в https://www.youtube.com/watch?v=V4oFJ3LbW9s
+- сделать ветку с open-api, можно посмотреть в https://www.youtube.com/watch?v=V4oFJ3LbW9s
 - сделать api-gateway
 - подключить линтер
 - подключить статический анализатор
